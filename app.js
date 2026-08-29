@@ -25,7 +25,14 @@ function next(){
  let p=findNext(false);if(p<0)p=findNext(true);if(p<0)return finishLifts();a.pos=p;save();renderWorkout();
 }
 function complete(){const e=current(),w=+document.querySelector('#weight').value||0,r=+document.querySelector('#reps').value||0,rir=document.querySelector('[aria-pressed=true]')?.dataset.rir??'';e.done.push({weight:w,reps:r,rir});e.deferred=false;save();S.active.queue.some(x=>x.done.length<x.sets)?startRest():next()}
-function defer(){current().deferred=true;next()}
+function defer(){
+ const e=current();
+ if(!e)return;
+ e.deferred=true;
+ delete S.active.restEnd;
+ S.active.phase='lifting';
+ next();
+}
 function beginLifts(){S.active.phase='lifting';save();renderWorkout()}
 function startRest(){S.active.phase='rest';S.active.restEnd=Date.now()+REST_MS;save();renderWorkout()}
 function continueAfterRest(){const e=current();delete S.active.restEnd;S.active.phase='lifting';if(e&&e.done.length<e.sets){save();renderWorkout();return}next()}
@@ -55,10 +62,10 @@ function renderWorkout(){
  const resting=a.phase==='rest',restRunning=resting&&!!a.restEnd&&a.restEnd>Date.now();
  const e=current();if(!e)return finishLifts();
  const done=a.queue.reduce((n,x)=>n+x.done.length,0),total=a.queue.reduce((n,x)=>n+x.sets,0),l=e.done.at(-1)||last(e.name);
- const displayedSet=Math.min(e.done.length+1,e.sets),restAction=e.done.length<e.sets?'START NEXT SET':'START NEXT EXERCISE';
- app.innerHTML=`<div class="workout-stage"><div class="stage-info"><div class="row workout-top"><span>${esc(a.name)}</span><span>${done}/${total}</span></div><section class="set-title"><div class="eyebrow">SET ${displayedSet} OF ${e.sets}</div><h1>${esc(e.name)}</h1><div class="meta">${e.reps} reps · target 1–2 RIR</div></section><div class="previous"><span>Previous</span>${l?`${l.weight} kg × ${l.reps} · RIR ${l.rir}`:'No history'}</div></div><div class="thumb-zone"><div class="controls"><label>WEIGHT (KG)<input id="weight" inputmode="decimal" type="number" step=".5" value="${l?.weight||''}" ${resting?'disabled':''}></label><label>REPS<input id="reps" inputmode="numeric" type="number" value="${l?.reps||''}" ${resting?'disabled':''}></label></div><div class="rir-label">RIR</div><div class="rir">${[0,1,2,'3+'].map(x=>`<button type="button" data-rir="${x}" aria-pressed="${x==1}" ${resting?'disabled':''}>${x}</button>`).join('')}</div><button class="primary" id="complete" ${restRunning?'disabled':''}>${resting?(restRunning?'REST <span id="rest-countdown">1:30</span>':restAction):'COMPLETE SET'}</button><button class="secondary-link" id="occupied">${resting?'Skip rest':'Machine occupied? Skip for now'}</button><button class="cancel" id="cancel" ${resting?'disabled':''}>Cancel workout</button></div></div>`;
+ const displayedSet=Math.min(e.done.length+1,e.sets),restAction=e.done.length<e.sets?'START NEXT SET':'START NEXT EXERCISE',canDefer=!resting&&e.done.length===0;
+ app.innerHTML=`<div class="workout-stage"><div class="stage-info"><div class="row workout-top"><span>${esc(a.name)}</span><span>${done}/${total}</span></div><section class="set-title"><div class="eyebrow">SET ${displayedSet} OF ${e.sets}</div><h1>${esc(e.name)}</h1><div class="meta">${e.reps} reps · target 1–2 RIR</div></section><div class="previous"><span>Previous</span>${l?`${l.weight} kg × ${l.reps} · RIR ${l.rir}`:'No history'}</div></div><div class="thumb-zone"><div class="controls"><label>WEIGHT (KG)<input id="weight" inputmode="decimal" type="number" step=".5" value="${l?.weight||''}" ${resting?'disabled':''}></label><label>REPS<input id="reps" inputmode="numeric" type="number" value="${l?.reps||''}" ${resting?'disabled':''}></label></div><div class="rir-label">RIR</div><div class="rir">${[0,1,2,'3+'].map(x=>`<button type="button" data-rir="${x}" aria-pressed="${x==1}" ${resting?'disabled':''}>${x}</button>`).join('')}</div><button class="primary" id="complete" ${restRunning?'disabled':''}>${resting?(restRunning?'REST <span id="rest-countdown">1:30</span>':restAction):'COMPLETE SET'}</button>${resting?'<button class="secondary-link" id="skip-rest">Skip rest</button>':canDefer?'<button class="secondary-link" id="occupied">Machine occupied? Skip for now</button>':''}<button class="cancel" id="cancel" ${resting?'disabled':''}>Cancel workout</button></div></div>`;
  document.querySelectorAll('.rir button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.rir button').forEach(x=>x.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true')});
- document.querySelector('#complete').onclick=resting?continueAfterRest:complete;document.querySelector('#occupied').onclick=resting?continueAfterRest:defer;document.querySelector('#cancel').onclick=cancelWorkout;
+ document.querySelector('#complete').onclick=resting?continueAfterRest:complete;document.querySelector('#skip-rest')?.addEventListener('click',continueAfterRest);document.querySelector('#occupied')?.addEventListener('click',defer);document.querySelector('#cancel').onclick=cancelWorkout;
  if(restRunning)startTimer(REST_MS,()=>renderWorkout(),'restEnd','rest-countdown');
 }
 function renderToday(){const d=templateDay(),sets=R[d].reduce((n,e)=>n+e.sets,0);app.innerHTML=`<p class="muted">${new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'})}</p><h1>${N[d]}</h1><p>${sets} working sets</p>${S.active?'<a class="button primary" href="/workout/">RESUME WORKOUT</a>':'<button class="primary" id="start">START WORKOUT</button>'}`;document.querySelector('#start')?.addEventListener('click',()=>start(d))}
