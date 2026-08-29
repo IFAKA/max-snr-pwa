@@ -24,7 +24,7 @@ function complete(){const e=current(),w=+document.querySelector('#weight').value
 function defer(){current().deferred=true;next()}
 function beginLifts(){S.active.phase='lifting';save();renderWorkout()}
 function startRest(){S.active.phase='rest';S.active.restEnd=Date.now()+REST_MS;save();renderWorkout()}
-function continueAfterRest(){delete S.active.restEnd;S.active.phase='lifting';next()}
+function continueAfterRest(){const e=current();delete S.active.restEnd;S.active.phase='lifting';if(e&&e.done.length<e.sets){save();renderWorkout();return}next()}
 function beginPlank(){S.active.phase='plank';S.active.timerEnd=Date.now()+60000;save();renderWorkout()}
 function finishLifts(){S.active.phase='stretch';S.active.timerEnd=null;save();renderWorkout()}
 function saveWorkout(){const a={...S.active};delete a.timerEnd;S.history.unshift(a);delete S.active;save();go('/')}
