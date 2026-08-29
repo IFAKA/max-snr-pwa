@@ -19,7 +19,11 @@ function start(day=templateDay()){
  S.active={id:Date.now(),date:new Date().toISOString(),day,name:N[day],queue:R[day].map((e,i)=>({...e,i,done:[],deferred:false})),pos:0,phase:'warmup'};save();go('/workout/');
 }
 function current(){return S.active?.queue[S.active.pos]}
-function next(){const a=S.active,q=a.queue;let p=q.findIndex((e,i)=>i>a.pos&&e.done.length<e.sets&&!e.deferred);if(p<0)p=q.findIndex(e=>e.done.length<e.sets);if(p<0)return finishLifts();a.pos=p;save();renderWorkout()}
+function next(){
+ const a=S.active,q=a.queue;
+ const findNext=deferred=>{for(let offset=1;offset<=q.length;offset++){const i=(a.pos+offset)%q.length,e=q[i];if(e.done.length<e.sets&&!!e.deferred===deferred)return i}return -1};
+ let p=findNext(false);if(p<0)p=findNext(true);if(p<0)return finishLifts();a.pos=p;save();renderWorkout();
+}
 function complete(){const e=current(),w=+document.querySelector('#weight').value||0,r=+document.querySelector('#reps').value||0,rir=document.querySelector('[aria-pressed=true]')?.dataset.rir??'';e.done.push({weight:w,reps:r,rir});e.deferred=false;save();S.active.queue.some(x=>x.done.length<x.sets)?startRest():next()}
 function defer(){current().deferred=true;next()}
 function beginLifts(){S.active.phase='lifting';save();renderWorkout()}
