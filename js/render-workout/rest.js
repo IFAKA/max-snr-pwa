@@ -1,0 +1,4 @@
+import { mount, state, header } from './shared.js';
+import { completedSets, totalSets, continueRest, countdown } from '../workout.js';
+import { buzz } from '../dom.js';
+export function renderRest() { const a = state(), next = a.tasks[a.nextPos], running = a.restEndsAt > Date.now(); mount(`<div class="workout-stage"><div class="stage-info">${header(a, `${completedSets()}/${totalSets()}`)}<div class="big-timer" id="timer">1:30</div><p class="next-up">${next?.performedName || 'Continue'}${next ? ` · ${next.set}/${next.sets}` : ''}</p></div><div class="thumb-zone"><button class="primary" id="continue">${running ? 'Skip' : 'Next'}</button><button class="cancel" id="cancel">Cancel workout</button></div></div>`); document.querySelector('#continue').onclick = () => { continueRest(); location.reload(); }; if (running) countdown(document.querySelector('#timer'), 'restEndsAt', 'rest', () => { buzz([35, 65, 35]); location.reload(); }); }
