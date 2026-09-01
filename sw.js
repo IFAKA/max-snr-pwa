@@ -1,4 +1,4 @@
-const CACHE='workout-v13';
+const CACHE='workout-v14';
 const FILES=['/','/routine/','/history/','/workout/','/styles.css','/app.js','/js/constants.js','/js/routine-data.js','/js/state.js','/js/storage.js','/js/workout.js','/js/dom.js','/js/render-workout.js','/js/render-today.js','/js/render-routine.js','/js/render-history.js','/js/workout/task-factory.js','/js/workout/session.js','/js/workout/timers.js','/js/workout/progression.js','/js/render-workout/shared.js','/js/render-workout/warmup.js','/js/render-workout/plank.js','/js/render-workout/lifting.js','/js/render-workout/rest.js','/js/render-workout/stretch.js','/js/render-workout/completion.js','/manifest.webmanifest','/icons/icon-192.png','/icons/icon-512.png','/icons/icon-maskable-512.png','/icons/apple-touch-icon.png'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
