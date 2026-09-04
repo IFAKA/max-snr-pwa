@@ -6,10 +6,11 @@ export function task(item, set, groupId = null, groupType = 'exercise', memberIn
 
 export function flatten(template) {
   const tasks = [];
-  for (const item of template) {
-    if (item.type === 'exercise') for (let set = 1; set <= item.sets; set++) tasks.push(task(item, set));
-    if (item.type === 'superset') for (let set = 1; set <= item.members[0].sets; set++) for (const [i, member] of item.members.entries()) tasks.push(task(member, set, item.id, 'superset', i, item.label));
-    if (item.type === 'equipmentBlock') for (const member of item.items) for (let set = 1; set <= member.sets; set++) tasks.push(task(member, set, item.id, 'equipmentBlock', null, item.label));
+  const rounds = Math.max(...template.map(item => item.type === 'exercise' ? item.sets : item.type === 'superset' ? Math.max(...item.members.map(member => member.sets)) : Math.max(...item.items.map(member => member.sets))));
+  for (let set = 1; set <= rounds; set++) for (const item of template) {
+    if (item.type === 'exercise' && set <= item.sets) tasks.push(task(item, set));
+    if (item.type === 'superset' && set <= Math.max(...item.members.map(member => member.sets))) for (const [i, member] of item.members.entries()) if (set <= member.sets) tasks.push(task(member, set, item.id, 'superset', i, item.label));
+    if (item.type === 'equipmentBlock') for (const member of item.items) if (set <= member.sets) tasks.push(task(member, set, item.id, 'equipmentBlock', null, item.label));
   }
   return tasks;
 }
