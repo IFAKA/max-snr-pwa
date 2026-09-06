@@ -2,7 +2,7 @@ import { getState } from '../state.js';
 
 export function lastPerformance(name) {
   const S = getState();
-  for (const workout of S.history) for (const t of workout.tasks || workout.queue || []) {
+  for (const workout of S.history) for (const t of [...(workout.tasks || workout.queue || [])].reverse()) {
     const actual = t.performedName || t.name;
     if (actual !== name) continue;
     if (t.completed && !Array.isArray(t.completed)) return t.completed;
@@ -12,13 +12,14 @@ export function lastPerformance(name) {
   return null;
 }
 
-export function progressionSuggestion(name) {
+export function progressionSuggestion(name, unit = 'kg') {
   const S = getState();
   for (const workout of S.history) {
-    const sets = (workout.tasks || []).filter(t => (t.performedName || t.name) === name && t.completed);
+    const sets = (workout.tasks || []).filter(t => (t.performedName || t.name) === name && t.completed && (t.completed.unit || 'kg') === unit);
     if (!sets.length) continue;
     const upper = Number((sets[0].reps || '').split('–')[1] || 0);
-    if (upper && sets.length >= sets[0].sets && sets.every(t => t.completed.reps >= upper && Number(t.completed.rir) <= 2)) return Number((Math.max(...sets.map(t => t.completed.weight)) + 2.5).toFixed(2));
+    const increment = unit === 'lb' ? 5 : 2.5;
+    if (upper && sets.length >= sets[0].sets && sets.every(t => t.completed.reps >= upper && Number(t.completed.rir) <= 2)) return Number((Math.max(...sets.map(t => t.completed.weight)) + increment).toFixed(2));
   }
   return null;
 }

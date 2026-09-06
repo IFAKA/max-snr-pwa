@@ -2,4 +2,29 @@ import { app, esc, dayNow } from './dom.js';
 import { getState } from './state.js';
 import { ROUTINE, NAMES } from './routine-data.js';
 import { start } from './workout.js';
-export function renderToday() { const day = dayNow(), S = getState(); if (!ROUTINE[day]) { app.innerHTML = `<h1>Rest day</h1>${S.active ? '<a class="button primary" href="/workout/">Resume</a>' : ''}`; return; } app.innerHTML = `<h1>${esc(NAMES[day])}</h1>${S.active ? '<a class="button primary" href="/workout/">Resume</a>' : '<button class="primary" id="start">Start</button>'}`; document.querySelector('#start')?.addEventListener('click', () => { if (start(day)) location.assign('/workout/'); }); }
+
+const DAYS = Object.keys(ROUTINE);
+
+function nextWorkout(day) {
+  const today = DAYS.indexOf(day);
+  for (let offset = 1; offset <= DAYS.length; offset++) {
+    const nextDay = DAYS[(today + offset) % DAYS.length];
+    if (ROUTINE[nextDay]) return {day: nextDay, name: NAMES[nextDay]};
+  }
+  return null;
+}
+
+export function renderToday() {
+  const day = dayNow(), state = getState(), routine = ROUTINE[day], next = nextWorkout(day);
+  const active = state.active;
+  const completed = active?.tasks?.filter(task => task.completed).length || 0;
+  const skipped = active?.tasks?.filter(task => task.skipped).length || 0;
+  const elapsed = active ? Math.max(1, Math.round((Date.now() - Date.parse(active.date)) / 60000)) : 0;
+  const activeCard = active ? `<section class="active-card"><p class="eyebrow">In progress</p><h2>${esc(active.name)}</h2><p>${completed}/${active.tasks.length} working sets${skipped ? ` · ${skipped} skipped` : ''} · ${elapsed} min · ${esc(active.phase)}</p><a class="button primary" href="/workout/">Resume workout</a></section>` : '';
+  app.innerHTML = `<header class="page-header"><p class="eyebrow">${esc(day)}</p><h1>${routine ? esc(NAMES[day]) : 'Rest day'}</h1><p class="lede">${routine ? `${routine.length} exercise blocks plus an optional plank and cooldown.` : `Recover today. Next up: ${esc(next.day)} · ${esc(next.name)}.`}</p></header>${activeCard}${routine && !active ? '<button class="primary" id="start">Start today’s workout</button>' : ''}`;
+  document.querySelector('#start')?.addEventListener('click', async event => {
+    event.currentTarget.disabled = true;
+    try { if (await start(day)) location.assign('/workout/'); }
+    catch (error) { event.currentTarget.disabled = false; alert(error.message); }
+  });
+}

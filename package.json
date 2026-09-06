@@ -1,4 +1,8 @@
 {
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  },
   "dependencies": {
     "vercel": "^59.9.1"
   }
