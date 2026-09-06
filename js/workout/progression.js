@@ -1,5 +1,13 @@
 import { getState } from '../state.js';
 
+export function lastActivePerformance(exerciseId, unit) {
+  const tasks = getState().active?.tasks || [];
+  return tasks
+    .filter(task => task.exerciseId === exerciseId && task.completed?.unit === unit)
+    .sort((a, b) => Date.parse(b.completed.completedAt || 0) - Date.parse(a.completed.completedAt || 0))[0]
+    ?.completed || null;
+}
+
 export function lastPerformance(name) {
   const S = getState();
   for (const workout of S.history) for (const t of [...(workout.tasks || workout.queue || [])].reverse()) {

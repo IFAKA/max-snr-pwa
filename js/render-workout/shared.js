@@ -1,6 +1,6 @@
 import { app, esc } from '../dom.js';
 import { getState } from '../state.js';
-import { cancelWorkout } from '../workout.js';
+import { cancelWorkout, selectExercise } from '../workout.js';
 
 export const state = () => getState().active;
 export const header = (active, count) => `<div class="row workout-top"><span>${esc(active.name)}</span><span>${count} working sets</span></div>`;
@@ -16,7 +16,10 @@ export function queue(active) {
     const deferred = entries.some(entry => active.deferredGroups.includes(entry.task.groupId || entry.task.exerciseId || entry.task.id));
     const status = skipped ? 'Skipped' : done ? 'Done' : current ? 'Now' : task.exerciseId === nextTask?.exerciseId ? 'Next' : deferred ? 'Later' : 'Queued';
     const completeCount = entries.filter(entry => entry.task.completed).length;
-    return `<li class="queue-item ${current ? 'current' : ''} ${done ? 'completed' : ''} ${skipped ? 'skipped' : ''}" ${current ? 'aria-current="step"' : ''}><span class="queue-status">${status}</span><strong>${esc(entries.find(entry => !entry.task.completed)?.task.performedName || task.performedName)}</strong><span class="queue-detail">${completeCount}/${entries.length} sets</span></li>`;
+    const name = entries.find(entry => !entry.task.completed)?.task.performedName || task.performedName;
+    const selectable = active.phase === 'lifting' && !current && !done;
+    const content = `<span class="queue-status">${status}</span><strong>${esc(name)}</strong><span class="queue-detail">${completeCount}/${entries.length} sets</span>`;
+    return `<li class="queue-item ${current ? 'current' : ''} ${done ? 'completed' : ''} ${skipped ? 'skipped' : ''}" ${current ? 'aria-current="step"' : ''}>${selectable ? `<button type="button" data-queue-exercise="${esc(task.exerciseId)}" aria-label="Select ${esc(name)}">${content}</button>` : content}</li>`;
   }).join('')}</ol></div>`;
 }
 
@@ -49,5 +52,8 @@ export function mount(html) {
   app.innerHTML = html;
   const cancel = document.querySelector('#cancel');
   if (cancel) cancel.onclick = () => runAction(cancel, cancelWorkout, () => location.assign('/'));
+  document.querySelectorAll('[data-queue-exercise]').forEach(button => {
+    button.onclick = event => runAction(event.currentTarget, () => selectExercise(event.currentTarget.dataset.queueExercise));
+  });
   document.querySelector('.queue-item.current')?.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest', inline: 'center'});
 }

@@ -9,7 +9,7 @@ globalThis.localStorage = {getItem: key => stored.get(key) || null, setItem: (ke
 const {emptyState, getState, setState} = await import('../js/state.js');
 const {loadState} = await import('../js/storage.js');
 const {startPlank, beginLifting} = await import('../js/workout/timers.js');
-const {start, findNext, deferCurrent, substituteCurrent, undoLastSet, completeSet, continueRest, completeStretch, finishWorkout} = await import('../js/workout/session.js');
+const {start, findNext, deferCurrent, substituteCurrent, undoLastSet, completeSet, continueRest, completeStretch, finishWorkout, selectExercise, finishEarly} = await import('../js/workout/session.js');
 
 const task = (exerciseId, set = 1) => ({id: `${exerciseId}-${set}`, exerciseId, originalName: exerciseId, performedName: exerciseId, alternatives: exerciseId === 'press' ? ['DB press'] : [], set, sets: 2, completed: null, skipped: false, groupId: null});
 
@@ -37,6 +37,18 @@ test('substitution updates every remaining set of the exercise', async () => {
   assert.deepEqual(state.active.tasks.slice(0, 2).map(item => item.performedName), ['DB press', 'DB press']);
 });
 
+test('selecting a queued exercise opens its first unfinished set without reordering work', async () => {
+  const state = emptyState();
+  state.active = {tasks: [task('press'), task('press', 2), task('row'), task('row', 2)], pos: 0, phase: 'lifting', deferredGroups: [], draft: {weight: '50'}};
+  setState(state);
+
+  assert.equal(await selectExercise('row'), true);
+  assert.equal(state.active.pos, 2);
+  assert.equal(state.active.phase, 'lifting');
+  assert.deepEqual(state.active.draft, {});
+  assert.deepEqual(state.active.tasks.map(item => item.exerciseId), ['press', 'press', 'row', 'row']);
+});
+
 test('undo restores the latest completed set as an editable draft', async () => {
   const state = emptyState();
   const completed = task('press');
@@ -47,6 +59,33 @@ test('undo restores the latest completed set as an editable draft', async () => 
   assert.equal(state.active.pos, 0);
   assert.equal(state.active.tasks[0].completed, null);
   assert.deepEqual(state.active.draft, {weight: 50, reps: 8, rir: '1'});
+});
+
+test('finishing early saves completed work and marks unfinished tasks skipped', async () => {
+  const state = emptyState();
+  const completed = task('press');
+  completed.completed = {weight: 50, reps: 8, rir: '1', unit: 'kg', completedAt: '2026-09-06T12:00:00.000Z'};
+  state.active = {name: 'UPPER A', date: '2026-09-06T11:30:00.000Z', tasks: [completed, task('row')], pos: 1, phase: 'lifting', deferredGroups: [], draft: {}};
+  setState(state);
+
+  await finishEarly();
+
+  assert.equal(state.active, null);
+  assert.equal(state.history.length, 1);
+  assert.equal(state.history[0].tasks[0].completed.weight, 50);
+  assert.equal(state.history[0].tasks[1].skipped, true);
+  assert.ok(state.history[0].completedAt);
+});
+
+test('normal direct save records a completion time', async () => {
+  const state = emptyState();
+  state.active = {name: 'UPPER A', date: '2026-09-06T11:30:00.000Z', tasks: [task('press')], pos: 0, phase: 'stretch', deferredGroups: [], draft: {}};
+  setState(state);
+
+  await finishWorkout();
+
+  assert.ok(state.history[0].completedAt);
+  assert.equal(state.active, null);
 });
 
 test('a complete workout persists and reloads through the fallback store', async () => {
