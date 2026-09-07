@@ -1,4 +1,4 @@
-import { app, esc } from '../dom.js';
+import { app, esc, icon } from '../dom.js';
 import { cancelWorkout, selectExercise, finishEarly } from '../workout.js';
 import { save } from '../storage.js';
 import { getState } from '../state.js';
@@ -24,10 +24,12 @@ function exerciseChoices() {
   const currentStarted = Boolean(current && active.tasks.some(task => task.exerciseId === current.exerciseId && task.completed));
   const selectionLocked = active.phase !== 'lifting' || currentStarted;
   return [...groups.entries()].map(([exerciseId, task]) => {
-    const started = active.tasks.some(item => item.exerciseId === exerciseId && item.completed);
-    const disabled = started || selectionLocked;
-    const status = started ? 'Started' : selectionLocked ? 'Locked' : '';
-    return `<button class="text-action" type="button" data-choose-exercise="${esc(exerciseId)}"${disabled ? ' disabled' : ''}>${esc(task.performedName)}${status ? ` <span class="sheet-choice-status">${status}</span>` : ''}</button>`;
+    const exerciseTasks = active.tasks.filter(item => item.exerciseId === exerciseId);
+    const done = exerciseTasks.every(item => item.completed || item.skipped);
+    const isCurrent = current?.exerciseId === exerciseId;
+    const disabled = done || selectionLocked;
+    const status = done ? `<span class="sheet-choice-status sheet-choice-done">${icon('check', 'Done')}</span>` : isCurrent ? '<span class="sheet-choice-status">Started</span>' : '';
+    return `<button class="text-action" type="button" data-choose-exercise="${esc(exerciseId)}"${disabled ? ' disabled' : ''}>${esc(task.performedName)}${status}</button>`;
   }).join('');
 }
 export const exitControls = () => `<button class="secondary more-trigger" type="button" data-open-sheet="session-sheet" aria-haspopup="dialog">More workout actions</button><div class="sheet-backdrop" id="session-sheet-backdrop" data-sheet-backdrop="session-sheet" hidden></div><section class="action-sheet" id="session-sheet" data-sheet role="dialog" aria-modal="true" aria-labelledby="session-sheet-title" aria-hidden="true" tabindex="-1" hidden><div class="sheet-content"><div class="sheet-header" data-sheet-handle><div class="sheet-handle" aria-hidden="true"></div><h2 id="session-sheet-title">Workout actions</h2></div><div class="choice-list">${exerciseChoices()}</div><button class="text-action destructive" id="finish-early" type="button">Finish and save early</button><button class="sheet-cancel" type="button" data-close-sheet>Cancel</button></div></section>`;
