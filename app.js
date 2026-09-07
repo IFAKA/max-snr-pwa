@@ -20,7 +20,20 @@ async function boot() {
       document.body?.append(`MaxSNR could not start: ${error?.message || 'Reload the app and try again.'}`);
     }
   }
-  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('/sw.js').catch(error => console.warn('Offline mode unavailable.', error));
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    const hadController = Boolean(navigator.serviceWorker.controller);
+    let reloading = false;
+    if (hadController) {
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (reloading) return;
+        reloading = true;
+        location.reload();
+      });
+    }
+    navigator.serviceWorker.register('/sw.js')
+      .then(registration => registration.update())
+      .catch(error => console.warn('Offline mode unavailable.', error));
+  }
 }
 
 boot();

@@ -224,4 +224,4 @@ main { width: min(100%, 30rem); padding: max(16px, env(safe-area-inset-top)) 16p
 body.workout main { height: 100dvh; }
 .workout-stage { height: 100%; min-height: 0; overflow: hidden; }
 .stage-info { position: sticky; z-index: 2; top: 0; flex: 0 0 auto; padding-bottom: 8px; background: var(--bg); }
-.thumb-zone { min-height: 0; margin-top: auto; overflow-y: auto; overscroll-behavior: contain; }
+.thumb-zone { min-height: 0; margin-top: auto; padding-bottom: max(56px, calc(env(safe-area-inset-bottom) + 16px)); overflow-y: auto; overscroll-behavior: contain; }
