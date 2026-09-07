@@ -216,7 +216,7 @@ main { width: min(100%, 30rem); padding: max(16px, env(safe-area-inset-top)) 16p
 .workout-stage h1 { margin-top: 14px; font-size: clamp(32px, 10vw, 46px); }
 .workout-top { font-size: 12px; }
 .workout-progress { margin-bottom: 18px; }
-.progress-copy, .queue-wrap, .previous, .next-up, .rir, .field-help { display: none; }
+.progress-copy, .queue-wrap, .previous, .rir, .field-help { display: none; }
 .meta { font-size: 14px; }
 .context-label { font-size: 13px; }
 .thumb-zone { padding-top: 18px; }
