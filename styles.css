@@ -135,7 +135,7 @@ body.sheet-open { overflow: hidden; }
 .sheet-choice-status { float: right; color: var(--muted); font-size: 11px; font-weight: 650; text-transform: uppercase; }
 .sheet-choice-status.exercise-dot { display: inline-block; width: 28px; height: 28px; margin: -5px 0; }
 @keyframes exercise-set-pulse { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
-@keyframes exercise-circle-pulse { 0%, 100% { box-shadow: 0 0 0 3px var(--accent), 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent); transform: scale(1); } 50% { box-shadow: 0 0 0 6px var(--accent), 0 0 20px 5px color-mix(in srgb, var(--accent) 55%, transparent); transform: scale(1.04); } }
+@keyframes exercise-circle-pulse { 0%, 100% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 72%, transparent), 0 0 0 0 transparent; transform: scale(1); } 50% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 72%, transparent), 0 0 8px 1px color-mix(in srgb, var(--accent) 30%, transparent); transform: scale(1.01); } }
 @media (prefers-color-scheme: dark) { :root { --bg: #121615; --surface: #1b211e; --text: #edf2ee; --muted: #a1aca4; --line: #364139; --accent: #8fd0a9; --accent-soft: #21372a; --danger: #ffaaa1; } .primary { color: #102116; } .notice.error { background: #542824; color: #ffd7d2; } }
 @media (max-width: 360px) { main { padding-inline: 12px; } .controls { grid-template-columns: 1fr; } .summary-grid { grid-template-columns: 1fr 1fr; } .summary-grid div:last-child { grid-column: 1 / -1; } }
 @media (max-height: 600px) { main { padding-top: 12px; } .workout-stage { min-height: calc(100svh - 24px); } .big-timer { margin: 18px 0; } }
