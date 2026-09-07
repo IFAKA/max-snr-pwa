@@ -1,12 +1,10 @@
 import { app, esc } from '../dom.js';
-import { cancelWorkout, phaseProgress, selectExercise, finishEarly } from '../workout.js';
+import { cancelWorkout, selectExercise, finishEarly } from '../workout.js';
 import { save } from '../storage.js';
 import { getState } from '../state.js';
 import { openSheet, closeSheet } from '../bottom-sheet.js';
 
 export const state = () => getState().active;
-export const setProgress = active => { const completed = active.tasks.filter(task => task.completed).length; const percentage = active.tasks.length ? Math.round(completed / active.tasks.length * 100) : 0; return {completed, total: active.tasks.length, percentage}; };
-export const header = active => { const progress = setProgress(active), phase = phaseProgress(active.phase); return `<div class="workout-progress"><div class="row workout-top"><span>${esc(active.name)}</span><span>${phase.label} · ${progress.completed}/${progress.total}</span></div><div class="progress-track phase-progress" role="progressbar" aria-label="Workout progress" aria-valuemin="0" aria-valuemax="${progress.total}" aria-valuenow="${progress.completed}"><span style="width:${progress.percentage}%"></span></div></div>`; };
 function exerciseChoices() {
   const active = state();
   if (!active) return '';
