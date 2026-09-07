@@ -36,7 +36,10 @@ function exerciseChoices() {
     const done = exerciseTasks.every(item => item.completed || item.skipped);
     const isCurrent = current?.exerciseId === exerciseId;
     const disabled = done || isCurrent || selectionLocked;
-    const status = done ? `<span class="sheet-choice-status sheet-choice-done">${icon('check', 'Done')}</span>` : isCurrent ? `<span class="sheet-choice-status sheet-choice-started">${icon('play', 'Started')}</span>` : '';
+    const completedSets = exerciseTasks.filter(item => item.completed).length;
+    const activeSet = isCurrent ? Number(current.set || 1) : 0;
+    const stateClass = `${done ? ' is-complete' : ''}${isCurrent ? ' is-current' : ''}`;
+    const status = `<span class="sheet-choice-status exercise-dot${stateClass}" style="--set-count: ${exerciseTasks.length}; --set-completed: ${completedSets}; --set-active: ${activeSet}" aria-hidden="true"></span>`;
     return `<button class="text-action" type="button" data-choose-exercise="${esc(exerciseId)}"${disabled ? ' disabled' : ''}>${esc(task.performedName)}${status}</button>`;
   }).join('');
 }

@@ -131,10 +131,7 @@ body.sheet-open { overflow: hidden; }
 .action-sheet .text-action { border-top: 1px solid var(--line); text-decoration: none; text-align: left; }
 .action-sheet .sheet-cancel { margin-top: 8px; border-top: 1px solid var(--line); color: var(--muted); }
 .sheet-choice-status { float: right; color: var(--muted); font-size: 11px; font-weight: 650; text-transform: uppercase; }
-.sheet-choice-done { display: inline-flex; align-items: center; color: var(--accent); }
-.sheet-choice-done .icon { width: 18px; height: 18px; }
-.sheet-choice-started { display: inline-flex; align-items: center; color: var(--accent); }
-.sheet-choice-started .icon { width: 16px; height: 16px; fill: currentColor; stroke-width: 1.2; }
+.sheet-choice-status.exercise-dot { display: inline-block; width: 28px; height: 28px; margin: -5px 0; }
 @media (prefers-color-scheme: dark) { :root { --bg: #121615; --surface: #1b211e; --text: #edf2ee; --muted: #a1aca4; --line: #364139; --accent: #8fd0a9; --accent-soft: #21372a; --danger: #ffaaa1; } .primary { color: #102116; } .notice.error { background: #542824; color: #ffd7d2; } }
 @media (max-width: 360px) { main { padding-inline: 12px; } .controls { grid-template-columns: 1fr; } .summary-grid { grid-template-columns: 1fr 1fr; } .summary-grid div:last-child { grid-column: 1 / -1; } }
 @media (max-height: 600px) { main { padding-top: 12px; } .workout-stage { min-height: calc(100svh - 24px); } .big-timer { margin: 18px 0; } }
