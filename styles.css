@@ -106,7 +106,8 @@ body.workout main { overflow: hidden; padding-top: 0; padding-bottom: 16px; }
 .exercise-dot::after { display: block; width: 100%; height: 100%; border-radius: inherit; background: repeating-conic-gradient(from -90deg, transparent 0 calc(1turn / var(--set-count) - 2deg), var(--bg) 0 calc(1turn / var(--set-count))); content: ''; }
 .exercise-dot.is-complete { border-color: var(--accent); opacity: 1; }
 .exercise-dot.is-current { border-width: 2px; border-color: var(--text); box-shadow: 0 0 0 3px var(--accent-soft); opacity: 1; }
-.exercise-dot.is-next-exercise { border-color: var(--accent); animation: exercise-circle-pulse 1.25s ease-in-out infinite; }
+.exercise-dot.is-next-exercise { border-color: var(--accent); }
+.rest-stage .exercise-dot.is-next-exercise { animation: exercise-circle-pulse 1.25s ease-in-out infinite; }
 .next-up { margin: 16px 0 0; padding: 11px 12px; border-left: 3px solid var(--accent); background: var(--surface); font-size: 14px; }
 .next-up span { display: block; margin-bottom: 3px; color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
 .thumb-zone { margin-top: auto; padding-top: 20px; padding-bottom: max(4px, env(safe-area-inset-bottom)); }
