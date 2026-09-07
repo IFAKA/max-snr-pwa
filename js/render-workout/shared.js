@@ -5,10 +5,11 @@ import { getState } from '../state.js';
 import { openSheet, closeSheet } from '../bottom-sheet.js';
 
 export const state = () => getState().active;
-export function exerciseProgress(active, focusPos = active.pos) {
+export function exerciseProgress(active, focusPos = active.pos, preview = false) {
   const exercises = [];
   active.tasks.forEach(task => { if (!exercises.some(item => item.exerciseId === task.exerciseId)) exercises.push(task); });
   const currentExerciseId = active.tasks[focusPos]?.exerciseId;
+  const nextExercise = preview && active.tasks[active.pos]?.exerciseId !== currentExerciseId;
   const completed = exercises.filter(exercise => active.tasks.filter(task => task.exerciseId === exercise.exerciseId).every(task => task.completed || task.skipped)).length;
   const dots = exercises.map(exercise => {
     const tasks = active.tasks.filter(task => task.exerciseId === exercise.exerciseId);
@@ -16,7 +17,7 @@ export function exerciseProgress(active, focusPos = active.pos) {
     const done = tasks.every(task => task.completed || task.skipped);
     const current = exercise.exerciseId === currentExerciseId;
     const activeSet = current ? Number(active.tasks[focusPos]?.set || 1) : 0;
-    const stateClass = `${done ? ' is-complete' : ''}${current ? ' is-current' : ''}`;
+    const stateClass = `${done ? ' is-complete' : ''}${current ? ' is-current' : ''}${current && nextExercise ? ' is-next-exercise' : ''}`;
     return `<span class="exercise-dot${stateClass}" style="--set-count: ${tasks.length}; --set-completed: ${completedSets}; --set-active: ${activeSet}" aria-hidden="true"></span>`;
   }).join('');
   return `<span class="exercise-progress" style="--exercise-count: ${exercises.length}" role="img" aria-label="${completed} of ${exercises.length} exercises complete">${dots}</span>`;

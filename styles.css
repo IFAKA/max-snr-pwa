@@ -101,10 +101,12 @@ body.workout main { overflow: hidden; padding-top: 0; padding-bottom: 16px; }
 .target-summary strong { font-size: clamp(16px, 4.5vw, 20px); line-height: 1.15; }
 .exercise-meta { display: flex; align-items: center; width: 100%; margin-top: 10px; }
 .exercise-progress { display: grid; grid-template-columns: repeat(var(--exercise-count), minmax(0, 1fr)); width: 100%; gap: 5px; }
-.exercise-dot { width: 100%; aspect-ratio: 1; border: 1px solid var(--line); border-radius: 50%; background: conic-gradient(from -90deg, var(--accent) 0 calc(var(--set-completed) / var(--set-count) * 1turn), color-mix(in srgb, var(--accent) 42%, var(--accent-soft)) calc(var(--set-completed) / var(--set-count) * 1turn) calc(var(--set-active) / var(--set-count) * 1turn), var(--accent-soft) 0); opacity: .72; }
+.exercise-dot { position: relative; width: 100%; aspect-ratio: 1; border: 1px solid var(--line); border-radius: 50%; background: conic-gradient(from -90deg, var(--accent) 0 calc(var(--set-completed) / var(--set-count) * 1turn), color-mix(in srgb, var(--accent) 42%, var(--accent-soft)) calc(var(--set-completed) / var(--set-count) * 1turn) calc(var(--set-active) / var(--set-count) * 1turn), var(--accent-soft) 0); opacity: .72; }
+.exercise-dot.is-current::before { position: absolute; z-index: 0; inset: 0; border-radius: inherit; background: conic-gradient(from -90deg, transparent 0 calc(var(--set-completed) / var(--set-count) * 1turn), var(--accent) calc(var(--set-completed) / var(--set-count) * 1turn) calc(var(--set-active) / var(--set-count) * 1turn), transparent 0); content: ''; animation: exercise-set-pulse 1.25s ease-in-out infinite; }
 .exercise-dot::after { display: block; width: 100%; height: 100%; border-radius: inherit; background: repeating-conic-gradient(from -90deg, transparent 0 calc(1turn / var(--set-count) - 2deg), var(--bg) 0 calc(1turn / var(--set-count))); content: ''; }
 .exercise-dot.is-complete { border-color: var(--accent); opacity: 1; }
 .exercise-dot.is-current { border-width: 2px; border-color: var(--text); box-shadow: 0 0 0 3px var(--accent-soft); opacity: 1; }
+.exercise-dot.is-next-exercise { animation: exercise-circle-pulse 1.25s ease-in-out infinite; }
 .next-up { margin: 16px 0 0; padding: 11px 12px; border-left: 3px solid var(--accent); background: var(--surface); font-size: 14px; }
 .next-up span { display: block; margin-bottom: 3px; color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
 .thumb-zone { margin-top: auto; padding-top: 20px; padding-bottom: max(4px, env(safe-area-inset-bottom)); }
@@ -132,6 +134,8 @@ body.sheet-open { overflow: hidden; }
 .action-sheet .sheet-cancel { margin-top: 8px; border-top: 1px solid var(--line); color: var(--muted); }
 .sheet-choice-status { float: right; color: var(--muted); font-size: 11px; font-weight: 650; text-transform: uppercase; }
 .sheet-choice-status.exercise-dot { display: inline-block; width: 28px; height: 28px; margin: -5px 0; }
+@keyframes exercise-set-pulse { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
+@keyframes exercise-circle-pulse { 0%, 100% { box-shadow: 0 0 0 3px var(--accent-soft); } 50% { box-shadow: 0 0 0 6px var(--accent-soft); } }
 @media (prefers-color-scheme: dark) { :root { --bg: #121615; --surface: #1b211e; --text: #edf2ee; --muted: #a1aca4; --line: #364139; --accent: #8fd0a9; --accent-soft: #21372a; --danger: #ffaaa1; } .primary { color: #102116; } .notice.error { background: #542824; color: #ffd7d2; } }
 @media (max-width: 360px) { main { padding-inline: 12px; } .controls { grid-template-columns: 1fr; } .summary-grid { grid-template-columns: 1fr 1fr; } .summary-grid div:last-child { grid-column: 1 / -1; } }
 @media (max-height: 600px) { main { padding-top: 12px; } .workout-stage { min-height: calc(100svh - 24px); } .big-timer { margin: 18px 0; } }

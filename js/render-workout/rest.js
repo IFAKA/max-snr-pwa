@@ -11,9 +11,9 @@ export function renderRest() {
   const next = active.tasks[nextPosition] || active.tasks.find((task, index) => index > active.pos && !task.skipped) || active.tasks[active.pos + 1];
   const betweenSets = next && active.tasks[active.pos]?.exerciseId === next.exerciseId;
   const nextLabel = betweenSets ? 'Next set' : 'Next exercise';
-  const nextMarkup = next ? `${esc(next.performedName)} · set ${esc(next.set)} of ${esc(next.sets)}` : 'Choose an exercise from More';
+  const nextMarkup = next ? betweenSets ? `${esc(next.performedName)} · set ${esc(next.set)} of ${esc(next.sets)}` : esc(next.performedName) : 'Choose an exercise from More';
   const nextIndex = next ? active.tasks.indexOf(next) : -1;
-  const progress = next ? `<div class="exercise-meta"><span class="sr-only">Next exercise progress</span>${exerciseProgress(active, nextIndex)}</div>` : '';
+  const progress = next ? `<div class="exercise-meta"><span class="sr-only">Next exercise progress</span>${exerciseProgress(active, nextIndex, true)}</div>` : '';
   mount(`<div class="workout-stage"><div class="stage-info"><h1>Rest</h1><div class="big-timer" id="timer" role="timer" aria-label="Rest remaining">${formatDuration(active.restEndsAt - Date.now())}</div><p class="next-up"><span>${nextLabel}</span>${nextMarkup}</p>${progress}</div><div class="thumb-zone"><button class="primary" id="continue">End rest</button>${exitControls()}</div></div>`);
   document.querySelector('#continue')?.addEventListener('click', event => advance(event.currentTarget));
   countdown(document.querySelector('#timer'), 'restEndsAt', 'rest', async () => { try { buzz([35, 65, 35]); await continueRest(); location.reload(); } catch (error) { showError(error); } });
