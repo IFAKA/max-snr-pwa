@@ -11,7 +11,7 @@ export function exerciseProgress(active, focusPos = active.pos, preview = false)
   const currentExerciseId = active.tasks[focusPos]?.exerciseId;
   const nextExercise = preview && active.tasks[active.pos]?.exerciseId !== currentExerciseId;
   const completed = exercises.filter(exercise => active.tasks.filter(task => task.exerciseId === exercise.exerciseId).every(task => task.completed || task.skipped)).length;
-  const dots = exercises.map(exercise => {
+  const renderDot = exercise => {
     const tasks = active.tasks.filter(task => task.exerciseId === exercise.exerciseId);
     const completedSets = tasks.filter(task => task.completed).length;
     const done = tasks.every(task => task.completed || task.skipped);
@@ -19,8 +19,19 @@ export function exerciseProgress(active, focusPos = active.pos, preview = false)
     const activeSet = current ? Number(active.tasks[focusPos]?.set || 1) : 0;
     const stateClass = `${done ? ' is-complete' : ''}${current ? ' is-current' : ''}${current && nextExercise ? ' is-next-exercise' : ''}`;
     return `<span class="exercise-dot${stateClass}" style="--set-count: ${tasks.length}; --set-completed: ${completedSets}; --set-active: ${activeSet}" aria-hidden="true"></span>`;
-  }).join('');
-  return `<span class="exercise-progress" style="--exercise-count: ${exercises.length}" role="img" aria-label="${completed} of ${exercises.length} exercises complete">${dots}</span>`;
+  };
+  const dots = [];
+  for (let index = 0; index < exercises.length; index++) {
+    const exercise = exercises[index];
+    if (exercise.groupType === 'superset') {
+      const members = exercises.filter(candidate => candidate.groupType === 'superset' && candidate.groupId === exercise.groupId).slice(0, 2);
+      if (members[0] === exercise) dots.push(`<span class="exercise-progress-group" aria-hidden="true"><span class="exercise-progress-connector"></span>${members.map(renderDot).join('')}</span>`);
+      continue;
+    }
+    dots.push(renderDot(exercise));
+  }
+  const gridCount = exercises.reduce((count, exercise) => count + (exercise.groupType === 'superset' ? (exercises.findIndex(item => item.groupId === exercise.groupId && item.groupType === 'superset') === exercises.indexOf(exercise) ? 2 : 0) : 1), 0);
+  return `<span class="exercise-progress" style="--exercise-count: ${gridCount}" role="img" aria-label="${completed} of ${exercises.length} exercises complete">${dots.join('')}</span>`;
 }
 function exerciseChoices() {
   const active = state();

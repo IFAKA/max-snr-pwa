@@ -6,12 +6,29 @@ import { flatten } from './task-factory.js';
 import { beginLifting, continueRest as advanceRest, startRest } from './timers.js';
 
 const taskGroup = task => task?.groupId || task?.exerciseId || task?.id;
+const supersetLead = (active, groupId) => Number.isInteger(active?.supersetLeads?.[groupId]) ? active.supersetLeads[groupId] : 0;
+const setSupersetLead = (active, task) => {
+  if (task?.groupType !== 'superset' || !task.groupId) return;
+  active.supersetLeads ||= {};
+  active.supersetLeads[task.groupId] = task.memberIndex;
+};
+const sameSupersetRound = (candidate, task) => candidate?.groupType === 'superset' && task?.groupType === 'superset' && candidate.groupId === task.groupId && candidate.set === task.set;
+const supersetPartnerIndex = (active, task) => active?.tasks.findIndex(candidate => sameSupersetRound(candidate, task) && candidate.memberIndex !== task.memberIndex && !candidate.completed && !candidate.skipped) ?? -1;
+const nextSupersetRoundIndex = (active, task) => {
+  if (task?.groupType !== 'superset') return -1;
+  const lead = supersetLead(active, task.groupId);
+  const candidates = active.tasks
+    .map((candidate, index) => ({candidate, index}))
+    .filter(({candidate}) => candidate.groupId === task.groupId && candidate.set > task.set && !candidate.completed && !candidate.skipped)
+    .sort((a, b) => a.candidate.set - b.candidate.set || a.candidate.memberIndex - b.candidate.memberIndex);
+  return candidates.find(item => item.candidate.memberIndex === lead)?.index ?? candidates[0]?.index ?? -1;
+};
 
 export async function start(day = dayNow()) {
   const state = getState();
   if (!ROUTINE[day]) return false;
   if (state.active && !confirm('A workout is already in progress.\n\nStart a new workout and discard it?')) return false;
-  state.active = {id: Date.now(), date: new Date().toISOString(), day, name: NAMES[day], tasks: flatten(ROUTINE[day]), pos: 0, phase: 'warmup', deferredGroups: [], draft: {}, restEndsAt: null, timerEndsAt: null};
+  state.active = {id: Date.now(), date: new Date().toISOString(), day, name: NAMES[day], tasks: flatten(ROUTINE[day]), pos: 0, phase: 'warmup', deferredGroups: [], supersetLeads: {}, draft: {}, restEndsAt: null, timerEndsAt: null};
   await save();
   return true;
 }
@@ -79,10 +96,15 @@ export async function selectExercise(exerciseId) {
   const active = getState().active;
   if (!active || !['lifting', 'rest'].includes(active.phase)) return false;
   const current = active.tasks[active.pos];
-  if (restBetweenSets(active)) return false;
-  if (active.phase === 'lifting' && current && active.tasks.some(task => task.exerciseId === current.exerciseId && task.completed)) return false;
   const pos = active.tasks.findIndex(task => task.exerciseId === exerciseId && !task.completed && !task.skipped);
   if (pos < 0) return false;
+  const selected = active.tasks[pos];
+  const currentRoundStarted = current?.groupType === 'superset' && active.tasks.some(task => sameSupersetRound(task, current) && task.completed);
+  const forcedPartner = active.phase === 'rest' && current?.groupType === 'superset' && supersetPartnerIndex(active, current) >= 0;
+  if (restBetweenSets(active) || forcedPartner) return false;
+  if (active.phase === 'lifting' && currentRoundStarted) return false;
+  if (active.phase === 'lifting' && current && current.groupType !== 'superset' && active.tasks.some(task => task.exerciseId === current.exerciseId && task.completed)) return false;
+  if (selected.groupType === 'superset') setSupersetLead(active, selected);
   if (active.phase === 'rest') active.nextPos = pos;
   else active.pos = pos;
   active.deferredGroups = active.deferredGroups.filter(id => id !== taskGroup(active.tasks[pos]));
@@ -108,13 +130,19 @@ export async function completeSet() {
   if (draft.rir !== undefined) task.completed.rir = draft.rir;
   active.draft = {};
   buzz([25, 45, 25]);
-  const next = active.pos + 1 < active.tasks.length ? active.pos + 1 : -1;
-  const nextTask = next >= 0 ? active.tasks[next] : null;
-  const partner = task.groupType === 'superset' && nextTask?.groupId === task.groupId && nextTask?.set === task.set && !nextTask.completed && !nextTask.skipped;
-  if (partner) {
-    active.pos = next;
-    await save();
-    return {render: true};
+  if (task.groupType === 'superset') {
+    const partner = supersetPartnerIndex(active, task);
+    if (partner >= 0) {
+      setSupersetLead(active, task);
+      active.pos = partner;
+      await save();
+      return {render: true};
+    }
+    const nextRound = nextSupersetRoundIndex(active, task);
+    if (nextRound >= 0) {
+      await startRest(nextRound);
+      return {render: true};
+    }
   }
   const following = nextPosition();
   if (following < 0) await finishLifts();

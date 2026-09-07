@@ -69,7 +69,6 @@ button:focus-visible, .button:focus-visible, .import-button:focus-visible, input
 .routine-exercise span:last-child { white-space: nowrap; }
 .routine-group { margin: 8px 0; padding: 10px; border: 1px solid var(--line); border-radius: 10px; }
 .group-label { margin-bottom: 2px; }
-.group-chip { display: inline-block; margin-bottom: 4px; }
 .history-workout { margin: 10px 0; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); overflow: hidden; }
 .history-workout > summary { min-height: 64px; padding: 14px 16px; cursor: pointer; }
 .history-workout > summary small { font-weight: 400; }
@@ -92,7 +91,6 @@ body.workout main { overflow: hidden; padding-top: 0; padding-bottom: 16px; }
 .workout-stage h1 { margin-top: 7px; font-size: clamp(34px, 10vw, 48px); }
 .context-label { margin-bottom: 5px; color: var(--muted); font-size: 12px; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
 .lifting-exercise { padding: 14px 16px 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
-.lifting-exercise .group-chip { margin-bottom: 12px; }
 .lifting-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
 .lifting-heading .context-label { margin-bottom: 0; }
 .lifting-exercise h1 { margin: 0; font-size: clamp(34px, 10vw, 48px); line-height: 1.02; }
@@ -101,6 +99,9 @@ body.workout main { overflow: hidden; padding-top: 0; padding-bottom: 16px; }
 .target-summary strong { font-size: clamp(16px, 4.5vw, 20px); line-height: 1.15; }
 .exercise-meta { display: flex; align-items: center; width: 100%; margin-top: 10px; }
 .exercise-progress { display: grid; grid-template-columns: repeat(var(--exercise-count), minmax(0, 1fr)); width: 100%; gap: 5px; }
+.exercise-progress-group { position: relative; display: grid; grid-column: span 2; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; min-width: 0; padding: 4px 7px; border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line)); border-radius: 999px; background: color-mix(in srgb, var(--accent-soft) 48%, transparent); }
+.exercise-progress-group .exercise-dot { z-index: 1; }
+.exercise-progress-connector { position: absolute; top: 50%; right: 12%; left: 12%; height: 2px; background: color-mix(in srgb, var(--accent) 28%, var(--line)); transform: translateY(-50%); }
 .exercise-dot { position: relative; width: 100%; aspect-ratio: 1; border: 1px solid var(--line); border-radius: 50%; background: conic-gradient(from -90deg, var(--accent) 0 calc(var(--set-completed) / var(--set-count) * 1turn), color-mix(in srgb, var(--accent) 42%, var(--accent-soft)) calc(var(--set-completed) / var(--set-count) * 1turn) calc(var(--set-active) / var(--set-count) * 1turn), var(--accent-soft) 0); opacity: .72; }
 .exercise-dot.is-current::before { position: absolute; z-index: 0; inset: 0; border-radius: inherit; background: conic-gradient(from -90deg, transparent 0 calc(var(--set-completed) / var(--set-count) * 1turn), var(--accent) calc(var(--set-completed) / var(--set-count) * 1turn) calc(var(--set-active) / var(--set-count) * 1turn), transparent 0); content: ''; animation: exercise-set-pulse 1.25s ease-in-out infinite; }
 .exercise-dot::after { display: block; width: 100%; height: 100%; border-radius: inherit; background: repeating-conic-gradient(from -90deg, transparent 0 calc(1turn / var(--set-count) - 2deg), var(--bg) 0 calc(1turn / var(--set-count))); content: ''; }

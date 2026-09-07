@@ -12,6 +12,7 @@ const {startPlank, beginLifting} = await import('../js/workout/timers.js');
 const {start, findNext, deferCurrent, substituteCurrent, undoLastSet, completeSet, continueRest, completeStretch, finishWorkout, selectExercise, finishEarly} = await import('../js/workout/session.js');
 
 const task = (exerciseId, set = 1) => ({id: `${exerciseId}-${set}`, exerciseId, originalName: exerciseId, performedName: exerciseId, alternatives: exerciseId === 'press' ? ['DB press'] : [], set, sets: 2, completed: null, skipped: false, groupId: null});
+const supersetTask = (exerciseId, memberIndex, set = 1) => ({...task(exerciseId, set), groupId: 'arms', groupType: 'superset', memberIndex, groupLabel: 'Arms'});
 
 test('next-task traversal ignores skipped sets', () => {
   const state = emptyState();
@@ -114,6 +115,40 @@ test('switching exercises is locked during rest between sets', async () => {
 
   assert.equal(await selectExercise('row'), false);
   assert.equal(state.active.nextPos, 1);
+});
+
+test('selecting the second superset member makes it the lead for each round', async () => {
+  const state = emptyState();
+  state.active = {tasks: [supersetTask('curl', 0), supersetTask('extension', 1), supersetTask('curl', 0, 2), supersetTask('extension', 1, 2)], pos: 0, phase: 'lifting', deferredGroups: [], supersetLeads: {}, draft: {}};
+  setState(state);
+
+  assert.equal(await selectExercise('extension'), true);
+  assert.equal(state.active.pos, 1);
+  assert.equal(state.active.supersetLeads.arms, 1);
+
+  state.active.draft = {reps: '8'};
+  await completeSet();
+  assert.equal(state.active.tasks[state.active.pos].exerciseId, 'curl');
+  assert.equal(state.active.tasks[state.active.pos].set, 1);
+
+  state.active.draft = {reps: '8'};
+  await completeSet();
+  assert.equal(state.active.phase, 'rest');
+  assert.equal(state.active.tasks[state.active.nextPos].exerciseId, 'extension');
+  assert.equal(state.active.tasks[state.active.nextPos].set, 2);
+  assert.equal(state.active.supersetLeads.arms, 1);
+});
+
+test('a superset can be switched during rest when no partner is forced', async () => {
+  const state = emptyState();
+  const completed = task('press');
+  completed.completed = {reps: 8, completedAt: '2026-09-06T12:00:00.000Z'};
+  state.active = {tasks: [completed, supersetTask('curl', 0), supersetTask('extension', 1)], pos: 0, nextPos: 1, phase: 'rest', deferredGroups: [], supersetLeads: {}, draft: {}, restEndsAt: Date.now() + 30000};
+  setState(state);
+
+  assert.equal(await selectExercise('extension'), true);
+  assert.equal(state.active.nextPos, 2);
+  assert.equal(state.active.supersetLeads.arms, 1);
 });
 
 test('undo restores the latest completed set as an editable draft', async () => {
