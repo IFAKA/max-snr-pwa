@@ -27,7 +27,7 @@ function exerciseChoices() {
     const exerciseTasks = active.tasks.filter(item => item.exerciseId === exerciseId);
     const done = exerciseTasks.every(item => item.completed || item.skipped);
     const isCurrent = current?.exerciseId === exerciseId;
-    const disabled = done || selectionLocked;
+    const disabled = done || isCurrent || selectionLocked;
     const status = done ? `<span class="sheet-choice-status sheet-choice-done">${icon('check', 'Done')}</span>` : isCurrent ? '<span class="sheet-choice-status">Started</span>' : '';
     return `<button class="text-action" type="button" data-choose-exercise="${esc(exerciseId)}"${disabled ? ' disabled' : ''}>${esc(task.performedName)}${status}</button>`;
   }).join('');
