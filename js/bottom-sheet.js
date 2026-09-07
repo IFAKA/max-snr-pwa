@@ -28,6 +28,7 @@ function unlockBody() {
 
 function finishClose(sheet) {
   if (activeSheet?.sheet !== sheet) return;
+  const shouldPopHistory = activeSheet.historyPushed && !activeSheet.historyPopped;
   document.removeEventListener('keydown', handleKeydown);
   sheet.classList.remove(ACTIVE_CLASS, CLOSING_CLASS, DRAG_CLASS);
   sheet.hidden = true;
@@ -41,10 +42,12 @@ function finishClose(sheet) {
   unlockBody();
   restoreFocus(sheet);
   activeSheet = null;
+  if (shouldPopHistory) history.back();
 }
 
-function closeActiveSheet(animate = true) {
+function closeActiveSheet(animate = true, fromHistory = false) {
   if (!activeSheet) return;
+  activeSheet.historyPopped ||= fromHistory;
   const {sheet, backdrop} = activeSheet;
   sheet.classList.remove(ACTIVE_CLASS, DRAG_CLASS);
   sheet.classList.add(CLOSING_CLASS);
@@ -127,6 +130,9 @@ export function openSheet(id) {
   if (activeSheet) closeActiveSheet(false);
   const backdrop = document.getElementById(`${id}-backdrop`);
   activeSheet = {sheet, backdrop};
+  const historyState = history.state && typeof history.state === 'object' ? history.state : {};
+  history.pushState({...historyState, maxSnrSheet: id}, '', location.href);
+  activeSheet.historyPushed = true;
   sheet._sheetTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   sheet.hidden = false;
   sheet.setAttribute('aria-hidden', 'false');
@@ -154,4 +160,8 @@ document.addEventListener('click', event => {
   if (closeButton) closeSheet(closeButton.closest('[data-sheet]')?.id);
   const backdrop = event.target.closest?.('[data-sheet-backdrop]');
   if (backdrop && event.target === backdrop) closeSheet(backdrop.dataset.sheetBackdrop);
+});
+
+window.addEventListener('popstate', () => {
+  if (activeSheet) closeActiveSheet(false, true);
 });

@@ -35,7 +35,7 @@ button:disabled { cursor: not-allowed; opacity: .55; }
 button:focus-visible, .button:focus-visible, .import-button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 3px solid #3d8b61; outline-offset: 3px; }
 .primary { display: flex; width: 100%; min-height: 54px; align-items: center; justify-content: center; margin-top: 14px; border-color: var(--accent); background: var(--accent); color: #fff; font-size: 17px; }
 .secondary { width: 100%; margin-top: 8px; border-color: transparent; background: var(--accent-soft); color: var(--accent); }
-.text-action, .sheet-cancel { display: block; width: 100%; min-height: 44px; padding: 10px 4px; border: 0; border-radius: 0; background: transparent; text-align: center; text-decoration: underline; }
+.text-action { display: block; width: 100%; min-height: 44px; padding: 10px 4px; border: 0; border-radius: 0; background: transparent; text-align: center; text-decoration: underline; }
 .text-action { color: var(--text); }
 .destructive { color: var(--danger); }
 .more-trigger { margin-top: 10px; color: var(--muted); }
@@ -101,7 +101,6 @@ body.workout main { overflow: hidden; padding-top: 0; padding-bottom: 16px; }
 .exercise-progress { display: grid; grid-template-columns: repeat(var(--exercise-count), minmax(0, 1fr)); width: 100%; gap: 5px; }
 .exercise-progress-group { position: relative; display: grid; grid-column: span 2; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; min-width: 0; padding: 4px 7px; border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line)); border-radius: 999px; background: color-mix(in srgb, var(--accent-soft) 48%, transparent); }
 .exercise-progress-group .exercise-dot { z-index: 1; }
-.exercise-progress-connector { position: absolute; top: 50%; right: 12%; left: 12%; height: 2px; background: color-mix(in srgb, var(--accent) 28%, var(--line)); transform: translateY(-50%); }
 .exercise-dot { position: relative; width: 100%; aspect-ratio: 1; border: 1px solid var(--line); border-radius: 50%; background: conic-gradient(from -90deg, var(--accent) 0 calc(var(--set-completed) / var(--set-count) * 1turn), color-mix(in srgb, var(--accent) 42%, var(--accent-soft)) calc(var(--set-completed) / var(--set-count) * 1turn) calc(var(--set-active) / var(--set-count) * 1turn), var(--accent-soft) 0); opacity: .72; }
 .exercise-dot.is-current::before { position: absolute; z-index: 0; inset: 0; border-radius: inherit; background: conic-gradient(from -90deg, transparent 0 calc(var(--set-completed) / var(--set-count) * 1turn), var(--accent) calc(var(--set-completed) / var(--set-count) * 1turn) calc(var(--set-active) / var(--set-count) * 1turn), transparent 0); content: ''; animation: exercise-set-pulse 1.25s ease-in-out infinite; }
 .exercise-dot::after { display: block; width: 100%; height: 100%; border-radius: inherit; background: repeating-conic-gradient(from -90deg, transparent 0 calc(1turn / var(--set-count) - 2deg), var(--bg) 0 calc(1turn / var(--set-count))); content: ''; }
@@ -133,9 +132,17 @@ body.sheet-open { overflow: hidden; }
 .sheet-handle { width: 40px; height: 5px; margin: 0 auto 16px; border-radius: 99px; background: var(--line); }
 .action-sheet h2 { margin-bottom: 12px; }
 .action-sheet .text-action { border-top: 1px solid var(--line); text-decoration: none; text-align: left; }
-.action-sheet .sheet-cancel { margin-top: 8px; border-top: 1px solid var(--line); color: var(--muted); }
 .sheet-choice-status { float: right; color: var(--muted); font-size: 11px; font-weight: 650; text-transform: uppercase; }
-.sheet-choice-status.exercise-dot { display: inline-block; width: 28px; height: 28px; margin: -5px 0; }
+.sheet-choice { display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left !important; }
+.sheet-choice-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sheet-set-progress { display: inline-flex; flex-shrink: 0; gap: 4px; align-items: center; }
+.sheet-set { width: 8px; height: 8px; border: 1px solid var(--line); border-radius: 50%; background: transparent; }
+.sheet-set.is-complete { border-color: var(--accent); background: var(--accent); }
+.sheet-set.is-skipped { background: var(--muted); opacity: .6; }
+.sheet-set.is-current { width: 10px; height: 10px; border: 2px solid var(--text); box-shadow: 0 0 0 2px var(--accent-soft); }
+.sheet-superset { margin: 4px 0; overflow: hidden; border: 1px solid color-mix(in srgb, var(--accent) 32%, var(--line)); border-radius: 12px; background: color-mix(in srgb, var(--accent-soft) 28%, transparent); }
+.sheet-superset-label { margin: 0; padding: 8px 12px 4px; color: var(--accent); font-size: 11px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.sheet-superset .text-action { border-top-color: color-mix(in srgb, var(--accent) 20%, var(--line)); }
 @keyframes exercise-set-pulse { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
 @keyframes exercise-circle-pulse { 0%, 100% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 72%, transparent), 0 0 0 0 transparent; transform: scale(1); } 50% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 72%, transparent), 0 0 8px 1px color-mix(in srgb, var(--accent) 30%, transparent); transform: scale(1.01); } }
 @media (prefers-color-scheme: dark) { :root { --bg: #121615; --surface: #1b211e; --text: #edf2ee; --muted: #a1aca4; --line: #364139; --accent: #8fd0a9; --accent-soft: #21372a; --danger: #ffaaa1; } .primary { color: #102116; } .notice.error { background: #542824; color: #ffd7d2; } }
