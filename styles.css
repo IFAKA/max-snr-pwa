@@ -87,6 +87,7 @@ nav a[aria-current="page"] { color: var(--accent); font-weight: 800; }
 .routine-day summary::after, .queue-wrap > summary::after, .settings-disclosure > summary::after { content: "+"; color: var(--muted); font-size: 22px; }
 .routine-day[open] summary::after, .queue-wrap[open] > summary::after, .settings-disclosure[open] > summary::after { content: "−"; }
 .routine-day summary > span:first-child, .queue-wrap > summary > span:first-child { display: grid; gap: 3px; min-width: 0; }
+.routine-day-summary > span:first-child { display: grid; gap: 3px; min-width: 0; }
 .routine-day-actions { padding: 0 14px 4px; }
 .routine-day-actions button { width: 100%; border-color: transparent; background: var(--accent-soft); color: var(--accent); }
 .routine-day > .routine-list, .routine-day > p { padding: 0 14px 14px; }
