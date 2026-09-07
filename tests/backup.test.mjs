@@ -28,6 +28,14 @@ test('rejects an active workout without tasks', () => {
   assert.throws(() => validateBackup({version: 2, history: [], active: {name: 'Broken', phase: 'lifting'}}), /backup/i);
 });
 
+test('rejects an active workout with a negative task position', () => {
+  assert.throws(() => validateBackup({
+    version: 2,
+    history: [],
+    active: {name: 'Workout', phase: 'lifting', pos: -1, tasks: []}
+  }), /backup/i);
+});
+
 test('defaults missing and invalid weekly goals to four', () => {
   assert.equal(validateBackup({version: 2, history: [], active: null}).settings.weeklyGoal, 4);
   assert.equal(validateBackup({version: 2, settings: {weeklyGoal: 9}, history: [], active: null}).settings.weeklyGoal, 4);

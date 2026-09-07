@@ -5,7 +5,7 @@ const isRecord = value => value && typeof value === 'object' && !Array.isArray(v
 const validText = (value, max = 160) => typeof value === 'string' && value.length <= max;
 
 function validPerformance(value) {
-  return isRecord(value) && Number.isFinite(value.weight) && value.weight >= 0 && value.weight <= 10000 && Number.isInteger(value.reps) && value.reps > 0 && value.reps <= 1000 && ['0', '1', '2', '3+'].includes(String(value.rir));
+  return isRecord(value) && (value.weight === undefined || (Number.isFinite(value.weight) && value.weight >= 0 && value.weight <= 10000)) && Number.isInteger(value.reps) && value.reps > 0 && value.reps <= 1000 && (value.rir === undefined || ['0', '1', '2', '3+'].includes(String(value.rir)));
 }
 
 function validTask(task) {
@@ -35,7 +35,7 @@ function validWorkout(workout, active = false) {
   if (active && !Array.isArray(tasks)) return false;
   if (tasks !== undefined && (!Array.isArray(tasks) || tasks.length > 1000 || !tasks.every(validTask))) return false;
   if (active && workout.phase !== undefined && !PHASES.has(workout.phase)) return false;
-  if (active && (!Number.isInteger(workout.pos || 0) || (tasks.length && (workout.pos || 0) >= tasks.length))) return false;
+  if (active && (!Number.isInteger(workout.pos || 0) || (workout.pos || 0) < 0 || (tasks.length && (workout.pos || 0) >= tasks.length))) return false;
   if (active && workout.nextPos !== undefined && workout.nextPos !== null && (!Number.isInteger(workout.nextPos) || workout.nextPos < 0 || workout.nextPos >= tasks.length)) return false;
   if (active && workout.deferredGroups !== undefined && !Array.isArray(workout.deferredGroups)) return false;
   return true;

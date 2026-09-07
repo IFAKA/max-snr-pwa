@@ -71,6 +71,8 @@ export async function resolveDeferred() {
 export async function selectExercise(exerciseId) {
   const active = getState().active;
   if (!active || active.phase !== 'lifting') return false;
+  const current = active.tasks[active.pos];
+  if (current && active.tasks.some(task => task.exerciseId === current.exerciseId && task.completed)) return false;
   const pos = active.tasks.findIndex(task => task.exerciseId === exerciseId && !task.completed && !task.skipped);
   if (pos < 0) return false;
   active.pos = pos;
@@ -82,9 +84,16 @@ export async function selectExercise(exerciseId) {
 
 export async function completeSet() {
   const state = getState(), active = state.active, task = activeTask(), draft = active.draft || {};
-  const weight = Number(draft.weight), reps = Number(draft.reps), rir = draft.rir ?? '1';
-  if (!task || !Number.isFinite(weight) || weight < 0 || !Number.isInteger(reps) || reps < 1) return {error: 'Enter a weight and whole-number reps before completing the set.'};
-  task.completed = {weight, reps, rir, unit: state.settings?.unit || 'kg', completedAt: new Date().toISOString(), actualName: task.performedName, originalName: task.originalName};
+  const reps = Number(draft.reps);
+  const hasWeight = draft.weight !== undefined && draft.weight !== '';
+  const weight = hasWeight ? Number(draft.weight) : null;
+  if (!task || !Number.isInteger(reps) || reps < 1 || (hasWeight && (!Number.isFinite(weight) || weight < 0))) return {error: 'Enter the reps you completed.'};
+  task.completed = {reps, completedAt: new Date().toISOString(), actualName: task.performedName, originalName: task.originalName};
+  if (hasWeight) {
+    task.completed.weight = weight;
+    task.completed.unit = state.settings?.unit || 'kg';
+  }
+  if (draft.rir !== undefined) task.completed.rir = draft.rir;
   active.draft = {};
   buzz([25, 45, 25]);
   const next = active.pos + 1 < active.tasks.length ? active.pos + 1 : -1;
@@ -128,22 +137,6 @@ export async function substituteCurrent(name) {
   return true;
 }
 
-export async function skipCurrent() {
-  const active = getState().active, current = activeTask();
-  if (!active || !current) return;
-  const group = taskGroup(current);
-  active.tasks.filter(task => taskGroup(task) === group && !task.completed).forEach(task => { task.skipped = true; });
-  active.deferredGroups = active.deferredGroups.filter(id => id !== group);
-  active.draft = {};
-  const next = findNext(active.pos, true);
-  if (next < 0) await finishLifts();
-  else {
-    active.pos = next;
-    active.phase = 'lifting';
-    await save();
-  }
-}
-
 export async function undoLastSet() {
   const active = getState().active;
   if (!active) return false;
@@ -156,7 +149,7 @@ export async function undoLastSet() {
   active.restEndsAt = null;
   active.timerEndsAt = null;
   active.nextPos = null;
-  active.draft = {weight: previous.weight, reps: previous.reps, rir: previous.rir};
+  active.draft = {weight: previous.weight ?? '', reps: previous.reps, rir: previous.rir};
   await save();
   return true;
 }

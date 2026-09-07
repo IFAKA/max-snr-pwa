@@ -49,6 +49,20 @@ test('selecting a queued exercise opens its first unfinished set without reorder
   assert.deepEqual(state.active.tasks.map(item => item.exerciseId), ['press', 'press', 'row', 'row']);
 });
 
+test('selecting another exercise is locked after the current exercise starts', async () => {
+  const state = emptyState();
+  const completed = task('press');
+  completed.completed = {reps: 8, completedAt: '2026-09-06T12:00:00.000Z'};
+  state.active = {tasks: [completed, task('press', 2), task('row'), task('row', 2)], pos: 1, phase: 'lifting', deferredGroups: [], draft: {reps: '9'}};
+  const originalTasks = structuredClone(state.active.tasks);
+  setState(state);
+
+  assert.equal(await selectExercise('row'), false);
+  assert.equal(state.active.pos, 1);
+  assert.deepEqual(state.active.draft, {reps: '9'});
+  assert.deepEqual(state.active.tasks, originalTasks);
+});
+
 test('undo restores the latest completed set as an editable draft', async () => {
   const state = emptyState();
   const completed = task('press');
