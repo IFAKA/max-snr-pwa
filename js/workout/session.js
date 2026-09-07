@@ -11,7 +11,7 @@ export async function start(day = dayNow()) {
   const state = getState();
   if (!ROUTINE[day]) return false;
   if (state.active && !confirm('A workout is already in progress.\n\nStart a new workout and discard it?')) return false;
-  state.active = {id: Date.now(), date: new Date().toISOString(), day, name: NAMES[day], tasks: flatten(ROUTINE[day]), pos: 0, phase: 'lifting', deferredGroups: [], draft: {}, restEndsAt: null, timerEndsAt: null};
+  state.active = {id: Date.now(), date: new Date().toISOString(), day, name: NAMES[day], tasks: flatten(ROUTINE[day]), pos: 0, phase: 'warmup', deferredGroups: [], draft: {}, restEndsAt: null, timerEndsAt: null};
   await save();
   return true;
 }

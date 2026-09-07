@@ -20,10 +20,10 @@ test('next-task traversal ignores skipped sets', () => {
   assert.equal(findNext(), 2);
 });
 
-test('new workouts begin directly at the first lifting set', async () => {
+test('new workouts begin at the warmup screen', async () => {
   setState(emptyState());
   await start('Monday');
-  assert.equal(getState().active.phase, 'lifting');
+  assert.equal(getState().active.phase, 'warmup');
 });
 
 test('loads accept two decimals but reps remain whole numbers', async () => {
