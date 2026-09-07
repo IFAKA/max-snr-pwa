@@ -198,7 +198,7 @@ export async function finishWorkout() {
 
 export async function cancelWorkout() {
   const state = getState();
-  if (!confirm('Cancel workout?\n\nYour current workout will be discarded.\nPrevious workout history won\'t be affected.')) return false;
+  if (!confirm('Discard workout?\n\nYour current workout and drafts will be removed. Completed workout history won\'t be affected.')) return false;
   state.active = null;
   await save();
   return true;

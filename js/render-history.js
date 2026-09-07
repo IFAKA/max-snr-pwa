@@ -1,5 +1,5 @@
 import { app, esc } from './dom.js';
-import { getState, setState } from './state.js';
+import { getState, setState, normalizeWeeklyGoal } from './state.js';
 import { migrate, persist } from './storage.js';
 import { validateBackup } from './backup.js';
 
@@ -51,12 +51,17 @@ function workoutMarkup(workout, workoutIndex) {
 
 export function renderHistory() {
   const state = getState();
-  app.innerHTML = `<header class="page-header"><p class="eyebrow">Training log</p><h1>History</h1><p class="lede">Review, correct, back up, or restore your workout data.</p></header><section class="settings-card"><label for="unit">Unit for future sets</label><select id="unit"><option value="kg" ${state.settings?.unit !== 'lb' ? 'selected' : ''}>Kilograms (kg)</option><option value="lb" ${state.settings?.unit === 'lb' ? 'selected' : ''}>Pounds (lb)</option></select><p class="muted">Existing sets keep the unit they were recorded in.</p></section><section class="history-data"><div class="data-actions"><button id="export" type="button">Export backup</button><label class="import-button" tabindex="0">Import backup<input id="import" tabindex="-1" type="file" accept="application/json,.json"></label></div><p id="data-status" class="muted" role="status"></p></section><section class="history-list" aria-label="Workout history">${state.history.length ? state.history.map(workoutMarkup).join('') : '<div class="empty-state"><h2>No workouts yet</h2><p>Your saved workouts will appear here.</p></div>'}</section>${state.history.length ? '<button class="danger-outline full" id="clear-history" type="button">Delete all workout history</button>' : ''}`;
+  app.innerHTML = `<header class="page-header"><p class="eyebrow">Training log</p><h1>History</h1><p class="lede">Review, correct, back up, or restore your workout data.</p></header><section class="settings-card"><label for="unit">Unit for future sets</label><select id="unit"><option value="kg" ${state.settings?.unit !== 'lb' ? 'selected' : ''}>Kilograms (kg)</option><option value="lb" ${state.settings?.unit === 'lb' ? 'selected' : ''}>Pounds (lb)</option></select><p class="muted">Existing sets keep the unit they were recorded in.</p><label for="weekly-goal">Weekly workout goal</label><select id="weekly-goal">${[1, 2, 3, 4, 5, 6, 7].map(goal => `<option value="${goal}" ${normalizeWeeklyGoal(state.settings?.weeklyGoal) === goal ? 'selected' : ''}>${goal} workout${goal === 1 ? '' : 's'} per week</option>`).join('')}</select><p class="muted">A personal target for saved workouts from Monday through Sunday.</p></section><section class="history-data"><div class="data-actions"><button id="export" type="button">Export backup</button><label class="import-button" tabindex="0">Import backup<input id="import" tabindex="-1" type="file" accept="application/json,.json"></label></div><p id="data-status" class="muted" role="status"></p></section><section class="history-list" aria-label="Workout history">${state.history.length ? state.history.map(workoutMarkup).join('') : '<div class="empty-state"><h2>No workouts yet</h2><p>Your saved workouts will appear here.</p></div>'}</section>${state.history.length ? '<button class="danger-outline full" id="clear-history" type="button">Delete all workout history</button>' : ''}`;
   const status = document.querySelector('#data-status');
   document.querySelector('#export').onclick = () => { download(state, 'maxsnr-backup.json'); status.textContent = 'Backup downloaded.'; };
   document.querySelector('#unit').onchange = async event => {
-    state.settings = {unit: event.target.value === 'lb' ? 'lb' : 'kg'};
+    state.settings = {...state.settings, unit: event.target.value === 'lb' ? 'lb' : 'kg'};
     try { await persist(); status.textContent = `Future sets will use ${state.settings.unit}.`; }
+    catch (error) { status.textContent = error.message; }
+  };
+  document.querySelector('#weekly-goal').onchange = async event => {
+    state.settings = {...state.settings, weeklyGoal: normalizeWeeklyGoal(Number(event.target.value))};
+    try { await persist(); status.textContent = `Weekly goal set to ${state.settings.weeklyGoal} workouts.`; }
     catch (error) { status.textContent = error.message; }
   };
   const importInput = document.querySelector('#import');

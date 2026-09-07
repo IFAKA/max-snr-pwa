@@ -5,6 +5,7 @@ import { flatten } from '../js/workout/task-factory.js';
 import { formatDuration } from '../js/workout/timers.js';
 import { getState, setState, emptyState } from '../js/state.js';
 import { lastActivePerformance, lastPerformance } from '../js/workout/progression.js';
+import { completedWorkoutsThisWeek, weeklyGoalSummary, phaseProgress } from '../js/workout/metrics.js';
 
 test('ordinary exercises finish all sets before the next exercise', () => {
   const tasks = flatten(ROUTINE.Monday);
@@ -51,4 +52,26 @@ test('last active performance uses the latest completed set of the same exercise
 
   assert.deepEqual(lastActivePerformance('press', 'kg'), {weight: 52.5, reps: 7, rir: '0', unit: 'kg', completedAt: '2026-09-06T12:01:00.000Z'});
   assert.equal(lastActivePerformance('press', 'lb'), null);
+});
+
+test('counts only saved workouts in the local Monday to Sunday week', () => {
+  const now = new Date('2026-09-09T12:00:00');
+  const history = [
+    {completedAt: '2026-09-07T08:00:00'},
+    {completedAt: '2026-09-13T23:59:00'},
+    {completedAt: '2026-09-14T00:00:00'},
+    {date: '2026-09-08T10:00:00'}
+  ];
+  assert.equal(completedWorkoutsThisWeek(history, now), 2);
+});
+
+test('weekly goal progress is capped at 100 percent', () => {
+  const state = {settings: {weeklyGoal: 2}, history: [{completedAt: '2026-09-07T08:00:00'}, {completedAt: '2026-09-08T08:00:00'}, {completedAt: '2026-09-09T08:00:00'}]};
+  assert.deepEqual(weeklyGoalSummary(state, new Date('2026-09-09T12:00:00')), {completed: 3, goal: 2, percentage: 100});
+});
+
+test('phase progress maps workout phases to three honest steps', () => {
+  assert.deepEqual(phaseProgress('warmup'), {step: 1, total: 3, label: 'Warm-up'});
+  assert.deepEqual(phaseProgress('rest'), {step: 2, total: 3, label: 'Lifting'});
+  assert.deepEqual(phaseProgress('stretch'), {step: 3, total: 3, label: 'Cooldown and review'});
 });

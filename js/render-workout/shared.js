@@ -1,9 +1,12 @@
 import { app, esc } from '../dom.js';
 import { getState } from '../state.js';
-import { cancelWorkout, selectExercise } from '../workout.js';
+import { cancelWorkout, phaseProgress, selectExercise } from '../workout.js';
+import { save } from '../storage.js';
 
 export const state = () => getState().active;
-export const header = (active, count) => `<div class="row workout-top"><span>${esc(active.name)}</span><span>${count} working sets</span></div>`;
+export const setProgress = active => { const completed = active.tasks.filter(task => task.completed).length; const percentage = active.tasks.length ? Math.round(completed / active.tasks.length * 100) : 0; return {completed, total: active.tasks.length, percentage}; };
+export const header = active => { const progress = setProgress(active), phase = phaseProgress(active.phase); return `<div class="workout-progress"><div class="row workout-top"><span>${esc(active.name)}</span><span>Step ${phase.step} of ${phase.total}</span></div><div class="progress-track phase-progress" role="progressbar" aria-label="Workout phase progress" aria-valuemin="1" aria-valuemax="${phase.total}" aria-valuenow="${phase.step}"><span style="width:${phase.step / phase.total * 100}%"></span></div><div class="row progress-copy"><span>${phase.label}</span><span>${progress.completed} of ${progress.total} sets · ${progress.percentage}%</span></div></div>`; };
+export const exitControls = () => '<button class="secondary-link save-later" id="save-later" type="button">Save &amp; finish later</button><button class="cancel" id="cancel" type="button">Discard workout</button>';
 
 export function queue(active) {
   const groups = new Map();
@@ -52,6 +55,8 @@ export function mount(html) {
   app.innerHTML = html;
   const cancel = document.querySelector('#cancel');
   if (cancel) cancel.onclick = () => runAction(cancel, cancelWorkout, () => location.assign('/'));
+  const saveLater = document.querySelector('#save-later');
+  if (saveLater) saveLater.onclick = () => runAction(saveLater, async () => { await save(); return true; }, () => location.assign('/'));
   document.querySelectorAll('[data-queue-exercise]').forEach(button => {
     button.onclick = event => runAction(event.currentTarget, () => selectExercise(event.currentTarget.dataset.queueExercise));
   });

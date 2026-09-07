@@ -1,4 +1,4 @@
-import { emptyState } from './state.js';
+import { emptyState, normalizeWeeklyGoal } from './state.js';
 
 const PHASES = new Set(['warmup', 'plank', 'lifting', 'rest', 'stretch', 'complete']);
 const isRecord = value => value && typeof value === 'object' && !Array.isArray(value);
@@ -45,7 +45,7 @@ export function validateBackup(raw) {
   if (!isRecord(raw) || !Array.isArray(raw.history) || raw.history.length > 5000 || !raw.history.every(workout => validWorkout(workout))) throw new Error('Invalid backup file.');
   if (raw.active !== null && raw.active !== undefined && !validWorkout(raw.active, true)) throw new Error('Invalid backup file.');
   const next = JSON.parse(JSON.stringify({...emptyState(), ...raw, version: 2}));
-  next.settings = {unit: raw.settings?.unit === 'lb' ? 'lb' : 'kg'};
+  next.settings = {unit: raw.settings?.unit === 'lb' ? 'lb' : 'kg', weeklyGoal: normalizeWeeklyGoal(raw.settings?.weeklyGoal)};
   next.updatedAt = Number.isFinite(raw.updatedAt) ? raw.updatedAt : 0;
   return next;
 }
