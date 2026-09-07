@@ -132,16 +132,11 @@ body.sheet-open { overflow: hidden; }
 .sheet-handle { width: 40px; height: 5px; margin: 0 auto 16px; border-radius: 99px; background: var(--line); }
 .action-sheet h2 { margin-bottom: 12px; }
 .action-sheet .text-action { border-top: 1px solid var(--line); text-decoration: none; text-align: left; }
-.sheet-choice-status { float: right; color: var(--muted); font-size: 11px; font-weight: 650; text-transform: uppercase; }
+.sheet-choice-status { flex-shrink: 0; color: var(--muted); font-size: 11px; font-weight: 650; text-transform: uppercase; }
 .sheet-choice { display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left !important; }
 .sheet-choice-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.sheet-set-progress { display: inline-flex; flex-shrink: 0; gap: 4px; align-items: center; }
-.sheet-set { width: 8px; height: 8px; border: 1px solid var(--line); border-radius: 50%; background: transparent; }
-.sheet-set.is-complete { border-color: var(--accent); background: var(--accent); }
-.sheet-set.is-skipped { background: var(--muted); opacity: .6; }
-.sheet-set.is-current { width: 10px; height: 10px; border: 2px solid var(--text); box-shadow: 0 0 0 2px var(--accent-soft); }
-.sheet-superset { margin: 4px 0; overflow: hidden; border: 1px solid color-mix(in srgb, var(--accent) 32%, var(--line)); border-radius: 12px; background: color-mix(in srgb, var(--accent-soft) 28%, transparent); }
-.sheet-superset-label { margin: 0; padding: 8px 12px 4px; color: var(--accent); font-size: 11px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.sheet-choice-status.exercise-dot { display: inline-block; width: 28px; height: 28px; margin: -5px 0; }
+.sheet-superset { margin: 4px 0; overflow: hidden; border: 1px solid color-mix(in srgb, var(--accent) 32%, var(--line)); border-radius: 12px; }
 .sheet-superset .text-action { border-top-color: color-mix(in srgb, var(--accent) 20%, var(--line)); }
 @keyframes exercise-set-pulse { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
 @keyframes exercise-circle-pulse { 0%, 100% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 72%, transparent), 0 0 0 0 transparent; transform: scale(1); } 50% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 72%, transparent), 0 0 8px 1px color-mix(in srgb, var(--accent) 30%, transparent); transform: scale(1.01); } }

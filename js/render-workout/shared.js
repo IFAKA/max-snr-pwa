@@ -45,8 +45,10 @@ function exerciseChoices() {
   const selectionLocked = active.phase === 'lifting' && currentStarted || restBetweenSets || !['lifting', 'rest'].includes(active.phase);
   const renderProgress = (tasks, isCurrent) => {
     const completedSets = tasks.filter(task => task.completed).length;
-    const progress = tasks.map(task => `<span class="sheet-set${task.completed ? ' is-complete' : ''}${task.skipped ? ' is-skipped' : ''}${isCurrent && task.id === current?.id ? ' is-current' : ''}" aria-hidden="true"></span>`).join('');
-    return `<span class="sheet-set-progress" aria-label="${completedSets} of ${tasks.length} sets complete">${progress}</span>`;
+    const done = tasks.every(task => task.completed || task.skipped);
+    const stateClass = `${done ? ' is-complete' : ''}${isCurrent ? ' is-current' : ''}`;
+    const activeSet = isCurrent ? Number(current.set || 1) : 0;
+    return `<span class="sheet-choice-status exercise-dot${stateClass}" style="--set-count: ${tasks.length}; --set-completed: ${completedSets}; --set-active: ${activeSet}" aria-hidden="true"></span>`;
   };
   const renderChoice = (exerciseId, task, wrapperClass = '') => {
     const exerciseTasks = active.tasks.filter(item => item.exerciseId === exerciseId);
@@ -64,7 +66,7 @@ function exerciseChoices() {
     }
     renderedSupersets.add(task.groupId);
     const members = [...groups.entries()].filter(([, member]) => member.groupType === 'superset' && member.groupId === task.groupId);
-    rendered.push(`<section class="sheet-superset" aria-label="${esc(task.groupLabel || 'Superset')}"><p class="sheet-superset-label">${esc(task.groupLabel || 'Superset')}</p>${members.map(([memberId, member]) => renderChoice(memberId, member)).join('')}</section>`);
+    rendered.push(`<section class="sheet-superset" aria-label="${esc(task.groupLabel || 'Superset')}">${members.map(([memberId, member]) => renderChoice(memberId, member)).join('')}</section>`);
   });
   return rendered.join('');
 }
