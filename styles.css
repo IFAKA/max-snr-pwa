@@ -197,6 +197,8 @@ body.sheet-open { overflow: hidden; }
 .sheet-choice-status { float: right; color: var(--muted); font-size: 11px; font-weight: 650; text-transform: uppercase; }
 .sheet-choice-done { display: inline-flex; align-items: center; color: var(--accent); }
 .sheet-choice-done .icon { width: 18px; height: 18px; }
+.sheet-choice-started { display: inline-flex; align-items: center; color: var(--accent); }
+.sheet-choice-started .icon { width: 16px; height: 16px; fill: currentColor; stroke-width: 1.2; }
 @media (prefers-color-scheme: dark) { :root { --bg: #121615; --surface: #1b211e; --text: #edf2ee; --muted: #a1aca4; --line: #364139; --accent: #8fd0a9; --accent-soft: #21372a; --danger: #ffaaa1; } .primary { color: #102116; } .notice.error { background: #542824; color: #ffd7d2; } }
 @media (max-width: 360px) { main { padding-inline: 12px; } .controls { grid-template-columns: 1fr; } .summary-grid { grid-template-columns: 1fr 1fr; } .summary-grid div:last-child { grid-column: 1 / -1; } .set-edit { grid-template-columns: 1fr; } }
 @media (max-height: 600px) { main { padding-top: 12px; } .workout-stage { min-height: calc(100svh - 24px); } .big-timer { margin: 18px 0; } }
@@ -226,6 +228,8 @@ main { width: min(100%, 30rem); padding: max(16px, env(safe-area-inset-top)) 16p
 .controls input { min-height: 58px; font-size: 24px; }
 .primary { min-height: 58px; margin-top: 12px; }
 .more-trigger { min-height: 58px; margin-top: 8px; }
+.more-trigger { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.more-trigger .icon { width: 20px; height: 20px; }
 .action-sheet { max-height: 90svh; }
 .action-sheet .text-action { min-height: 52px; }
 .choice-list { display: grid; gap: 2px; }
