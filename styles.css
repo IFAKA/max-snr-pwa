@@ -1,12 +1,12 @@
 :root {
   color-scheme: light dark;
-  --bg: #f5f3ee;
-  --surface: #fffdf8;
-  --text: #1f2621;
-  --muted: #697169;
-  --line: #d8d7d0;
-  --accent: #174f35;
-  --accent-soft: #dcecdf;
+  --bg: #f3f5f3;
+  --surface: #ffffff;
+  --text: #202522;
+  --muted: #68716c;
+  --line: #d7ddd8;
+  --accent: #1f6041;
+  --accent-soft: #e2eee6;
   --danger: #9b342c;
   --radius: 14px;
   --ease-out: cubic-bezier(.23, 1, .32, 1);
@@ -82,6 +82,7 @@ nav a[aria-current="page"] { color: var(--accent); font-weight: 800; }
 .routine-day { margin: 10px 0; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); overflow: hidden; }
 .routine-day.today { border-color: var(--accent); }
 .routine-day summary, .queue-wrap > summary, .settings-disclosure > summary { display: flex; min-height: 68px; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; cursor: pointer; list-style: none; }
+.routine-day-summary { display: flex; min-height: 68px; align-items: center; padding: 12px 14px; }
 .routine-day summary::-webkit-details-marker, .queue-wrap summary::-webkit-details-marker, .settings-disclosure summary::-webkit-details-marker { display: none; }
 .routine-day summary::after, .queue-wrap > summary::after, .settings-disclosure > summary::after { content: "+"; color: var(--muted); font-size: 22px; }
 .routine-day[open] summary::after, .queue-wrap[open] > summary::after, .settings-disclosure[open] > summary::after { content: "−"; }
@@ -182,7 +183,7 @@ body.sheet-open { overflow: hidden; }
 .action-sheet .sheet-label { margin: 16px 0 0; }
 .action-sheet .sheet-cancel { margin-top: 8px; border-top: 1px solid var(--line); color: var(--muted); }
 .sheet-choice-status { float: right; color: var(--muted); font-size: 11px; font-weight: 650; text-transform: uppercase; }
-@media (prefers-color-scheme: dark) { :root { --bg: #141815; --surface: #1c221e; --text: #edf2ed; --muted: #a3ada5; --line: #39433b; --accent: #86d5a9; --accent-soft: #233b2d; --danger: #ffaaa1; } .primary { color: #102116; } .notice.error { background: #542824; color: #ffd7d2; } }
+@media (prefers-color-scheme: dark) { :root { --bg: #121615; --surface: #1b211e; --text: #edf2ee; --muted: #a1aca4; --line: #364139; --accent: #8fd0a9; --accent-soft: #21372a; --danger: #ffaaa1; } .primary { color: #102116; } .notice.error { background: #542824; color: #ffd7d2; } }
 @media (max-width: 360px) { main { padding-inline: 12px; } .controls { grid-template-columns: 1fr; } .summary-grid { grid-template-columns: 1fr 1fr; } .summary-grid div:last-child { grid-column: 1 / -1; } .set-edit { grid-template-columns: 1fr; } }
 @media (max-height: 600px) { main { padding-top: 12px; } .workout-stage { min-height: calc(100svh - 24px); } .big-timer { margin: 18px 0; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
