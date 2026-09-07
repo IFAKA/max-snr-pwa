@@ -15,8 +15,9 @@ export function exerciseProgress(active) {
     const completedSets = tasks.filter(task => task.completed).length;
     const done = tasks.every(task => task.completed || task.skipped);
     const current = exercise.exerciseId === currentExerciseId;
+    const activeSet = current ? Number(active.tasks[active.pos]?.set || 1) : 0;
     const stateClass = `${done ? ' is-complete' : ''}${current ? ' is-current' : ''}`;
-    return `<span class="exercise-dot${stateClass}" style="--set-count: ${tasks.length}; --set-progress: ${completedSets}" aria-hidden="true"></span>`;
+    return `<span class="exercise-dot${stateClass}" style="--set-count: ${tasks.length}; --set-completed: ${completedSets}; --set-active: ${activeSet}" aria-hidden="true"></span>`;
   }).join('');
   return `<span class="exercise-progress" style="--exercise-count: ${exercises.length}" role="img" aria-label="${completed} of ${exercises.length} exercises complete">${dots}</span>`;
 }
