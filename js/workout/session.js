@@ -11,7 +11,7 @@ export async function start(day = dayNow()) {
   const state = getState();
   if (!ROUTINE[day]) return false;
   if (state.active && !confirm('A workout is already in progress.\n\nStart a new workout and discard it?')) return false;
-  state.active = {id: Date.now(), date: new Date().toISOString(), day, name: NAMES[day], tasks: flatten(ROUTINE[day]), pos: 0, phase: 'warmup', deferredGroups: [], draft: {}, restEndsAt: null, timerEndsAt: null};
+  state.active = {id: Date.now(), date: new Date().toISOString(), day, name: NAMES[day], tasks: flatten(ROUTINE[day]), pos: 0, phase: 'lifting', deferredGroups: [], draft: {}, restEndsAt: null, timerEndsAt: null};
   await save();
   return true;
 }
@@ -84,10 +84,13 @@ export async function selectExercise(exerciseId) {
 
 export async function completeSet() {
   const state = getState(), active = state.active, task = activeTask(), draft = active.draft || {};
-  const reps = Number(draft.reps);
+  const repsText = String(draft.reps ?? '').trim();
+  const weightText = String(draft.weight ?? '').trim();
+  const reps = Number(repsText);
   const hasWeight = draft.weight !== undefined && draft.weight !== '';
-  const weight = hasWeight ? Number(draft.weight) : null;
-  if (!task || !Number.isInteger(reps) || reps < 1 || (hasWeight && (!Number.isFinite(weight) || weight < 0))) return {error: 'Enter the reps you completed.'};
+  const weight = hasWeight ? Number(weightText) : null;
+  const validWeight = !hasWeight || (/^\d+(?:\.\d{1,2})?$/.test(weightText) && Number.isFinite(weight) && weight >= 0);
+  if (!task || !/^\d+$/.test(repsText) || !Number.isInteger(reps) || reps < 1 || (hasWeight && !validWeight)) return {error: hasWeight && !validWeight ? 'Enter a valid load with up to 2 decimals.' : 'Enter whole-number reps.'};
   task.completed = {reps, completedAt: new Date().toISOString(), actualName: task.performedName, originalName: task.originalName};
   if (hasWeight) {
     task.completed.weight = weight;

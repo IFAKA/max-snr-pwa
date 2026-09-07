@@ -20,6 +20,28 @@ test('next-task traversal ignores skipped sets', () => {
   assert.equal(findNext(), 2);
 });
 
+test('new workouts begin directly at the first lifting set', async () => {
+  setState(emptyState());
+  await start('Monday');
+  assert.equal(getState().active.phase, 'lifting');
+});
+
+test('loads accept two decimals but reps remain whole numbers', async () => {
+  const state = emptyState();
+  state.active = {tasks: [task('press')], pos: 0, phase: 'lifting', deferredGroups: [], draft: {weight: '50.25', reps: '8'}};
+  setState(state);
+  assert.deepEqual((await completeSet()), {render: true});
+  assert.equal(state.active.phase, 'stretch');
+  assert.equal(state.active.tasks[0].completed.weight, 50.25);
+
+  state.active = {tasks: [task('press')], pos: 0, phase: 'lifting', deferredGroups: [], draft: {weight: '50.256', reps: '8'}};
+  setState(state);
+  assert.match((await completeSet()).error, /2 decimals/);
+
+  state.active.draft = {weight: '50', reps: '8.5'};
+  assert.match((await completeSet()).error, /whole-number reps/);
+});
+
 test('doing an exercise later moves all remaining sets and selects the next exercise', async () => {
   const state = emptyState();
   state.active = {tasks: [task('press'), task('press', 2), task('row')], pos: 0, deferredGroups: [], draft: {}};
