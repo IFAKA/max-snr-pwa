@@ -68,14 +68,23 @@ export async function resolveDeferred() {
   return {render: true};
 }
 
+const restBetweenSets = active => {
+  if (active?.phase !== 'rest') return false;
+  const current = active.tasks[active.pos];
+  const next = active.tasks[active.nextPos];
+  return Boolean(current && next && current.exerciseId === next.exerciseId);
+};
+
 export async function selectExercise(exerciseId) {
   const active = getState().active;
-  if (!active || active.phase !== 'lifting') return false;
+  if (!active || !['lifting', 'rest'].includes(active.phase)) return false;
   const current = active.tasks[active.pos];
-  if (current && active.tasks.some(task => task.exerciseId === current.exerciseId && task.completed)) return false;
+  if (restBetweenSets(active)) return false;
+  if (active.phase === 'lifting' && current && active.tasks.some(task => task.exerciseId === current.exerciseId && task.completed)) return false;
   const pos = active.tasks.findIndex(task => task.exerciseId === exerciseId && !task.completed && !task.skipped);
   if (pos < 0) return false;
-  active.pos = pos;
+  if (active.phase === 'rest') active.nextPos = pos;
+  else active.pos = pos;
   active.deferredGroups = active.deferredGroups.filter(id => id !== taskGroup(active.tasks[pos]));
   active.draft = {};
   await save();
@@ -181,6 +190,7 @@ export async function finishEarly() {
 export async function finishWorkout() {
   const state = getState();
   if (!state.active) return false;
+  delete state.active.note;
   state.active.completedAt ||= new Date().toISOString();
   const snapshot = {...state.active, tasks: state.active.tasks.map(task => ({...task, completed: task.completed ? {...task.completed} : null}))};
   delete snapshot.draft;

@@ -29,7 +29,6 @@ function validTask(task) {
 
 function validWorkout(workout, active = false) {
   if (!isRecord(workout) || !validText(workout.name || 'Workout')) return false;
-  if (workout.note !== undefined && !validText(workout.note, 1000)) return false;
   if (workout.date !== undefined && Number.isNaN(Date.parse(workout.date))) return false;
   const tasks = workout.tasks || workout.queue;
   if (active && !Array.isArray(tasks)) return false;
@@ -45,6 +44,8 @@ export function validateBackup(raw) {
   if (!isRecord(raw) || !Array.isArray(raw.history) || raw.history.length > 5000 || !raw.history.every(workout => validWorkout(workout))) throw new Error('Invalid backup file.');
   if (raw.active !== null && raw.active !== undefined && !validWorkout(raw.active, true)) throw new Error('Invalid backup file.');
   const next = JSON.parse(JSON.stringify({...emptyState(), ...raw, version: 2}));
+  next.history.forEach(workout => { delete workout.note; });
+  if (next.active) delete next.active.note;
   next.settings = {unit: raw.settings?.unit === 'lb' ? 'lb' : 'kg', weeklyGoal: normalizeWeeklyGoal(raw.settings?.weeklyGoal)};
   next.updatedAt = Number.isFinite(raw.updatedAt) ? raw.updatedAt : 0;
   return next;

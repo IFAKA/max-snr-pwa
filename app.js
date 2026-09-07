@@ -21,18 +21,12 @@ async function boot() {
     }
   }
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-    const hadController = Boolean(navigator.serviceWorker.controller);
-    let reloading = false;
-    if (hadController) {
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (reloading) return;
-        reloading = true;
-        location.reload();
-      });
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(registrations.map(registration => registration.unregister()));
+    if ('caches' in window) {
+      const cacheNames = await caches.keys();
+      await Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
     }
-    navigator.serviceWorker.register('/sw.js')
-      .then(registration => registration.update())
-      .catch(error => console.warn('Offline mode unavailable.', error));
   }
 }
 

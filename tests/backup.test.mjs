@@ -44,3 +44,13 @@ test('defaults missing and invalid weekly goals to four', () => {
 test('preserves valid weekly goals', () => {
   assert.equal(validateBackup({version: 2, settings: {weeklyGoal: 6}, history: [], active: null}).settings.weeklyGoal, 6);
 });
+
+test('removes legacy workout notes from imported backups', () => {
+  const backup = validateBackup({
+    version: 2,
+    history: [{name: 'Workout', note: '<p>legacy</p>', tasks: []}],
+    active: {name: 'Workout', phase: 'stretch', note: 'legacy', tasks: [], pos: 0}
+  });
+  assert.equal('note' in backup.history[0], false);
+  assert.equal('note' in backup.active, false);
+});

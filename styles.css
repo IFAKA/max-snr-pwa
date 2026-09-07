@@ -107,14 +107,14 @@ nav a[aria-current="page"] { color: var(--accent); font-weight: 800; }
 .history-exercise { padding: 12px 0; border-top: 1px solid var(--line); }
 .history-exercise ul { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
 .history-exercise li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-size: 14px; }
-.history-note, .notice { padding: 10px 12px; border-radius: 10px; background: var(--accent-soft); white-space: pre-wrap; }
+.notice { padding: 10px 12px; border-radius: 10px; background: var(--accent-soft); white-space: pre-wrap; }
 .notice.error { background: #f9dfdc; color: #74251f; }
 .settings-disclosure { margin-top: 24px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .settings-disclosure > summary { padding-inline: 0; font-weight: 800; }
 .settings-disclosure > div { padding-bottom: 12px; }
 .settings-card { margin-bottom: 12px; padding: 16px 0; border: 0; border-bottom: 1px solid var(--line); background: transparent; }
-.settings-card label, .controls label, .set-edit label, .note-field { display: grid; gap: 6px; font-size: 13px; font-weight: 800; }
-.settings-card select, .controls input, .set-edit input, .set-edit select, .note-field textarea { width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text); }
+.settings-card label, .controls label, .set-edit label { display: grid; gap: 6px; font-size: 13px; font-weight: 800; }
+.settings-card select, .controls input, .set-edit input, .set-edit select { width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text); }
 .settings-card label + p { margin: 5px 0 16px; font-size: 12px; }
 .data-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .data-actions .icon-button { width: 100%; }
@@ -147,7 +147,7 @@ body.workout main { overflow: hidden; padding-top: 0; padding-bottom: 16px; }
 .exercise-dot { width: 100%; aspect-ratio: 1; border: 1px solid currentColor; border-radius: 50%; opacity: .75; }
 .exercise-dot.is-complete { border-color: var(--accent); background: var(--accent); opacity: 1; }
 .previous, .next-up { margin: 16px 0 0; padding: 11px 12px; border-left: 3px solid var(--accent); background: var(--surface); font-size: 14px; }
-.previous span { display: block; margin-bottom: 3px; color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.previous span, .next-up span { display: block; margin-bottom: 3px; color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
 .field-help { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; font-weight: 400; line-height: 1.35; }
 .thumb-zone { margin-top: auto; padding-top: 20px; padding-bottom: max(4px, env(safe-area-inset-bottom)); }
 .controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
@@ -161,8 +161,6 @@ body.workout main { overflow: hidden; padding-top: 0; padding-bottom: 16px; }
 .summary-grid div { display: grid; gap: 4px; padding: 14px 8px; border-top: 1px solid var(--line); text-align: center; }
 .summary-grid strong { font-size: 20px; }
 .summary-grid span { color: var(--muted); font-size: 11px; }
-.note-field { margin-top: 18px; }
-.note-field textarea { min-height: 88px; resize: vertical; font-weight: 400; }
 .timer-adjust { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
 .queue-wrap { margin: 16px 0; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); overflow: hidden; }
 .queue-wrap > summary { min-height: 70px; }

@@ -22,7 +22,9 @@ function exerciseChoices() {
   active.tasks.forEach(task => { if (!groups.has(task.exerciseId)) groups.set(task.exerciseId, task); });
   const current = active.tasks[active.pos];
   const currentStarted = Boolean(current && active.tasks.some(task => task.exerciseId === current.exerciseId && task.completed));
-  const selectionLocked = active.phase !== 'lifting' || currentStarted;
+  const next = active.tasks[active.nextPos];
+  const restBetweenSets = active.phase === 'rest' && current && next && current.exerciseId === next.exerciseId;
+  const selectionLocked = active.phase === 'lifting' && currentStarted || restBetweenSets || !['lifting', 'rest'].includes(active.phase);
   return [...groups.entries()].map(([exerciseId, task]) => {
     const exerciseTasks = active.tasks.filter(item => item.exerciseId === exerciseId);
     const done = exerciseTasks.every(item => item.completed || item.skipped);
@@ -32,7 +34,7 @@ function exerciseChoices() {
     return `<button class="text-action" type="button" data-choose-exercise="${esc(exerciseId)}"${disabled ? ' disabled' : ''}>${esc(task.performedName)}${status}</button>`;
   }).join('');
 }
-export const exitControls = () => `<button class="secondary more-trigger" type="button" data-open-sheet="session-sheet" aria-haspopup="dialog">${icon('more', 'More workout actions')}<span aria-hidden="true">More workout actions</span></button><div class="sheet-backdrop" id="session-sheet-backdrop" data-sheet-backdrop="session-sheet" hidden></div><section class="action-sheet" id="session-sheet" data-sheet role="dialog" aria-modal="true" aria-labelledby="session-sheet-title" aria-hidden="true" tabindex="-1" hidden><div class="sheet-content"><div class="sheet-header" data-sheet-handle><div class="sheet-handle" aria-hidden="true"></div><h2 id="session-sheet-title">Workout actions</h2></div><div class="choice-list">${exerciseChoices()}</div><button class="text-action destructive" id="finish-early" type="button">Finish and save early</button><button class="sheet-cancel" type="button" data-close-sheet>Cancel</button></div></section>`;
+export const exitControls = () => `<button class="secondary more-trigger" type="button" data-open-sheet="session-sheet" aria-haspopup="dialog" aria-label="More workout actions" title="More workout actions">${icon('more')}</button><div class="sheet-backdrop" id="session-sheet-backdrop" data-sheet-backdrop="session-sheet" hidden></div><section class="action-sheet" id="session-sheet" data-sheet role="dialog" aria-modal="true" aria-labelledby="session-sheet-title" aria-hidden="true" tabindex="-1" hidden><div class="sheet-content"><div class="sheet-header" data-sheet-handle><div class="sheet-handle" aria-hidden="true"></div><h2 id="session-sheet-title">Workout actions</h2></div><div class="choice-list">${exerciseChoices()}</div><button class="text-action destructive" id="finish-early" type="button">Finish and save early</button><button class="sheet-cancel" type="button" data-close-sheet>Cancel</button></div></section>`;
 export const queue = () => '';
 export function showError(error) { const message = error?.message || 'Something went wrong. Your latest change may not have been saved.'; let status = document.querySelector('#app-error'); if (!status) { status = document.createElement('p'); status.id = 'app-error'; status.className = 'notice error'; status.setAttribute('role', 'alert'); app.prepend(status); } status.textContent = message; }
 export async function runAction(button, action, onSuccess = () => location.reload()) { if (button) button.disabled = true; try { const result = await action(); if (result !== false) onSuccess(result); else if (button) button.disabled = false; } catch (error) { if (button) button.disabled = false; showError(error); } }

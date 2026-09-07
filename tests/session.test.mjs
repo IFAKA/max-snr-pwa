@@ -85,6 +85,37 @@ test('selecting another exercise is locked after the current exercise starts', a
   assert.deepEqual(state.active.tasks, originalTasks);
 });
 
+test('selecting an exercise during rest preserves the countdown and changes the next position', async () => {
+  const state = emptyState();
+  const restEndsAt = Date.now() + 30000;
+  const completed = task('press');
+  completed.completed = {reps: 8, completedAt: '2026-09-06T12:00:00.000Z'};
+  state.active = {tasks: [completed, task('press', 2), task('row'), task('row', 2)], pos: 1, nextPos: 2, phase: 'rest', deferredGroups: [], draft: {}, restEndsAt};
+  setState(state);
+
+  assert.equal(await selectExercise('row'), true);
+  assert.equal(state.active.phase, 'rest');
+  assert.equal(state.active.pos, 1);
+  assert.equal(state.active.nextPos, 2);
+  assert.equal(state.active.restEndsAt, restEndsAt);
+
+  await continueRest();
+  assert.equal(state.active.phase, 'lifting');
+  assert.equal(state.active.pos, 2);
+  assert.equal(state.active.nextPos, null);
+});
+
+test('switching exercises is locked during rest between sets', async () => {
+  const state = emptyState();
+  const completed = task('press');
+  completed.completed = {reps: 8, completedAt: '2026-09-06T12:00:00.000Z'};
+  state.active = {tasks: [completed, task('press', 2), task('row')], pos: 0, nextPos: 1, phase: 'rest', deferredGroups: [], draft: {}, restEndsAt: Date.now() + 30000};
+  setState(state);
+
+  assert.equal(await selectExercise('row'), false);
+  assert.equal(state.active.nextPos, 1);
+});
+
 test('undo restores the latest completed set as an editable draft', async () => {
   const state = emptyState();
   const completed = task('press');
