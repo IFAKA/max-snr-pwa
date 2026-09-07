@@ -5,15 +5,17 @@ import { save } from '../storage.js';
 
 export const state = () => getState().active;
 export const setProgress = active => { const completed = active.tasks.filter(task => task.completed).length; const percentage = active.tasks.length ? Math.round(completed / active.tasks.length * 100) : 0; return {completed, total: active.tasks.length, percentage}; };
-export const header = active => { const progress = setProgress(active), phase = phaseProgress(active.phase); return `<div class="workout-progress"><div class="row workout-top"><span>${esc(active.name)}</span><span>Step ${phase.step} of ${phase.total}</span></div><div class="progress-track phase-progress" role="progressbar" aria-label="Workout phase progress" aria-valuemin="1" aria-valuemax="${phase.total}" aria-valuenow="${phase.step}"><span style="width:${phase.step / phase.total * 100}%"></span></div><div class="row progress-copy"><span>${phase.label}</span><span>${progress.completed} of ${progress.total} sets · ${progress.percentage}%</span></div></div>`; };
-export const exitControls = () => '<button class="secondary-link save-later" id="save-later" type="button">Save &amp; finish later</button><button class="cancel" id="cancel" type="button">Discard workout</button>';
+export const header = active => { const progress = setProgress(active), phase = phaseProgress(active.phase); return `<div class="workout-progress"><div class="row workout-top"><span>${esc(active.name)}</span><span>${phase.label} · ${progress.completed}/${progress.total}</span></div><div class="progress-track phase-progress" role="progressbar" aria-label="Workout progress" aria-valuemin="0" aria-valuemax="${progress.total}" aria-valuenow="${progress.completed}"><span style="width:${progress.percentage}%"></span></div><div class="progress-copy"><span>Step ${phase.step} of ${phase.total}</span></div></div>`; };
+export const exitControls = (extra = '') => `<button class="text-action more-trigger" type="button" data-open-sheet="session-sheet">More</button><dialog class="action-sheet" id="session-sheet"><div><div class="sheet-handle" aria-hidden="true"></div><h2>More</h2>${extra}<button class="text-action save-later" id="save-later" type="button">Save &amp; finish later</button><button class="text-action destructive" id="cancel" type="button">Discard workout</button><button class="sheet-cancel" type="button" data-close-sheet>Cancel</button></div></dialog>`;
 
 export function queue(active) {
   const groups = new Map();
   active.tasks.forEach((task, index) => { if (!groups.has(task.exerciseId)) groups.set(task.exerciseId, []); groups.get(task.exerciseId).push({task, index}); });
   const currentId = active.tasks[active.pos]?.exerciseId;
   const nextTask = active.tasks.find((task, index) => index !== active.pos && !task.completed && !task.skipped && task.exerciseId !== currentId && !active.deferredGroups.includes(task.groupId || task.exerciseId || task.id));
-  return `<div class="queue-wrap"><div class="row queue-heading"><span class="eyebrow">Workout queue</span><span class="muted">Swipe to browse</span></div><ol class="exercise-queue" aria-label="Workout queue">${[...groups.values()].map(entries => {
+  const currentEntries = [...groups.values()].find(entries => entries.some(entry => entry.task.exerciseId === currentId)) || [];
+  const nextName = nextTask?.performedName || 'Finish the workout';
+  return `<details class="queue-wrap"><summary><span><span class="eyebrow">Now</span><strong>${esc(currentEntries.find(entry => !entry.task.completed)?.task.performedName || currentEntries[0]?.task.performedName || 'Workout')}</strong><small>${currentEntries.filter(entry => entry.task.completed).length}/${currentEntries.length || 0} sets complete</small></span><span class="queue-next">Next · ${esc(nextName)}</span></summary><div class="queue-browser"><div class="row queue-heading"><span class="eyebrow">Browse exercises</span><span class="muted">Select any unfinished exercise</span></div><ol class="exercise-queue" aria-label="Workout queue">${[...groups.values()].map(entries => {
     const task = entries[0].task, current = task.exerciseId === currentId && !active.tasks[active.pos]?.completed;
     const done = entries.every(entry => entry.task.completed || entry.task.skipped), skipped = entries.every(entry => entry.task.skipped);
     const deferred = entries.some(entry => active.deferredGroups.includes(entry.task.groupId || entry.task.exerciseId || entry.task.id));
@@ -23,7 +25,7 @@ export function queue(active) {
     const selectable = active.phase === 'lifting' && !current && !done;
     const content = `<span class="queue-status">${status}</span><strong>${esc(name)}</strong><span class="queue-detail">${completeCount}/${entries.length} sets</span>`;
     return `<li class="queue-item ${current ? 'current' : ''} ${done ? 'completed' : ''} ${skipped ? 'skipped' : ''}" ${current ? 'aria-current="step"' : ''}>${selectable ? `<button type="button" data-queue-exercise="${esc(task.exerciseId)}" aria-label="Select ${esc(name)}">${content}</button>` : content}</li>`;
-  }).join('')}</ol></div>`;
+  }).join('')}</ol></div></details>`;
 }
 
 export function showError(error) {
@@ -53,6 +55,9 @@ export async function runAction(button, action, onSuccess = () => location.reloa
 
 export function mount(html) {
   app.innerHTML = html;
+  document.querySelectorAll('[data-open-sheet]').forEach(button => button.onclick = () => document.getElementById(button.dataset.openSheet)?.showModal());
+  document.querySelectorAll('[data-close-sheet]').forEach(button => button.onclick = () => button.closest('dialog')?.close());
+  document.querySelectorAll('.action-sheet').forEach(sheet => sheet.addEventListener('click', event => { if (event.target === sheet) sheet.close(); }));
   const cancel = document.querySelector('#cancel');
   if (cancel) cancel.onclick = () => runAction(cancel, cancelWorkout, () => location.assign('/'));
   const saveLater = document.querySelector('#save-later');
