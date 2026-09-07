@@ -96,7 +96,6 @@ nav a[aria-current="page"] { color: var(--accent); font-weight: 800; }
 .routine-exercise span:last-child { white-space: nowrap; }
 .exercise-detail { display: block; margin-top: 3px; font-size: 12px; }
 .routine-group { margin: 8px 0; padding: 10px; border: 1px solid var(--line); border-radius: 10px; }
-.routine-group.superset { border-left: 4px solid var(--accent); }
 .group-label { margin-bottom: 2px; }
 .group-help { margin-bottom: 6px; font-size: 12px; }
 .group-chip { display: inline-block; margin-bottom: 4px; }
@@ -135,6 +134,18 @@ body.workout main { overflow: hidden; padding-top: 0; padding-bottom: 16px; }
 .progress-copy { margin-top: 5px; color: var(--muted); font-size: 12px; }
 .workout-stage h1 { margin-top: 7px; font-size: clamp(34px, 10vw, 48px); }
 .meta { color: var(--muted); font-size: 15px; }
+.context-label { margin-bottom: 5px; color: var(--muted); font-size: 12px; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
+.lifting-exercise { padding: 14px 16px 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.lifting-exercise .group-chip { margin-bottom: 12px; }
+.lifting-exercise h1 { margin: 0; font-size: clamp(34px, 10vw, 48px); line-height: 1.02; }
+.lifting-details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+.lifting-detail { display: grid; gap: 4px; min-width: 0; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.lifting-detail .context-label { margin-bottom: 0; }
+.lifting-detail strong { font-size: clamp(16px, 4.5vw, 20px); line-height: 1.15; }
+.exercise-meta { display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin-top: 10px; }
+.exercise-progress { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 5px; }
+.exercise-dot { width: 13px; height: 13px; border: 2px solid currentColor; border-radius: 50%; opacity: .75; }
+.exercise-dot.is-complete { border-color: var(--accent); background: var(--accent); opacity: 1; }
 .previous, .next-up { margin: 16px 0 0; padding: 11px 12px; border-left: 3px solid var(--accent); background: var(--surface); font-size: 14px; }
 .previous span { display: block; margin-bottom: 3px; color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
 .field-help { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; font-weight: 400; line-height: 1.35; }
@@ -205,9 +216,11 @@ main { width: min(100%, 30rem); padding: max(16px, env(safe-area-inset-top)) 16p
 .workout-progress { margin-bottom: 18px; }
 .progress-copy, .queue-wrap, .previous, .next-up, .rir, .field-help { display: none; }
 .meta { font-size: 14px; }
+.context-label { font-size: 13px; }
 .thumb-zone { padding-top: 18px; }
 .controls { grid-template-columns: 1fr 1fr; }
-.controls label { gap: 8px; }
+.controls label { gap: 8px; font-size: 15px; }
+.controls label > span { font-weight: 850; letter-spacing: .06em; text-transform: uppercase; }
 .controls input { min-height: 58px; font-size: 24px; }
 .primary { min-height: 58px; margin-top: 12px; }
 .more-trigger { min-height: 48px; margin-top: 8px; }
