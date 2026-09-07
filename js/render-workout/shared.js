@@ -13,7 +13,7 @@ export function exerciseProgress(active) {
     const done = active.tasks.filter(task => task.exerciseId === exercise.exerciseId).every(task => task.completed || task.skipped);
     return `<span class="exercise-dot${done ? ' is-complete' : ''}" aria-hidden="true"></span>`;
   }).join('');
-  return `<span class="exercise-progress" role="img" aria-label="${completed} of ${exercises.length} exercises complete">${dots}</span>`;
+  return `<span class="exercise-progress" style="--exercise-count: ${exercises.length}" role="img" aria-label="${completed} of ${exercises.length} exercises complete">${dots}</span>`;
 }
 function exerciseChoices() {
   const active = state();

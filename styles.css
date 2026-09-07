@@ -142,9 +142,9 @@ body.workout main { overflow: hidden; padding-top: 0; padding-bottom: 16px; }
 .lifting-detail { display: grid; gap: 4px; min-width: 0; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
 .lifting-detail .context-label { margin-bottom: 0; }
 .lifting-detail strong { font-size: clamp(16px, 4.5vw, 20px); line-height: 1.15; }
-.exercise-meta { display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin-top: 10px; }
-.exercise-progress { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 5px; }
-.exercise-dot { width: 13px; height: 13px; border: 2px solid currentColor; border-radius: 50%; opacity: .75; }
+.exercise-meta { display: flex; align-items: center; width: 100%; margin-top: 10px; }
+.exercise-progress { display: grid; grid-template-columns: repeat(var(--exercise-count), minmax(0, 1fr)); width: 100%; gap: 5px; }
+.exercise-dot { width: 100%; aspect-ratio: 1; border: 2px solid currentColor; border-radius: 50%; opacity: .75; }
 .exercise-dot.is-complete { border-color: var(--accent); background: var(--accent); opacity: 1; }
 .previous, .next-up { margin: 16px 0 0; padding: 11px 12px; border-left: 3px solid var(--accent); background: var(--surface); font-size: 14px; }
 .previous span { display: block; margin-bottom: 3px; color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
