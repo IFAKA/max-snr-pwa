@@ -12,12 +12,28 @@ Change routine data in `js/routine-data.js`; persistence or compatibility in `js
 
 ## Apple Watch–First Product/UI Rules
 
-- Treat representative Apple Watch-sized widths as the primary design target; phone layouts expand the same flow rather than introducing a separate interaction model.
-- Prefer glanceable screens with one primary metric or action, shallow hierarchical navigation, vertical scrolling or paging, full-width capsule actions, and minimal simultaneous controls. On watch-sized screens, use a compact current-location header with a native disclosure menu; never use a clipped or persistent phone-style tab bar.
-- In active workouts, do not use custom bottom sheets, drawers, or modal action overlays; use a shallow inline disclosure or a dedicated next screen with a clear return path.
-- Use large, visible metrics and explicit touch controls such as steppers instead of keyboard-dependent fields for workout input. Keep every essential target at least 44px tall.
-- Do not add phone-only navigation or dense desktop-style layouts without documenting an explicit exception.
-- For UI changes, validate watch-sized and phone-sized viewports, large text/zoom, dark mode, reduced motion, keyboard and screen-reader labels, and offline behavior.
+Follow Apple’s primary references before changing UI: [Designing for watchOS](https://developer.apple.com/design/human-interface-guidelines/designing-for-watchos/), [Scroll views](https://developer.apple.com/design/human-interface-guidelines/scroll-views/), [Digital Crown](https://developer.apple.com/design/human-interface-guidelines/digital-crown/), [Gestures](https://developer.apple.com/design/human-interface-guidelines/gestures/), and [Page controls](https://developer.apple.com/design/human-interface-guidelines/page-controls/).
+
+- Treat representative Apple Watch-sized widths as the primary design target; use phone layouts as an expansion of the same flow, never as the source layout to shrink.
+- Design each watch screen for one focused purpose: one primary metric or action, concise copy, shallow hierarchy, and no requirement to fit secondary content in the first viewport.
+- Use full-screen-height vertical scrolling or vertical paging for additional content. Let the Digital Crown/native scroll behavior work; do not create horizontal phone-style tab bars, nested same-axis scrollers, fake swipe navigation, or custom gesture systems without a documented HIG reason.
+- Keep primary actions obvious and nondestructive. Avoid assigning a primary action to list/scroll views where it conflicts with watchOS double-tap behavior. Secondary actions belong in a shallow native disclosure or a dedicated next screen with a clear return path.
+- Use large visible metrics, readable labels, and explicit native controls. Every essential touch target must be at least 44px tall; never solve overflow by making text, buttons, labels, or hit areas tiny.
+- Keep content inside the watch canvas with no horizontal overflow or clipped controls. It is acceptable—and preferred—for long lists/details to scroll vertically rather than be cramped into one screen.
+- Reuse the same semantic components and interaction contracts across Today, Routine, History, workout setup, warmup, plank, lifting, rest, stretch, completion, navigation, disclosures, steppers, timers, import/export, and error states.
+- Do not add phone-only navigation, dense desktop-style layouts, bottom sheets, drawers, modal action overlays, or custom swipe gestures without documenting the exception and its HIG justification.
+- For every UI change, validate representative watch widths (225×225 and a smaller watch width), phone width, 200% text/zoom, long labels, dark mode, reduced motion, keyboard focus, screen-reader names, touch targets, vertical scrolling/paging, timer refresh/resume behavior, and offline loading.
+
+### Watch UI readiness gate
+
+A UI change is **not ready** unless all of these pass:
+
+- No view has horizontal overflow, clipped controls, truncated essential copy, or a phone tab bar at watch width.
+- Every view has a clear primary task/action and secondary content is scrollable, paged, disclosed, or moved to a dedicated screen.
+- Every interactive element is reachable by keyboard, has a visible focus state, has an accessible name, and meets the 44px minimum target.
+- All gestures are native or explicitly justified; no custom gesture interferes with scrolling, Digital Crown-like vertical navigation, double-tap primary-action expectations, or assistive technology.
+- Shared components are reused across all equivalent views; no one-off watch-only markup is introduced without documenting why.
+- Static checks, route smoke tests, offline/service-worker checks, and the relevant browser/device viewport checks pass. If browser/device validation is unavailable, report the missing evidence; do not claim the UI is ready.
 
 ## Compatibility and routing
 
@@ -27,7 +43,7 @@ Any new module must be added to `sw.js` precache and the cache version must be i
 
 ## Validation and deployment
 
-There is no build script or automated suite. Run `node --check app.js`, `node --check` for every JavaScript module, `git diff --check`, and serve locally with `python3 -m http.server 4173` to smoke test `/`, `/routine/`, `/history/`, and `/workout/`. Exercise start/resume, refresh during every workout phase, sets/supersets, defer/skip, cancellation, completion/history, import/export, migration, localStorage fallback, and service-worker precache. Clear site storage between scenarios. Use browser validation at mobile dimensions when Chromium is available.
+There is no build script or automated suite. Run `node --check app.js`, `node --check` for every JavaScript module, `git diff --check`, and serve locally with `python3 -m http.server 4173` to smoke test `/`, `/routine/`, `/history/`, and `/workout/`. Exercise start/resume, refresh during every workout phase, sets/supersets, defer/skip, cancellation, completion/history, import/export, migration, localStorage fallback, service-worker precache, and the watch UI readiness gate above. Clear site storage between scenarios. Use browser validation at 225×225, a smaller watch width, and phone dimensions when Chromium is available; otherwise explicitly mark the visual/device gate as not passed.
 
 After validation succeeds, deploy with `npx vercel --prod` and report the production URL. Do not deploy with failing validation. Use two-space indentation, semicolon-terminated JavaScript, concise camelCase names, uppercase constants, and `esc()` for user/history-derived HTML.
 
