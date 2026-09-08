@@ -24,6 +24,14 @@ Follow Apple’s primary references before changing UI: [Designing for watchOS](
 - Do not add phone-only navigation, dense desktop-style layouts, bottom sheets, drawers, modal action overlays, or custom swipe gestures without documenting the exception and its HIG justification.
 - For every UI change, validate representative watch widths (225×225 and a smaller watch width), phone width, 200% text/zoom, long labels, dark mode, reduced motion, keyboard focus, screen-reader names, touch targets, vertical scrolling/paging, timer refresh/resume behavior, and offline loading.
 
+### Shared watch-and-phone flow contract
+
+- Use one shared semantic DOM and one CSS system for smartwatch and phone. Start with the watch-sized canvas; phone layouts may add space but must not introduce a second navigation model or phone-only tab bar.
+- Today is the landing view: show the current workout type as the title, followed by exactly two primary navigation actions, `Routine` and `History`.
+- Routine is a list of days. Selecting a workout day opens a dedicated day view with that day’s title and an exercise list showing exercise name, sets, and reps. The `Start` action opens a native confirmation dialog before starting.
+- Keep long content in a new view or a vertically scrolling list instead of forcing it into one viewport. History and Routine have explicit titles, and browser/native Android back must unwind detail → parent → Today.
+- Prefer native links, buttons, `dialog`, and browser history for navigation and confirmation. Preserve the existing route paths, state schema, and service-worker behavior while using query parameters for detail views.
+
 ### Watch UI readiness gate
 
 A UI change is **not ready** unless all of these pass:

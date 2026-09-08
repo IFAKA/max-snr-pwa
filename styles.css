@@ -1,15 +1,15 @@
 :root {
   color-scheme: light dark;
-  --bg: #f2f5f2;
+  --bg: #f1f5f1;
   --surface: #fff;
-  --surface-raised: #e7eee8;
-  --text: #18221c;
-  --muted: #66746b;
-  --line: #d2ddd4;
+  --surface-raised: #e5eee7;
+  --text: #17221a;
+  --muted: #68766d;
+  --line: #d1ddd4;
   --accent: #17633f;
   --accent-soft: #dceee3;
   --danger: #a5322a;
-  --radius: 18px;
+  --radius: 16px;
   --ease-out: cubic-bezier(.23, 1, .32, 1);
   font-family: ui-rounded, "SF Pro Rounded", system-ui, sans-serif;
   background: var(--bg);
@@ -17,147 +17,101 @@
   font-size: 16px;
 }
 * { box-sizing: border-box; }
-[hidden] { display: none !important; }
-html { min-height: 100%; background: var(--bg); }
-body { min-height: 100%; margin: 0; background: var(--bg); color: var(--text); font-variant-numeric: tabular-nums; }
-main { width: min(100%, 42rem); min-height: 100svh; margin: auto; padding: 76px 16px max(28px, env(safe-area-inset-bottom)); }
-body.workout main { width: 100%; max-width: 34rem; padding: max(10px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); }
+html, body { min-width: 0; min-height: 100%; margin: 0; background: var(--bg); color: var(--text); }
+body { font-variant-numeric: tabular-nums; }
+main { width: 100%; max-width: 34rem; min-height: 100svh; margin: auto; padding: 24px 16px max(24px, env(safe-area-inset-bottom)); }
 h1, h2, h3, p { margin-top: 0; }
-h1 { margin-bottom: 10px; font-size: clamp(32px, 11vw, 52px); line-height: 1.02; letter-spacing: -.05em; }
+h1 { margin-bottom: 10px; font-size: clamp(30px, 10vw, 50px); line-height: 1; letter-spacing: -.055em; overflow-wrap: anywhere; }
 h2 { margin-bottom: 8px; font-size: 22px; letter-spacing: -.025em; }
 h3 { margin-bottom: 8px; font-size: 16px; }
-p { line-height: 1.45; }
+p { line-height: 1.4; }
 .muted, small { color: var(--muted); }
-.page-header { margin-bottom: 22px; }
-.group-label, .context-label { color: var(--accent); font-size: 12px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
-.context-label { margin-bottom: 6px; color: var(--muted); }
+.page-header { margin-bottom: 20px; }
+.context-label, .group-label { margin-bottom: 6px; color: var(--accent); font-size: 12px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.context-label { color: var(--muted); }
+.today-status { margin-bottom: 0; color: var(--muted); }
+.back-link { display: inline-flex; min-height: 44px; align-items: center; margin: -8px 0 12px; color: var(--accent); font-weight: 800; text-decoration: none; }
 button, input, select, textarea, .button { font: inherit; }
 button, .button, .import-button { min-height: 46px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--text); cursor: pointer; }
-button, .button { padding: 10px 16px; font-weight: 750; text-decoration: none; user-select: none; -webkit-user-select: none; transition: transform 140ms var(--ease-out), background-color 140ms ease, color 140ms ease; }
+button, .button { display: inline-flex; align-items: center; justify-content: center; padding: 10px 16px; font-weight: 800; text-decoration: none; user-select: none; transition: transform 140ms var(--ease-out), background-color 140ms ease; }
 button:active, .button:active, .import-button:active { transform: scale(.98); }
 button:disabled { cursor: not-allowed; opacity: .55; }
-button:focus-visible, .button:focus-visible, .import-button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 3px solid #3d8b61; outline-offset: 3px; }
-.primary { display: flex; width: 100%; min-height: 56px; align-items: center; justify-content: center; margin-top: 12px; border-color: var(--accent); background: var(--accent); color: #fff; font-size: 17px; }
-.secondary { width: 100%; margin-top: 8px; border-color: transparent; background: var(--accent-soft); color: var(--accent); }
-.text-action { display: flex; width: 100%; min-height: 46px; align-items: center; padding: 10px 4px; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: transparent; color: var(--text); text-align: left; text-decoration: none; }
-.destructive { color: var(--danger); }
-.more-trigger { display: flex; align-items: center; justify-content: center; gap: 8px; }
+button:focus-visible, .button:focus-visible, .import-button:focus-visible, input:focus-visible, summary:focus-visible, a:focus-visible { outline: 3px solid #3d8b61; outline-offset: 3px; }
+.primary { width: 100%; border-color: var(--accent); background: var(--accent); color: #fff; }
+.secondary { width: 100%; margin-top: 10px; border-color: transparent; background: var(--accent-soft); color: var(--accent); }
+.today-actions { display: grid; gap: 10px; margin-top: 28px; }
+.today-actions .secondary { margin-top: 0; }
+.notice { padding: 12px 14px; border-radius: 14px; background: var(--accent-soft); }
+.notice.error { background: #f9dfdc; color: #74251f; }
 .empty-state { padding: 20px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
-.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
-.icon { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
-.app-nav { position: fixed; z-index: 5; top: max(8px, env(safe-area-inset-top)); right: 0; left: 0; display: flex; width: min(calc(100% - 24px), 42rem); min-height: 52px; align-items: center; gap: 10px; margin: auto; padding: 5px 6px 5px 14px; border: 1px solid var(--line); border-radius: 999px; background: color-mix(in srgb, var(--surface) 90%, transparent); box-shadow: 0 8px 28px rgba(18,35,24,.08); backdrop-filter: blur(16px); }
-.app-brand { flex: 0 0 auto; color: var(--accent); font-size: 12px; font-weight: 900; letter-spacing: .12em; text-decoration: none; }
-.app-location { min-width: 0; overflow: hidden; color: var(--text); font-size: 14px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
-.app-menu { position: relative; margin-left: auto; }
-.app-menu summary { display: grid; min-width: 54px; min-height: 42px; place-items: center; padding: 9px 12px; border: 0; border-radius: 999px; color: var(--accent); cursor: pointer; font-size: 13px; font-weight: 800; list-style: none; }
-.app-menu summary::-webkit-details-marker { display: none; }
-.app-menu summary::after { content: "⌄"; margin-left: 4px; font-size: 16px; }
-.app-menu-list { position: absolute; top: calc(100% + 8px); right: 0; display: grid; min-width: 150px; padding: 6px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); box-shadow: 0 12px 32px rgba(18,35,24,.16); }
-.app-menu-list a { display: flex; min-height: 44px; align-items: center; padding: 10px 12px; border-radius: 10px; color: inherit; text-decoration: none; }
-.app-menu-list a:hover, .app-menu-list a:focus-visible, .app-menu-list a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); }
-.today-screen { display: flex; min-height: calc(100svh - 76px); flex-direction: column; }
-.today-routine-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-.today-routine-heading p { margin-bottom: 0; }
-.today-routine-list { margin-top: 8px; }
-.today-bottom-action { margin-top: auto; padding-top: 24px; }
-.today-bottom-action p { margin-bottom: 4px; }
-.routine-day, .history-workout { margin: 10px 0; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+ul { margin: 0; padding: 0; list-style: none; }
+.routine-list, .history-list { display: grid; gap: 8px; }
+.routine-day, .history-workout, .routine-group, .data-card { overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
 .routine-day.today { border-color: var(--accent); box-shadow: inset 4px 0 var(--accent); }
-.routine-day-link { display: flex; min-height: 64px; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; color: inherit; text-decoration: none; }
-.routine-day-link:hover, .routine-day-link:focus-visible { background: var(--surface-raised); }
-.routine-day-link > span:first-child { display: grid; gap: 3px; min-width: 0; }
+.routine-day-link, .history-workout > summary { display: flex; min-height: 64px; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; color: inherit; text-decoration: none; cursor: pointer; }
+.routine-day-link:hover, .routine-day-link:focus-visible, .history-workout > summary:hover { background: var(--surface-raised); }
+.routine-day-link > span:first-child, .history-workout > summary { min-width: 0; }
+.routine-day-link > span:first-child, .history-workout > summary { display: flex; flex-direction: column; gap: 3px; }
+.routine-day-link > span:last-child { flex: 0 0 auto; }
 .routine-day-action { color: var(--accent); font-size: 28px; line-height: 1; }
-.routine-day summary, .history-workout > summary { display: flex; min-height: 62px; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; cursor: pointer; list-style: none; }
-.routine-day summary::-webkit-details-marker { display: none; }
-.routine-day summary::after { content: "+"; color: var(--muted); font-size: 22px; }
-.routine-day[open] summary::after { content: "−"; }
-.routine-day summary > span:first-child, .routine-day-summary > span:first-child { display: grid; gap: 3px; min-width: 0; }
-.routine-day-summary { display: flex; min-height: 62px; align-items: center; padding: 12px 16px; }
-.routine-day > .routine-list { padding: 0 16px 16px; }
-.routine-day.rest { opacity: .78; }
-.routine-exercise { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line); line-height: 1.3; }
+.routine-exercise { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); line-height: 1.3; }
 .routine-exercise span:last-child { white-space: nowrap; }
-.routine-group { margin: 8px 0; padding: 10px; border: 1px solid var(--line); border-radius: 14px; }
+.routine-group { padding: 10px 14px; }
+.routine-group ul { margin-top: 4px; }
+.history-workout > summary { flex-direction: row; list-style: none; }
+.history-workout > summary::-webkit-details-marker, .data-card > summary::-webkit-details-marker { display: none; }
+.history-workout > summary::after, .data-card > summary::after { content: "+"; color: var(--accent); font-size: 22px; }
+.history-workout[open] > summary::after, .data-card[open] > summary::after { content: "−"; }
 .history-body { padding: 0 16px 16px; }
 .history-exercise { padding: 12px 0; border-top: 1px solid var(--line); }
-.history-exercise ul { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.history-exercise ul { display: grid; gap: 8px; }
 .history-exercise li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
-.notice { padding: 12px 14px; border-radius: 14px; background: var(--accent-soft); white-space: pre-wrap; }
-.notice.error { background: #f9dfdc; color: #74251f; }
-.data-card { margin-top: 28px; padding-top: 18px; border-top: 1px solid var(--line); }
-.data-card h2 { font-size: 18px; }
+.data-card { margin-top: 24px; }
+.data-card > summary { display: flex; min-height: 48px; align-items: center; justify-content: space-between; padding: 10px 14px; cursor: pointer; font-weight: 800; list-style: none; }
+.data-card-content { padding: 0 14px 14px; }
 .data-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.data-actions .icon-button, .import-button { width: 100%; }
-.import-button { display: flex; align-items: center; justify-content: center; padding: 10px; text-align: center; }
-.import-button input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
-.workout-stage { display: flex; width: 100%; min-height: calc(100svh - env(safe-area-inset-top) - env(safe-area-inset-bottom)); flex-direction: column; padding-top: max(10px, env(safe-area-inset-top)); scroll-snap-align: start; }
+.import-button { display: flex; align-items: center; justify-content: center; padding: 10px; }
+.import-button input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.workout-stage { display: flex; min-height: calc(100svh - 48px); flex-direction: column; gap: 16px; padding-top: max(8px, env(safe-area-inset-top)); }
 .stage-info { min-width: 0; }
-.workout-stage h1 { margin: 12px 0 0; overflow-wrap: anywhere; font-size: clamp(34px, 10vw, 48px); }
-.exercise-meta { width: 100%; margin-top: 22px; }
-.thumb-zone { width: 100%; margin-top: auto; padding-top: 24px; padding-bottom: max(8px, env(safe-area-inset-bottom)); }
-.controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.stepper { display: grid; grid-template-columns: 46px minmax(0, 1fr) 46px; min-height: 64px; align-items: center; overflow: hidden; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); }
-.stepper button { min-height: 62px; padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--accent); font-size: 28px; line-height: 1; }
-.stepper output { display: grid; place-items: center; min-width: 0; font-size: 25px; font-weight: 850; }
-.stepper-label { display: grid; gap: 7px; color: var(--muted); font-size: 12px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
-.big-timer { display: block; width: 100%; margin: 28px 0; border: 0; background: transparent; color: var(--text); font-size: clamp(64px, 20vw, 96px); font-weight: 850; line-height: 1; letter-spacing: -.08em; text-align: center; }
-.rest-stage .big-timer { margin: 24px 0 12px; }
+.workout-stage h1 { margin: 8px 0 0; }
+.thumb-zone { width: 100%; margin-top: auto; padding-bottom: max(8px, env(safe-area-inset-bottom)); }
+.controls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stepper-label { display: grid; gap: 6px; color: var(--muted); font-size: 12px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.stepper { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; min-height: 58px; align-items: center; overflow: hidden; border: 1px solid var(--line); border-radius: 15px; background: var(--surface); }
+.stepper button { min-height: 56px; padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--accent); font-size: 25px; }
+.stepper output { display: grid; place-items: center; min-width: 0; font-size: 23px; font-weight: 850; }
+.big-timer { display: block; width: 100%; margin: 30px 0 20px; color: var(--text); font-size: clamp(64px, 20vw, 96px); font-weight: 850; line-height: 1; letter-spacing: -.08em; text-align: center; }
 .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-top: 22px; }
 .summary-grid div { display: grid; gap: 4px; padding: 14px 6px; border-radius: 14px; background: var(--surface-raised); text-align: center; }
 .summary-grid strong { font-size: 22px; }
 .summary-grid span { color: var(--muted); font-size: 13px; }
-.workout-disclosure { margin-top: 8px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
-.workout-disclosure summary { display: flex; min-height: 44px; align-items: center; justify-content: space-between; padding: 10px 14px; color: var(--text); cursor: pointer; font-weight: 800; list-style: none; }
+.workout-disclosure { margin-top: 8px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.workout-disclosure summary { display: flex; min-height: 44px; align-items: center; justify-content: space-between; padding: 10px 14px; cursor: pointer; font-weight: 800; list-style: none; }
 .workout-disclosure summary::-webkit-details-marker { display: none; }
-.workout-disclosure summary::after { content: "+"; color: var(--accent); font-size: 20px; }
-.workout-disclosure[open] summary::after { content: "−"; }
 .disclosure-content { padding: 0 14px 12px; }
 .choice-list { display: grid; }
-.setup-stage { min-height: calc(100svh - 76px); }
-.setup-stage h1 { margin-top: 8px; }
-.setup-routine { margin: 18px 0; }
-.setup-recovery, .setup-history { margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--line); }
-.setup-recovery h2, .setup-history h2 { font-size: 18px; }
-.setup-recovery .button, .setup-history .button { display: flex; justify-content: space-between; gap: 8px; margin-top: 8px; }
-@media (max-width: 360px) {
-  main { padding: 64px 10px 16px; }
-  body.workout main { padding: 10px 10px 16px; }
-  .workout-stage { min-height: auto; padding-inline: 0; }
-  .workout-stage h1 { margin-top: 8px; font-size: clamp(28px, 12vw, 34px); line-height: 1.04; }
-  .context-label, .group-label { font-size: 11px; }
-  .stage-info > .muted { font-size: 15px; }
-  .exercise-meta { margin-top: 12px; }
-  .controls { grid-template-columns: 1fr 1fr; gap: 6px; }
-  .stepper-label { gap: 4px; font-size: 10px; }
-  .stepper { grid-template-columns: 38px minmax(0, 1fr) 38px; min-height: 52px; border-radius: 15px; }
-  .stepper button { min-height: 50px; font-size: 24px; }
-  .stepper output { font-size: 21px; }
-  .thumb-zone { margin-top: 18px; padding-top: 0; }
-  .primary { min-height: 50px; margin-top: 8px; font-size: 16px; }
-  .secondary { min-height: 44px; }
-  .big-timer { margin: 18px 0; font-size: clamp(56px, 24vw, 72px); }
-  .rest-stage .big-timer { margin: 14px 0 8px; }
-  .summary-grid { grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 12px; }
-  .summary-grid div { padding: 9px 3px; }
-  .summary-grid strong { font-size: 18px; }
-  .summary-grid span { font-size: 10px; }
-  .summary-grid { grid-template-columns: 1fr 1fr; }
-  .summary-grid div:last-child { grid-column: 1 / -1; }
-  .app-nav { width: calc(100% - 16px); gap: 7px; padding-left: 10px; }
-  .app-brand { font-size: 11px; }
-  .app-menu summary { min-width: 50px; padding-inline: 8px; }
-}
+.text-action { display: flex; min-height: 44px; align-items: center; padding: 10px 2px; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: transparent; color: inherit; text-align: left; }
+.confirm-dialog { width: min(calc(100% - 24px), 24rem); border: 1px solid var(--line); border-radius: 18px; background: var(--surface); color: var(--text); box-shadow: 0 18px 60px rgba(18, 35, 24, .24); }
+.confirm-dialog::backdrop { background: rgba(12, 20, 15, .46); }
+.dialog-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 20px; }
+.dialog-actions .primary { margin: 0; }
 @media (max-width: 260px) {
-  .app-nav { min-height: 46px; }
-  .app-location { font-size: 13px; }
-  .app-menu summary { min-height: 38px; font-size: 12px; }
-  .workout-stage h1 { font-size: 27px; }
-}
-@media (max-height: 500px) {
-  main { padding-top: 70px; }
-  .workout-stage { min-height: auto; }
-  .thumb-zone { margin-top: 18px; }
-  .big-timer { margin: 18px 0; }
+  main { max-width: 225px; padding: 14px 12px max(18px, env(safe-area-inset-bottom)); }
+  h1 { font-size: 30px; }
+  .page-header { margin-bottom: 14px; }
+  .today-actions { margin-top: 22px; }
+  .routine-day-link, .history-workout > summary { min-height: 56px; padding: 10px 12px; }
+  .routine-day-link strong, .history-workout strong { font-size: 14px; }
+  .routine-day-link small, .history-workout small { font-size: 11px; }
+  .routine-exercise { gap: 5px; padding: 9px 0; font-size: 12px; }
+  .routine-exercise span:last-child { white-space: normal; text-align: right; }
+  .routine-group { padding: 10px 12px; }
+  .history-body { padding-inline: 12px; }
+  .workout-stage { min-height: calc(100svh - 32px); }
+  .workout-stage h1 { font-size: 30px; }
+  .big-timer { margin: 22px 0 16px; font-size: 72px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
@@ -166,217 +120,4 @@ button:focus-visible, .button:focus-visible, .import-button:focus-visible, input
   :root { --bg: #0d1210; --surface: #171e1a; --surface-raised: #203428; --text: #edf2ee; --muted: #a1aca4; --line: #344138; --accent: #8fd0a9; --accent-soft: #21372a; --danger: #ffaaa1; }
   .primary { color: #102116; }
   .notice.error { background: #542824; color: #ffd7d2; }
-  .app-nav { box-shadow: 0 8px 28px rgba(0,0,0,.28); }
-}
-
-/* Watch contract: the same semantic flow, composed for a 225×225 case. */
-@media (max-width: 260px) {
-  :root { --watch-gutter: 8px; --watch-gap: 6px; }
-  html, body { min-width: 0; overflow-x: hidden; }
-  main { width: 100%; min-height: 100svh; padding: 56px var(--watch-gutter) 12px; }
-  body.workout main { width: 100%; max-width: none; min-height: 100svh; padding: max(7px, env(safe-area-inset-top)) var(--watch-gutter) max(10px, env(safe-area-inset-bottom)); }
-  body.workout .workout-stage { min-height: calc(100svh - max(7px, env(safe-area-inset-top)) - max(10px, env(safe-area-inset-bottom))); }
-  .app-nav { top: max(5px, env(safe-area-inset-top)); width: calc(100% - 12px); min-height: 42px; gap: 5px; padding: 3px 4px 3px 9px; border-radius: 15px; }
-  .app-brand { font-size: 9px; letter-spacing: .1em; }
-  .app-location { font-size: 12px; }
-  .app-menu summary { min-width: 45px; min-height: 34px; padding: 6px 7px; font-size: 11px; }
-  .app-menu summary::after { margin-left: 2px; font-size: 13px; }
-  .app-menu-list { top: calc(100% + 4px); min-width: 122px; padding: 4px; border-radius: 12px; }
-  .app-menu-list a { min-height: 40px; padding: 8px 10px; font-size: 13px; }
-  .workout-stage { min-height: auto; padding: 0; gap: var(--watch-gap); }
-  .stage-info { display: flex; min-height: 0; flex-direction: column; }
-  .context-label { margin-bottom: 2px; font-size: 9px; letter-spacing: .1em; line-height: 1.15; }
-  .workout-stage h1 { max-height: 3.1em; margin: 0; font-size: clamp(24px, 12vw, 31px); line-height: .98; letter-spacing: -.06em; overflow: hidden; }
-  .stage-info > .muted { margin: 4px 0 0; font-size: 13px; line-height: 1.18; }
-  .exercise-meta { margin-top: 7px; }
-  .thumb-zone { width: 100%; margin-top: var(--watch-gap); padding: 0; }
-  .controls { gap: 5px; }
-  .stepper-label { gap: 3px; font-size: 9px; letter-spacing: .1em; }
-  .stepper { grid-template-columns: 40px minmax(0, 1fr) 40px; min-height: 50px; border-radius: 13px; }
-  .stepper button { min-height: 48px; font-size: 22px; }
-  .stepper output { font-size: 20px; }
-  .primary { min-height: 46px; margin-top: var(--watch-gap); font-size: 15px; }
-  .workout-disclosure { margin-top: 4px; border-radius: 11px; }
-  .workout-disclosure summary { min-height: 38px; padding: 7px 10px; font-size: 13px; }
-  .workout-disclosure summary::after { font-size: 17px; }
-  .disclosure-content { padding: 0 10px 7px; }
-  .text-action { min-height: 40px; padding: 7px 2px; font-size: 12px; }
-  .group-label { margin: 6px 2px 0; font-size: 9px; }
-  .big-timer { margin: 12px 0 9px; font-size: clamp(60px, 30vw, 76px); line-height: .82; }
-  .rest-stage .big-timer { margin: 9px 0 7px; }
-  .rest-stage .exercise-meta { margin-top: 4px; }
-  .summary-grid { gap: 3px; margin-top: 8px; }
-  .summary-grid div { gap: 2px; padding: 7px 2px; border-radius: 9px; }
-  .summary-grid strong { font-size: 16px; }
-  .summary-grid span { font-size: 9px; }
-  .setup-stage h1 { max-height: none; margin-top: 0; }
-  .setup-routine { margin: 10px 0; }
-}
-
-@media (max-width: 260px) and (max-height: 260px) {
-  .workout-stage { overflow: visible; }
-  .workout-stage .thumb-zone { margin-top: auto; }
-  .workout-stage h1 { font-size: 27px; }
-  .workout-stage .big-timer { margin-block: 8px; font-size: 62px; }
-  .workout-stage.rest-stage .big-timer { font-size: 54px; }
-}
-
-/* Whole-app Apple Watch canvas. Lists scroll; the current task and action do not get squeezed. */
-@media (max-width: 260px) {
-  body { overflow-x: hidden; }
-  main { width: 100%; max-width: 225px; margin-inline: auto; overflow-x: hidden; }
-  body:not(.workout) main { padding-top: 55px; }
-  h1 { margin-bottom: 6px; font-size: 28px; line-height: .98; letter-spacing: -.06em; }
-  h2 { margin-bottom: 5px; font-size: 18px; }
-  p { line-height: 1.25; }
-  .page-header { margin-bottom: 10px; }
-  .page-header h1 { max-width: 100%; }
-  .today-screen { min-height: calc(100svh - 55px); }
-  .today-routine-heading { min-height: 20px; }
-  .today-routine-heading p { font-size: 11px; }
-  .today-routine-list { margin-top: 3px; }
-  .routine-day, .history-workout { margin: 5px 0; border-radius: 13px; }
-  .routine-day-link, .routine-day summary, .history-workout > summary { min-height: 50px; padding: 8px 10px; }
-  .routine-day-link { gap: 6px; }
-  .routine-day-link strong, .routine-day summary strong, .history-workout summary strong { font-size: 14px; }
-  .routine-day-link small, .routine-day summary small, .history-workout summary small { font-size: 10px; }
-  .routine-day-action { font-size: 22px; }
-  .routine-day > .routine-list { padding: 0 10px 10px; }
-  .routine-exercise { gap: 5px; padding: 6px 0; font-size: 11px; }
-  .routine-group { margin: 5px 0; padding: 6px; border-radius: 10px; }
-  .today-bottom-action { margin-top: 12px; padding-top: 0; }
-  .today-bottom-action p { margin-bottom: 3px; font-size: 11px; }
-  .button, button { min-height: 44px; }
-  .primary { min-height: 44px; margin-top: 6px; padding: 8px 10px; font-size: 14px; }
-  .secondary { min-height: 40px; margin-top: 5px; padding: 7px 10px; font-size: 12px; }
-  .setup-stage { min-height: calc(100svh - 55px); }
-  .setup-stage .stage-info { display: block; }
-  .setup-stage .context-label { margin-bottom: 3px; }
-  .setup-stage h1 { margin: 0; font-size: 28px; }
-  .setup-stage .setup-routine { margin: 9px 0 0; }
-  .setup-stage .setup-routine::before { content: 'Up next'; display: block; margin-bottom: 3px; color: var(--muted); font-size: 9px; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
-  .setup-recovery, .setup-history { margin-top: 12px; padding-top: 9px; }
-  .setup-recovery h2, .setup-history h2 { font-size: 15px; }
-  .setup-recovery .button, .setup-history .button { min-height: 40px; margin-top: 5px; }
-  .history-body { padding: 0 10px 10px; }
-  .history-exercise { padding: 8px 0; }
-  .history-exercise h3 { margin-bottom: 4px; font-size: 13px; }
-  .history-exercise ul { gap: 3px; font-size: 11px; }
-  .data-card { margin-top: 14px; padding-top: 10px; }
-  .data-card h2 { font-size: 15px; }
-  .data-actions { gap: 5px; }
-  .icon-button { min-height: 40px; }
-}
-
-/* Final watch rules: preserve hierarchy and scrolling instead of shrinking content to nothing. */
-@media (max-width: 260px) {
-  :root { --watch-gutter: 12px; }
-  body { overflow-x: hidden; }
-  main, body.workout main { width: 100%; max-width: 225px; min-height: 100svh; margin-inline: auto; padding: 58px var(--watch-gutter) 18px; overflow-x: hidden; }
-  body.workout main { padding-top: max(10px, env(safe-area-inset-top)); }
-  .app-nav { width: calc(100% - 12px); min-height: 44px; gap: 8px; padding: 4px 5px 4px 10px; border-radius: 16px; }
-  .app-brand { font-size: 10px; }
-  .app-location { font-size: 13px; }
-  .app-menu summary { min-width: 52px; min-height: 44px; padding: 9px 8px; font-size: 12px; }
-  .app-menu-list a { min-height: 44px; font-size: 13px; }
-  h1 { font-size: 30px; line-height: 1; letter-spacing: -.055em; }
-  h2 { font-size: 19px; }
-  p { line-height: 1.35; }
-  .page-header { margin-bottom: 14px; }
-  .context-label, .group-label { font-size: 11px; line-height: 1.2; }
-  .today-screen { min-height: 0; }
-  .today-bottom-action { margin: 0 0 14px; padding: 0; }
-  .today-bottom-action p { font-size: 12px; }
-  .today-routine { margin-top: 0; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
-  .today-routine-heading, .setup-routine > summary { display: flex; min-height: 44px; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; cursor: pointer; list-style: none; font-size: 14px; font-weight: 800; }
-  .today-routine-heading::-webkit-details-marker, .setup-routine > summary::-webkit-details-marker { display: none; }
-  .today-routine-heading::after, .setup-routine > summary::after { content: "+"; color: var(--accent); font-size: 20px; }
-  .today-routine[open] .today-routine-heading::after, .setup-routine[open] > summary::after { content: "−"; }
-  .today-routine-list { margin: 0; padding: 0 12px 12px; }
-  .today-routine-heading small, .setup-routine summary small { color: var(--muted); font-size: 11px; font-weight: 700; }
-  .routine-day, .history-workout { border-radius: 14px; }
-  .routine-day-link, .history-workout > summary { min-height: 54px; padding: 10px 12px; }
-  .routine-day-link strong, .history-workout summary strong { font-size: 15px; }
-  .routine-day-link small, .history-workout summary small { font-size: 11px; }
-  .routine-exercise { padding: 8px 0; font-size: 12px; }
-  .routine-group { padding: 8px; }
-  .button, button { min-height: 44px; }
-  .primary { min-height: 48px; margin-top: 8px; padding: 10px 12px; font-size: 16px; }
-  .secondary { min-height: 44px; font-size: 13px; }
-  .data-actions { grid-template-columns: 1fr 1fr; }
-  .data-actions button, .data-actions .import-button { min-height: 44px; }
-  .setup-stage { min-height: 0; }
-  .setup-stage h1 { margin: 0; font-size: 30px; }
-  .setup-stage .primary { margin-block: 12px 14px; }
-  .setup-routine { margin: 0; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
-  .setup-stage .setup-routine::before { content: none; }
-  .setup-routine > .routine-list { padding: 0 12px 12px; }
-  .setup-recovery, .setup-history { margin-top: 18px; padding-top: 12px; }
-  .workout-stage { min-height: 0; gap: 16px; padding: 0; }
-  .workout-stage h1 { max-height: none; margin: 0; font-size: 30px; line-height: 1; overflow: visible; }
-  .stage-info > .muted { margin-top: 8px; font-size: 14px; }
-  .exercise-meta { margin-top: 12px; }
-  .workout-stage .thumb-zone { margin-top: 0; padding: 0 0 max(8px, env(safe-area-inset-bottom)); }
-  .controls { gap: 8px; }
-  .stepper-label { gap: 5px; font-size: 11px; }
-  .stepper { grid-template-columns: 44px minmax(0, 1fr) 44px; min-height: 58px; border-radius: 15px; }
-  .stepper button { min-height: 56px; font-size: 25px; }
-  .stepper output { font-size: 23px; }
-  .workout-disclosure { margin-top: 8px; }
-  .workout-disclosure summary { min-height: 44px; padding: 10px 12px; font-size: 14px; }
-  .text-action { min-height: 44px; padding: 10px 2px; font-size: 13px; }
-  .big-timer, .workout-stage .big-timer, .rest-stage .big-timer { margin: 18px 0 14px; font-size: 72px; line-height: .9; }
-  .summary-grid { gap: 5px; margin-top: 12px; }
-  .summary-grid div { padding: 10px 4px; border-radius: 11px; }
-  .summary-grid strong { font-size: 19px; }
-  .summary-grid span { font-size: 11px; }
-}
-
-/* Final narrow-canvas contract: scroll vertically, never clip or squeeze content. */
-@media (max-width: 260px) {
-  html, body { min-width: 0; overflow-x: hidden; }
-  body { overflow-y: auto; }
-  main, body.workout main { width: 100%; max-width: 225px; min-height: 100svh; overflow: visible; }
-  .app-nav, .app-location, .app-menu { min-width: 0; }
-  .app-location { overflow: hidden; text-overflow: ellipsis; }
-  .app-menu-list { max-width: calc(100vw - 24px); }
-  .page-header, .stage-info, .today-screen, .setup-stage, .workout-stage,
-  .routine-day, .history-workout, .routine-list, .history-body { min-width: 0; }
-  h1, h2, h3, p, strong, small, .routine-exercise { overflow-wrap: anywhere; }
-  .workout-stage { min-height: calc(100svh - 18px); }
-  .workout-stage h1 { max-height: none; overflow: visible; }
-  .thumb-zone { margin-top: auto; }
-  .data-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .routine-exercise { grid-template-columns: minmax(0, 1fr) minmax(0, auto); }
-  .routine-exercise span:last-child { white-space: normal; text-align: right; }
-}
-
-/* Apple Watch canvas: the page itself is fixed; only list content may scroll. */
-@media (max-width: 260px) {
-  html, body { height: 100%; overflow: hidden; }
-  main, body.workout main { height: 100svh; min-height: 0; overflow: hidden; }
-  .today-screen, .setup-stage { min-height: 0; height: 100%; overflow: hidden; }
-  .today-routine-list, .routine-list, .history-body, .app-menu-list,
-  .disclosure-content .choice-list {
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-width: thin;
-  }
-  .today-routine-list { max-height: calc(100svh - 220px); }
-  .setup-routine > .routine-list { max-height: 34svh; }
-  .routine-list, .history-list { max-height: calc(100svh - 112px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
-  .history-body { max-height: 58svh; }
-  .app-menu-list { max-height: calc(100svh - 58px); }
-  .workout-stage { height: 100%; min-height: 0; overflow: hidden; }
-  .workout-stage .thumb-zone { flex: 0 0 auto; }
-  .lifting-stage { gap: 5px; }
-  .lifting-stage .stepper { min-height: 52px; }
-  .lifting-stage .stepper button { min-height: 50px; }
-  .lifting-stage .primary { margin-top: 5px; }
-  .data-card { margin-top: 8px; padding: 0; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
-  .data-card summary { display: flex; min-height: 44px; align-items: center; justify-content: space-between; padding: 10px 12px; cursor: pointer; font-weight: 800; list-style: none; }
-  .data-card summary::-webkit-details-marker { display: none; }
-  .data-card summary::after { content: "+"; color: var(--accent); font-size: 20px; }
-  .data-card[open] summary::after { content: "−"; }
-  .data-card-content { padding: 0 12px 10px; }
 }

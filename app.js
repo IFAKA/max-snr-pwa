@@ -1,4 +1,5 @@
 import { loadState } from './js/storage.js';
+import { getState } from './js/state.js';
 import { renderToday } from './js/render-today.js';
 import { renderHistory } from './js/render-history.js';
 import { renderRoutine } from './js/render-routine.js';
@@ -9,7 +10,27 @@ const renderers = { today: renderToday, routine: renderRoutine, history: renderH
 async function boot() {
   try {
     await loadState();
-    (renderers[document.body.dataset.route] || renderToday)();
+    const route = document.body.dataset.route;
+    const referrer = document.referrer ? new URL(document.referrer) : null;
+    const params = new URLSearchParams(location.search);
+    const hasParentEntry = referrer?.origin === location.origin && (
+      (route === 'routine' && (params.has('day') ? referrer.pathname === '/routine/' : referrer.pathname === '/'))
+      || (route === 'workout' && params.has('day') && referrer.pathname === '/routine/')
+      || (route !== 'routine' && route !== 'workout' && referrer.pathname === '/')
+    );
+    if (route !== 'today' && !history.state?.route && !hasParentEntry) {
+      const currentUrl = `${location.pathname}${location.search}${location.hash}`;
+      const parentUrl = route === 'routine' && params.has('day')
+        ? '/routine/'
+        : route === 'workout' && params.has('day') && !getState()?.active
+          ? `/routine/?day=${encodeURIComponent(params.get('day'))}`
+          : '/';
+      history.replaceState({route: parentUrl === '/' ? 'today' : route, path: parentUrl}, '', parentUrl);
+      history.pushState({route, path: currentUrl}, '', currentUrl);
+    } else if (route === 'today' && !history.state?.route) {
+      history.replaceState({route: 'today'}, '', location.href);
+    }
+    (renderers[route] || renderToday)();
   } catch (error) {
     const target = document.querySelector('#app');
     if (target) {
