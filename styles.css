@@ -90,13 +90,6 @@ body.workout main { overflow: hidden; padding-top: 0; padding-bottom: 16px; }
 .stage-info { min-width: 0; }
 .workout-stage h1 { margin-top: 7px; font-size: clamp(34px, 10vw, 48px); }
 .context-label { margin-bottom: 5px; color: var(--muted); font-size: 12px; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
-.lifting-exercise { padding: 14px 16px 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
-.lifting-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
-.lifting-heading .context-label { margin-bottom: 0; }
-.lifting-exercise h1 { margin: 0; font-size: clamp(34px, 10vw, 48px); line-height: 1.02; }
-.target-summary { display: grid; flex-shrink: 0; gap: 4px; text-align: right; }
-.target-summary .context-label { margin-bottom: 0; }
-.target-summary strong { font-size: clamp(16px, 4.5vw, 20px); line-height: 1.15; }
 .exercise-meta { display: flex; align-items: center; width: 100%; margin-top: 10px; }
 .exercise-progress { display: grid; grid-template-columns: repeat(var(--exercise-count), minmax(0, 1fr)); width: 100%; gap: 5px; }
 .exercise-progress-group { position: relative; display: grid; grid-column: span 2; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; min-width: 0; padding: 4px 7px; border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line)); border-radius: 999px; background: color-mix(in srgb, var(--accent-soft) 48%, transparent); }
