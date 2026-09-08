@@ -1,4 +1,4 @@
-import { app, esc } from '../dom.js';
+import { app, esc, listMarkup } from '../dom.js';
 import { save } from '../storage.js';
 import { getState } from '../state.js';
 import { selectExercise, exerciseSelectionLocked, start } from '../workout.js';
@@ -31,8 +31,8 @@ export function exercisePicker(active) {
     seen.add(task.exerciseId);
     return true;
   });
-  const rows = items.map(task => `<li><button class="list-link" type="button" data-exercise-id="${esc(task.exerciseId)}"><span>${esc(task.performedName)}</span><span aria-hidden="true">›</span></button></li>`).join('');
-  return `<section class="workout-picker" aria-labelledby="exercise-picker-title"><h1 id="exercise-picker-title">Exercise</h1><ul class="app-list exercise-picker-list">${rows}</ul></section>`;
+  const rows = items.map(task => `<li><button class="list-link" type="button" data-exercise-id="${esc(task.exerciseId)}"><span>${esc(task.performedName)}</span><span aria-hidden="true">›</span></button></li>`);
+  return `<section class="workout-picker" aria-labelledby="exercise-picker-title"><h1 id="exercise-picker-title">Exercise</h1>${listMarkup(rows, 'exercise-picker-list', 'Available exercises')}</section>`;
 }
 export function bindExercisePicker(active, onSelected = () => location.assign('/workout/')) {
   document.querySelectorAll('[data-exercise-id]').forEach(button => button.addEventListener('click', () => runAction(button, () => selectExercise(button.dataset.exerciseId), onSelected)));

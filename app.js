@@ -55,17 +55,3 @@ async function boot() {
 
 boot();
 window.addEventListener('popstate', () => renderers[document.body.dataset.route]?.());
-
-let touchStart;
-document.addEventListener('touchstart', event => {
-  if (event.touches.length === 1) touchStart = event.touches[0];
-}, {passive: true});
-document.addEventListener('touchend', event => {
-  if (!touchStart || event.changedTouches.length !== 1 || document.querySelector('dialog[open]')) return;
-  const touch = event.changedTouches[0];
-  const dx = touch.clientX - touchStart.clientX;
-  const dy = touch.clientY - touchStart.clientY;
-  const fromEdge = touchStart.clientX < 32;
-  touchStart = null;
-  if (fromEdge && dx > 60 && Math.abs(dx) > Math.abs(dy) * 1.25) history.back();
-}, {passive: true});

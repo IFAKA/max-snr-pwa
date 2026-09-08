@@ -6,12 +6,12 @@ import { renderRest } from './render-workout/rest.js';
 import { renderStretch } from './render-workout/stretch.js';
 import { renderCompletion } from './render-workout/completion.js';
 import { keepAwake } from './dom.js';
-import { app, esc } from './dom.js';
+import { app, esc, listMarkup } from './dom.js';
 import { ROUTINE, NAMES } from './routine-data.js';
 
 function renderStart(day) {
   const items = ROUTINE[day];
-  app.innerHTML = `<section aria-labelledby="start-title"><h1 id="start-title">${esc(items ? NAMES[day] : 'Rest day')}</h1>${items ? `<ul class="app-list">${startRow(day)}</ul>` : ''}</section>`;
+  app.innerHTML = `<section aria-labelledby="start-title"><h1 id="start-title">${esc(items ? NAMES[day] : 'Rest day')}</h1>${items ? listMarkup([startRow(day)], 'navigation-list', 'Workout actions') : '<p class="notice">Rest day</p>'}</section>`;
   bindStartDialog();
 }
 

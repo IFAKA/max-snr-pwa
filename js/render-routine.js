@@ -8,7 +8,9 @@ export function renderRoutine() {
   const params = new URLSearchParams(location.search);
   const requestedDay = params.get('day');
   if (requestedDay && Object.prototype.hasOwnProperty.call(ROUTINE, requestedDay)) return params.get('view') === 'exercises' ? renderExercises(requestedDay) : renderDay(requestedDay);
-  const days = Object.entries(ROUTINE).map(([day]) => `<li class="${day === today ? 'today' : ''}"><a class="list-link" href="/routine/?day=${encodeURIComponent(day)}"><span>${day === today ? 'Today · ' : ''}${esc(day)}</span><span aria-hidden="true">›</span></a></li>`);
+  const days = Object.entries(ROUTINE).map(([day, items]) => items
+    ? `<li class="${day === today ? 'today' : ''}"><a class="list-link" href="/routine/?day=${encodeURIComponent(day)}"><span>${day === today ? 'Today · ' : ''}${esc(day)}</span><span aria-hidden="true">›</span></a></li>`
+    : `<li class="rest-day"><button class="list-link is-disabled" type="button" disabled><span>${day === today ? 'Today · ' : ''}${esc(day)}<small>Rest day</small></span><span aria-hidden="true">—</span></button></li>`);
   app.innerHTML = `<section aria-labelledby="routine-title"><h1 id="routine-title">Routine</h1>${listMarkup(days, 'routine-list', 'Routine days')}</section>`;
 }
 
