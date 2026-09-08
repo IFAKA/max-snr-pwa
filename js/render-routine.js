@@ -1,6 +1,7 @@
 import { app, esc, listMarkup } from './dom.js';
 import { ROUTINE, NAMES } from './routine-data.js';
 import { routineMarkup } from './routine-view.js';
+import { startRow, bindStartDialog } from './render-workout/shared.js';
 
 export function renderRoutine() {
   const today = new Intl.DateTimeFormat('en', {weekday: 'long'}).format(new Date());
@@ -13,11 +14,12 @@ export function renderRoutine() {
 
 function renderDay(day) {
   const items = ROUTINE[day];
-  const rows = items ? ['<li><a class="list-link" href="/routine/?day=' + encodeURIComponent(day) + '&view=exercises"><span>Exercises</span><span aria-hidden="true">›</span></a></li>', '<li><a class="list-link" href="/workout/?day=' + encodeURIComponent(day) + '&confirm=1"><span>Start</span><span aria-hidden="true">›</span></a></li>'] : ['<li><button class="list-link is-disabled" type="button" disabled><span>Start</span><span aria-hidden="true">—</span></button></li>'];
-  app.innerHTML = `<section aria-labelledby="day-title"><a class="back-link" href="/routine/">Routine</a><h1 id="day-title">${esc(NAMES[day] || 'Rest day')}</h1>${listMarkup(rows, 'navigation-list', 'Workout actions')}</section>`;
+  const rows = items ? ['<li><a class="list-link" href="?day=' + encodeURIComponent(day) + '&view=exercises"><span>Exercises</span><span aria-hidden="true">›</span></a></li>', startRow(day)] : ['<li><button class="list-link is-disabled" type="button" disabled><span>Start</span><span aria-hidden="true">—</span></button></li>'];
+  app.innerHTML = `<section aria-labelledby="day-title"><h1 id="day-title">${esc(NAMES[day] || 'Rest day')}</h1>${listMarkup(rows, 'navigation-list', 'Workout actions')}</section>`;
+  bindStartDialog();
 }
 
 function renderExercises(day) {
   const items = ROUTINE[day];
-  app.innerHTML = `<section aria-labelledby="exercise-title"><a class="back-link" href="/routine/?day=${encodeURIComponent(day)}">${esc(NAMES[day] || 'Workout')}</a><h1 id="exercise-title">Exercises</h1>${routineMarkup(items)}</section>`;
+  app.innerHTML = `<section aria-labelledby="exercise-title"><h1 id="exercise-title">Exercises</h1>${routineMarkup(items)}</section>`;
 }

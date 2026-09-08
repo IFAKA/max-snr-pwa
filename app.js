@@ -16,6 +16,7 @@ async function boot() {
     const hasParentEntry = referrer?.origin === location.origin && (
       (route === 'routine' && (params.has('day') ? referrer.pathname === '/routine/' : referrer.pathname === '/'))
       || (route === 'workout' && params.has('day') && referrer.pathname === '/routine/')
+      || (route === 'workout' && params.get('view') === 'exercises' && referrer.pathname === '/workout/')
       || (route !== 'routine' && route !== 'workout' && referrer.pathname === '/')
     );
     if (route !== 'today' && !history.state?.route && !hasParentEntry) {
@@ -28,6 +29,8 @@ async function boot() {
             ? '/history/'
             : route === 'workout' && params.has('day') && !getState()?.active
               ? `/routine/?day=${encodeURIComponent(params.get('day'))}`
+              : route === 'workout' && params.get('view') === 'exercises'
+                ? '/workout/'
               : '/';
       history.replaceState({route: parentUrl === '/' ? 'today' : route, path: parentUrl}, '', parentUrl);
       history.pushState({route, path: currentUrl}, '', currentUrl);

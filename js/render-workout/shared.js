@@ -1,13 +1,30 @@
 import { app, esc } from '../dom.js';
 import { save } from '../storage.js';
 import { getState } from '../state.js';
-import { selectExercise, exerciseSelectionLocked } from '../workout.js';
+import { selectExercise, exerciseSelectionLocked, start } from '../workout.js';
 
 export const state = () => getState().active;
 export function workoutStage({className = '', title, body = '', actions = ''}) {
   return `<section class="workout-stage ${className}" aria-labelledby="workout-title"><div class="stage-info"><h1 id="workout-title">${title}</h1>${body}</div><div class="thumb-zone">${actions}</div></section>`;
 }
-export function exercisePicker(active, backHref = '/workout/') {
+export const startRow = day => `<li><button class="list-link" type="button" data-start-day="${esc(day)}"><span>Start</span><span aria-hidden="true">›</span></button></li>`;
+export function bindStartDialog() {
+  const trigger = document.querySelector('[data-start-day]');
+  if (!trigger) return;
+  const day = trigger.dataset.startDay;
+  const dialog = document.createElement('dialog');
+  dialog.className = 'confirm-dialog';
+  dialog.innerHTML = '<form method="dialog"><h2>Start?</h2><div class="dialog-actions"><button value="cancel">Cancel</button><button class="primary" value="default">Start</button></div></form>';
+  document.body.append(dialog);
+  trigger.addEventListener('click', () => dialog.showModal());
+  dialog.addEventListener('close', async () => {
+    if (dialog.returnValue !== 'default') return;
+    const button = dialog.querySelector('[value="default"]');
+    if (button) button.disabled = true;
+    try { if (await start(day)) location.assign('/workout/'); } catch (error) { showError(error); }
+  });
+}
+export function exercisePicker(active) {
   const seen = new Set();
   const items = active.tasks.filter(task => {
     if (seen.has(task.exerciseId) || task.completed || task.skipped) return false;
@@ -15,7 +32,7 @@ export function exercisePicker(active, backHref = '/workout/') {
     return true;
   });
   const rows = items.map(task => `<li><button class="list-link" type="button" data-exercise-id="${esc(task.exerciseId)}"><span>${esc(task.performedName)}</span><span aria-hidden="true">›</span></button></li>`).join('');
-  return `<section class="workout-picker" aria-labelledby="exercise-picker-title"><a class="back-link" href="${backHref}">Back</a><h1 id="exercise-picker-title">Exercise</h1><ul class="app-list exercise-picker-list">${rows}</ul></section>`;
+  return `<section class="workout-picker" aria-labelledby="exercise-picker-title"><h1 id="exercise-picker-title">Exercise</h1><ul class="app-list exercise-picker-list">${rows}</ul></section>`;
 }
 export function bindExercisePicker(active, onSelected = () => location.assign('/workout/')) {
   document.querySelectorAll('[data-exercise-id]').forEach(button => button.addEventListener('click', () => runAction(button, () => selectExercise(button.dataset.exerciseId), onSelected)));
