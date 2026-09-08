@@ -1,4 +1,4 @@
-import { mount, state, runAction, showError, exitControls, exerciseProgress, workoutStage, primaryAction } from './shared.js';
+import { mount, state, runAction, showError, exitControls, workoutStage, primaryAction } from './shared.js';
 import { save } from '../storage.js';
 import { esc } from '../dom.js';
 import { activeTask, completeSet } from '../workout.js';
@@ -9,7 +9,7 @@ export function renderLifting() {
   const draft = active.draft || {};
   const repsValue = draft.reps ?? String(String(task.reps).split('–')[0]);
   const weightValue = draft.weight ?? '0';
-  const stage = workoutStage({eyebrow: `Strength · Set ${esc(task.set)} of ${esc(task.sets)}`, title: esc(task.performedName), body: `<div class="exercise-meta"><span class="sr-only">Exercise progress</span>${exerciseProgress(active)}</div>`, actions: ''});
+  const stage = workoutStage({className: 'lifting-stage', eyebrow: `Strength · Set ${esc(task.set)} of ${esc(task.sets)}`, title: esc(task.performedName), actions: ''});
   const formMarkup = `<form class="thumb-zone" id="set-form"><div class="controls"><label class="stepper-label">Reps<div class="stepper"><button type="button" data-stepper="reps" data-step="-1" aria-label="Decrease reps">−</button><output id="reps-value" aria-live="polite">${esc(repsValue)}</output><button type="button" data-stepper="reps" data-step="1" aria-label="Increase reps">+</button></div></label><label class="stepper-label">Load · kg<div class="stepper"><button type="button" data-stepper="weight" data-step="-2.5" aria-label="Decrease load">−</button><output id="weight-value" aria-live="polite">${esc(weightValue)}</output><button type="button" data-stepper="weight" data-step="2.5" aria-label="Increase load">+</button></div></label></div><input id="reps" type="hidden" value="${esc(repsValue)}"><input id="weight" type="hidden" value="${esc(weightValue)}">${primaryAction('log-set', 'Log set', 'submit')}${exitControls()}</form>`;
   mount(stage.replace('<div class="thumb-zone"></div>', formMarkup));
   const weight = document.querySelector('#weight'), reps = document.querySelector('#reps'), form = document.querySelector('#set-form');

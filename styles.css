@@ -381,3 +381,56 @@ button:focus-visible, .button:focus-visible, .import-button:focus-visible, input
   .summary-grid strong { font-size: 19px; }
   .summary-grid span { font-size: 11px; }
 }
+
+/* Final narrow-canvas contract: scroll vertically, never clip or squeeze content. */
+@media (max-width: 260px) {
+  html, body { min-width: 0; overflow-x: hidden; }
+  body { overflow-y: auto; }
+  main, body.workout main { width: 100%; max-width: 225px; min-height: 100svh; overflow: visible; }
+  .app-nav, .app-location, .app-menu { min-width: 0; }
+  .app-location { overflow: hidden; text-overflow: ellipsis; }
+  .app-menu-list { max-width: calc(100vw - 24px); }
+  .page-header, .stage-info, .today-screen, .setup-stage, .workout-stage,
+  .routine-day, .history-workout, .routine-list, .history-body { min-width: 0; }
+  h1, h2, h3, p, strong, small, .routine-exercise, .sheet-choice-name { overflow-wrap: anywhere; }
+  .workout-stage { min-height: calc(100svh - 18px); }
+  .workout-stage h1 { max-height: none; overflow: visible; }
+  .thumb-zone { margin-top: auto; }
+  .data-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .routine-exercise { grid-template-columns: minmax(0, 1fr) minmax(0, auto); }
+  .routine-exercise span:last-child { white-space: normal; text-align: right; }
+  .progress-disclosures { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .progress-disclosure summary { overflow-wrap: anywhere; }
+  .progress-disclosure:last-child { grid-column: auto; }
+}
+
+/* Apple Watch canvas: the page itself is fixed; only list content may scroll. */
+@media (max-width: 260px) {
+  html, body { height: 100%; overflow: hidden; }
+  main, body.workout main { height: 100svh; min-height: 0; overflow: hidden; }
+  .today-screen, .setup-stage { min-height: 0; height: 100%; overflow: hidden; }
+  .today-routine-list, .routine-list, .history-body, .app-menu-list,
+  .disclosure-content .choice-list, .progress-sheet-list {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  .today-routine-list { max-height: calc(100svh - 220px); }
+  .setup-routine > .routine-list { max-height: 34svh; }
+  .routine-list, .history-list { max-height: calc(100svh - 112px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+  .history-body { max-height: 58svh; }
+  .app-menu-list { max-height: calc(100svh - 58px); }
+  .workout-stage { height: 100%; min-height: 0; overflow: hidden; }
+  .workout-stage .thumb-zone { flex: 0 0 auto; }
+  .lifting-stage .progress-disclosures, .rest-stage .progress-disclosures { display: none; }
+  .lifting-stage { gap: 5px; }
+  .lifting-stage .stepper { min-height: 52px; }
+  .lifting-stage .stepper button { min-height: 50px; }
+  .lifting-stage .primary { margin-top: 5px; }
+  .data-card { margin-top: 8px; padding: 0; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .data-card summary { display: flex; min-height: 44px; align-items: center; justify-content: space-between; padding: 10px 12px; cursor: pointer; font-weight: 800; list-style: none; }
+  .data-card summary::-webkit-details-marker { display: none; }
+  .data-card summary::after { content: "+"; color: var(--accent); font-size: 20px; }
+  .data-card[open] summary::after { content: "−"; }
+  .data-card-content { padding: 0 12px 10px; }
+}
