@@ -1,6 +1,6 @@
 import { mount, state, runAction, showError, workoutStage, primaryAction, stepperMarkup, bindHoldSteppers } from './shared.js';
 import { save } from '../storage.js';
-import { esc, icon } from '../dom.js';
+import { esc, icon, listMarkup } from '../dom.js';
 import { activeTask, completeSet } from '../workout.js';
 
 export function renderLifting() {
@@ -11,7 +11,7 @@ export function renderLifting() {
   const repsValue = draft.reps ?? String(String(task.reps).split('–')[0]);
   const weightValue = draft.weight ?? '0';
   const stage = workoutStage({className: 'lifting-stage', title: esc(task.performedName), actions: ''});
-  const changeLink = !active.tasks.some(item => item.exerciseId === task.exerciseId && item.completed) ? `<a class="list-link stage-link" href="/workout/?view=exercises"><span>Change exercise</span>${icon('chevron', 'Change exercise')}</a>` : '';
+  const changeLink = !active.tasks.some(item => item.exerciseId === task.exerciseId && item.completed) ? listMarkup([`<li><a class="list-link stage-link" href="/workout/?view=exercises"><span>Change exercise</span>${icon('chevron', 'Change exercise')}</a></li>`], 'stage-action-list', 'Workout options') : '';
   const formMarkup = `<form class="thumb-zone" id="set-form"><p class="set-count">Set ${esc(task.set)} of ${esc(task.sets)}</p>${changeLink}${step === 'load' ? stepperMarkup('weight', 'Load · kg', weightValue, -2.5, 2.5) : stepperMarkup('reps', 'Reps', repsValue, -1, 1)}<input id="reps" type="hidden" value="${esc(repsValue)}"><input id="weight" type="hidden" value="${esc(weightValue)}">${primaryAction('next-step', step === 'load' ? 'Log set' : 'Next', step === 'load' ? 'submit' : 'button')}</form>`;
   mount(stage.replace('<div class="thumb-zone"></div>', formMarkup));
   const weight = document.querySelector('#weight'), reps = document.querySelector('#reps'), form = document.querySelector('#set-form');

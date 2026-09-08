@@ -82,17 +82,18 @@ ul { margin: 0; padding: 0; list-style: none; }
 .import-button { display: flex; align-items: center; justify-content: center; padding: 10px; }
 .import-button input { position: absolute; width: 1px; height: 1px; opacity: 0; }
 .list-link input { position: absolute; width: 1px; height: 1px; opacity: 0; }
-.workout-stage { display: flex; min-height: calc(100svh - 24px); max-height: calc(100svh - 24px); flex-direction: column; gap: 8px; padding: 0 0 8px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.workout-stage { display: flex; height: calc(100svh - 24px); min-height: 0; flex-direction: column; gap: 6px; padding: 0 0 8px; overflow: hidden; }
 .stage-info { min-width: 0; }
-.workout-stage h1 { margin: 0 0 10px; font-size: clamp(28px, 9vw, 46px); }
+.workout-stage h1 { margin: 0 0 6px; font-size: clamp(28px, 9vw, 46px); }
 .thumb-zone { width: 100%; margin-top: auto; padding-bottom: max(8px, env(safe-area-inset-bottom)); }
 .thumb-zone { display: grid; gap: 8px; }
 .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .stage-link { margin: 0; }
-.set-count { margin: 0 0 6px; color: var(--muted); font-size: 13px; }
+.stage-action-list { margin: 0; }
+.set-count { margin: 0 0 2px; color: var(--muted); font-size: 13px; }
 .workout-picker { height: 100%; overflow: hidden; }
 .exercise-picker-list { max-height: calc(100svh - 76px); overflow-y: auto; }
-.stepper-label { display: grid; gap: 6px; color: var(--muted); font-size: 12px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.stepper-label { display: grid; gap: 4px; color: var(--muted); font-size: 12px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
 .stepper { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; min-height: 58px; align-items: center; overflow: hidden; border: 1px solid var(--line); border-radius: 15px; background: var(--surface); }
 .stepper button { min-height: 56px; padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--accent); font-size: 25px; }
 .stepper button .icon { width: 22px; height: 22px; margin: auto; stroke: currentColor; stroke-width: 2.5; fill: none; }
@@ -114,7 +115,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .dialog-actions .primary { margin: 0; }
 .hold-scroll-text { min-width: 0; }
 [data-hold-scroll] { min-width: 0; overflow: hidden; }
-[data-hold-scroll].is-hold-scrolling .hold-scroll-text { display: inline-block; max-width: none; white-space: nowrap; animation: title-pan 3s linear infinite alternate; }
+[data-hold-scroll].is-hold-scrolling .hold-scroll-text { display: inline-block; max-width: none; white-space: nowrap; animation: title-pan 3s linear 1 both; }
 @keyframes title-pan { from { transform: translateX(0); } to { transform: translateX(var(--scroll-distance)); } }
 @media (max-width: 260px) {
   main { max-width: 225px; padding: 10px 12px; }
@@ -130,15 +131,16 @@ ul { margin: 0; padding: 0; list-style: none; }
   .routine-group { padding: 10px 12px; }
   .history-body { padding-inline: 12px; }
   .routine-list, .exercise-list, .history-list, .history-detail { max-height: calc(100svh - 72px); }
-  .workout-stage { min-height: calc(100svh - 20px); }
-  .workout-stage h1 { font-size: 30px; }
-  .workout-stage { gap: 6px; }
+  .workout-stage { height: calc(100svh - 20px); gap: 4px; }
+  .workout-stage h1 { margin-bottom: 4px; font-size: 26px; line-height: .94; }
   .workout-stage .thumb-zone { gap: 2px; }
   .lifting-stage .thumb-zone { margin-top: 0; }
+  .lifting-stage .thumb-zone { gap: 6px; }
   .lifting-stage .primary { min-height: 44px; }
-  .stepper-label { gap: 2px; }
-  .stepper { min-height: 48px; }
-  .stepper button { min-height: 46px; }
+  .lifting-stage .stage-action-list .list-link { min-height: 44px; }
+  .stepper-label { gap: 3px; }
+  .stepper { min-height: 46px; }
+  .stepper button { min-height: 44px; }
   .stepper output { font-size: 20px; }
   .list-link > .icon { width: 20px; height: 20px; flex-basis: 20px; }
   .big-timer { margin: 22px 0 16px; font-size: 72px; }
