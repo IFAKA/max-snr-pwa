@@ -199,3 +199,67 @@ button:focus-visible, .button:focus-visible, .import-button:focus-visible, input
   .notice.error { background: #542824; color: #ffd7d2; }
   .app-nav { box-shadow: 0 8px 28px rgba(0,0,0,.28); }
 }
+
+/* Watch contract: the same semantic flow, composed for a 225×225 case. */
+@media (max-width: 260px) {
+  :root { --watch-gutter: 8px; --watch-gap: 6px; }
+  html, body { min-width: 0; overflow-x: hidden; }
+  main { width: 100%; min-height: 100svh; padding: 56px var(--watch-gutter) 12px; }
+  body.workout main { width: 100%; max-width: none; min-height: 100svh; padding: max(7px, env(safe-area-inset-top)) var(--watch-gutter) max(10px, env(safe-area-inset-bottom)); }
+  body.workout .workout-stage { min-height: calc(100svh - max(7px, env(safe-area-inset-top)) - max(10px, env(safe-area-inset-bottom))); }
+  .app-nav { top: max(5px, env(safe-area-inset-top)); width: calc(100% - 12px); min-height: 42px; gap: 5px; padding: 3px 4px 3px 9px; border-radius: 15px; }
+  .app-brand { font-size: 9px; letter-spacing: .1em; }
+  .app-location { font-size: 12px; }
+  .app-menu summary { min-width: 45px; min-height: 34px; padding: 6px 7px; font-size: 11px; }
+  .app-menu summary::after { margin-left: 2px; font-size: 13px; }
+  .app-menu-list { top: calc(100% + 4px); min-width: 122px; padding: 4px; border-radius: 12px; }
+  .app-menu-list a { min-height: 40px; padding: 8px 10px; font-size: 13px; }
+  .workout-stage { min-height: auto; padding: 0; gap: var(--watch-gap); }
+  .stage-info { display: flex; min-height: 0; flex-direction: column; }
+  .context-label { margin-bottom: 2px; font-size: 9px; letter-spacing: .1em; line-height: 1.15; }
+  .workout-stage h1 { max-height: 3.1em; margin: 0; font-size: clamp(24px, 12vw, 31px); line-height: .98; letter-spacing: -.06em; overflow: hidden; }
+  .stage-info > .muted { margin: 4px 0 0; font-size: 13px; line-height: 1.18; }
+  .exercise-meta { margin-top: 7px; }
+  .exercise-progress { gap: 3px; }
+  .exercise-progress-section { min-height: 40px; }
+  .exercise-progress-count { width: 38px; font-size: 15px; }
+  .exercise-dot { width: 38px; }
+  .exercise-dot-label { font-size: 12px; }
+  .exercise-progress-group { gap: 2px; padding: 3px 4px; }
+  .progress-disclosures { gap: 3px; margin-top: 3px; }
+  .progress-disclosure { border-radius: 9px; }
+  .progress-disclosure summary { min-height: 30px; padding: 4px 2px; font-size: 9px; }
+  .progress-disclosure summary::after { font-size: 14px; }
+  .progress-disclosure .disclosure-content { padding: 0 5px 5px; }
+  .progress-sheet-list li, .progress-sheet-list .sheet-choice, .sheet-choice-static { min-height: 40px; font-size: 11px; }
+  .thumb-zone { width: 100%; margin-top: var(--watch-gap); padding: 0; }
+  .controls { gap: 5px; }
+  .stepper-label { gap: 3px; font-size: 9px; letter-spacing: .1em; }
+  .stepper { grid-template-columns: 40px minmax(0, 1fr) 40px; min-height: 50px; border-radius: 13px; }
+  .stepper button { min-height: 48px; font-size: 22px; }
+  .stepper output { font-size: 20px; }
+  .primary { min-height: 46px; margin-top: var(--watch-gap); font-size: 15px; }
+  .workout-disclosure { margin-top: 4px; border-radius: 11px; }
+  .workout-disclosure summary { min-height: 38px; padding: 7px 10px; font-size: 13px; }
+  .workout-disclosure summary::after { font-size: 17px; }
+  .disclosure-content { padding: 0 10px 7px; }
+  .text-action { min-height: 40px; padding: 7px 2px; font-size: 12px; }
+  .group-label { margin: 6px 2px 0; font-size: 9px; }
+  .big-timer { margin: 12px 0 9px; font-size: clamp(60px, 30vw, 76px); line-height: .82; }
+  .rest-stage .big-timer { margin: 9px 0 7px; }
+  .rest-stage .exercise-meta { margin-top: 4px; }
+  .summary-grid { gap: 3px; margin-top: 8px; }
+  .summary-grid div { gap: 2px; padding: 7px 2px; border-radius: 9px; }
+  .summary-grid strong { font-size: 16px; }
+  .summary-grid span { font-size: 9px; }
+  .setup-stage h1 { max-height: none; margin-top: 0; }
+  .setup-routine { margin: 10px 0; }
+}
+
+@media (max-width: 260px) and (max-height: 260px) {
+  .workout-stage { overflow: visible; }
+  .workout-stage .thumb-zone { margin-top: auto; }
+  .workout-stage h1 { font-size: 27px; }
+  .workout-stage .big-timer { margin-block: 8px; font-size: 62px; }
+  .workout-stage.rest-stage .big-timer { font-size: 54px; }
+}

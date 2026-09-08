@@ -4,6 +4,10 @@ import { save } from '../storage.js';
 import { getState } from '../state.js';
 
 export const state = () => getState().active;
+export function workoutStage({className = '', eyebrow, title, body = '', actions = ''}) {
+  return `<section class="workout-stage ${className}" aria-labelledby="workout-title"><div class="stage-info"><p class="context-label">${eyebrow}</p><h1 id="workout-title">${title}</h1>${body}</div><div class="thumb-zone">${actions}</div></section>`;
+}
+export const primaryAction = (id, label, type = 'button') => `<button class="primary" id="${id}" type="${type}">${label}</button>`;
 export function renderDisclosure({id, title, content, className = ''}) {
   return `<details class="workout-disclosure ${className}" id="${id}"><summary>${title}</summary><div class="disclosure-content">${content}</div></details>`;
 }
