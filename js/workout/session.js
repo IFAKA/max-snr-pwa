@@ -94,11 +94,11 @@ const restBetweenSets = active => {
 
 export const exerciseSelectionLocked = active => {
   if (!active || !['lifting', 'rest'].includes(active.phase)) return true;
+  if (active.phase === 'rest') return false;
   const current = active.tasks[active.pos];
   const currentStarted = Boolean(current && active.tasks.some(task => task.exerciseId === current.exerciseId && task.completed));
   const currentSupersetRoundStarted = Boolean(current?.groupType === 'superset' && active.tasks.some(task => task.groupId === current.groupId && task.set === current.set && task.completed));
-  const forcedPartner = active.phase === 'rest' && current?.groupType === 'superset' && supersetPartnerIndex(active, current) >= 0;
-  return restBetweenSets(active) || forcedPartner || (active.phase === 'lifting' && (currentStarted || currentSupersetRoundStarted));
+  return currentStarted || currentSupersetRoundStarted;
 };
 
 export async function selectExercise(exerciseId) {

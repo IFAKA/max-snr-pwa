@@ -1,6 +1,5 @@
 import { app, esc, listMarkup } from './dom.js';
 import { ROUTINE, NAMES } from './routine-data.js';
-import { flatten } from './workout.js';
 import { routineMarkup } from './routine-view.js';
 
 export function renderRoutine() {
@@ -8,7 +7,7 @@ export function renderRoutine() {
   const params = new URLSearchParams(location.search);
   const requestedDay = params.get('day');
   if (requestedDay && Object.prototype.hasOwnProperty.call(ROUTINE, requestedDay)) return params.get('view') === 'exercises' ? renderExercises(requestedDay) : renderDay(requestedDay);
-  const days = Object.entries(ROUTINE).map(([day, items]) => `<li class="${day === today ? 'today' : ''}"><a class="list-link" href="/routine/?day=${encodeURIComponent(day)}"><span><strong>${day === today ? 'Today · ' : ''}${esc(day)}</strong><small>${items ? `${esc(NAMES[day])} · ${flatten(items).length} sets` : 'Rest day'}</small></span><span aria-hidden="true">›</span></a></li>`);
+  const days = Object.entries(ROUTINE).map(([day]) => `<li class="${day === today ? 'today' : ''}"><a class="list-link" href="/routine/?day=${encodeURIComponent(day)}"><span>${day === today ? 'Today · ' : ''}${esc(day)}</span><span aria-hidden="true">›</span></a></li>`);
   app.innerHTML = `<section aria-labelledby="routine-title"><h1 id="routine-title">Routine</h1>${listMarkup(days, 'routine-list', 'Routine days')}</section>`;
 }
 
