@@ -101,7 +101,6 @@ body.workout main { overflow: hidden; padding-top: 0; padding-bottom: 16px; }
 .exercise-dot.is-current { border-width: 2px; border-color: var(--text); box-shadow: 0 0 0 3px var(--accent-soft); opacity: 1; }
 .exercise-dot.is-next-exercise { border-color: var(--accent); }
 .rest-stage .exercise-dot.is-next-exercise { animation: exercise-circle-pulse 1.25s ease-in-out infinite; }
-.next-up { margin: 0; color: var(--muted); font-size: 15px; font-weight: 650; text-align: center; }
 .thumb-zone { margin-top: auto; padding-top: 20px; padding-bottom: max(4px, env(safe-area-inset-bottom)); }
 .controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .controls input { min-height: 52px; font-size: 21px; text-align: center; }
