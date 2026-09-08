@@ -30,3 +30,5 @@ Any new module must be added to `sw.js` precache and the cache version must be i
 There is no build script or automated suite. Run `node --check app.js`, `node --check` for every JavaScript module, `git diff --check`, and serve locally with `python3 -m http.server 4173` to smoke test `/`, `/routine/`, `/history/`, and `/workout/`. Exercise start/resume, refresh during every workout phase, sets/supersets, defer/skip, cancellation, completion/history, import/export, migration, localStorage fallback, and service-worker precache. Clear site storage between scenarios. Use browser validation at mobile dimensions when Chromium is available.
 
 After validation succeeds, deploy with `npx vercel --prod` and report the production URL. Do not deploy with failing validation. Use two-space indentation, semicolon-terminated JavaScript, concise camelCase names, uppercase constants, and `esc()` for user/history-derived HTML.
+
+After finishing and validating any requested change, commit it and push the current branch to its configured remote. Never force-push; report the commit and push result.
