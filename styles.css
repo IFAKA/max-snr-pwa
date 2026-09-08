@@ -106,35 +106,12 @@ button:focus-visible, .button:focus-visible, .import-button:focus-visible, input
 .summary-grid div { display: grid; gap: 4px; padding: 14px 6px; border-radius: 14px; background: var(--surface-raised); text-align: center; }
 .summary-grid strong { font-size: 22px; }
 .summary-grid span { color: var(--muted); font-size: 13px; }
-.exercise-progress { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; width: 100%; gap: 6px; }
-.exercise-progress-section { display: flex; min-width: 0; min-height: 44px; align-items: center; justify-content: center; padding: 4px; border: 0; border-radius: 999px; background: transparent; color: inherit; }
-.exercise-progress-section.progress-completed { justify-self: end; }
-.exercise-progress-section.progress-current { justify-self: center; }
-.exercise-progress-section.progress-remaining { justify-self: start; }
-.exercise-progress-count { display: grid; width: clamp(44px, 13vw, 60px); aspect-ratio: 1; place-items: center; border: 1px solid var(--line); border-radius: 50%; background: var(--accent-soft); font-size: clamp(18px, 5vw, 26px); font-weight: 850; }
-.exercise-progress-count.is-complete { border-color: var(--accent); background: var(--accent); color: #fff; }
-.exercise-progress-current { display: flex; align-items: center; justify-content: center; gap: 5px; }
-.exercise-progress-group { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; padding: 4px 6px; border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line)); border-radius: 999px; background: var(--accent-soft); }
-.exercise-dot { display: block; width: clamp(44px, 13vw, 62px); aspect-ratio: 1; border: 1px solid var(--line); border-radius: 50%; background: var(--accent-soft); }
-.exercise-dot.is-complete { border-color: var(--accent); background: var(--accent); }
-.exercise-dot.is-current { border: 2px solid var(--text); box-shadow: 0 0 0 3px var(--accent-soft); }
-.exercise-dot-label { display: grid; width: 100%; height: 100%; place-items: center; color: #fff; font-size: clamp(14px, 4vw, 22px); font-weight: 900; }
-.progress-remaining.is-attention { animation: remaining-hint-pulse 2.6s ease-in-out infinite; }
 .workout-disclosure { margin-top: 8px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
 .workout-disclosure summary { display: flex; min-height: 44px; align-items: center; justify-content: space-between; padding: 10px 14px; color: var(--text); cursor: pointer; font-weight: 800; list-style: none; }
 .workout-disclosure summary::-webkit-details-marker { display: none; }
 .workout-disclosure summary::after { content: "+"; color: var(--accent); font-size: 20px; }
 .workout-disclosure[open] summary::after { content: "−"; }
 .disclosure-content { padding: 0 14px 12px; }
-.progress-disclosures { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; width: 100%; margin-top: 8px; }
-.progress-disclosure { margin-top: 0; border-radius: 12px; }
-.progress-disclosure summary { min-height: 38px; justify-content: center; padding: 6px 4px; font-size: 11px; }
-.progress-disclosure .disclosure-content { padding: 0 8px 8px; }
-.progress-sheet-list { display: grid; margin: 0; padding: 0; list-style: none; }
-.progress-sheet-list li { min-height: 44px; border-top: 1px solid var(--line); font-size: 14px; font-weight: 750; }
-.progress-sheet-list .sheet-choice { min-height: 44px; color: var(--accent); }
-.sheet-choice-static { display: flex; align-items: center; min-height: 44px; padding: 10px 4px; border-top: 1px solid var(--line); color: var(--muted); }
-.progress-sheet-empty { margin: 0; padding: 10px 4px; color: var(--muted); }
 .choice-list { display: grid; }
 .setup-stage { min-height: calc(100svh - 76px); }
 .setup-stage h1 { margin-top: 8px; }
@@ -142,7 +119,6 @@ button:focus-visible, .button:focus-visible, .import-button:focus-visible, input
 .setup-recovery, .setup-history { margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--line); }
 .setup-recovery h2, .setup-history h2 { font-size: 18px; }
 .setup-recovery .button, .setup-history .button { display: flex; justify-content: space-between; gap: 8px; margin-top: 8px; }
-@keyframes remaining-hint-pulse { 0%,100% { opacity: .78; } 50% { opacity: 1; } }
 @media (max-width: 360px) {
   main { padding: 64px 10px 16px; }
   body.workout main { padding: 10px 10px 16px; }
@@ -165,11 +141,6 @@ button:focus-visible, .button:focus-visible, .import-button:focus-visible, input
   .summary-grid div { padding: 9px 3px; }
   .summary-grid strong { font-size: 18px; }
   .summary-grid span { font-size: 10px; }
-  .exercise-progress { gap: 3px; }
-  .exercise-dot { width: 42px; }
-  .exercise-progress-count { width: 42px; font-size: 17px; }
-  .progress-disclosures { gap: 3px; }
-  .progress-disclosure summary { font-size: 10px; }
   .summary-grid { grid-template-columns: 1fr 1fr; }
   .summary-grid div:last-child { grid-column: 1 / -1; }
   .app-nav { width: calc(100% - 16px); gap: 7px; padding-left: 10px; }
@@ -181,8 +152,6 @@ button:focus-visible, .button:focus-visible, .import-button:focus-visible, input
   .app-location { font-size: 13px; }
   .app-menu summary { min-height: 38px; font-size: 12px; }
   .workout-stage h1 { font-size: 27px; }
-  .progress-disclosures { grid-template-columns: 1fr 1fr; }
-  .progress-disclosure:last-child { grid-column: 1 / -1; }
 }
 @media (max-height: 500px) {
   main { padding-top: 70px; }
@@ -220,18 +189,6 @@ button:focus-visible, .button:focus-visible, .import-button:focus-visible, input
   .workout-stage h1 { max-height: 3.1em; margin: 0; font-size: clamp(24px, 12vw, 31px); line-height: .98; letter-spacing: -.06em; overflow: hidden; }
   .stage-info > .muted { margin: 4px 0 0; font-size: 13px; line-height: 1.18; }
   .exercise-meta { margin-top: 7px; }
-  .exercise-progress { gap: 3px; }
-  .exercise-progress-section { min-height: 40px; }
-  .exercise-progress-count { width: 38px; font-size: 15px; }
-  .exercise-dot { width: 38px; }
-  .exercise-dot-label { font-size: 12px; }
-  .exercise-progress-group { gap: 2px; padding: 3px 4px; }
-  .progress-disclosures { gap: 3px; margin-top: 3px; }
-  .progress-disclosure { border-radius: 9px; }
-  .progress-disclosure summary { min-height: 30px; padding: 4px 2px; font-size: 9px; }
-  .progress-disclosure summary::after { font-size: 14px; }
-  .progress-disclosure .disclosure-content { padding: 0 5px 5px; }
-  .progress-sheet-list li, .progress-sheet-list .sheet-choice, .sheet-choice-static { min-height: 40px; font-size: 11px; }
   .thumb-zone { width: 100%; margin-top: var(--watch-gap); padding: 0; }
   .controls { gap: 5px; }
   .stepper-label { gap: 3px; font-size: 9px; letter-spacing: .1em; }
@@ -359,13 +316,6 @@ button:focus-visible, .button:focus-visible, .import-button:focus-visible, input
   .workout-stage h1 { max-height: none; margin: 0; font-size: 30px; line-height: 1; overflow: visible; }
   .stage-info > .muted { margin-top: 8px; font-size: 14px; }
   .exercise-meta { margin-top: 12px; }
-  .exercise-progress-section { min-height: 44px; }
-  .exercise-progress-count, .exercise-dot { width: 44px; }
-  .exercise-progress-count { font-size: 17px; }
-  .exercise-dot-label { font-size: 13px; }
-  .progress-disclosures { gap: 5px; margin-top: 6px; }
-  .progress-disclosure summary { min-height: 44px; padding: 9px 4px; font-size: 11px; }
-  .progress-sheet-list li, .progress-sheet-list .sheet-choice, .sheet-choice-static { min-height: 44px; font-size: 12px; }
   .workout-stage .thumb-zone { margin-top: 0; padding: 0 0 max(8px, env(safe-area-inset-bottom)); }
   .controls { gap: 8px; }
   .stepper-label { gap: 5px; font-size: 11px; }
@@ -392,16 +342,13 @@ button:focus-visible, .button:focus-visible, .import-button:focus-visible, input
   .app-menu-list { max-width: calc(100vw - 24px); }
   .page-header, .stage-info, .today-screen, .setup-stage, .workout-stage,
   .routine-day, .history-workout, .routine-list, .history-body { min-width: 0; }
-  h1, h2, h3, p, strong, small, .routine-exercise, .sheet-choice-name { overflow-wrap: anywhere; }
+  h1, h2, h3, p, strong, small, .routine-exercise { overflow-wrap: anywhere; }
   .workout-stage { min-height: calc(100svh - 18px); }
   .workout-stage h1 { max-height: none; overflow: visible; }
   .thumb-zone { margin-top: auto; }
   .data-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .routine-exercise { grid-template-columns: minmax(0, 1fr) minmax(0, auto); }
   .routine-exercise span:last-child { white-space: normal; text-align: right; }
-  .progress-disclosures { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .progress-disclosure summary { overflow-wrap: anywhere; }
-  .progress-disclosure:last-child { grid-column: auto; }
 }
 
 /* Apple Watch canvas: the page itself is fixed; only list content may scroll. */
@@ -410,7 +357,7 @@ button:focus-visible, .button:focus-visible, .import-button:focus-visible, input
   main, body.workout main { height: 100svh; min-height: 0; overflow: hidden; }
   .today-screen, .setup-stage { min-height: 0; height: 100%; overflow: hidden; }
   .today-routine-list, .routine-list, .history-body, .app-menu-list,
-  .disclosure-content .choice-list, .progress-sheet-list {
+  .disclosure-content .choice-list {
     overflow-y: auto;
     overscroll-behavior: contain;
     scrollbar-width: thin;
@@ -422,7 +369,6 @@ button:focus-visible, .button:focus-visible, .import-button:focus-visible, input
   .app-menu-list { max-height: calc(100svh - 58px); }
   .workout-stage { height: 100%; min-height: 0; overflow: hidden; }
   .workout-stage .thumb-zone { flex: 0 0 auto; }
-  .lifting-stage .progress-disclosures, .rest-stage .progress-disclosures { display: none; }
   .lifting-stage { gap: 5px; }
   .lifting-stage .stepper { min-height: 52px; }
   .lifting-stage .stepper button { min-height: 50px; }
