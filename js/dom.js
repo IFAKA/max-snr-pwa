@@ -12,7 +12,7 @@ const ICONS = {
   more: '<circle cx="5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1" fill="currentColor" stroke="none"/>',
 };
 export const icon = (name, label = '') => `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${ICONS[name] || ''}</svg><span class="sr-only">${esc(label)}</span>`;
-export const pageNav = current => `<nav class="app-nav" aria-label="Primary"><a class="icon-button${current === 'today' ? ' is-current' : ''}" href="/" aria-label="Today">${icon('home', 'Today')}</a><a class="icon-button${current === 'routine' ? ' is-current' : ''}" href="/routine/" aria-label="Routine">${icon('calendar', 'Routine')}</a><a class="icon-button${current === 'history' ? ' is-current' : ''}" href="/history/" aria-label="History">${icon('history', 'History')}</a></nav>`;
+export const pageNav = current => `<nav class="app-nav" aria-label="Primary"><a class="${current === 'today' ? 'is-current' : ''}" href="/" aria-label="Today">${icon('home', 'Today')}</a><a class="${current === 'routine' ? 'is-current' : ''}" href="/routine/" aria-label="Routine">${icon('calendar', 'Routine')}</a><a class="${current === 'history' ? 'is-current' : ''}" href="/history/" aria-label="History">${icon('history', 'History')}</a></nav>`;
 export const buzz = pattern => navigator.vibrate?.(pattern);
 let wakeLock;
 export async function keepAwake() { try { if ('wakeLock' in navigator && document.visibilityState === 'visible') wakeLock = await navigator.wakeLock.request('screen'); } catch {} }

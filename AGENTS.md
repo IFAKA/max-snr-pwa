@@ -10,6 +10,14 @@ Workout behavior is split by responsibility under `js/workout/`: `task-factory.j
 
 Change routine data in `js/routine-data.js`; persistence or compatibility in `js/storage.js`; workout rules in `js/workout/`; and user-visible workout markup/events in `js/render-workout/`. Keep domain modules independent of presentation and use explicit outcomes for navigation/rendering.
 
+## Apple Watch–First Product/UI Rules
+
+- Treat representative Apple Watch-sized widths as the primary design target; phone layouts expand the same flow rather than introducing a separate interaction model.
+- Prefer glanceable screens with one primary metric or action, shallow navigation, vertical scrolling or paging, full-width capsule actions, and minimal simultaneous controls.
+- Use large, visible metrics and explicit touch controls such as steppers instead of keyboard-dependent fields for workout input. Keep every essential target at least 44px tall.
+- Do not add phone-only navigation or dense desktop-style layouts without documenting an explicit exception.
+- For UI changes, validate watch-sized and phone-sized viewports, large text/zoom, dark mode, reduced motion, keyboard and screen-reader labels, and offline behavior.
+
 ## Compatibility and routing
 
 Preserve state schema `version: 2` with `history` and `active`. Preserve IndexedDB database/object-store names (`maxsnr-workout` / `state`), the `maxsnr` localStorage fallback, and legacy migration behavior. Keep route paths trailing-slash-compatible (`/workout/`, `/history/`). Do not split individual HTML fragments into files.
