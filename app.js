@@ -22,9 +22,13 @@ async function boot() {
       const currentUrl = `${location.pathname}${location.search}${location.hash}`;
       const parentUrl = route === 'routine' && params.has('day')
         ? '/routine/'
-        : route === 'workout' && params.has('day') && !getState()?.active
-          ? `/routine/?day=${encodeURIComponent(params.get('day'))}`
-          : '/';
+        : route === 'history' && params.get('view') === 'workout'
+          ? '/history/?view=workouts'
+          : route === 'history' && params.get('view')
+            ? '/history/'
+            : route === 'workout' && params.has('day') && !getState()?.active
+              ? `/routine/?day=${encodeURIComponent(params.get('day'))}`
+              : '/';
       history.replaceState({route: parentUrl === '/' ? 'today' : route, path: parentUrl}, '', parentUrl);
       history.pushState({route, path: currentUrl}, '', currentUrl);
     } else if (route === 'today' && !history.state?.route) {

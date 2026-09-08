@@ -21,6 +21,7 @@ function renderStart(day) {
     dialog.className = 'confirm-dialog';
     dialog.innerHTML = `<form method="dialog"><h2>Start ${esc(NAMES[day])}?</h2><p class="muted">Your workout will begin with the warm-up.</p><div class="dialog-actions"><button value="cancel">Not yet</button><button class="primary" id="confirm-start" value="default">Start</button></div></form>`;
     document.body.append(dialog);
+    if (new URLSearchParams(location.search).get('confirm') === '1') dialog.showModal();
     dialog.addEventListener('close', async () => {
       if (dialog.returnValue !== 'default') return;
       const button = dialog.querySelector('#confirm-start');
