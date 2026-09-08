@@ -92,17 +92,22 @@ const restBetweenSets = active => {
   return Boolean(current && next && current.exerciseId === next.exerciseId);
 };
 
+export const exerciseSelectionLocked = active => {
+  if (!active || !['lifting', 'rest'].includes(active.phase)) return true;
+  const current = active.tasks[active.pos];
+  const currentStarted = Boolean(current && active.tasks.some(task => task.exerciseId === current.exerciseId && task.completed));
+  const currentSupersetRoundStarted = Boolean(current?.groupType === 'superset' && active.tasks.some(task => task.groupId === current.groupId && task.set === current.set && task.completed));
+  const forcedPartner = active.phase === 'rest' && current?.groupType === 'superset' && supersetPartnerIndex(active, current) >= 0;
+  return restBetweenSets(active) || forcedPartner || (active.phase === 'lifting' && (currentStarted || currentSupersetRoundStarted));
+};
+
 export async function selectExercise(exerciseId) {
   const active = getState().active;
-  if (!active || !['lifting', 'rest'].includes(active.phase)) return false;
+  if (exerciseSelectionLocked(active)) return false;
   const current = active.tasks[active.pos];
   const pos = active.tasks.findIndex(task => task.exerciseId === exerciseId && !task.completed && !task.skipped);
   if (pos < 0) return false;
   const selected = active.tasks[pos];
-  const currentRoundStarted = current?.groupType === 'superset' && active.tasks.some(task => sameSupersetRound(task, current) && task.completed);
-  const forcedPartner = active.phase === 'rest' && current?.groupType === 'superset' && supersetPartnerIndex(active, current) >= 0;
-  if (restBetweenSets(active) || forcedPartner) return false;
-  if (active.phase === 'lifting' && currentRoundStarted) return false;
   if (active.phase === 'lifting' && current && current.groupType !== 'superset' && active.tasks.some(task => task.exerciseId === current.exerciseId && task.completed)) return false;
   if (selected.groupType === 'superset') setSupersetLead(active, selected);
   if (active.phase === 'rest') active.nextPos = pos;

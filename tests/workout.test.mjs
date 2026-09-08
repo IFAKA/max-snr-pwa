@@ -23,10 +23,14 @@ test('superset members alternate within each round', () => {
   ]);
 });
 
-test('timer formatting does not show zero at a minute boundary', () => {
+test('timer formatting uses plain seconds below one minute', () => {
+  assert.equal(formatDuration(0), '0');
+  assert.equal(formatDuration(1000), '1');
+  assert.equal(formatDuration(2000), '2');
+  assert.equal(formatDuration(59000), '59');
   assert.equal(formatDuration(59999), '1:00');
-  assert.equal(formatDuration(59000), '0:59');
-  assert.equal(formatDuration(0), '0:00');
+  assert.equal(formatDuration(60000), '1:00');
+  assert.equal(formatDuration(65000), '1:05');
 });
 
 test('last performance returns the final completed set in the latest workout', () => {

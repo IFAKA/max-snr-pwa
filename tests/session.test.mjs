@@ -9,7 +9,7 @@ globalThis.localStorage = {getItem: key => stored.get(key) || null, setItem: (ke
 const {emptyState, getState, setState} = await import('../js/state.js');
 const {loadState} = await import('../js/storage.js');
 const {startPlank, beginLifting} = await import('../js/workout/timers.js');
-const {start, findNext, deferCurrent, substituteCurrent, undoLastSet, completeSet, continueRest, completeStretch, finishWorkout, selectExercise, finishEarly} = await import('../js/workout/session.js');
+const {start, findNext, deferCurrent, substituteCurrent, undoLastSet, completeSet, continueRest, completeStretch, finishWorkout, selectExercise, exerciseSelectionLocked, finishEarly} = await import('../js/workout/session.js');
 
 const task = (exerciseId, set = 1) => ({id: `${exerciseId}-${set}`, exerciseId, originalName: exerciseId, performedName: exerciseId, alternatives: exerciseId === 'press' ? ['DB press'] : [], set, sets: 2, completed: null, skipped: false, groupId: null});
 const supersetTask = (exerciseId, memberIndex, set = 1) => ({...task(exerciseId, set), groupId: 'arms', groupType: 'superset', memberIndex, groupLabel: 'Arms'});
@@ -137,6 +137,18 @@ test('selecting the second superset member makes it the lead for each round', as
   assert.equal(state.active.tasks[state.active.nextPos].exerciseId, 'extension');
   assert.equal(state.active.tasks[state.active.nextPos].set, 2);
   assert.equal(state.active.supersetLeads.arms, 1);
+});
+
+test('switching exercises is locked after the first superset member starts', async () => {
+  const state = emptyState();
+  const completed = supersetTask('curl', 0);
+  completed.completed = {reps: 8, completedAt: '2026-09-06T12:00:00.000Z'};
+  state.active = {tasks: [completed, supersetTask('extension', 1), supersetTask('curl', 0, 2), supersetTask('extension', 1, 2), task('row')], pos: 1, phase: 'lifting', deferredGroups: [], supersetLeads: {}, draft: {}};
+  setState(state);
+
+  assert.equal(exerciseSelectionLocked(state.active), true);
+  assert.equal(await selectExercise('row'), false);
+  assert.equal(state.active.pos, 1);
 });
 
 test('a superset can be switched during rest when no partner is forced', async () => {

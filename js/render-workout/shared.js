@@ -1,15 +1,22 @@
 import { app, esc, icon } from '../dom.js';
-import { cancelWorkout, selectExercise, finishEarly } from '../workout.js';
+import { cancelWorkout, selectExercise, exerciseSelectionLocked, finishEarly } from '../workout.js';
 import { save } from '../storage.js';
 import { getState } from '../state.js';
 import { openSheet, closeSheet } from '../bottom-sheet.js';
 
 export const state = () => getState().active;
-export function exerciseProgress(active, focusPos = active.pos, preview = false) {
+function exerciseInitials(name) {
+  return String(name || 'Exercise')
+    .trim()
+    .split(/\s+/)
+    .map(word => word[0])
+    .join('')
+    .toUpperCase();
+}
+export function exerciseProgress(active, focusPos = active.pos) {
   const exercises = [];
   active.tasks.forEach(task => { if (!exercises.some(item => item.exerciseId === task.exerciseId)) exercises.push(task); });
   const currentExerciseId = active.tasks[focusPos]?.exerciseId;
-  const nextExercise = preview && active.tasks[active.pos]?.exerciseId !== currentExerciseId;
   const currentExercise = exercises.find(exercise => exercise.exerciseId === currentExerciseId);
   const currentExerciseIds = new Set(currentExercise?.groupType === 'superset'
     ? exercises.filter(exercise => exercise.groupType === 'superset' && exercise.groupId === currentExercise.groupId).map(exercise => exercise.exerciseId)
@@ -30,8 +37,9 @@ export function exerciseProgress(active, focusPos = active.pos, preview = false)
     const done = tasks.every(task => task.completed || task.skipped);
     const current = exercise.exerciseId === currentExerciseId;
     const activeSet = current ? Number(active.tasks[focusPos]?.set || 1) : 0;
-    const stateClass = `${done ? ' is-complete' : ''}${current ? ' is-current' : ''}${current && nextExercise ? ' is-next-exercise' : ''}`;
-    return `<span class="exercise-dot${stateClass}" style="--set-count: ${tasks.length}; --set-completed: ${completedSets}; --set-active: ${activeSet}" aria-hidden="true"></span>`;
+    const stateClass = `${done ? ' is-complete' : ''}${current ? ' is-current' : ''}`;
+    const initials = current ? `<span class="exercise-dot-label">${esc(exerciseInitials(exercise.performedName))}</span>` : '';
+    return `<span class="exercise-dot${stateClass}" style="--set-count: ${tasks.length}; --set-completed: ${completedSets}; --set-active: ${activeSet}" aria-hidden="true">${initials}</span>`;
   };
   const currentDots = [];
   for (const exercise of exercises) {
@@ -52,10 +60,7 @@ function exerciseChoices() {
   const groups = new Map();
   active.tasks.forEach(task => { if (!groups.has(task.exerciseId)) groups.set(task.exerciseId, task); });
   const current = active.tasks[active.pos];
-  const currentStarted = Boolean(current && active.tasks.some(task => task.exerciseId === current.exerciseId && task.completed));
-  const next = active.tasks[active.nextPos];
-  const restBetweenSets = active.phase === 'rest' && current && next && current.exerciseId === next.exerciseId;
-  const selectionLocked = active.phase === 'lifting' && currentStarted || restBetweenSets || !['lifting', 'rest'].includes(active.phase);
+  const selectionLocked = exerciseSelectionLocked(active);
   const renderProgress = (tasks, isCurrent) => {
     const completedSets = tasks.filter(task => task.completed).length;
     const done = tasks.every(task => task.completed || task.skipped);
