@@ -31,7 +31,7 @@ export function exerciseProgress(active, focusPos = active.pos) {
   const remainingExercises = exercises.filter(exercise => !currentExerciseIds.has(exercise.exerciseId) && !isDone(exercise));
   const currentExercises = exercises.filter(exercise => currentExerciseIds.has(exercise.exerciseId));
   const renderSheetItems = (items, interactive = false, canSelect = true) => items.length
-    ? `<ul class="progress-sheet-list">${items.map(exercise => interactive ? `<li><button class="text-action sheet-choice" type="button" data-choose-exercise="${esc(exercise.exerciseId)}" aria-label="Choose ${esc(exercise.performedName)}"${canSelect ? '' : ' disabled'}><span class="sheet-choice-name">${esc(exercise.performedName)}</span></button></li>` : `<li>${esc(exercise.performedName)}</li>`).join('')}</ul>`
+    ? `<ul class="progress-sheet-list">${items.map(exercise => interactive ? `<li><button class="text-action sheet-choice" type="button" data-choose-exercise="${esc(exercise.exerciseId)}" aria-label="Choose ${esc(exercise.performedName)}"${canSelect ? '' : ' disabled'}><span class="sheet-choice-name">${esc(exercise.performedName)}</span></button></li>` : `<li class="sheet-choice-static">${esc(exercise.performedName)}</li>`).join('')}</ul>`
     : '<p class="progress-sheet-empty">Nothing here yet.</p>';
   const renderProgressSheet = (id, title, items, interactive = false, canSelect = true) => renderSheet({id, title, className: 'progress-sheet', content: renderSheetItems(items, interactive, canSelect)});
   const renderDot = exercise => {
