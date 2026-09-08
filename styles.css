@@ -310,3 +310,74 @@ button:focus-visible, .button:focus-visible, .import-button:focus-visible, input
   .data-actions { gap: 5px; }
   .icon-button { min-height: 40px; }
 }
+
+/* Final watch rules: preserve hierarchy and scrolling instead of shrinking content to nothing. */
+@media (max-width: 260px) {
+  :root { --watch-gutter: 12px; }
+  body { overflow-x: hidden; }
+  main, body.workout main { width: 100%; max-width: 225px; min-height: 100svh; margin-inline: auto; padding: 58px var(--watch-gutter) 18px; overflow-x: hidden; }
+  body.workout main { padding-top: max(10px, env(safe-area-inset-top)); }
+  .app-nav { width: calc(100% - 12px); min-height: 44px; gap: 8px; padding: 4px 5px 4px 10px; border-radius: 16px; }
+  .app-brand { font-size: 10px; }
+  .app-location { font-size: 13px; }
+  .app-menu summary { min-width: 52px; min-height: 44px; padding: 9px 8px; font-size: 12px; }
+  .app-menu-list a { min-height: 44px; font-size: 13px; }
+  h1 { font-size: 30px; line-height: 1; letter-spacing: -.055em; }
+  h2 { font-size: 19px; }
+  p { line-height: 1.35; }
+  .page-header { margin-bottom: 14px; }
+  .context-label, .group-label { font-size: 11px; line-height: 1.2; }
+  .today-screen { min-height: 0; }
+  .today-bottom-action { margin: 0 0 14px; padding: 0; }
+  .today-bottom-action p { font-size: 12px; }
+  .today-routine { margin-top: 0; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+  .today-routine-heading, .setup-routine > summary { display: flex; min-height: 44px; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; cursor: pointer; list-style: none; font-size: 14px; font-weight: 800; }
+  .today-routine-heading::-webkit-details-marker, .setup-routine > summary::-webkit-details-marker { display: none; }
+  .today-routine-heading::after, .setup-routine > summary::after { content: "+"; color: var(--accent); font-size: 20px; }
+  .today-routine[open] .today-routine-heading::after, .setup-routine[open] > summary::after { content: "−"; }
+  .today-routine-list { margin: 0; padding: 0 12px 12px; }
+  .today-routine-heading small, .setup-routine summary small { color: var(--muted); font-size: 11px; font-weight: 700; }
+  .routine-day, .history-workout { border-radius: 14px; }
+  .routine-day-link, .history-workout > summary { min-height: 54px; padding: 10px 12px; }
+  .routine-day-link strong, .history-workout summary strong { font-size: 15px; }
+  .routine-day-link small, .history-workout summary small { font-size: 11px; }
+  .routine-exercise { padding: 8px 0; font-size: 12px; }
+  .routine-group { padding: 8px; }
+  .button, button { min-height: 44px; }
+  .primary { min-height: 48px; margin-top: 8px; padding: 10px 12px; font-size: 16px; }
+  .secondary { min-height: 44px; font-size: 13px; }
+  .data-actions { grid-template-columns: 1fr 1fr; }
+  .data-actions button, .data-actions .import-button { min-height: 44px; }
+  .setup-stage { min-height: 0; }
+  .setup-stage h1 { margin: 0; font-size: 30px; }
+  .setup-stage .primary { margin-block: 12px 14px; }
+  .setup-routine { margin: 0; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+  .setup-stage .setup-routine::before { content: none; }
+  .setup-routine > .routine-list { padding: 0 12px 12px; }
+  .setup-recovery, .setup-history { margin-top: 18px; padding-top: 12px; }
+  .workout-stage { min-height: 0; gap: 16px; padding: 0; }
+  .workout-stage h1 { max-height: none; margin: 0; font-size: 30px; line-height: 1; overflow: visible; }
+  .stage-info > .muted { margin-top: 8px; font-size: 14px; }
+  .exercise-meta { margin-top: 12px; }
+  .exercise-progress-section { min-height: 44px; }
+  .exercise-progress-count, .exercise-dot { width: 44px; }
+  .exercise-progress-count { font-size: 17px; }
+  .exercise-dot-label { font-size: 13px; }
+  .progress-disclosures { gap: 5px; margin-top: 6px; }
+  .progress-disclosure summary { min-height: 44px; padding: 9px 4px; font-size: 11px; }
+  .progress-sheet-list li, .progress-sheet-list .sheet-choice, .sheet-choice-static { min-height: 44px; font-size: 12px; }
+  .workout-stage .thumb-zone { margin-top: 0; padding: 0 0 max(8px, env(safe-area-inset-bottom)); }
+  .controls { gap: 8px; }
+  .stepper-label { gap: 5px; font-size: 11px; }
+  .stepper { grid-template-columns: 44px minmax(0, 1fr) 44px; min-height: 58px; border-radius: 15px; }
+  .stepper button { min-height: 56px; font-size: 25px; }
+  .stepper output { font-size: 23px; }
+  .workout-disclosure { margin-top: 8px; }
+  .workout-disclosure summary { min-height: 44px; padding: 10px 12px; font-size: 14px; }
+  .text-action { min-height: 44px; padding: 10px 2px; font-size: 13px; }
+  .big-timer, .workout-stage .big-timer, .rest-stage .big-timer { margin: 18px 0 14px; font-size: 72px; line-height: .9; }
+  .summary-grid { gap: 5px; margin-top: 12px; }
+  .summary-grid div { padding: 10px 4px; border-radius: 11px; }
+  .summary-grid strong { font-size: 19px; }
+  .summary-grid span { font-size: 11px; }
+}

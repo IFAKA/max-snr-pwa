@@ -24,38 +24,7 @@ export function renderLifting() {
     saveDraft();
   };
   document.querySelectorAll('[data-stepper]').forEach(button => {
-    let repeatTimer;
-    let repeatInterval;
-    let repeated = false;
-    let pointerActivated = false;
-    const stopRepeating = () => {
-      window.clearTimeout(repeatTimer);
-      window.clearInterval(repeatInterval);
-      repeatTimer = undefined;
-      repeatInterval = undefined;
-    };
-    button.addEventListener('click', () => {
-      if (pointerActivated || repeated) { pointerActivated = false; repeated = false; return; }
-      changeValue(button);
-    });
-    button.addEventListener('pointerdown', event => {
-      if (event.button !== 0) return;
-      pointerActivated = true;
-      repeated = false;
-      changeValue(button);
-      repeatTimer = window.setTimeout(() => {
-        repeated = true;
-        let delay = 135;
-        const repeat = () => {
-          changeValue(button);
-          delay = Math.max(42, delay * .82);
-          repeatInterval = window.setTimeout(repeat, delay);
-        };
-        repeatInterval = window.setTimeout(repeat, delay);
-      }, 360);
-      button.setPointerCapture?.(event.pointerId);
-    });
-    ['pointerup', 'pointercancel', 'pointerleave'].forEach(type => button.addEventListener(type, stopRepeating));
+    button.addEventListener('click', () => changeValue(button));
   });
   form.onsubmit = event => runAction(event.submitter, async () => { event.preventDefault(); saveDraft(); const result = await completeSet(); if (result?.error) { showError(new Error(result.error)); return false; } return result; });
 }
