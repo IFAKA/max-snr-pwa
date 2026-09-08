@@ -45,12 +45,16 @@ button:focus-visible, .button:focus-visible, .import-button:focus-visible, input
 .empty-state { padding: 20px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 .icon { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
-.app-nav { position: fixed; z-index: 5; top: max(8px, env(safe-area-inset-top)); right: 0; left: 0; display: flex; width: min(calc(100% - 24px), 42rem); min-height: 52px; align-items: center; justify-content: space-between; gap: 8px; margin: auto; padding: 5px 6px 5px 14px; border: 1px solid var(--line); border-radius: 999px; background: color-mix(in srgb, var(--surface) 90%, transparent); box-shadow: 0 8px 28px rgba(18,35,24,.08); backdrop-filter: blur(16px); }
-.app-nav::before { content: "MAXSNR"; color: var(--accent); font-size: 12px; font-weight: 900; letter-spacing: .12em; }
-.app-nav a { display: inline-flex; min-width: 44px; min-height: 42px; align-items: center; justify-content: center; gap: 6px; border: 0; color: inherit; text-decoration: none; }
-.app-nav a.is-current { color: var(--accent); font-weight: 850; }
-.app-nav a .sr-only { position: static; width: auto; height: auto; margin: 0; overflow: visible; clip: auto; white-space: normal; font-size: 13px; }
-.app-nav a .icon { display: none; }
+.app-nav { position: fixed; z-index: 5; top: max(8px, env(safe-area-inset-top)); right: 0; left: 0; display: flex; width: min(calc(100% - 24px), 42rem); min-height: 52px; align-items: center; gap: 10px; margin: auto; padding: 5px 6px 5px 14px; border: 1px solid var(--line); border-radius: 999px; background: color-mix(in srgb, var(--surface) 90%, transparent); box-shadow: 0 8px 28px rgba(18,35,24,.08); backdrop-filter: blur(16px); }
+.app-brand { flex: 0 0 auto; color: var(--accent); font-size: 12px; font-weight: 900; letter-spacing: .12em; text-decoration: none; }
+.app-location { min-width: 0; overflow: hidden; color: var(--text); font-size: 14px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+.app-menu { position: relative; margin-left: auto; }
+.app-menu summary { display: grid; min-width: 54px; min-height: 42px; place-items: center; padding: 9px 12px; border: 0; border-radius: 999px; color: var(--accent); cursor: pointer; font-size: 13px; font-weight: 800; list-style: none; }
+.app-menu summary::-webkit-details-marker { display: none; }
+.app-menu summary::after { content: "⌄"; margin-left: 4px; font-size: 16px; }
+.app-menu-list { position: absolute; top: calc(100% + 8px); right: 0; display: grid; min-width: 150px; padding: 6px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); box-shadow: 0 12px 32px rgba(18,35,24,.16); }
+.app-menu-list a { display: flex; min-height: 44px; align-items: center; padding: 10px 12px; border-radius: 10px; color: inherit; text-decoration: none; }
+.app-menu-list a:hover, .app-menu-list a:focus-visible, .app-menu-list a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); }
 .today-screen { display: flex; min-height: calc(100svh - 76px); flex-direction: column; }
 .today-routine-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .today-routine-heading p { margin-bottom: 0; }
@@ -148,9 +152,9 @@ body.sheet-open { overflow: hidden; }
   .controls { grid-template-columns: 1fr; }
   .summary-grid { grid-template-columns: 1fr 1fr; }
   .summary-grid div:last-child { grid-column: 1 / -1; }
-  .app-nav { width: calc(100% - 16px); }
-  .app-nav::before { font-size: 11px; }
-  .app-nav a .sr-only { font-size: 12px; }
+  .app-nav { width: calc(100% - 16px); gap: 7px; padding-left: 10px; }
+  .app-brand { font-size: 11px; }
+  .app-menu summary { min-width: 50px; padding-inline: 8px; }
 }
 @media (max-height: 500px) {
   main { padding-top: 70px; }
