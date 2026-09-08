@@ -112,7 +112,7 @@ body.workout main { overflow: hidden; padding-top: 0; padding-bottom: 16px; }
 .thumb-zone { margin-top: auto; padding-top: 20px; padding-bottom: max(4px, env(safe-area-inset-bottom)); }
 .controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .controls input { min-height: 52px; font-size: 21px; text-align: center; }
-.big-timer { margin: 30px 0; border: 0; background: transparent; color: var(--text); font-size: clamp(58px, 20vw, 88px); font-weight: 850; line-height: 1; letter-spacing: -.07em; text-align: center; }
+.big-timer { display: block; width: 100%; margin: 30px 0; border: 0; background: transparent; color: var(--text); font-size: clamp(58px, 20vw, 88px); font-weight: 850; line-height: 1; letter-spacing: -.07em; text-align: center; }
 .big-timer.is-attention { animation: attention-pulse 1.25s ease-in-out infinite; }
 .exercise-progress-section.is-attention { border-radius: 999px; animation: remaining-hint-pulse 2.6s ease-in-out infinite; }
 .rest-stage .big-timer { margin: 24px 0 12px; }
