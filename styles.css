@@ -136,7 +136,6 @@ body.sheet-open { overflow: hidden; }
 .setup-stage { min-height: calc(100svh - 76px); }
 .setup-stage h1 { margin-top: 8px; }
 .setup-routine { margin: 18px 0; }
-.setup-stage .thumb-zone { margin-top: 24px; }
 .setup-recovery, .setup-history { margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--line); }
 .setup-recovery h2, .setup-history h2 { font-size: 18px; }
 .setup-recovery .button, .setup-history .button { display: flex; justify-content: space-between; gap: 8px; margin-top: 8px; }

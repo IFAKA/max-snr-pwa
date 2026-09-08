@@ -55,7 +55,7 @@ function renderStart(day) {
   const recoveryDays = !items ? missedDays(state.history, day) : [];
   const recoveryMarkup = recoveryDays.length ? `<section class="setup-recovery"><h2>Make up a missed workout</h2><p class="muted">Choose a routine you missed earlier this week.</p>${recoveryDays.map(missed => `<a class="button secondary" href="/workout/?day=${encodeURIComponent(missed)}">${esc(NAMES[missed])}<span>${esc(missed)}</span></a>`).join('')}</section>` : '';
   const content = items ? `<p class="context-label">${esc(day)} · ${flatten(items).length} sets</p><h1>${esc(NAMES[day])}</h1><button class="primary" id="start" type="button">Start workout</button><section class="setup-routine" aria-label="Exercises">${routineMarkup(items)}</section>${workoutHistoryMarkup(workouts)}` : `<p class="context-label">${esc(day)}</p><h1>Rest day</h1><p class="muted">Recover today, or make up a missed session.</p>${recoveryMarkup}${workouts.length ? workoutHistoryMarkup(workouts) : ''}`;
-  app.innerHTML = `<div class="workout-stage setup-stage"><div class="stage-info">${content}</div><div class="thumb-zone"><a class="button secondary" href="/routine/">Back to routine</a></div></div>${pageNav('routine')}`;
+  app.innerHTML = `<div class="workout-stage setup-stage"><div class="stage-info">${content}</div></div>${pageNav('routine')}`;
   document.querySelector('#start')?.addEventListener('click', async event => { event.currentTarget.disabled = true; try { if (await start(day)) location.assign('/workout/'); } catch (error) { event.currentTarget.disabled = false; const message = document.createElement('p'); message.className = 'notice error'; message.textContent = error.message; event.currentTarget.after(message); } });
 }
 
