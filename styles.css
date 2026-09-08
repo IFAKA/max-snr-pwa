@@ -101,12 +101,12 @@ body.workout main { overflow: hidden; padding-top: 0; padding-bottom: 16px; }
 .exercise-dot.is-current { border-width: 2px; border-color: var(--text); box-shadow: 0 0 0 3px var(--accent-soft); opacity: 1; }
 .exercise-dot.is-next-exercise { border-color: var(--accent); }
 .rest-stage .exercise-dot.is-next-exercise { animation: exercise-circle-pulse 1.25s ease-in-out infinite; }
-.next-up { margin: 16px 0 0; padding: 11px 12px; border-left: 3px solid var(--accent); background: var(--surface); font-size: 14px; }
-.next-up span { display: block; margin-bottom: 3px; color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.next-up { margin: 12px 0 0; color: var(--muted); font-size: 15px; font-weight: 650; text-align: center; }
 .thumb-zone { margin-top: auto; padding-top: 20px; padding-bottom: max(4px, env(safe-area-inset-bottom)); }
 .controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .controls input { min-height: 52px; font-size: 21px; text-align: center; }
 .big-timer { margin: 30px 0; color: var(--text); font-size: clamp(58px, 20vw, 88px); font-weight: 850; line-height: 1; letter-spacing: -.07em; text-align: center; }
+.rest-stage .big-timer { margin: 24px 0 30px; }
 .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 18px; }
 .summary-grid div { display: grid; gap: 4px; padding: 14px 8px; text-align: center; }
 .summary-grid strong { font-size: 20px; }
