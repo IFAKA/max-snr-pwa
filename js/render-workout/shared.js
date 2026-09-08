@@ -17,6 +17,13 @@ export function exerciseProgress(active, focusPos = active.pos, preview = false)
   const isDone = exercise => active.tasks.filter(task => task.exerciseId === exercise.exerciseId).every(task => task.completed || task.skipped);
   const completed = exercises.filter(exercise => !currentExerciseIds.has(exercise.exerciseId) && isDone(exercise)).length;
   const remaining = exercises.length - completed - currentExerciseIds.size;
+  const completedExercises = exercises.filter(exercise => !currentExerciseIds.has(exercise.exerciseId) && isDone(exercise));
+  const remainingExercises = exercises.filter(exercise => !currentExerciseIds.has(exercise.exerciseId) && !isDone(exercise));
+  const currentExercises = exercises.filter(exercise => currentExerciseIds.has(exercise.exerciseId));
+  const renderSheetItems = items => items.length
+    ? `<ul class="progress-sheet-list">${items.map(exercise => `<li>${esc(exercise.performedName)}</li>`).join('')}</ul>`
+    : '<p class="progress-sheet-empty">Nothing here yet.</p>';
+  const renderSheet = (id, title, items) => `<div class="sheet-backdrop" id="${id}-backdrop" data-sheet-backdrop="${id}" hidden></div><section class="action-sheet progress-sheet" id="${id}" data-sheet role="dialog" aria-modal="true" aria-labelledby="${id}-title" aria-hidden="true" tabindex="-1" hidden><div class="sheet-content"><div class="sheet-header" data-sheet-handle><div class="sheet-handle" aria-hidden="true"></div><h2 id="${id}-title">${title}</h2></div>${renderSheetItems(items)}</div></section>`;
   const renderDot = exercise => {
     const tasks = active.tasks.filter(task => task.exerciseId === exercise.exerciseId);
     const completedSets = tasks.filter(task => task.completed).length;
@@ -36,7 +43,8 @@ export function exerciseProgress(active, focusPos = active.pos, preview = false)
     }
     currentDots.push(renderDot(exercise));
   }
-  return `<span class="exercise-progress" role="img" aria-label="${completed} completed, ${currentExerciseIds.size} current, ${remaining} remaining"><span class="exercise-progress-section"><span class="exercise-progress-count is-complete">${completed}</span></span><span class="exercise-progress-section is-current"><span class="exercise-progress-current">${currentDots.join('')}</span></span><span class="exercise-progress-section"><span class="exercise-progress-count">${remaining}</span></span></span>`;
+  const currentLabel = currentExercises.map(exercise => exercise.performedName).join(', ') || 'No current exercise';
+  return `<div class="exercise-progress" role="group" aria-label="Exercise progress"><button class="exercise-progress-section" type="button" data-open-sheet="progress-completed-sheet" aria-haspopup="dialog" aria-controls="progress-completed-sheet" aria-label="${completed} completed exercises"><span class="exercise-progress-count is-complete">${completed}</span></button><button class="exercise-progress-section is-current" type="button" data-open-sheet="progress-current-sheet" aria-haspopup="dialog" aria-controls="progress-current-sheet" aria-label="Current: ${esc(currentLabel)}"><span class="exercise-progress-current">${currentDots.join('')}</span></button><button class="exercise-progress-section" type="button" data-open-sheet="progress-remaining-sheet" aria-haspopup="dialog" aria-controls="progress-remaining-sheet" aria-label="${remaining} remaining exercises"><span class="exercise-progress-count">${remaining}</span></button>${renderSheet('progress-completed-sheet', 'Completed exercises', completedExercises)}${renderSheet('progress-current-sheet', 'Current exercise', currentExercises)}${renderSheet('progress-remaining-sheet', 'Remaining exercises', remainingExercises)}</div>`;
 }
 function exerciseChoices() {
   const active = state();
