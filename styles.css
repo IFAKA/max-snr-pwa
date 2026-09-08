@@ -91,10 +91,9 @@ body.workout main { overflow: hidden; padding-top: 0; padding-bottom: 16px; }
 .workout-stage h1 { margin-top: 7px; font-size: clamp(34px, 10vw, 48px); }
 .context-label { margin-bottom: 5px; color: var(--muted); font-size: 12px; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
 .exercise-meta { display: flex; align-items: center; width: 100%; margin-top: 10px; }
-.exercise-progress { display: grid; grid-template-columns: minmax(42px, .7fr) minmax(0, 2fr) minmax(42px, .7fr); align-items: end; width: 100%; gap: 8px; }
+.exercise-progress { display: grid; grid-template-columns: minmax(36px, .7fr) minmax(0, 2fr) minmax(36px, .7fr); align-items: center; width: 100%; gap: 5px; }
 .exercise-progress-section { display: grid; min-width: 0; justify-items: center; gap: 5px; }
-.exercise-progress-label { color: var(--muted); font-size: 10px; font-weight: 850; letter-spacing: .08em; line-height: 1; text-transform: uppercase; }
-.exercise-progress-count { display: grid; width: min(100%, 42px); aspect-ratio: 1; place-items: center; border: 1px solid var(--text); border-radius: 50%; background: var(--text); color: var(--bg); font-size: 15px; font-weight: 850; line-height: 1; }
+.exercise-progress-count { display: grid; width: min(100%, 36px); aspect-ratio: 1; place-items: center; border: 1px solid var(--line); border-radius: 50%; background: var(--accent-soft); color: var(--text); font-size: 14px; font-weight: 850; line-height: 1; }
 .exercise-progress-count.is-complete { border-color: var(--accent); background: var(--accent); color: var(--bg); }
 .exercise-progress-current { display: flex; align-items: center; justify-content: center; width: 100%; min-width: 0; gap: 5px; }
 .exercise-progress-current > .exercise-dot { flex: 0 1 42px; }

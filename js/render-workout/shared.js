@@ -36,7 +36,7 @@ export function exerciseProgress(active, focusPos = active.pos, preview = false)
     }
     currentDots.push(renderDot(exercise));
   }
-  return `<span class="exercise-progress" role="img" aria-label="${completed} completed, ${currentExerciseIds.size} current, ${remaining} remaining"><span class="exercise-progress-section"><span class="exercise-progress-label">Done</span><span class="exercise-progress-count is-complete">${completed}</span></span><span class="exercise-progress-section is-current"><span class="exercise-progress-label">Current</span><span class="exercise-progress-current">${currentDots.join('')}</span></span><span class="exercise-progress-section"><span class="exercise-progress-label">Remaining</span><span class="exercise-progress-count">${remaining}</span></span></span>`;
+  return `<span class="exercise-progress" role="img" aria-label="${completed} completed, ${currentExerciseIds.size} current, ${remaining} remaining"><span class="exercise-progress-section"><span class="exercise-progress-count is-complete">${completed}</span></span><span class="exercise-progress-section is-current"><span class="exercise-progress-current">${currentDots.join('')}</span></span><span class="exercise-progress-section"><span class="exercise-progress-count">${remaining}</span></span></span>`;
 }
 function exerciseChoices() {
   const active = state();
