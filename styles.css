@@ -120,24 +120,21 @@ button:focus-visible, .button:focus-visible, .import-button:focus-visible, input
 .exercise-dot.is-current { border: 2px solid var(--text); box-shadow: 0 0 0 3px var(--accent-soft); }
 .exercise-dot-label { display: grid; width: 100%; height: 100%; place-items: center; color: #fff; font-size: clamp(14px, 4vw, 22px); font-weight: 900; }
 .progress-remaining.is-attention { animation: remaining-hint-pulse 2.6s ease-in-out infinite; }
-.sheet-backdrop { position: fixed; z-index: 20; inset: 0; background: rgba(12,18,14,.42); opacity: 0; transition: opacity 180ms ease; }
-.sheet-backdrop.is-open { opacity: 1; }
-body.sheet-open { overflow: hidden; }
-.action-sheet { position: fixed; z-index: 21; right: 0; bottom: 0; left: 0; max-height: min(90svh,42rem); overflow: hidden auto; padding: 0; border: 1px solid var(--line); border-bottom: 0; border-radius: 22px 22px 0 0; background: var(--surface); color: var(--text); box-shadow: 0 -18px 60px rgba(0,0,0,.22); transform: translateY(calc(100% + 24px)); transition: transform 220ms var(--ease-out); }
-.action-sheet.is-open { transform: translateY(var(--sheet-translate,0)); }
-.action-sheet.is-closing { transform: translateY(calc(100% + 24px)); }
-.action-sheet.is-dragging { transition: none; user-select: none; }
-.sheet-content { padding: 10px 16px calc(12px + env(safe-area-inset-bottom)); }
-.sheet-header { touch-action: none; }
-.sheet-handle { width: 40px; height: 5px; margin: 0 auto 12px; border-radius: 99px; background: var(--line); }
-.sheet-title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.sheet-title-row h2 { margin-bottom: 12px; }
-.sheet-close { min-width: 44px; min-height: 44px; padding: 6px; }
+.workout-disclosure { margin-top: 8px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
+.workout-disclosure summary { display: flex; min-height: 44px; align-items: center; justify-content: space-between; padding: 10px 14px; color: var(--text); cursor: pointer; font-weight: 800; list-style: none; }
+.workout-disclosure summary::-webkit-details-marker { display: none; }
+.workout-disclosure summary::after { content: "+"; color: var(--accent); font-size: 20px; }
+.workout-disclosure[open] summary::after { content: "−"; }
+.disclosure-content { padding: 0 14px 12px; }
+.progress-disclosures { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; width: 100%; margin-top: 8px; }
+.progress-disclosure { margin-top: 0; border-radius: 12px; }
+.progress-disclosure summary { min-height: 38px; justify-content: center; padding: 6px 4px; font-size: 11px; }
+.progress-disclosure .disclosure-content { padding: 0 8px 8px; }
 .progress-sheet-list { display: grid; margin: 0; padding: 0; list-style: none; }
-.progress-sheet-list li { min-height: 52px; border-top: 1px solid var(--line); font-size: 16px; font-weight: 750; }
-.progress-sheet-list .sheet-choice { min-height: 52px; color: var(--accent); }
-.sheet-choice-static { display: flex; align-items: center; min-height: 52px; padding: 12px 4px; border-top: 1px solid var(--line); color: var(--muted); }
-.progress-sheet-empty { margin: 0; padding: 12px 4px; color: var(--muted); }
+.progress-sheet-list li { min-height: 44px; border-top: 1px solid var(--line); font-size: 14px; font-weight: 750; }
+.progress-sheet-list .sheet-choice { min-height: 44px; color: var(--accent); }
+.sheet-choice-static { display: flex; align-items: center; min-height: 44px; padding: 10px 4px; border-top: 1px solid var(--line); color: var(--muted); }
+.progress-sheet-empty { margin: 0; padding: 10px 4px; color: var(--muted); }
 .choice-list { display: grid; }
 .setup-stage { min-height: calc(100svh - 76px); }
 .setup-stage h1 { margin-top: 8px; }
@@ -147,14 +144,45 @@ body.sheet-open { overflow: hidden; }
 .setup-recovery .button, .setup-history .button { display: flex; justify-content: space-between; gap: 8px; margin-top: 8px; }
 @keyframes remaining-hint-pulse { 0%,100% { opacity: .78; } 50% { opacity: 1; } }
 @media (max-width: 360px) {
-  main { padding-inline: 12px; }
-  .workout-stage { padding-inline: 0; }
-  .controls { grid-template-columns: 1fr; }
+  main { padding: 64px 10px 16px; }
+  body.workout main { padding: 10px 10px 16px; }
+  .workout-stage { min-height: auto; padding-inline: 0; }
+  .workout-stage h1 { margin-top: 8px; font-size: clamp(28px, 12vw, 34px); line-height: 1.04; }
+  .context-label, .group-label { font-size: 11px; }
+  .stage-info > .muted { font-size: 15px; }
+  .exercise-meta { margin-top: 12px; }
+  .controls { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .stepper-label { gap: 4px; font-size: 10px; }
+  .stepper { grid-template-columns: 38px minmax(0, 1fr) 38px; min-height: 52px; border-radius: 15px; }
+  .stepper button { min-height: 50px; font-size: 24px; }
+  .stepper output { font-size: 21px; }
+  .thumb-zone { margin-top: 18px; padding-top: 0; }
+  .primary { min-height: 50px; margin-top: 8px; font-size: 16px; }
+  .secondary { min-height: 44px; }
+  .big-timer { margin: 18px 0; font-size: clamp(56px, 24vw, 72px); }
+  .rest-stage .big-timer { margin: 14px 0 8px; }
+  .summary-grid { grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 12px; }
+  .summary-grid div { padding: 9px 3px; }
+  .summary-grid strong { font-size: 18px; }
+  .summary-grid span { font-size: 10px; }
+  .exercise-progress { gap: 3px; }
+  .exercise-dot { width: 42px; }
+  .exercise-progress-count { width: 42px; font-size: 17px; }
+  .progress-disclosures { gap: 3px; }
+  .progress-disclosure summary { font-size: 10px; }
   .summary-grid { grid-template-columns: 1fr 1fr; }
   .summary-grid div:last-child { grid-column: 1 / -1; }
   .app-nav { width: calc(100% - 16px); gap: 7px; padding-left: 10px; }
   .app-brand { font-size: 11px; }
   .app-menu summary { min-width: 50px; padding-inline: 8px; }
+}
+@media (max-width: 260px) {
+  .app-nav { min-height: 46px; }
+  .app-location { font-size: 13px; }
+  .app-menu summary { min-height: 38px; font-size: 12px; }
+  .workout-stage h1 { font-size: 27px; }
+  .progress-disclosures { grid-template-columns: 1fr 1fr; }
+  .progress-disclosure:last-child { grid-column: 1 / -1; }
 }
 @media (max-height: 500px) {
   main { padding-top: 70px; }

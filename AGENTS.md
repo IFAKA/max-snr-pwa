@@ -14,6 +14,7 @@ Change routine data in `js/routine-data.js`; persistence or compatibility in `js
 
 - Treat representative Apple Watch-sized widths as the primary design target; phone layouts expand the same flow rather than introducing a separate interaction model.
 - Prefer glanceable screens with one primary metric or action, shallow hierarchical navigation, vertical scrolling or paging, full-width capsule actions, and minimal simultaneous controls. On watch-sized screens, use a compact current-location header with a native disclosure menu; never use a clipped or persistent phone-style tab bar.
+- In active workouts, do not use custom bottom sheets, drawers, or modal action overlays; use a shallow inline disclosure or a dedicated next screen with a clear return path.
 - Use large, visible metrics and explicit touch controls such as steppers instead of keyboard-dependent fields for workout input. Keep every essential target at least 44px tall.
 - Do not add phone-only navigation or dense desktop-style layouts without documenting an explicit exception.
 - For UI changes, validate watch-sized and phone-sized viewports, large text/zoom, dark mode, reduced motion, keyboard and screen-reader labels, and offline behavior.

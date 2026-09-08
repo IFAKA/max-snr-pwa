@@ -13,13 +13,47 @@ export function renderLifting() {
   const weight = document.querySelector('#weight'), reps = document.querySelector('#reps'), form = document.querySelector('#set-form');
   if (!weight || !reps || !form) return showError(new Error('The set form could not be loaded. Reload the workout.'));
   const saveDraft = () => { active.draft.weight = weight.value; active.draft.reps = reps.value; save().catch(showError); };
-  document.querySelectorAll('[data-stepper]').forEach(button => button.addEventListener('click', () => {
+  const changeValue = button => {
     const field = button.dataset.stepper === 'reps' ? reps : weight;
     const step = Number(button.dataset.step);
     const next = Math.max(button.dataset.stepper === 'reps' ? 1 : 0, Number(field.value || 0) + step);
     field.value = button.dataset.stepper === 'reps' ? String(Math.round(next)) : next.toFixed(2).replace(/\.00$/, '');
     document.querySelector(`#${button.dataset.stepper}-value`).textContent = field.value;
     saveDraft();
-  }));
+  };
+  document.querySelectorAll('[data-stepper]').forEach(button => {
+    let repeatTimer;
+    let repeatInterval;
+    let repeated = false;
+    let pointerActivated = false;
+    const stopRepeating = () => {
+      window.clearTimeout(repeatTimer);
+      window.clearInterval(repeatInterval);
+      repeatTimer = undefined;
+      repeatInterval = undefined;
+    };
+    button.addEventListener('click', () => {
+      if (pointerActivated || repeated) { pointerActivated = false; repeated = false; return; }
+      changeValue(button);
+    });
+    button.addEventListener('pointerdown', event => {
+      if (event.button !== 0) return;
+      pointerActivated = true;
+      repeated = false;
+      changeValue(button);
+      repeatTimer = window.setTimeout(() => {
+        repeated = true;
+        let delay = 135;
+        const repeat = () => {
+          changeValue(button);
+          delay = Math.max(42, delay * .82);
+          repeatInterval = window.setTimeout(repeat, delay);
+        };
+        repeatInterval = window.setTimeout(repeat, delay);
+      }, 360);
+      button.setPointerCapture?.(event.pointerId);
+    });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(type => button.addEventListener(type, stopRepeating));
+  });
   form.onsubmit = event => runAction(event.submitter, async () => { event.preventDefault(); saveDraft(); const result = await completeSet(); if (result?.error) { showError(new Error(result.error)); return false; } return result; });
 }
