@@ -263,3 +263,50 @@ button:focus-visible, .button:focus-visible, .import-button:focus-visible, input
   .workout-stage .big-timer { margin-block: 8px; font-size: 62px; }
   .workout-stage.rest-stage .big-timer { font-size: 54px; }
 }
+
+/* Whole-app Apple Watch canvas. Lists scroll; the current task and action do not get squeezed. */
+@media (max-width: 260px) {
+  body { overflow-x: hidden; }
+  main { width: 100%; max-width: 225px; margin-inline: auto; overflow-x: hidden; }
+  body:not(.workout) main { padding-top: 55px; }
+  h1 { margin-bottom: 6px; font-size: 28px; line-height: .98; letter-spacing: -.06em; }
+  h2 { margin-bottom: 5px; font-size: 18px; }
+  p { line-height: 1.25; }
+  .page-header { margin-bottom: 10px; }
+  .page-header h1 { max-width: 100%; }
+  .today-screen { min-height: calc(100svh - 55px); }
+  .today-routine-heading { min-height: 20px; }
+  .today-routine-heading p { font-size: 11px; }
+  .today-routine-list { margin-top: 3px; }
+  .routine-day, .history-workout { margin: 5px 0; border-radius: 13px; }
+  .routine-day-link, .routine-day summary, .history-workout > summary { min-height: 50px; padding: 8px 10px; }
+  .routine-day-link { gap: 6px; }
+  .routine-day-link strong, .routine-day summary strong, .history-workout summary strong { font-size: 14px; }
+  .routine-day-link small, .routine-day summary small, .history-workout summary small { font-size: 10px; }
+  .routine-day-action { font-size: 22px; }
+  .routine-day > .routine-list { padding: 0 10px 10px; }
+  .routine-exercise { gap: 5px; padding: 6px 0; font-size: 11px; }
+  .routine-group { margin: 5px 0; padding: 6px; border-radius: 10px; }
+  .today-bottom-action { margin-top: 12px; padding-top: 0; }
+  .today-bottom-action p { margin-bottom: 3px; font-size: 11px; }
+  .button, button { min-height: 44px; }
+  .primary { min-height: 44px; margin-top: 6px; padding: 8px 10px; font-size: 14px; }
+  .secondary { min-height: 40px; margin-top: 5px; padding: 7px 10px; font-size: 12px; }
+  .setup-stage { min-height: calc(100svh - 55px); }
+  .setup-stage .stage-info { display: block; }
+  .setup-stage .context-label { margin-bottom: 3px; }
+  .setup-stage h1 { margin: 0; font-size: 28px; }
+  .setup-stage .setup-routine { margin: 9px 0 0; }
+  .setup-stage .setup-routine::before { content: 'Up next'; display: block; margin-bottom: 3px; color: var(--muted); font-size: 9px; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
+  .setup-recovery, .setup-history { margin-top: 12px; padding-top: 9px; }
+  .setup-recovery h2, .setup-history h2 { font-size: 15px; }
+  .setup-recovery .button, .setup-history .button { min-height: 40px; margin-top: 5px; }
+  .history-body { padding: 0 10px 10px; }
+  .history-exercise { padding: 8px 0; }
+  .history-exercise h3 { margin-bottom: 4px; font-size: 13px; }
+  .history-exercise ul { gap: 3px; font-size: 11px; }
+  .data-card { margin-top: 14px; padding-top: 10px; }
+  .data-card h2 { font-size: 15px; }
+  .data-actions { gap: 5px; }
+  .icon-button { min-height: 40px; }
+}
