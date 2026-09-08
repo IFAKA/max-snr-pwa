@@ -11,13 +11,36 @@ const ICONS = {
   check: '<path d="m5 12 4 4L19 6"/>',
   play: '<path d="m8 5 11 7-11 7z"/>',
   more: '<circle cx="5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1" fill="currentColor" stroke="none"/>',
+  chevron: '<path d="m9 5 7 7-7 7"/>',
+  dash: '<path d="M5 12h14"/>',
+  minus: '<path d="M5 12h14"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
 };
 export const icon = (name, label = '') => `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${ICONS[name] || ''}</svg><span class="sr-only">${esc(label)}</span>`;
 export const pageNav = current => {
-  const labels = {today: 'Today', routine: 'Routine', history: 'History'};
-  const currentLabel = labels[current] || 'Today';
-  return `<nav class="app-nav" aria-label="Primary"><a class="app-brand" href="/" aria-label="MaxSNR home">MAXSNR</a><span class="app-location" aria-current="page">${currentLabel}</span><details class="app-menu"><summary aria-label="Open navigation">Menu</summary><div class="app-menu-list"><a href="/"${current === 'today' ? ' aria-current="page"' : ''}>Today</a><a href="/routine/"${current === 'routine' ? ' aria-current="page"' : ''}>Routine</a><a href="/history/"${current === 'history' ? ' aria-current="page"' : ''}>History</a></div></details></nav>`;
+  const labels = {today: 'Home', routine: 'Routine', history: 'History'};
+  const currentLabel = labels[current] || 'Home';
+  return `<nav class="app-nav" aria-label="Primary"><a class="app-brand" href="/" aria-label="MaxSNR home">MAXSNR</a><span class="app-location" aria-current="page">${currentLabel}</span><details class="app-menu"><summary aria-label="Open navigation">Menu</summary><div class="app-menu-list"><a href="/"${current === 'today' ? ' aria-current="page"' : ''}>Home</a><a href="/routine/"${current === 'routine' ? ' aria-current="page"' : ''}>Routine</a><a href="/history/"${current === 'history' ? ' aria-current="page"' : ''}>History</a></div></details></nav>`;
 };
+export function bindHoldScroll(root = document) {
+  root.querySelectorAll('[data-hold-scroll]').forEach(element => {
+    if (element.dataset.holdBound) return;
+    element.dataset.holdBound = 'true';
+    const text = element.querySelector('.hold-scroll-text') || element;
+    let timer;
+    const stop = () => { clearTimeout(timer); element.classList.remove('is-hold-scrolling'); text.style.removeProperty('--scroll-distance'); };
+    const start = () => {
+      if (text.scrollWidth <= element.clientWidth + 1) return;
+      text.style.setProperty('--scroll-distance', `${Math.min(0, element.clientWidth - text.scrollWidth)}px`);
+      element.classList.add('is-hold-scrolling');
+    };
+    element.addEventListener('pointerdown', () => { timer = setTimeout(start, 450); });
+    element.addEventListener('pointerup', stop);
+    element.addEventListener('pointercancel', stop);
+    element.addEventListener('pointerleave', stop);
+    element.addEventListener('blur', stop);
+  });
+}
 export const buzz = pattern => navigator.vibrate?.(pattern);
 let wakeLock;
 export async function keepAwake() { try { if ('wakeLock' in navigator && document.visibilityState === 'visible') wakeLock = await navigator.wakeLock.request('screen'); } catch {} }
