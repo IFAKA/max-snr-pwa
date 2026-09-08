@@ -28,10 +28,8 @@ export function bindHoldScroll(root = document) {
     element.dataset.holdBound = 'true';
     const text = element.querySelector('.hold-scroll-text') || element;
     let timer;
-    let animationTimer;
     const stop = () => {
       clearTimeout(timer);
-      clearTimeout(animationTimer);
       element.classList.remove('is-hold-scrolling');
       text.style.removeProperty('--scroll-distance');
     };
@@ -39,7 +37,6 @@ export function bindHoldScroll(root = document) {
       if (text.scrollWidth <= element.clientWidth + 1) return;
       text.style.setProperty('--scroll-distance', `${Math.min(0, element.clientWidth - text.scrollWidth)}px`);
       element.classList.add('is-hold-scrolling');
-      animationTimer = setTimeout(stop, 3600);
     };
     const schedule = () => { timer = setTimeout(start, 1400); };
     schedule();
@@ -48,7 +45,6 @@ export function bindHoldScroll(root = document) {
     element.addEventListener('pointercancel', stop);
     element.addEventListener('pointerleave', stop);
     element.addEventListener('blur', stop);
-    element.addEventListener('animationend', stop);
   });
 }
 export const buzz = pattern => navigator.vibrate?.(pattern);

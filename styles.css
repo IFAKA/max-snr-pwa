@@ -38,7 +38,7 @@ button:focus-visible, .button:focus-visible, .import-button:focus-visible, input
 .secondary { width: 100%; margin-top: 10px; border-color: transparent; background: var(--accent-soft); color: var(--accent); }
 .notice { padding: 12px 14px; border-radius: 14px; background: var(--accent-soft); }
 .notice.error { background: #f9dfdc; color: #74251f; }
-.empty-state { padding: 14px 2px; color: var(--muted); }
+.empty-state { display: flex; min-height: 52px; align-items: center; padding: 10px 2px; color: var(--muted); }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 ul { margin: 0; padding: 0; list-style: none; }
 .app-list { border-top: 1px solid var(--line); }
@@ -88,7 +88,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .stage-link { margin: 0; }
 .stage-action-list { margin: 0; }
-.set-count { margin: 0 0 2px; color: var(--muted); font-size: 13px; }
+.set-count { margin: 0; color: var(--muted); font-size: 13px; }
 .workout-picker { height: 100%; overflow: hidden; }
 .exercise-picker-list { max-height: calc(100svh - 76px); overflow-y: auto; }
 .stepper-label { display: grid; gap: 4px; color: var(--muted); font-size: 12px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
@@ -113,8 +113,9 @@ ul { margin: 0; padding: 0; list-style: none; }
 .dialog-actions .primary { margin: 0; }
 .hold-scroll-text { min-width: 0; }
 [data-hold-scroll] { min-width: 0; overflow: hidden; }
-[data-hold-scroll].is-hold-scrolling .hold-scroll-text { display: inline-block; max-width: none; white-space: nowrap; animation: title-pan 3s linear 1 both; }
-@keyframes title-pan { from { transform: translateX(0); } to { transform: translateX(var(--scroll-distance)); } }
+[data-hold-scroll] { white-space: nowrap; }
+[data-hold-scroll].is-hold-scrolling .hold-scroll-text { display: inline-block; max-width: none; white-space: nowrap; animation: title-pan 4.8s linear infinite; }
+@keyframes title-pan { 0%, 25% { transform: translateX(0); } 75%, 100% { transform: translateX(var(--scroll-distance)); } }
 @media (max-width: 260px) {
   main { max-width: 225px; padding: 10px 12px; }
   h1 { font-size: 30px; }
@@ -133,7 +134,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   .workout-stage h1 { margin-bottom: 4px; font-size: 26px; line-height: .94; }
   .workout-stage .thumb-zone { gap: 2px; }
   .lifting-stage .thumb-zone { margin-top: 0; }
-  .lifting-stage .thumb-zone { gap: 6px; }
+  .lifting-stage .thumb-zone { gap: 4px; }
   .lifting-stage .primary { min-height: 44px; }
   .lifting-stage .stage-action-list .list-link { min-height: 44px; }
   .stepper-label { gap: 3px; }
