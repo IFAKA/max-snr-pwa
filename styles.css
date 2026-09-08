@@ -90,7 +90,7 @@ body.workout main { overflow: hidden; padding-top: 0; padding-bottom: 16px; }
 .stage-info { min-width: 0; }
 .workout-stage h1 { margin-top: 7px; font-size: clamp(34px, 10vw, 48px); }
 .context-label { margin-bottom: 5px; color: var(--muted); font-size: 12px; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
-.exercise-meta { display: flex; align-items: center; width: 100%; margin-top: 10px; }
+.exercise-meta { display: flex; align-items: center; width: 100%; margin-top: 28px; }
 .exercise-progress { display: grid; grid-template-columns: minmax(0, .55fr) minmax(0, 2fr) minmax(0, .55fr); align-items: center; width: 100%; gap: 5px; }
 .exercise-progress-section { display: grid; min-width: 0; justify-items: center; gap: 5px; }
 .exercise-progress-count { display: grid; width: 100%; aspect-ratio: 1; place-items: center; border: 1px solid var(--line); border-radius: 50%; background: var(--accent-soft); color: var(--text); font-size: clamp(18px, 5vw, 26px); font-weight: 850; line-height: 1; }
