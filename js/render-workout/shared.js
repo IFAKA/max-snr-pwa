@@ -10,7 +10,13 @@ export function exerciseProgress(active, focusPos = active.pos, preview = false)
   active.tasks.forEach(task => { if (!exercises.some(item => item.exerciseId === task.exerciseId)) exercises.push(task); });
   const currentExerciseId = active.tasks[focusPos]?.exerciseId;
   const nextExercise = preview && active.tasks[active.pos]?.exerciseId !== currentExerciseId;
-  const completed = exercises.filter(exercise => active.tasks.filter(task => task.exerciseId === exercise.exerciseId).every(task => task.completed || task.skipped)).length;
+  const currentExercise = exercises.find(exercise => exercise.exerciseId === currentExerciseId);
+  const currentExerciseIds = new Set(currentExercise?.groupType === 'superset'
+    ? exercises.filter(exercise => exercise.groupType === 'superset' && exercise.groupId === currentExercise.groupId).map(exercise => exercise.exerciseId)
+    : currentExerciseId ? [currentExerciseId] : []);
+  const isDone = exercise => active.tasks.filter(task => task.exerciseId === exercise.exerciseId).every(task => task.completed || task.skipped);
+  const completed = exercises.filter(exercise => !currentExerciseIds.has(exercise.exerciseId) && isDone(exercise)).length;
+  const remaining = exercises.length - completed - currentExerciseIds.size;
   const renderDot = exercise => {
     const tasks = active.tasks.filter(task => task.exerciseId === exercise.exerciseId);
     const completedSets = tasks.filter(task => task.completed).length;
@@ -20,18 +26,17 @@ export function exerciseProgress(active, focusPos = active.pos, preview = false)
     const stateClass = `${done ? ' is-complete' : ''}${current ? ' is-current' : ''}${current && nextExercise ? ' is-next-exercise' : ''}`;
     return `<span class="exercise-dot${stateClass}" style="--set-count: ${tasks.length}; --set-completed: ${completedSets}; --set-active: ${activeSet}" aria-hidden="true"></span>`;
   };
-  const dots = [];
-  for (let index = 0; index < exercises.length; index++) {
-    const exercise = exercises[index];
+  const currentDots = [];
+  for (const exercise of exercises) {
+    if (!currentExerciseIds.has(exercise.exerciseId)) continue;
     if (exercise.groupType === 'superset') {
       const members = exercises.filter(candidate => candidate.groupType === 'superset' && candidate.groupId === exercise.groupId).slice(0, 2);
-      if (members[0] === exercise) dots.push(`<span class="exercise-progress-group" aria-hidden="true">${members.map(renderDot).join('')}</span>`);
+      if (members[0] === exercise) currentDots.push(`<span class="exercise-progress-group" aria-hidden="true">${members.map(renderDot).join('')}</span>`);
       continue;
     }
-    dots.push(renderDot(exercise));
+    currentDots.push(renderDot(exercise));
   }
-  const gridCount = exercises.reduce((count, exercise) => count + (exercise.groupType === 'superset' ? (exercises.findIndex(item => item.groupId === exercise.groupId && item.groupType === 'superset') === exercises.indexOf(exercise) ? 2 : 0) : 1), 0);
-  return `<span class="exercise-progress" style="--exercise-count: ${gridCount}" role="img" aria-label="${completed} of ${exercises.length} exercises complete">${dots.join('')}</span>`;
+  return `<span class="exercise-progress" role="img" aria-label="${completed} completed, ${currentExerciseIds.size} current, ${remaining} remaining"><span class="exercise-progress-section"><span class="exercise-progress-label">Done</span><span class="exercise-progress-count is-complete">${completed}</span></span><span class="exercise-progress-section is-current"><span class="exercise-progress-label">Current</span><span class="exercise-progress-current">${currentDots.join('')}</span></span><span class="exercise-progress-section"><span class="exercise-progress-label">Remaining</span><span class="exercise-progress-count">${remaining}</span></span></span>`;
 }
 function exerciseChoices() {
   const active = state();
