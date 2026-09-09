@@ -55,8 +55,6 @@ export function isAppUrl(url) {
 export function navigateTo(url, {replace = false} = {}) {
   const target = new URL(url, location.href);
   const path = `${target.pathname}${target.search}${target.hash}`;
-  const state = {route: routeForPath(target.pathname), path};
-  if (replace) history.replaceState(state, '', path);
-  else history.pushState(state, '', path);
-  window.dispatchEvent(new PopStateEvent('popstate'));
+  if (replace) location.replace(path);
+  else location.assign(path);
 }
