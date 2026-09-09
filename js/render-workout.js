@@ -26,7 +26,8 @@ export function renderWorkout() {
   if (!a) return navigateTo('/');
   const params = new URLSearchParams(location.search);
   if (params.get('view') === 'exercises') {
-    renderExercisePicker(() => navigateTo(params.get('return') === 'select' ? '/workout/?view=exercise' : '/workout/'));
+    const firstExerciseNotStarted = a.phase === 'lifting' && !a.tasks.some(task => task.completed);
+    renderExercisePicker(() => navigateTo(params.get('return') === 'select' || firstExerciseNotStarted ? '/workout/?view=exercise' : '/workout/'));
     return;
   }
   if (params.get('view') === 'select') {
