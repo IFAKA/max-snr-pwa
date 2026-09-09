@@ -4,6 +4,7 @@ import { renderToday } from './js/render-today.js';
 import { renderHistory } from './js/render-history.js';
 import { renderRoutine } from './js/render-routine.js';
 import { renderWorkout } from './js/render-workout.js';
+import { isAppUrl, renderWithTransition, routeForPath } from './js/navigation.js';
 
 const renderers = { today: renderToday, routine: renderRoutine, history: renderHistory, workout: renderWorkout };
 
@@ -37,7 +38,7 @@ async function boot() {
     } else if (route === 'today' && !history.state?.route) {
       history.replaceState({route: 'today'}, '', location.href);
     }
-    (renderers[route] || renderToday)();
+    renderWithTransition(() => (renderers[route] || renderToday)());
   } catch (error) {
     const target = document.querySelector('#app');
     if (target) {
@@ -61,4 +62,24 @@ async function boot() {
 }
 
 boot();
-window.addEventListener('popstate', () => renderers[document.body.dataset.route]?.());
+
+document.addEventListener('click', event => {
+  if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  const link = event.target.closest?.('a[href]');
+  if (!link || link.target && link.target !== '_self' || link.hasAttribute('download')) return;
+  const url = new URL(link.href, location.href);
+  if (!isAppUrl(url)) return;
+  event.preventDefault();
+  const route = routeForPath(url.pathname);
+  if (!route) return;
+  const path = `${url.pathname}${url.search}${url.hash}`;
+  history.pushState({route, path}, '', path);
+  document.body.dataset.route = route;
+  window.dispatchEvent(new PopStateEvent('popstate'));
+});
+
+window.addEventListener('popstate', () => {
+  const route = routeForPath(location.pathname) || 'today';
+  document.body.dataset.route = route;
+  renderWithTransition(() => (renderers[route] || renderToday)());
+});

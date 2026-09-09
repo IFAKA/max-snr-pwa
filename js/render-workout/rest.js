@@ -1,6 +1,7 @@
 import { mount, state, runAction, showError, workoutStage, primaryAction, exercisePicker, bindExercisePicker } from './shared.js';
 import { continueRest, countdown, formatDuration, findNext, exerciseSelectionLocked } from '../workout.js';
 import { buzz, esc, icon, listMarkup } from '../dom.js';
+import { navigateTo } from '../navigation.js';
 
 const advance = button => runAction(button, continueRest);
 
@@ -9,7 +10,7 @@ export function renderRest() {
   if (!running) { advance(null); return; }
   if (new URLSearchParams(location.search).get('view') === 'exercises') {
     mount(exercisePicker(active));
-    bindExercisePicker(active, () => location.assign('/workout/'));
+    bindExercisePicker(active, () => navigateTo('/workout/'));
     return;
   }
   const nextPosition = Number.isInteger(active.nextPos) ? active.nextPos : findNext(-1, true);

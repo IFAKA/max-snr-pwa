@@ -9,6 +9,7 @@ import { renderExerciseSelection, renderExercisePicker } from './render-workout/
 import { bindTitleMarquee, bindHoldScroll, keepAwake } from './dom.js';
 import { app, listMarkup, titleMarkup } from './dom.js';
 import { ROUTINE, NAMES } from './routine-data.js';
+import { navigateTo } from './navigation.js';
 
 function renderStart(day) {
   const items = ROUTINE[day];
@@ -22,14 +23,14 @@ export function renderWorkout() {
   const a = state();
   const requestedDay = new URLSearchParams(location.search).get('day');
   if (!a && requestedDay && Object.prototype.hasOwnProperty.call(ROUTINE, requestedDay)) return renderStart(requestedDay);
-  if (!a) return location.assign('/');
+  if (!a) return navigateTo('/');
   const params = new URLSearchParams(location.search);
   if (params.get('view') === 'exercises') {
-    renderExercisePicker(() => location.assign(params.get('return') === 'select' ? '/workout/?view=exercise' : '/workout/'));
+    renderExercisePicker(() => navigateTo(params.get('return') === 'select' ? '/workout/?view=exercise' : '/workout/'));
     return;
   }
   if (params.get('view') === 'select') {
-    if (a.phase !== 'lifting' || a.tasks.some(task => task.completed)) return location.assign('/workout/?view=exercise');
+    if (a.phase !== 'lifting' || a.tasks.some(task => task.completed)) return navigateTo('/workout/?view=exercise');
     return renderExerciseSelection();
   }
   if (params.get('view') === 'exercise') return renderLifting();

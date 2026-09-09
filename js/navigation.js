@@ -1,0 +1,53 @@
+import { app } from './dom.js';
+
+const ROUTES = new Set(['/', '/routine/', '/history/', '/workout/']);
+
+function prefersReducedMotion() {
+  return globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
+}
+
+function focusView() {
+  const heading = app?.querySelector('h1, h2');
+  if (!heading) return;
+  heading.setAttribute('tabindex', '-1');
+  heading.focus({preventScroll: true});
+  heading.addEventListener('blur', () => heading.removeAttribute('tabindex'), {once: true});
+}
+
+function updateView(render, focus) {
+  const result = render();
+  if (focus) focusView();
+  return result;
+}
+
+export function renderWithTransition(render, {focus = true} = {}) {
+  if (prefersReducedMotion()) return updateView(render, focus);
+  if (typeof document.startViewTransition === 'function') {
+    return document.startViewTransition(() => updateView(render, focus));
+  }
+  app?.classList.add('is-view-transitioning');
+  const result = updateView(render, focus);
+  (globalThis.requestAnimationFrame || globalThis.setTimeout)(() => app?.classList.remove('is-view-transitioning'), 0);
+  return result;
+}
+
+export function routeForPath(pathname) {
+  if (pathname === '/') return 'today';
+  if (pathname.startsWith('/routine/')) return 'routine';
+  if (pathname.startsWith('/history/')) return 'history';
+  if (pathname.startsWith('/workout/')) return 'workout';
+  return null;
+}
+
+export function isAppUrl(url) {
+  return url.origin === location.origin && [...ROUTES].some(route => url.pathname === route);
+}
+
+export function navigateTo(url, {replace = false} = {}) {
+  const target = new URL(url, location.href);
+  const path = `${target.pathname}${target.search}${target.hash}`;
+  const state = {route: routeForPath(target.pathname), path};
+  if (replace) history.replaceState(state, '', path);
+  else history.pushState(state, '', path);
+  window.dispatchEvent(new PopStateEvent('popstate'));
+}

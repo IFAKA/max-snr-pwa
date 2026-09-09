@@ -2,6 +2,7 @@ import { app, bindHoldScroll, bindTitleMarquee, esc, icon, listMarkup, titleMark
 import { save } from '../storage.js';
 import { getState } from '../state.js';
 import { selectExercise, exerciseSelectionLocked, start } from '../workout.js';
+import { navigateTo } from '../navigation.js';
 
 export const state = () => getState().active;
 export function workoutStage({className = '', title, body = '', actions = ''}) {
@@ -54,7 +55,7 @@ export function bindStartDialog() {
     if (dialog.returnValue !== 'default') return;
     const button = dialog.querySelector('[value="default"]');
     if (button) button.disabled = true;
-    try { if (await start(day)) location.assign('/workout/'); } catch (error) { showError(error); }
+    try { if (await start(day)) navigateTo('/workout/'); } catch (error) { showError(error); }
   });
 }
 export function exercisePicker(active) {
@@ -71,7 +72,7 @@ export function exercisePicker(active) {
     : `<li><button class="list-link" type="button" data-exercise-id="${esc(task.exerciseId)}"><span data-hold-scroll><span class="hold-scroll-text">${esc(task.performedName)}</span></span>${icon('chevron', 'Select exercise')}</button></li>`);
   return `<section class="workout-picker" aria-labelledby="exercise-picker-title">${titleMarkup('Exercise', 'exercise-picker-title')}${listMarkup(rows, 'exercise-picker-list', 'Available exercises')}</section>`;
 }
-export function bindExercisePicker(active, onSelected = () => location.assign('/workout/')) {
+export function bindExercisePicker(active, onSelected = () => navigateTo('/workout/')) {
   document.querySelectorAll('[data-exercise-id]').forEach(button => button.addEventListener('click', () => runAction(button, () => selectExercise(button.dataset.exerciseId), onSelected)));
   if (exerciseSelectionLocked(active)) document.querySelectorAll('[data-exercise-id]').forEach(button => { button.disabled = true; });
 }
@@ -96,5 +97,5 @@ export function mount(html) {
   bindHoldScroll(app);
   bindTitleMarquee(app);
   const saveLater = document.querySelector('#save-later');
-  if (saveLater) saveLater.onclick = () => runAction(saveLater, async () => { await save(); return true; }, () => location.assign('/'));
+  if (saveLater) saveLater.onclick = () => runAction(saveLater, async () => { await save(); return true; }, () => navigateTo('/'));
 }
