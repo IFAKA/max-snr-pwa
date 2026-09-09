@@ -7,8 +7,12 @@ import { activeTask, completeSet } from '../workout.js';
 export function renderLifting() {
   const active = state(), task = activeTask();
   if (!task) return;
-  const step = new URLSearchParams(location.search).get('step') || 'reps';
   const draft = active.draft || {};
+  let step = new URLSearchParams(location.search).get('step') || 'reps';
+  if (step === 'load' && !Object.keys(draft).length && active.tasks.some(item => item.completed)) {
+    step = 'reps';
+    history.replaceState(history.state, '', '/workout/?step=reps');
+  }
   const repsValue = draft.reps ?? String(String(task.reps).split('–')[0]);
   const weightValue = draft.weight ?? '';
   const stage = workoutStage({className: 'lifting-stage', title: esc(task.performedName), actions: ''});
