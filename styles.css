@@ -140,7 +140,7 @@ button,
 .import-button {
   min-height: 52px;
   border: 2px solid var(--line);
-  border-radius: 999px;
+  border-radius: 15px;
   background: var(--surface);
   color: var(--text);
   cursor: pointer;
