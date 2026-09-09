@@ -152,6 +152,13 @@ ul { margin: 0; padding: 0; list-style: none; }
   .list-link > .icon { width: 20px; height: 20px; flex-basis: 20px; }
   .big-timer { margin: 10px 0 6px; font-size: 48px; }
 }
+@media (min-width: 261px) {
+  :root { font-size: 18px; }
+  h3 { font-size: 18px; }
+  .group-label, .stepper-label { font-size: 16px; }
+  .list-link small, .history-workout small { font-size: 17px; }
+  .status-row output, .set-count, .summary-grid span { font-size: 16px; }
+}
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
 }
