@@ -1,4 +1,4 @@
-const CACHE_NAME = 'maxsnr-v29';
+const CACHE_NAME = 'maxsnr-v30';
 const PRECACHE = ['/', '/routine/', '/history/', '/workout/', '/styles.css', '/manifest.webmanifest', '/icons/apple-touch-icon.png', '/icons/icon-192.png', '/icons/icon-512.png', '/icons/icon-maskable-512.png', '/app.js', '/js/backup.js', '/js/constants.js', '/js/dom.js', '/js/render-history.js', '/js/render-routine.js', '/js/render-today.js', '/js/render-workout.js', '/js/render-workout/completion.js', '/js/render-workout/lifting.js', '/js/render-workout/plank.js', '/js/render-workout/rest.js', '/js/render-workout/select.js', '/js/render-workout/shared.js', '/js/render-workout/stretch.js', '/js/render-workout/warmup.js', '/js/routine-data.js', '/js/routine-view.js', '/js/state.js', '/js/storage.js', '/js/workout.js', '/js/workout/metrics.js', '/js/workout/progression.js', '/js/workout/session.js', '/js/workout/task-factory.js', '/js/workout/timers.js', '/js/vendor/canvas-confetti.js'];
 
 self.addEventListener('install', event => event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(PRECACHE)).then(() => self.skipWaiting())));
