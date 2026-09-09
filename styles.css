@@ -148,7 +148,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   .stepper button { min-height: 44px; }
   .stepper output { font-size: 20px; }
   .list-link > .icon { width: 20px; height: 20px; flex-basis: 20px; }
-  .big-timer { margin: 14px 0 8px; font-size: 56px; }
+  .big-timer { margin: 10px 0 6px; font-size: 48px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
