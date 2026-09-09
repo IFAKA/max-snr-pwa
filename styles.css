@@ -171,9 +171,11 @@ main > section:has(> .app-list) { display: flex; height: 100%; min-height: 0; fl
   .big-timer { margin: 10px 0 6px; font-size: 48px; }
 }
 @media (max-width: 600px) {
-  .confirm-dialog.bottom-sheet { inset: auto 0 0; width: min(100%, 34rem); max-width: none; margin: 0 auto; padding: 10px 14px max(14px, env(safe-area-inset-bottom)); border-bottom: 0; border-radius: 18px 18px 0 0; box-shadow: 0 -14px 40px rgba(18, 35, 24, .2); transform: translateY(var(--sheet-drag-y, 0px)); transition: transform 220ms var(--ease-out); }
+  .confirm-dialog.bottom-sheet { inset: auto 0 0; width: min(100%, 34rem); max-width: none; margin: 0 auto; padding: 10px 14px max(14px, env(safe-area-inset-bottom)); border-bottom: 0; border-radius: 18px 18px 0 0; box-shadow: 0 -14px 40px rgba(18, 35, 24, .2); transform: translateY(var(--sheet-drag-y, 0px)); transition: transform 220ms var(--ease-out), opacity 180ms ease-out; }
+  .confirm-dialog.bottom-sheet.is-opening { transform: translateY(100%); opacity: 0; }
   .confirm-dialog.bottom-sheet.is-dragging { transition: none; }
-  .confirm-dialog.bottom-sheet .sheet-handle { display: flex; width: 100%; height: 44px; align-items: flex-start; justify-content: center; padding-top: 0; margin: 0 0 2px; cursor: grab; touch-action: none; }
+  .confirm-dialog.bottom-sheet h2 { margin-bottom: 14px; text-align: center; }
+  .confirm-dialog.bottom-sheet .sheet-handle { display: flex; width: 100%; height: 28px; align-items: flex-start; justify-content: center; padding-top: 0; margin: -2px 0 2px; cursor: grab; touch-action: none; }
   .confirm-dialog.bottom-sheet .sheet-handle::before { width: 36px; height: 4px; border-radius: 999px; background: var(--muted); content: ""; opacity: .65; }
 }
 @media (min-width: 261px) {

@@ -43,7 +43,12 @@ export function bindStartDialog() {
   handle?.addEventListener('pointerup', finishDrag);
   handle?.addEventListener('pointercancel', () => resetDrag());
   dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close('cancel'); });
-  trigger.addEventListener('click', () => { resetDrag(); dialog.showModal(); });
+  trigger.addEventListener('click', () => {
+    resetDrag();
+    dialog.classList.add('is-opening');
+    dialog.showModal();
+    requestAnimationFrame(() => dialog.classList.remove('is-opening'));
+  });
   dialog.addEventListener('close', async () => {
     resetDrag();
     if (dialog.returnValue !== 'default') return;
