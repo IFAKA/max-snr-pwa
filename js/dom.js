@@ -134,7 +134,12 @@ export function bindMagneticLists(root = document) {
     const setActive = index => {
       if (!rows.length) return;
       const nextIndex = Math.max(0, Math.min(rows.length - 1, index));
-      rows.forEach((row, rowIndex) => row.classList.toggle('is-magnetic-target', rowIndex === nextIndex));
+      rows.forEach((row, rowIndex) => {
+        const isTarget = rowIndex === nextIndex;
+        row.classList.toggle('is-magnetic-target', isTarget);
+        if (isTarget) row.setAttribute('aria-current', 'true');
+        else row.removeAttribute('aria-current');
+      });
       if (nextIndex !== activeIndex) buzz(8);
       activeIndex = nextIndex;
       const row = rows[activeIndex];
@@ -146,8 +151,12 @@ export function bindMagneticLists(root = document) {
       if (pointerId !== null) {
         try { list.releasePointerCapture?.(pointerId); } catch {}
       }
-      rows.forEach(row => row.classList.remove('is-magnetic-target'));
+      rows.forEach(row => {
+        row.classList.remove('is-magnetic-target');
+        row.removeAttribute('aria-current');
+      });
       list.classList.remove('is-magnetic-picker');
+      status.classList.remove('is-magnetic-status-visible');
       list.style.removeProperty('touch-action');
       status.textContent = '';
       pointerId = null;
@@ -174,6 +183,7 @@ export function bindMagneticLists(root = document) {
       activeIndex = startIndex;
       pickerActive = true;
       list.classList.add('is-magnetic-picker');
+      status.classList.add('is-magnetic-status-visible');
       list.style.setProperty('touch-action', 'none');
       list.setPointerCapture?.(pointerId);
       setActive(activeIndex);
