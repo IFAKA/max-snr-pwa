@@ -94,7 +94,7 @@ document.addEventListener('keydown', event => {
   event.preventDefault();
   openCancelDialog();
 });
-window.addEventListener('popstate', handleWorkoutNavigation);
+globalThis.window?.addEventListener?.('popstate', handleWorkoutNavigation);
 
 export function configureWorkoutNavigation(render) {
   workoutRouteRenderer = render;

@@ -7,3 +7,11 @@ const E = {
 };
 export const ROUTINE = {Monday: [E.press, E.neutralPulldown, E.lateral, E.row, superset('upper-a-arms', 'Cable arm superset', 'cable-station', [E.tricep, E.curl])], Tuesday: [E.legPress, E.legCurl, E.legExtension, E.calf, E.lateral, superset('neck-superset', 'Neck superset', 'neck-setup', [E.neckFront, E.neckBack])], Wednesday: null, Thursday: [E.latPulldown, E.pecDeck, E.reversePec, E.preacher, E.row, E.tricep, E.inclineDumbbell], Friday: [E.reversePec, block('cable-block', 'Cable equipment block', 'cable-station', [E.lateral, E.fly, E.straightPulldown, E.pushdown]), block('dumbbell-block', 'Dumbbell equipment block', 'dumbbells', [E.hammer, E.shrug, E.wrist])], Saturday: null, Sunday: null};
 export const NAMES = {Monday: 'UPPER A', Tuesday: 'LOWER + AESTHETIC', Thursday: 'UPPER B', Friday: 'AESTHETIC'};
+
+export const isExerciseDefinition = item => Boolean(item && item.type === 'exercise' && typeof item.id === 'string' && item.id && typeof item.name === 'string' && item.name && Number.isInteger(item.sets) && item.sets > 0);
+const groupMembers = item => item?.type === 'superset' ? item.members : item?.type === 'equipmentBlock' ? item.items : null;
+
+export const dayItems = day => Array.isArray(ROUTINE[day]) ? ROUTINE[day] : [];
+export const isWorkoutDay = day => dayItems(day).some(item => isExerciseDefinition(item) || (Array.isArray(groupMembers(item)) && groupMembers(item).some(isExerciseDefinition)));
+export const workoutName = day => typeof NAMES[day] === 'string' && NAMES[day].trim() ? NAMES[day] : day;
+export const configuredDays = () => Object.keys(ROUTINE);

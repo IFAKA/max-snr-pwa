@@ -1,6 +1,6 @@
 import { app, bindHoldScroll, bindTitleMarquee, dayNow, icon, listMarkup, titleMarkup } from './dom.js';
 import { getState } from './state.js';
-import { ROUTINE, NAMES } from './routine-data.js';
+import { isWorkoutDay, workoutName } from './routine-data.js';
 import { startRow, bindStartDialog } from './render-workout/shared.js';
 import confetti from './vendor/canvas-confetti.js';
 
@@ -21,9 +21,9 @@ function showCompletionConfetti() {
 
 export function renderToday() {
   const state = getState(), params = new URLSearchParams(location.search), redirectDay = params.get('day');
-  const day = params.get('completed') === '1' && Object.prototype.hasOwnProperty.call(ROUTINE, redirectDay) && ROUTINE[redirectDay] ? redirectDay : dayNow();
-  const routine = ROUTINE[day], active = state.active;
-  const title = routine ? NAMES[day] : 'Rest';
+  const day = params.get('completed') === '1' && isWorkoutDay(redirectDay) ? redirectDay : dayNow();
+  const routine = isWorkoutDay(day), active = state.active;
+  const title = routine ? workoutName(day) : 'Rest';
   const complete = !active && isCurrentDayComplete(state.history, day);
   const startItem = complete
     ? '<li class="complete-row"><div class="list-link" role="status"><span>Done</span>' + icon('check', 'Workout complete') + '</div></li>'

@@ -12,6 +12,7 @@ const {STRETCH_MS} = await import('../js/constants.js');
 const {startPlank, beginLifting, setTimer} = await import('../js/workout/timers.js');
 const {start, findNext, deferCurrent, substituteCurrent, undoLastSet, completeSet, continueRest, completeStretch, finishWorkout, selectExercise, exerciseSelectionLocked, finishEarly} = await import('../js/workout/session.js');
 const {isCurrentDayComplete} = await import('../js/render-today.js');
+const {ROUTINE, NAMES} = await import('../js/routine-data.js');
 
 const task = (exerciseId, set = 1) => ({id: `${exerciseId}-${set}`, exerciseId, originalName: exerciseId, performedName: exerciseId, alternatives: exerciseId === 'press' ? ['DB press'] : [], set, sets: 2, completed: null, skipped: false, groupId: null});
 const supersetTask = (exerciseId, memberIndex, set = 1) => ({...task(exerciseId, set), groupId: 'arms', groupType: 'superset', memberIndex, groupLabel: 'Arms'});
@@ -27,6 +28,37 @@ test('new workouts begin at the warmup screen', async () => {
   setState(emptyState());
   await start('Monday');
   assert.equal(getState().active.phase, 'warmup');
+});
+
+test('new workouts snapshot changed routine details and reject empty definitions', async () => {
+  const originalRoutine = ROUTINE.Adapted;
+  const originalName = NAMES.Adapted;
+  try {
+    ROUTINE.Adapted = [
+      {type: 'exercise', id: 'updated-press', name: 'Updated Press', sets: 1, reps: '4–6'},
+      {type: 'equipmentBlock', id: 'updated-block', label: 'Updated block', items: [{type: 'exercise', id: 'updated-row', name: 'Updated Row', sets: 2, reps: '8–10'}]}
+    ];
+    NAMES.Adapted = 'ADAPTED';
+    setState(emptyState());
+    assert.equal(await start('Adapted'), true);
+    assert.equal(getState().active.name, 'ADAPTED');
+    assert.deepEqual(getState().active.tasks.map(item => [item.originalName, item.sets, item.reps]), [
+      ['Updated Press', 1, '4–6'], ['Updated Row', 2, '8–10'], ['Updated Row', 2, '8–10']
+    ]);
+    await finishWorkout();
+    assert.equal(getState().history[0].tasks[0].originalName, 'Updated Press');
+
+    ROUTINE.Adapted = [];
+    assert.equal(await start('Adapted'), false);
+    assert.equal(getState().active, null);
+    ROUTINE.Adapted = [{type: 'superset', id: 'empty', members: []}];
+    assert.equal(await start('Adapted'), false);
+  } finally {
+    if (originalRoutine === undefined) delete ROUTINE.Adapted;
+    else ROUTINE.Adapted = originalRoutine;
+    if (originalName === undefined) delete NAMES.Adapted;
+    else NAMES.Adapted = originalName;
+  }
 });
 
 test('loads accept two decimals but reps remain whole numbers', async () => {

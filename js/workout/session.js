@@ -1,4 +1,4 @@
-import { ROUTINE, NAMES } from '../routine-data.js';
+import { dayItems, isWorkoutDay, workoutName } from '../routine-data.js';
 import { getState } from '../state.js';
 import { save } from '../storage.js';
 import { dayNow, buzz } from '../dom.js';
@@ -26,9 +26,11 @@ const nextSupersetRoundIndex = (active, task) => {
 
 export async function start(day = dayNow()) {
   const state = getState();
-  if (!ROUTINE[day]) return false;
+  if (!isWorkoutDay(day)) return false;
   if (state.active && !confirm('A workout is already in progress.\n\nStart a new workout and discard it?')) return false;
-  state.active = {id: Date.now(), date: new Date().toISOString(), day, name: NAMES[day], tasks: flatten(ROUTINE[day]), pos: 0, phase: 'warmup', deferredGroups: [], supersetLeads: {}, draft: {}, restEndsAt: null, timerEndsAt: null};
+  const tasks = flatten(dayItems(day));
+  if (!tasks.length) return false;
+  state.active = {id: Date.now(), date: new Date().toISOString(), day, name: workoutName(day), tasks, pos: 0, phase: 'warmup', deferredGroups: [], supersetLeads: {}, draft: {}, restEndsAt: null, timerEndsAt: null};
   await save();
   return true;
 }

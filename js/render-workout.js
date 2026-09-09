@@ -8,12 +8,12 @@ import { renderCompletion } from './render-workout/completion.js';
 import { renderExerciseSelection, renderExercisePicker } from './render-workout/select.js';
 import { bindTitleMarquee, bindHoldScroll, keepAwake } from './dom.js';
 import { app, listMarkup, titleMarkup } from './dom.js';
-import { ROUTINE, NAMES } from './routine-data.js';
+import { dayItems, isWorkoutDay, configuredDays, workoutName } from './routine-data.js';
 import { navigateTo } from './navigation.js';
 
 function renderStart(day) {
-  const items = ROUTINE[day];
-  app.innerHTML = `<section aria-labelledby="start-title">${titleMarkup(items ? NAMES[day] : 'Rest', 'start-title')}${items ? listMarkup([startRow(day)], 'navigation-list', 'Workout actions') : '<p class="notice">Rest</p>'}</section>`;
+  const available = isWorkoutDay(day);
+  app.innerHTML = `<section aria-labelledby="start-title">${titleMarkup(available ? workoutName(day) : 'Rest', 'start-title')}${available ? listMarkup([startRow(day)], 'navigation-list', 'Workout actions') : '<p class="notice">Rest</p>'}</section>`;
   bindStartDialog();
   bindHoldScroll();
   bindTitleMarquee();
@@ -22,7 +22,7 @@ function renderStart(day) {
 export function renderWorkout() {
   const a = state();
   const requestedDay = new URLSearchParams(location.search).get('day');
-  if (!a && requestedDay && Object.prototype.hasOwnProperty.call(ROUTINE, requestedDay)) return renderStart(requestedDay);
+  if (!a && requestedDay && configuredDays().includes(requestedDay)) return renderStart(requestedDay);
   if (!a) return navigateTo('/');
   configureWorkoutNavigation(renderWorkout);
   const params = new URLSearchParams(location.search);

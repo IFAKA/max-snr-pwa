@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ROUTINE } from '../js/routine-data.js';
+import { ROUTINE, NAMES, configuredDays, dayItems, isWorkoutDay, workoutName } from '../js/routine-data.js';
 import { flatten } from '../js/workout/task-factory.js';
 import { formatDuration } from '../js/workout/timers.js';
 import { getState, setState, emptyState } from '../js/state.js';
@@ -21,6 +21,42 @@ test('superset members alternate within each round', () => {
   assert.deepEqual(tasks.map(task => [task.memberIndex, task.set]), [
     [0, 1], [1, 1], [0, 2], [1, 2]
   ]);
+});
+
+test('routine helpers safely reflect configured days and missing names', () => {
+  const original = ROUTINE.TestDay;
+  const originalName = NAMES.TestDay;
+  try {
+    ROUTINE.TestDay = [{type: 'exercise', id: 'changed', name: 'Changed exercise', sets: 2, reps: '5–7'}];
+    delete NAMES.TestDay;
+    assert.deepEqual(configuredDays().includes('TestDay'), true);
+    assert.deepEqual(dayItems('TestDay'), ROUTINE.TestDay);
+    assert.equal(isWorkoutDay('TestDay'), true);
+    assert.equal(workoutName('TestDay'), 'TestDay');
+    assert.equal(isWorkoutDay('MissingDay'), false);
+    assert.deepEqual(dayItems('MissingDay'), []);
+  } finally {
+    if (original === undefined) delete ROUTINE.TestDay;
+    else ROUTINE.TestDay = original;
+    if (originalName === undefined) delete NAMES.TestDay;
+    else NAMES.TestDay = originalName;
+  }
+});
+
+test('flatten ignores empty and malformed groups while keeping valid members', () => {
+  const template = [
+    {type: 'superset', id: 'empty', members: []},
+    {type: 'equipmentBlock', id: 'bad', items: [null, {type: 'exercise', id: 'block-press', name: 'Block press', sets: 2, reps: '8'}]},
+    {type: 'superset', id: 'uneven', label: 'Uneven', members: [
+      {type: 'exercise', id: 'short', name: 'Short', sets: 1, reps: '10'},
+      {type: 'exercise', id: 'long', name: 'Long', sets: 3, reps: '8'}
+    ]}
+  ];
+  assert.deepEqual(flatten(template).map(item => [item.exerciseId, item.set, item.groupType]), [
+    ['block-press', 1, 'equipmentBlock'], ['block-press', 2, 'equipmentBlock'],
+    ['short', 1, 'superset'], ['long', 1, 'superset'], ['long', 2, 'superset'], ['long', 3, 'superset']
+  ]);
+  assert.equal(flatten([{type: 'superset', id: 'empty', members: []}]).length, 0);
 });
 
 test('timer formatting uses plain seconds below one minute', () => {
