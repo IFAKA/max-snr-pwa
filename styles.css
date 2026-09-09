@@ -46,7 +46,7 @@ button:focus-visible, .button:focus-visible, .import-button:focus-visible, input
 .magnetic-list-status { display: none; margin: 8px 0 0; padding: 8px 10px; border: 1px solid var(--accent); border-radius: 10px; background: var(--accent-soft); color: var(--accent); font-size: 14px; font-weight: 800; }
 .magnetic-list-status.is-magnetic-status-visible { position: static; display: block; width: auto; height: auto; margin: 8px 0 0; overflow: visible; clip: auto; white-space: normal; }
 ul { margin: 0; padding: 0; list-style: none; }
-.app-list { border-top: 1px solid var(--line); touch-action: pan-y; }
+.app-list { border-top: 1px solid var(--line); touch-action: none; }
 .app-list > li { border-bottom: 1px solid var(--line); }
 .app-list.is-magnetic-picker { touch-action: none; }
 .app-list > li.is-magnetic-target { background: var(--accent-soft); box-shadow: inset 6px 0 0 var(--accent), 0 0 0 2px var(--accent); transition: background-color 180ms var(--ease-out), box-shadow 180ms var(--ease-out); }
@@ -64,7 +64,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .complete-row .list-link:hover, .complete-row .list-link:focus-visible, .complete-row .list-link:active { background: transparent; }
 .icon { display: block; color: currentColor; }
 .list-link.is-disabled { color: var(--muted); cursor: not-allowed; opacity: .55; }
-.navigation-list { min-height: calc(100svh - 82px); margin-top: 12px; }
+.navigation-list { min-height: calc(100svh - 82px); max-height: calc(100svh - 82px); margin-top: 12px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 .routine-list, .history-list { display: block; }
 .routine-list, .exercise-list, .history-list { max-height: calc(100svh - 82px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 .routine-list > li.today { border-left: 3px solid var(--accent); }

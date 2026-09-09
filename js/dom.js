@@ -100,6 +100,15 @@ function rowInterval(rows) {
   return Math.max(1, second.top - first.top || first.height);
 }
 
+function scrollSurface(list) {
+  let surface = list;
+  while (surface && surface !== document.body) {
+    if (surface.scrollHeight > surface.clientHeight + 1) return surface;
+    surface = surface.parentElement;
+  }
+  return list;
+}
+
 function magneticStatus(list) {
   let status = list.querySelector(`.${MAGNETIC_STATUS_CLASS}`);
   if (status) return status;
@@ -130,6 +139,8 @@ export function bindMagneticLists(root = document) {
     let interval = 1;
     let pickerActive = false;
     let suppressClick = false;
+    let movedBeforePicker = false;
+    const scrollTarget = scrollSurface(list);
 
     const clearTimer = () => { clearTimeout(timer); timer = null; };
     const setActive = index => {
@@ -165,6 +176,7 @@ export function bindMagneticLists(root = document) {
       startIndex = -1;
       rows = [];
       pickerActive = false;
+      movedBeforePicker = false;
     };
     const cancel = () => { reset(); };
     const activate = () => {
@@ -194,6 +206,8 @@ export function bindMagneticLists(root = document) {
       if (pointerId !== null) return;
       rows = listRows(list);
       if (!rows.length) return;
+      suppressClick = false;
+      movedBeforePicker = false;
       pointerId = event.pointerId;
       startY = lastY = event.clientY;
       clearTimer();
@@ -201,9 +215,15 @@ export function bindMagneticLists(root = document) {
     };
     const onPointerMove = event => {
       if (event.pointerId !== pointerId) return;
+      const previousY = lastY;
       lastY = event.clientY;
       if (!pickerActive) {
-        if (Math.abs(lastY - startY) > MAGNETIC_MOVE_TOLERANCE) clearTimer();
+        if (Math.abs(lastY - startY) > MAGNETIC_MOVE_TOLERANCE) {
+          clearTimer();
+          movedBeforePicker = true;
+          event.preventDefault();
+          scrollTarget.scrollTop += previousY - lastY;
+        }
         return;
       }
       event.preventDefault();
@@ -216,7 +236,10 @@ export function bindMagneticLists(root = document) {
       const box = list.getBoundingClientRect?.();
       const outside = box && (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom);
       if (pickerActive && !outside) activate();
-      else reset();
+      else {
+        if (movedBeforePicker) suppressClick = true;
+        reset();
+      }
     };
     const onClick = event => {
       if (!suppressClick) return;
