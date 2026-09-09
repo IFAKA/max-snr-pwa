@@ -22,9 +22,9 @@ export function renderLifting() {
   const weight = document.querySelector('#weight'), reps = document.querySelector('#reps'), form = document.querySelector('#set-form');
   if (!weight || !reps || !form) return showError(new Error('The set form could not be loaded. Reload the workout.'));
   const saveDraft = () => { active.draft.weight = weight.value; active.draft.reps = reps.value; save().catch(showError); };
-  const changeValue = button => {
+  const changeValue = (button, multiplier = 1) => {
     const field = button.dataset.stepper === 'reps' ? reps : weight;
-    const step = Number(button.dataset.step);
+    const step = Number(button.dataset.step) * multiplier;
     const next = Math.max(button.dataset.stepper === 'reps' ? 1 : 0, Number(field.value || 0) + step);
     field.value = button.dataset.stepper === 'reps' ? String(Math.round(next)) : next.toFixed(2).replace(/\.00$/, '');
     document.querySelector(`#${button.dataset.stepper}-value`).textContent = field.value;

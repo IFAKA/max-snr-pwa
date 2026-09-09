@@ -80,10 +80,22 @@ export const primaryAction = (id, label, type = 'button') => `<button class="pri
 export const stepperMarkup = (name, label, value, down, up) => `<label class="stepper-label">${label}<div class="stepper"><button type="button" data-stepper="${name}" data-step="${down}" aria-label="Decrease ${label.toLowerCase()}">${icon('minus')}</button><output id="${name}-value" aria-live="polite">${esc(value)}</output><button type="button" data-stepper="${name}" data-step="${up}" aria-label="Increase ${label.toLowerCase()}">${icon('plus')}</button></div></label>`;
 export function bindHoldSteppers(changeValue) {
   document.querySelectorAll('[data-stepper]').forEach(button => {
-    let timer;
+    let timer, startedAt;
     let interval;
     const stop = () => { clearTimeout(timer); clearInterval(interval); if (interval) button.dataset.skipClick = '1'; interval = null; };
-    button.addEventListener('pointerdown', () => { button.dataset.skipClick = '1'; changeValue(button); timer = setTimeout(() => { interval = setInterval(() => changeValue(button), 110); }, 450); });
+    const multiplier = () => {
+      const elapsed = performance.now() - startedAt;
+      if (elapsed >= 2500) return 10;
+      if (elapsed >= 1500) return 5;
+      if (elapsed >= 800) return 2;
+      return 1;
+    };
+    button.addEventListener('pointerdown', () => {
+      button.dataset.skipClick = '1';
+      startedAt = performance.now();
+      changeValue(button, 1);
+      timer = setTimeout(() => { interval = setInterval(() => changeValue(button, multiplier()), 110); }, 450);
+    });
     button.addEventListener('pointerup', stop);
     button.addEventListener('pointercancel', stop);
     button.addEventListener('pointerleave', stop);
