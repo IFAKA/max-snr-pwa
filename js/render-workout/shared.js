@@ -16,8 +16,36 @@ export function bindStartDialog() {
   dialog.className = 'confirm-dialog bottom-sheet';
   dialog.innerHTML = '<div class="sheet-handle" aria-hidden="true"></div><form method="dialog"><h2>Start?</h2><div class="dialog-actions"><button class="primary" value="default">Start</button><button value="cancel">Cancel</button></div></form>';
   document.body.append(dialog);
-  trigger.addEventListener('click', () => dialog.showModal());
+  const handle = dialog.querySelector('.sheet-handle');
+  let dragStartY = 0;
+  let dragStartTime = 0;
+  const resetDrag = () => { dialog.classList.remove('is-dragging'); dialog.style.removeProperty('--sheet-drag-y'); };
+  handle?.addEventListener('pointerdown', event => {
+    if (!window.matchMedia('(max-width: 600px)').matches || event.pointerType === 'mouse' && event.button !== 0) return;
+    dragStartY = event.clientY;
+    dragStartTime = performance.now();
+    dialog.classList.add('is-dragging');
+    handle.setPointerCapture(event.pointerId);
+  });
+  handle?.addEventListener('pointermove', event => {
+    if (!dialog.classList.contains('is-dragging')) return;
+    const distance = Math.max(0, event.clientY - dragStartY);
+    dialog.style.setProperty('--sheet-drag-y', `${distance}px`);
+  });
+  const finishDrag = event => {
+    if (!dialog.classList.contains('is-dragging')) return;
+    const distance = Math.max(0, event.clientY - dragStartY);
+    const elapsed = Math.max(1, performance.now() - dragStartTime);
+    const velocity = distance / elapsed;
+    resetDrag();
+    if (distance > 96 || velocity > .5) dialog.close('cancel');
+  };
+  handle?.addEventListener('pointerup', finishDrag);
+  handle?.addEventListener('pointercancel', () => resetDrag());
+  dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close('cancel'); });
+  trigger.addEventListener('click', () => { resetDrag(); dialog.showModal(); });
   dialog.addEventListener('close', async () => {
+    resetDrag();
     if (dialog.returnValue !== 'default') return;
     const button = dialog.querySelector('[value="default"]');
     if (button) button.disabled = true;
