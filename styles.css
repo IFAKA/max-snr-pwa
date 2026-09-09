@@ -113,15 +113,15 @@ ul { margin: 0; padding: 0; list-style: none; }
 .dialog-actions button { min-height: 44px; }
 .dialog-actions .primary { margin: 0; }
 .hold-scroll-text, .title-marquee-text { min-width: 0; }
-.title-marquee-track { display: inline-flex; gap: 2rem; align-items: baseline; }
+.title-marquee-track { display: inline-block; }
 .title-marquee-text { display: inline-block; flex: 0 0 auto; }
 [data-hold-scroll] { min-width: 0; overflow: hidden; }
 [data-hold-scroll], [data-title-marquee] { white-space: nowrap; }
 [data-title-marquee] { overflow: hidden; }
-[data-title-marquee].is-title-marquee .title-marquee-track { animation: title-marquee 7s linear infinite; }
+[data-title-marquee].is-title-marquee .title-marquee-track { animation: title-marquee 7s linear 1 forwards; }
 [data-hold-scroll].is-hold-scrolling .hold-scroll-text { display: inline-block; max-width: none; white-space: nowrap; animation: title-pan 4.8s linear infinite; }
 @keyframes title-pan { 0%, 25% { transform: translateX(0); } 75%, 100% { transform: translateX(var(--scroll-distance)); } }
-@keyframes title-marquee { from { transform: translateX(0); } to { transform: translateX(var(--marquee-distance)); } }
+@keyframes title-marquee { 0%, 18% { transform: translateX(0); } 82%, 100% { transform: translateX(var(--marquee-distance)); } }
 @media (max-width: 260px) {
   main { max-width: 225px; padding: 10px 12px; }
   h1 { font-size: 30px; }

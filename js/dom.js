@@ -56,8 +56,8 @@ export function bindTitleMarquee(root = document) {
     const start = () => {
       const textWidth = text.getBoundingClientRect().width;
       if (textWidth <= element.clientWidth + 1) return;
-      const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
-      track.style.setProperty('--marquee-distance', `${-(textWidth + gap)}px`);
+      const distance = Math.min(0, element.clientWidth - textWidth);
+      track.style.setProperty('--marquee-distance', `${distance}px`);
       element.classList.add('is-title-marquee');
     };
     setTimeout(start, 1400);

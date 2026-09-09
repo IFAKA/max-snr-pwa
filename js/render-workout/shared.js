@@ -4,7 +4,7 @@ import { getState } from '../state.js';
 import { selectExercise, exerciseSelectionLocked, start } from '../workout.js';
 
 export const state = () => getState().active;
-export const titleMarquee = title => `<span class="title-marquee-track"><span class="title-marquee-text">${title}</span><span class="title-marquee-text" aria-hidden="true">${title}</span></span>`;
+export const titleMarquee = title => `<span class="title-marquee-track"><span class="title-marquee-text">${title}</span></span>`;
 export function workoutStage({className = '', title, body = '', actions = ''}) {
   return `<section class="workout-stage ${className}" aria-labelledby="workout-title"><div class="stage-info"><h1 id="workout-title" data-title-marquee>${titleMarquee(title)}</h1>${body}</div><div class="thumb-zone">${actions}</div></section>`;
 }
