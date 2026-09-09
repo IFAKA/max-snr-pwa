@@ -34,7 +34,7 @@ p { line-height: 1.4; }
 .today-screen { padding-top: 0; }
 button, input, select, textarea, .button { font: inherit; }
 button, .button, .import-button { min-height: 46px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--text); cursor: pointer; }
-button, .button { display: inline-flex; align-items: center; justify-content: center; padding: 10px 16px; font-weight: 800; text-decoration: none; user-select: none; transition: transform 140ms var(--ease-out), background-color 140ms ease; }
+button, .button { display: inline-flex; align-items: center; justify-content: center; padding: 10px 16px; font-weight: 400; text-decoration: none; user-select: none; transition: transform 140ms var(--ease-out), background-color 140ms ease; }
 button:active, .button:active, .import-button:active { transform: scale(.98); }
 button:disabled { cursor: not-allowed; opacity: .55; }
 button:focus-visible, .button:focus-visible, .import-button:focus-visible, input:focus-visible, summary:focus-visible, a:focus-visible { outline: 3px solid #3d8b61; outline-offset: 3px; }
@@ -62,7 +62,8 @@ ul { margin: 0; padding: 0; list-style: none; }
 .list-link small, .history-workout small { font-size: 16px; }
 .list-link > span:last-child { flex: 0 0 auto; color: var(--accent); font-size: 24px; }
 .list-link > .icon { width: 22px; height: 22px; flex: 0 0 22px; color: inherit; stroke: currentColor; stroke-width: 2.2; fill: none; }
-.complete-row .list-link { background: transparent; color: var(--success); cursor: default; font-weight: 850; }
+.complete-row .list-link { background: transparent; color: var(--success); cursor: default; font-weight: 400; }
+.list-link[data-start-day], .primary { font-weight: 800; }
 .complete-row .list-link:hover, .complete-row .list-link:focus-visible, .complete-row .list-link:active { background: transparent; }
 .icon { display: block; color: currentColor; }
 .list-link.is-disabled { color: var(--muted); cursor: not-allowed; opacity: .55; pointer-events: none; }
@@ -73,7 +74,8 @@ main > section:has(> .app-list) { display: flex; height: 100%; min-height: 0; fl
 .routine-exercise { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 10px 2px; line-height: 1.3; }
 .routine-exercise span:last-child { white-space: nowrap; }
 .routine-group-label { padding: 14px 2px 6px; border-top: 1px solid var(--line); }
-.routine-group-label .list-title { display: block; margin: 0; font-size: 14px; line-height: 1.2; letter-spacing: .08em; text-transform: uppercase; }
+.routine-group-label .list-title { display: block; margin: 0; font-size: 14px; font-weight: 400; line-height: 1.2; letter-spacing: .08em; text-transform: uppercase; }
+.history-workout strong { font-weight: 400; }
 .history-list > li { padding: 0; }
 .history-workout > summary { display: flex; min-height: 56px; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 2px; cursor: pointer; list-style: none; }
 .history-workout > summary::-webkit-details-marker, .data-card > summary::-webkit-details-marker { display: none; }
