@@ -1,6 +1,7 @@
 import { app } from './dom.js';
 
 const ROUTES = new Set(['/', '/routine/', '/history/', '/workout/']);
+let activeViewTransition = null;
 
 function prefersReducedMotion() {
   return globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
@@ -23,7 +24,15 @@ function updateView(render, focus) {
 export function renderWithTransition(render, {focus = true} = {}) {
   if (prefersReducedMotion()) return updateView(render, focus);
   if (typeof document.startViewTransition === 'function') {
-    return document.startViewTransition(() => updateView(render, focus));
+    if (activeViewTransition) return updateView(render, focus);
+    try {
+      activeViewTransition = document.startViewTransition(() => updateView(render, focus));
+      activeViewTransition.finished.finally(() => { activeViewTransition = null; });
+      return activeViewTransition;
+    } catch {
+      activeViewTransition = null;
+      return updateView(render, focus);
+    }
   }
   app?.classList.add('is-view-transitioning');
   const result = updateView(render, focus);
