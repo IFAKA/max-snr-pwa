@@ -52,6 +52,7 @@ export function bindHoldScroll(root = document) {
 const MAGNETIC_HOLD_MS = 400;
 const MAGNETIC_MOVE_TOLERANCE = 10;
 const MAGNETIC_STATUS_CLASS = 'magnetic-list-status';
+const MAGNETIC_DETENT_VIBRATION = [16, 24, 16];
 
 export function magneticRowIndex(startIndex, deltaY, rowCount, rowInterval) {
   if (!rowCount) return -1;
@@ -140,7 +141,7 @@ export function bindMagneticLists(root = document) {
         if (isTarget) row.setAttribute('aria-current', 'true');
         else row.removeAttribute('aria-current');
       });
-      if (nextIndex !== activeIndex) buzz(8);
+      if (nextIndex !== activeIndex) buzz(MAGNETIC_DETENT_VIBRATION);
       activeIndex = nextIndex;
       const row = rows[activeIndex];
       status.textContent = `Picker: ${describeRow(row)}${enabledAction(row) ? '' : ', unavailable'}`;
