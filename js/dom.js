@@ -50,7 +50,7 @@ export function bindHoldScroll(root = document) {
   bindMagneticLists(root);
 }
 const MAGNETIC_HOLD_MS = 400;
-const MAGNETIC_MOVE_TOLERANCE = 10;
+const MAGNETIC_MOVE_TOLERANCE = 24;
 const MAGNETIC_STATUS_CLASS = 'magnetic-list-status';
 const MAGNETIC_DETENT_DISTANCE = 24;
 const MAGNETIC_DETENT_VIBRATION = 10;
@@ -60,9 +60,9 @@ export function magneticRawRowIndex(startIndex, deltaY, detentDistance = MAGNETI
   return startIndex + Math.round(deltaY / distance);
 }
 
-export function magneticRowIndex(startIndex, deltaY, rowCount, rowInterval) {
+export function magneticRowIndex(startIndex, deltaY, rowCount, detentDistance) {
   if (!rowCount) return -1;
-  return Math.max(0, Math.min(rowCount - 1, magneticRawRowIndex(startIndex, deltaY, rowInterval)));
+  return Math.max(0, Math.min(rowCount - 1, magneticRawRowIndex(startIndex, deltaY, detentDistance)));
 }
 
 export function magneticPickerIndex(rawIndex, rowCount) {
