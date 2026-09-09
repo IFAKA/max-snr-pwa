@@ -49,7 +49,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .app-list { border-top: 1px solid var(--line); touch-action: none; }
 .app-list > li { border-bottom: 1px solid var(--line); }
 .app-list.is-magnetic-picker { touch-action: none; }
-.app-list > li.is-magnetic-target { background: var(--accent-soft); box-shadow: inset 6px 0 0 var(--accent), 0 0 0 2px var(--accent); transition: background-color 180ms var(--ease-out), box-shadow 180ms var(--ease-out); }
+.app-list > li.is-magnetic-target { background: var(--accent-soft); box-shadow: inset 0 2px 0 var(--accent), inset 0 -2px 0 var(--accent); transition: background-color 180ms var(--ease-out), box-shadow 180ms var(--ease-out); }
 .app-list > li.is-magnetic-target .list-link { background: transparent; }
 .app-list > li.is-magnetic-target .list-link:focus-visible { outline-offset: -3px; }
 .app-list > li.is-magnetic-target .list-link.is-disabled, .app-list > li.is-magnetic-target.complete-row .list-link { color: var(--muted); }
@@ -67,16 +67,14 @@ ul { margin: 0; padding: 0; list-style: none; }
 main > section:has(> .app-list) { display: flex; height: 100%; min-height: 0; flex-direction: column; overflow: hidden; }
 .navigation-list { flex: 1 1 auto; min-height: 0; margin-top: 12px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 .routine-list, .exercise-list, .history-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
-.routine-list > li.today { border-left: 3px solid var(--accent); }
 .day-indicator { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); font-size: 0; }
 .routine-exercise { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 10px 2px; line-height: 1.3; }
 .routine-exercise span:last-child { white-space: nowrap; }
 .routine-group-label { padding: 14px 2px 6px; border-top: 1px solid var(--line); }
 .routine-group-label .list-title { display: block; margin: 0; font-size: 14px; line-height: 1.2; letter-spacing: .08em; text-transform: uppercase; }
 .history-list > li { padding: 0; }
-.status-row { padding: 0 2px; }
-.status-row:has(output:empty) { display: none; }
-.status-row output { display: block; padding: 10px 0; color: var(--muted); font-size: 15px; }
+.data-status { flex: 0 0 auto; max-width: 100%; margin-top: 12px; padding: 10px 12px; overflow-wrap: anywhere; border: 1px solid var(--accent); border-radius: 14px; background: var(--accent-soft); color: var(--text); font-size: 15px; line-height: 1.35; }
+.data-status.error { border-color: var(--danger); background: #f9dfdc; color: #74251f; }
 .history-workout > summary { display: flex; min-height: 56px; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 2px; cursor: pointer; list-style: none; }
 .history-workout > summary::-webkit-details-marker, .data-card > summary::-webkit-details-marker { display: none; }
 .history-workout > summary::after, .data-card > summary::after { content: "+"; color: var(--accent); font-size: 22px; }
@@ -176,7 +174,7 @@ main > section:has(> .app-list) { display: flex; height: 100%; min-height: 0; fl
   .list-link { min-height: 64px; padding-block: 14px; }
   .list-link small, .history-workout small { font-size: 18px; }
   .routine-exercise { gap: 12px; padding-block: 14px; font-size: 20px; }
-  .status-row output, .set-count, .summary-grid span { font-size: 17px; }
+  .data-status, .set-count, .summary-grid span { font-size: 17px; }
   button, .button, .import-button { min-height: 52px; }
   .workout-disclosure summary, .text-action { min-height: 52px; }
 }
@@ -186,8 +184,10 @@ main > section:has(> .app-list) { display: flex; height: 100%; min-height: 0; fl
 @media (prefers-color-scheme: dark) {
   :root { --bg: #0d1210; --surface: #171e1a; --surface-raised: #203428; --text: #edf2ee; --muted: #a1aca4; --line: #344138; --accent: #8fd0a9; --accent-soft: #21372a; --danger: #ffaaa1; --success: #8fd0a9; }
   .primary { color: #102116; }
-  .notice.error { background: #542824; color: #ffd7d2; }
+  .notice.error, .data-status.error { background: #542824; color: #ffd7d2; }
 }
 @media (forced-colors: active) {
-  .app-list > li.is-magnetic-target { background: Highlight; box-shadow: inset 4px 0 0 HighlightText; color: HighlightText; }
+  .app-list > li.is-magnetic-target { background: Highlight; box-shadow: inset 0 2px 0 HighlightText, inset 0 -2px 0 HighlightText; color: HighlightText; }
+  .data-status { border-color: CanvasText; background: Canvas; color: CanvasText; }
+  .data-status.error { border-color: Mark; background: Canvas; color: CanvasText; }
 }
