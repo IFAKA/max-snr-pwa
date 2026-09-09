@@ -54,7 +54,7 @@ const MAGNETIC_MOVE_TOLERANCE = 24;
 const MAGNETIC_STATUS_CLASS = 'magnetic-list-status';
 const MAGNETIC_DETENT_DISTANCE = 24;
 const MAGNETIC_HOLD_VIBRATION = 5;
-const MAGNETIC_DETENT_VIBRATION = 18;
+const MAGNETIC_DETENT_VIBRATION = [8, 18, 8];
 
 export function magneticRawRowIndex(startIndex, deltaY, detentDistance = MAGNETIC_DETENT_DISTANCE) {
   const distance = Math.max(1, detentDistance || MAGNETIC_DETENT_DISTANCE);
@@ -167,17 +167,18 @@ export function bindMagneticLists(root = document) {
       document.addEventListener?.('pointerup', onPointerUp);
       document.addEventListener?.('pointercancel', cancel);
     };
-    const setActive = index => {
+    const setActive = (index, vibration = MAGNETIC_DETENT_VIBRATION) => {
       if (!rows.length) return;
       const nextIndex = index < 0 || index >= rows.length ? -1 : index;
+      const changed = nextIndex !== activeIndex;
       rows.forEach((row, rowIndex) => {
         const isTarget = nextIndex >= 0 && rowIndex === nextIndex;
         row.classList.toggle('is-magnetic-target', isTarget);
         if (isTarget) row.setAttribute('aria-current', 'true');
         else row.removeAttribute('aria-current');
       });
-      if (nextIndex !== activeIndex) buzz(MAGNETIC_DETENT_VIBRATION);
       activeIndex = nextIndex;
+      if (changed) buzz(vibration);
       if (activeIndex < 0) {
         status.textContent = 'Picker cancelled — release to cancel';
         return;
@@ -235,8 +236,7 @@ export function bindMagneticLists(root = document) {
       status.classList.add('is-magnetic-status-visible');
       list.style.setProperty('touch-action', 'none');
       list.setPointerCapture?.(pointerId);
-      buzz(MAGNETIC_HOLD_VIBRATION);
-      setActive(activeIndex);
+      setActive(activeIndex, MAGNETIC_HOLD_VIBRATION);
     };
     const onPointerDown = event => {
       if (event.pointerType === 'mouse' && event.button !== 0) return;
