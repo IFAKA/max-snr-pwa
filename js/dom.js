@@ -52,11 +52,11 @@ export function bindHoldScroll(root = document) {
 const MAGNETIC_HOLD_MS = 400;
 const MAGNETIC_MOVE_TOLERANCE = 10;
 const MAGNETIC_STATUS_CLASS = 'magnetic-list-status';
-const MAGNETIC_DETENT_VIBRATION = [16, 24, 16];
+const MAGNETIC_DETENT_VIBRATION = [24, 36, 24];
 
 export function magneticRawRowIndex(startIndex, deltaY, rowInterval) {
   const interval = Math.max(1, rowInterval || 1);
-  return startIndex + Math.round(deltaY / interval);
+  return startIndex - Math.round(deltaY / interval);
 }
 
 export function magneticRowIndex(startIndex, deltaY, rowCount, rowInterval) {
@@ -156,6 +156,16 @@ export function bindMagneticLists(root = document) {
     const scrollTarget = scrollSurface(list);
 
     const clearTimer = () => { clearTimeout(timer); timer = null; };
+    const stopDocumentTracking = () => {
+      document.removeEventListener?.('pointermove', onPointerMove);
+      document.removeEventListener?.('pointerup', onPointerUp);
+      document.removeEventListener?.('pointercancel', cancel);
+    };
+    const startDocumentTracking = () => {
+      document.addEventListener?.('pointermove', onPointerMove, {passive: false});
+      document.addEventListener?.('pointerup', onPointerUp);
+      document.addEventListener?.('pointercancel', cancel);
+    };
     const setActive = index => {
       if (!rows.length) return;
       const nextIndex = index < 0 || index >= rows.length ? -1 : index;
@@ -177,6 +187,7 @@ export function bindMagneticLists(root = document) {
     };
     const reset = () => {
       clearTimer();
+      stopDocumentTracking();
       if (pointerId !== null) {
         try { list.releasePointerCapture?.(pointerId); } catch {}
       }
@@ -198,7 +209,11 @@ export function bindMagneticLists(root = document) {
     const cancel = () => { reset(); };
     const activate = () => {
       const action = rows[activeIndex] && enabledAction(rows[activeIndex]);
-      if (!action) { reset(); return; }
+      if (!action) {
+        suppressClick = true;
+        reset();
+        return;
+      }
       buzz([18, 35, 18]);
       action.click();
       suppressClick = true;
@@ -210,7 +225,7 @@ export function bindMagneticLists(root = document) {
       if (!rows.length) return reset();
       interval = rowInterval(rows);
       startIndex = nearestRow(rows, startY);
-      activeIndex = startIndex;
+      activeIndex = -1;
       pickerActive = true;
       list.classList.add('is-magnetic-picker');
       status.classList.add('is-magnetic-status-visible');
@@ -228,17 +243,13 @@ export function bindMagneticLists(root = document) {
       pointerId = event.pointerId;
       startY = lastY = event.clientY;
       clearTimer();
+      startDocumentTracking();
       timer = setTimeout(enter, MAGNETIC_HOLD_MS);
     };
     const onPointerMove = event => {
       if (event.pointerId !== pointerId) return;
       const previousY = lastY;
       lastY = event.clientY;
-      const outside = pointerOutside(list, event);
-      if (pickerActive && outside) {
-        cancel();
-        return;
-      }
       if (!pickerActive) {
         if (Math.abs(lastY - startY) > MAGNETIC_MOVE_TOLERANCE) {
           clearTimer();
@@ -269,8 +280,6 @@ export function bindMagneticLists(root = document) {
       event.stopPropagation();
     };
     list.addEventListener('pointerdown', onPointerDown);
-    list.addEventListener('pointermove', onPointerMove, {passive: false});
-    list.addEventListener('pointerup', onPointerUp);
     list.addEventListener('pointercancel', cancel);
     list.addEventListener('pointerleave', event => { if (!pickerActive && event.pointerId === pointerId) cancel(); });
     list.addEventListener('blur', cancel);
