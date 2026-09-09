@@ -58,8 +58,8 @@ ul { margin: 0; padding: 0; list-style: none; }
 .day-indicator { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); font-size: 0; }
 .routine-exercise { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 10px 2px; line-height: 1.3; }
 .routine-exercise span:last-child { white-space: nowrap; }
-.routine-group { padding: 10px 2px; }
-.routine-group ul { margin-top: 4px; }
+.routine-group-label { padding: 14px 2px 6px; border-top: 1px solid var(--line); }
+.routine-group-label .group-label { display: block; margin: 0; }
 .history-list > li { padding: 0; }
 .status-row { padding: 0 2px; }
 .status-row:has(output:empty) { display: none; }
@@ -107,9 +107,11 @@ ul { margin: 0; padding: 0; list-style: none; }
 .disclosure-content { padding: 0 14px 12px; }
 .choice-list { display: grid; }
 .text-action { display: flex; min-height: 44px; align-items: center; padding: 10px 2px; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: transparent; color: inherit; text-align: left; }
-.confirm-dialog { width: min(calc(100% - 24px), 24rem); max-height: calc(100svh - 24px); margin: auto; padding: 14px; overflow: hidden; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); color: var(--text); box-shadow: 0 18px 60px rgba(18, 35, 24, .24); }
+.confirm-dialog { box-sizing: border-box; width: min(calc(100% - 24px), 24rem); max-height: calc(100svh - 24px); margin: auto; padding: 14px; overflow: hidden; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); color: var(--text); box-shadow: 0 18px 60px rgba(18, 35, 24, .24); }
 .confirm-dialog::backdrop { background: rgba(12, 20, 15, .46); }
-.dialog-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 20px; }
+.confirm-dialog form, .confirm-dialog h2, .dialog-actions, .dialog-actions button { width: 100%; }
+.confirm-dialog form { margin: 0; }
+.dialog-actions { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 20px; }
 .dialog-actions button { min-height: 44px; }
 .dialog-actions .primary { margin: 0; }
 .hold-scroll-text, .title-marquee-text { min-width: 0; }
@@ -133,7 +135,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   .list-link small, .history-workout small { font-size: 11px; }
   .routine-exercise { gap: 5px; padding: 9px 0; font-size: 12px; }
   .routine-exercise span:last-child { white-space: normal; text-align: right; }
-  .routine-group { padding: 10px 12px; }
+  .routine-group-label { padding-inline: 0; }
   .history-body { padding-inline: 12px; }
   .routine-list, .exercise-list, .history-list, .history-detail { max-height: calc(100svh - 72px); }
   .workout-stage { height: calc(100svh - 20px); gap: 4px; }

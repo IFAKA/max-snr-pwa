@@ -60,6 +60,11 @@ export function bindTitleMarquee(root = document) {
       track.style.setProperty('--marquee-distance', `${distance}px`);
       element.classList.add('is-title-marquee');
     };
+    track.addEventListener('animationend', event => {
+      if (event.animationName !== 'title-marquee') return;
+      element.classList.remove('is-title-marquee');
+      track.style.removeProperty('--marquee-distance');
+    });
     setTimeout(start, 1400);
   });
 }
