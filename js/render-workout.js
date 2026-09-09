@@ -25,7 +25,7 @@ export function renderWorkout() {
   if (!a) return location.assign('/');
   const params = new URLSearchParams(location.search);
   if (params.get('view') === 'exercises') {
-    renderExercisePicker(() => location.assign(params.get('return') === 'select' ? '/workout/?view=select' : '/workout/'));
+    renderExercisePicker(() => location.assign(params.get('return') === 'select' ? '/workout/?view=exercise' : '/workout/'));
     return;
   }
   if (params.get('view') === 'select') {
