@@ -26,12 +26,16 @@ export function bindStartDialog() {
 }
 export function exercisePicker(active) {
   const seen = new Set();
-  const items = active.tasks.filter(task => {
-    if (seen.has(task.exerciseId) || task.completed || task.skipped) return false;
+  const items = active.tasks.reduce((list, task) => {
+    if (seen.has(task.exerciseId)) return list;
     seen.add(task.exerciseId);
-    return true;
-  });
-  const rows = items.map(task => `<li><button class="list-link" type="button" data-exercise-id="${esc(task.exerciseId)}"><span data-hold-scroll><span class="hold-scroll-text">${esc(task.performedName)}</span></span>${icon('chevron', 'Select exercise')}</button></li>`);
+    const exerciseTasks = active.tasks.filter(candidate => candidate.exerciseId === task.exerciseId);
+    list.push({task, complete: exerciseTasks.every(candidate => candidate.completed || candidate.skipped)});
+    return list;
+  }, []);
+  const rows = items.map(({task, complete}) => complete
+    ? `<li class="complete-row"><div class="list-link" role="status"><span data-hold-scroll><span class="hold-scroll-text">${esc(task.performedName)}</span></span>${icon('check', 'Done')}</div></li>`
+    : `<li><button class="list-link" type="button" data-exercise-id="${esc(task.exerciseId)}"><span data-hold-scroll><span class="hold-scroll-text">${esc(task.performedName)}</span></span>${icon('chevron', 'Select exercise')}</button></li>`);
   return `<section class="workout-picker" aria-labelledby="exercise-picker-title">${titleMarkup('Exercise', 'exercise-picker-title')}${listMarkup(rows, 'exercise-picker-list', 'Available exercises')}</section>`;
 }
 export function bindExercisePicker(active, onSelected = () => location.assign('/workout/')) {
