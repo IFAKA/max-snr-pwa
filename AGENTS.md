@@ -49,6 +49,15 @@ Preserve state schema `version: 2` with `history` and `active`. Preserve Indexed
 
 Do not add service-worker caching or cache-version changes. Keep IndexedDB/localStorage persistence and legacy migration behavior intact.
 
+## Architecture quality rules
+
+- Keep the dependency direction one way: constants/data/state/storage → workout domain → renderers → `app.js` routing. Workout domain modules must not import renderers or navigation.
+- Organize code by product domain and user-facing capability. Prefer `workout/`, `routine/`, `history/`, and `storage/` over generic `utils/`, `helpers/`, or `misc/` folders.
+- Keep domain functions pure when possible. Do not mutate function arguments; keep DOM, storage, timers, navigation, and other browser side effects at the edges.
+- Use one shared semantic UI system for all viewport sizes. Structure new UI as semantic atoms, molecules, organisms, templates, and pages without duplicating watch and phone markup.
+- Keep source files under 400 lines and functions under 200 lines. Split oversized files by responsibility; current split candidates are `js/dom.js` (DOM helpers versus magnetic lists) and `js/workout/session.js` (session progression versus completion/cancellation).
+- ESLint enforces unused code, complexity, parameter immutability, file/function size, and the workout dependency boundary. Prettier owns formatting; the pre-commit hook runs the complete check suite.
+
 ## Validation and delivery
 
 There is no build script or automated suite. Run `node --check app.js`, `node --check` for every JavaScript module, `git diff --check`, and serve locally with `python3 -m http.server 4173` to smoke test `/`, `/routine/`, `/history/`, and `/workout/`. Exercise start/resume, refresh during every workout phase, sets/supersets, defer/skip, cancellation, completion/history, import/export, migration, localStorage fallback, and the watch UI readiness gate above. Clear site storage between scenarios. Use browser validation at 225×225, a smaller watch width, and phone dimensions when Chromium is available; otherwise explicitly mark the visual/device gate as not passed.
