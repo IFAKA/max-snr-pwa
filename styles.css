@@ -625,8 +625,10 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   font-size: 28px;
   font-weight: 850;
 }
-.stepper button:hover {
-  background: var(--accent-soft);
+@media (hover: hover) and (pointer: fine) {
+  .stepper button:hover {
+    background: var(--accent-soft);
+  }
 }
 .stepper button:focus-visible {
   position: relative;
