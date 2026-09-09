@@ -236,6 +236,7 @@ export function bindMagneticLists(root = document) {
       movedBeforePicker = false;
       pointerId = event.pointerId;
       startY = lastY = event.clientY;
+      document.documentElement?.classList.add('is-magnetic-picker-active');
       clearTimer();
       startDocumentTracking();
       timer = setTimeout(enter, MAGNETIC_HOLD_MS);
