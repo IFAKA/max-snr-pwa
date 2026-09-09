@@ -1,4 +1,4 @@
-import { state, startRow, bindStartDialog } from './render-workout/shared.js';
+import { state, startRow, bindStartDialog, titleMarquee } from './render-workout/shared.js';
 import { renderWarmup } from './render-workout/warmup.js';
 import { renderPlank } from './render-workout/plank.js';
 import { renderLifting } from './render-workout/lifting.js';
@@ -12,7 +12,7 @@ import { ROUTINE, NAMES } from './routine-data.js';
 
 function renderStart(day) {
   const items = ROUTINE[day];
-  app.innerHTML = `<section aria-labelledby="start-title"><h1 id="start-title" data-title-marquee><span class="title-marquee-text">${esc(items ? NAMES[day] : 'Rest')}</span></h1>${items ? listMarkup([startRow(day)], 'navigation-list', 'Workout actions') : '<p class="notice">Rest</p>'}</section>`;
+  app.innerHTML = `<section aria-labelledby="start-title"><h1 id="start-title" data-title-marquee>${titleMarquee(esc(items ? NAMES[day] : 'Rest'))}</h1>${items ? listMarkup([startRow(day)], 'navigation-list', 'Workout actions') : '<p class="notice">Rest</p>'}</section>`;
   bindStartDialog();
   bindHoldScroll();
   bindTitleMarquee();

@@ -52,10 +52,12 @@ export function bindTitleMarquee(root = document) {
     if (element.dataset.marqueeBound) return;
     element.dataset.marqueeBound = 'true';
     const text = element.querySelector('.title-marquee-text') || element;
+    const track = element.querySelector('.title-marquee-track') || element;
     const start = () => {
       const textWidth = text.getBoundingClientRect().width;
       if (textWidth <= element.clientWidth + 1) return;
-      text.style.setProperty('--marquee-distance', `${Math.min(0, element.clientWidth - textWidth)}px`);
+      const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+      track.style.setProperty('--marquee-distance', `${-(textWidth + gap)}px`);
       element.classList.add('is-title-marquee');
     };
     setTimeout(start, 1400);

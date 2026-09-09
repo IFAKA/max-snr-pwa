@@ -113,14 +113,15 @@ ul { margin: 0; padding: 0; list-style: none; }
 .dialog-actions button { min-height: 44px; }
 .dialog-actions .primary { margin: 0; }
 .hold-scroll-text, .title-marquee-text { min-width: 0; }
-.title-marquee-text { display: inline-block; }
+.title-marquee-track { display: inline-flex; gap: 2rem; align-items: baseline; }
+.title-marquee-text { display: inline-block; flex: 0 0 auto; }
 [data-hold-scroll] { min-width: 0; overflow: hidden; }
 [data-hold-scroll], [data-title-marquee] { white-space: nowrap; }
 [data-title-marquee] { overflow: hidden; }
-[data-title-marquee].is-title-marquee .title-marquee-text { display: inline-block; max-width: none; animation: title-marquee 6.4s linear infinite; }
+[data-title-marquee].is-title-marquee .title-marquee-track { animation: title-marquee 7s linear infinite; }
 [data-hold-scroll].is-hold-scrolling .hold-scroll-text { display: inline-block; max-width: none; white-space: nowrap; animation: title-pan 4.8s linear infinite; }
 @keyframes title-pan { 0%, 25% { transform: translateX(0); } 75%, 100% { transform: translateX(var(--scroll-distance)); } }
-@keyframes title-marquee { 0%, 18% { transform: translateX(0); } 50%, 68% { transform: translateX(var(--marquee-distance)); } 100% { transform: translateX(0); } }
+@keyframes title-marquee { from { transform: translateX(0); } to { transform: translateX(var(--marquee-distance)); } }
 @media (max-width: 260px) {
   main { max-width: 225px; padding: 10px 12px; }
   h1 { font-size: 30px; }
@@ -139,7 +140,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   .workout-stage h1 { margin-bottom: 4px; font-size: 26px; line-height: .94; }
   .workout-stage .thumb-zone { gap: 2px; }
   .lifting-stage .thumb-zone { margin-top: 0; }
-  .lifting-stage .thumb-zone { gap: 4px; }
+  .lifting-stage .thumb-zone { gap: 10px; }
   .lifting-stage .primary { min-height: 44px; }
   .lifting-stage .stage-action-list .list-link { min-height: 44px; }
   .stepper-label { gap: 3px; }
@@ -147,7 +148,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   .stepper button { min-height: 44px; }
   .stepper output { font-size: 20px; }
   .list-link > .icon { width: 20px; height: 20px; flex-basis: 20px; }
-  .big-timer { margin: 22px 0 16px; font-size: 72px; }
+  .big-timer { margin: 14px 0 8px; font-size: 56px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
