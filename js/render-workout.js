@@ -1,4 +1,4 @@
-import { state, startRow, bindStartDialog, titleMarquee } from './render-workout/shared.js';
+import { state, startRow, bindStartDialog } from './render-workout/shared.js';
 import { renderWarmup } from './render-workout/warmup.js';
 import { renderPlank } from './render-workout/plank.js';
 import { renderLifting } from './render-workout/lifting.js';
@@ -7,12 +7,12 @@ import { renderStretch } from './render-workout/stretch.js';
 import { renderCompletion } from './render-workout/completion.js';
 import { renderExerciseSelection, renderExercisePicker } from './render-workout/select.js';
 import { bindTitleMarquee, bindHoldScroll, keepAwake } from './dom.js';
-import { app, esc, listMarkup } from './dom.js';
+import { app, listMarkup, titleMarkup } from './dom.js';
 import { ROUTINE, NAMES } from './routine-data.js';
 
 function renderStart(day) {
   const items = ROUTINE[day];
-  app.innerHTML = `<section aria-labelledby="start-title"><h1 id="start-title" data-title-marquee>${titleMarquee(esc(items ? NAMES[day] : 'Rest'))}</h1>${items ? listMarkup([startRow(day)], 'navigation-list', 'Workout actions') : '<p class="notice">Rest</p>'}</section>`;
+  app.innerHTML = `<section aria-labelledby="start-title">${titleMarkup(items ? NAMES[day] : 'Rest', 'start-title')}${items ? listMarkup([startRow(day)], 'navigation-list', 'Workout actions') : '<p class="notice">Rest</p>'}</section>`;
   bindStartDialog();
   bindHoldScroll();
   bindTitleMarquee();

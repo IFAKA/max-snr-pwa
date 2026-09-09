@@ -1,12 +1,11 @@
-import { app, bindHoldScroll, bindTitleMarquee, esc, icon, listMarkup } from '../dom.js';
+import { app, bindHoldScroll, bindTitleMarquee, esc, icon, listMarkup, titleMarkup } from '../dom.js';
 import { save } from '../storage.js';
 import { getState } from '../state.js';
 import { selectExercise, exerciseSelectionLocked, start } from '../workout.js';
 
 export const state = () => getState().active;
-export const titleMarquee = title => `<span class="title-marquee-track"><span class="title-marquee-text">${title}</span></span>`;
 export function workoutStage({className = '', title, body = '', actions = ''}) {
-  return `<section class="workout-stage ${className}" aria-labelledby="workout-title"><div class="stage-info"><h1 id="workout-title" data-title-marquee>${titleMarquee(title)}</h1>${body}</div><div class="thumb-zone">${actions}</div></section>`;
+  return `<section class="workout-stage ${className}" aria-labelledby="workout-title"><div class="stage-info">${titleMarkup(title, 'workout-title')}${body}</div><div class="thumb-zone">${actions}</div></section>`;
 }
 export const startRow = day => `<li><button class="list-link" type="button" data-start-day="${esc(day)}"><span>Start</span>${icon('chevron', 'Start workout')}</button></li>`;
 export function bindStartDialog() {
@@ -33,7 +32,7 @@ export function exercisePicker(active) {
     return true;
   });
   const rows = items.map(task => `<li><button class="list-link" type="button" data-exercise-id="${esc(task.exerciseId)}"><span data-hold-scroll><span class="hold-scroll-text">${esc(task.performedName)}</span></span>${icon('chevron', 'Select exercise')}</button></li>`);
-  return `<section class="workout-picker" aria-labelledby="exercise-picker-title"><h1 id="exercise-picker-title">Exercise</h1>${listMarkup(rows, 'exercise-picker-list', 'Available exercises')}</section>`;
+  return `<section class="workout-picker" aria-labelledby="exercise-picker-title">${titleMarkup('Exercise', 'exercise-picker-title')}${listMarkup(rows, 'exercise-picker-list', 'Available exercises')}</section>`;
 }
 export function bindExercisePicker(active, onSelected = () => location.assign('/workout/')) {
   document.querySelectorAll('[data-exercise-id]').forEach(button => button.addEventListener('click', () => runAction(button, () => selectExercise(button.dataset.exerciseId), onSelected)));
