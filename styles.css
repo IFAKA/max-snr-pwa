@@ -153,11 +153,18 @@ ul { margin: 0; padding: 0; list-style: none; }
   .big-timer { margin: 10px 0 6px; font-size: 48px; }
 }
 @media (min-width: 261px) {
-  :root { font-size: 18px; }
-  h3 { font-size: 18px; }
-  .group-label, .stepper-label { font-size: 16px; }
-  .list-link small, .history-workout small { font-size: 17px; }
-  .status-row output, .set-count, .summary-grid span { font-size: 16px; }
+  :root { font-size: 20px; }
+  main { padding: 16px; }
+  h1 { font-size: clamp(44px, 12vw, 60px); }
+  h2 { font-size: 28px; }
+  h3 { font-size: 20px; }
+  .group-label, .stepper-label { font-size: 17px; }
+  .list-link { min-height: 64px; padding-block: 14px; }
+  .list-link small, .history-workout small { font-size: 18px; }
+  .routine-exercise { gap: 12px; padding-block: 14px; font-size: 20px; }
+  .status-row output, .set-count, .summary-grid span { font-size: 17px; }
+  button, .button, .import-button { min-height: 52px; }
+  .workout-disclosure summary, .text-action { min-height: 52px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
