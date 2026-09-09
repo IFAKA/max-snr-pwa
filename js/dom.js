@@ -53,7 +53,8 @@ const MAGNETIC_HOLD_MS = 400;
 const MAGNETIC_MOVE_TOLERANCE = 24;
 const MAGNETIC_STATUS_CLASS = 'magnetic-list-status';
 const MAGNETIC_DETENT_DISTANCE = 24;
-const MAGNETIC_DETENT_VIBRATION = 10;
+const MAGNETIC_HOLD_VIBRATION = 5;
+const MAGNETIC_DETENT_VIBRATION = 18;
 
 export function magneticRawRowIndex(startIndex, deltaY, detentDistance = MAGNETIC_DETENT_DISTANCE) {
   const distance = Math.max(1, detentDistance || MAGNETIC_DETENT_DISTANCE);
@@ -88,7 +89,7 @@ function listRows(list) {
 }
 
 function rowAction(row) {
-  return row.querySelector?.('a, button, [role="button"]');
+  return row.querySelector?.('a, button, label, [role="button"]');
 }
 
 function enabledAction(row) {
@@ -216,7 +217,7 @@ export function bindMagneticLists(root = document) {
         reset();
         return;
       }
-      buzz([18, 35, 18]);
+      buzz([6, 14, 6]);
       action.click();
       suppressClick = true;
       reset();
@@ -234,6 +235,7 @@ export function bindMagneticLists(root = document) {
       status.classList.add('is-magnetic-status-visible');
       list.style.setProperty('touch-action', 'none');
       list.setPointerCapture?.(pointerId);
+      buzz(MAGNETIC_HOLD_VIBRATION);
       setActive(activeIndex);
     };
     const onPointerDown = event => {
