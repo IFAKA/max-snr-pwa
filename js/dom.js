@@ -108,7 +108,7 @@ function scrollSurface(list) {
     if (surface.scrollHeight > surface.clientHeight + 1) return surface;
     surface = surface.parentElement;
   }
-  return list;
+  return document.scrollingElement || document.documentElement || list;
 }
 
 function magneticStatus(list) {
@@ -189,6 +189,7 @@ export function bindMagneticLists(root = document) {
         row.removeAttribute('aria-current');
       });
       list.classList.remove('is-magnetic-picker');
+      document.documentElement?.classList.remove('is-magnetic-picker-active');
       status.classList.remove('is-magnetic-status-visible');
       list.style.removeProperty('touch-action');
       status.textContent = '';
@@ -220,6 +221,7 @@ export function bindMagneticLists(root = document) {
       activeIndex = -1;
       pickerActive = true;
       list.classList.add('is-magnetic-picker');
+      document.documentElement?.classList.add('is-magnetic-picker-active');
       status.classList.add('is-magnetic-status-visible');
       list.style.setProperty('touch-action', 'none');
       list.setPointerCapture?.(pointerId);

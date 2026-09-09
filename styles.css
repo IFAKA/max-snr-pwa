@@ -19,6 +19,7 @@
 }
 * { box-sizing: border-box; }
 html, body { width: 100%; min-width: 0; min-height: 100%; margin: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior-y: auto; background: var(--bg); color: var(--text); }
+html.is-magnetic-picker-active, html.is-magnetic-picker-active body { overscroll-behavior-y: none; }
 body { font-variant-numeric: tabular-nums; }
 main { width: 100%; max-width: 34rem; min-height: 100svh; margin: auto; overflow: visible; padding: 12px; }
 h1, h2, h3, p { margin-top: 0; }
