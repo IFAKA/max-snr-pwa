@@ -52,11 +52,12 @@ export function bindHoldScroll(root = document) {
 const MAGNETIC_HOLD_MS = 400;
 const MAGNETIC_MOVE_TOLERANCE = 10;
 const MAGNETIC_STATUS_CLASS = 'magnetic-list-status';
+const MAGNETIC_DETENT_DISTANCE = 24;
 const MAGNETIC_DETENT_VIBRATION = [24, 36, 24];
 
-export function magneticRawRowIndex(startIndex, deltaY, rowInterval) {
-  const interval = Math.max(1, rowInterval || 1);
-  return startIndex - Math.round(deltaY / interval);
+export function magneticRawRowIndex(startIndex, deltaY, detentDistance = MAGNETIC_DETENT_DISTANCE) {
+  const distance = Math.max(1, detentDistance || MAGNETIC_DETENT_DISTANCE);
+  return startIndex + Math.round(deltaY / distance);
 }
 
 export function magneticRowIndex(startIndex, deltaY, rowCount, rowInterval) {
@@ -101,13 +102,6 @@ function nearestRow(rows, y) {
   }, {index: 0, distance: Infinity}).index;
 }
 
-function rowInterval(rows) {
-  if (rows.length < 2) return rows[0]?.getBoundingClientRect().height || 1;
-  const first = rows[0].getBoundingClientRect();
-  const second = rows[1].getBoundingClientRect();
-  return Math.max(1, second.top - first.top || first.height);
-}
-
 function scrollSurface(list) {
   let surface = list;
   while (surface && surface !== document.body) {
@@ -149,7 +143,6 @@ export function bindMagneticLists(root = document) {
     let startIndex = -1;
     let activeIndex = -1;
     let rows = [];
-    let interval = 1;
     let pickerActive = false;
     let suppressClick = false;
     let movedBeforePicker = false;
@@ -223,7 +216,6 @@ export function bindMagneticLists(root = document) {
       if (pointerId === null) return;
       rows = listRows(list);
       if (!rows.length) return reset();
-      interval = rowInterval(rows);
       startIndex = nearestRow(rows, startY);
       activeIndex = -1;
       pickerActive = true;
@@ -260,7 +252,7 @@ export function bindMagneticLists(root = document) {
         return;
       }
       event.preventDefault();
-      const rawIndex = magneticRawRowIndex(startIndex, lastY - startY, interval);
+      const rawIndex = magneticRawRowIndex(startIndex, lastY - startY);
       const nextIndex = magneticPickerIndex(rawIndex, rows.length);
       setActive(nextIndex);
     };

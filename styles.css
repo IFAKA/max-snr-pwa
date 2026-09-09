@@ -43,8 +43,7 @@ button:focus-visible, .button:focus-visible, .import-button:focus-visible, input
 .notice.error { background: #f9dfdc; color: #74251f; }
 .empty-state { display: flex; min-height: 52px; align-items: center; padding: 10px 2px; color: var(--muted); }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
-.magnetic-list-status { display: none; margin: 8px 0 0; padding: 8px 10px; border: 1px solid var(--accent); border-radius: 10px; background: var(--accent-soft); color: var(--accent); font-size: 14px; font-weight: 800; }
-.magnetic-list-status.is-magnetic-status-visible { position: static; display: block; width: auto; height: auto; margin: 8px 0 0; overflow: visible; clip: auto; white-space: normal; }
+.magnetic-list-status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 ul { margin: 0; padding: 0; list-style: none; }
 .app-list { border-top: 1px solid var(--line); touch-action: none; }
 .app-list > li { border-bottom: 1px solid var(--line); }
@@ -64,9 +63,9 @@ ul { margin: 0; padding: 0; list-style: none; }
 .complete-row .list-link:hover, .complete-row .list-link:focus-visible, .complete-row .list-link:active { background: transparent; }
 .icon { display: block; color: currentColor; }
 .list-link.is-disabled { color: var(--muted); cursor: not-allowed; opacity: .55; }
-.navigation-list { min-height: calc(100svh - 82px); max-height: calc(100svh - 82px); margin-top: 12px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
-.routine-list, .history-list { display: block; }
-.routine-list, .exercise-list, .history-list { max-height: calc(100svh - 82px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+main > section:has(> .app-list) { display: flex; min-height: 100%; flex-direction: column; }
+.navigation-list { flex: 1 1 auto; min-height: 0; margin-top: 12px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.routine-list, .exercise-list, .history-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 .routine-list > li.today { border-left: 3px solid var(--accent); }
 .day-indicator { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); font-size: 0; }
 .routine-exercise { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 10px 2px; line-height: 1.3; }
@@ -152,7 +151,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   .routine-group-label { padding-inline: 0; }
   .routine-group-label .list-title { font-size: 17px; }
   .history-body { padding-inline: 12px; }
-  .routine-list, .exercise-list, .history-list, .history-detail { max-height: calc(100svh - 72px); }
+  .history-detail { max-height: calc(100svh - 72px); }
   .workout-stage { height: calc(100svh - 20px); gap: 4px; }
   .workout-stage h1 { margin-bottom: 4px; font-size: 26px; line-height: .94; }
   .workout-stage .thumb-zone { gap: 2px; }
