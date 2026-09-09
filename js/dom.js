@@ -47,6 +47,184 @@ export function bindHoldScroll(root = document) {
     element.addEventListener('pointerleave', stop);
     element.addEventListener('blur', stop);
   });
+  bindMagneticLists(root);
+}
+const MAGNETIC_HOLD_MS = 400;
+const MAGNETIC_MOVE_TOLERANCE = 10;
+const MAGNETIC_STATUS_CLASS = 'magnetic-list-status';
+
+export function magneticRowIndex(startIndex, deltaY, rowCount, rowInterval) {
+  if (!rowCount) return -1;
+  const interval = Math.max(1, rowInterval || 1);
+  return Math.max(0, Math.min(rowCount - 1, startIndex - Math.round(deltaY / interval)));
+}
+
+export function magneticEdgePosition(index, rowCount, overshoot = 0) {
+  if (!rowCount) return -1;
+  if (index >= 0 && index < rowCount) return index;
+  const edge = index < 0 ? 0 : rowCount - 1;
+  const distance = overshoot || (index < 0 ? index : index - edge);
+  return edge + (distance / (Math.abs(distance) + 3));
+}
+
+function listRows(list) {
+  return [...list.children].filter(row => row.matches?.('li'));
+}
+
+function rowAction(row) {
+  return row.querySelector?.('a, button, [role="button"]');
+}
+
+function enabledAction(row) {
+  const action = rowAction(row);
+  return action && !action.disabled && action.getAttribute('aria-disabled') !== 'true' && !action.classList.contains('is-disabled')
+    ? action
+    : null;
+}
+
+function nearestRow(rows, y) {
+  if (!rows.length) return -1;
+  const boxes = rows.map(row => row.getBoundingClientRect());
+  if (y >= boxes[boxes.length - 1].bottom) return rows.length - 1;
+  return boxes.reduce((nearest, box, index) => {
+    const distance = Math.abs(y - (box.top + box.height / 2));
+    return distance < nearest.distance ? {index, distance} : nearest;
+  }, {index: 0, distance: Infinity}).index;
+}
+
+function rowInterval(rows) {
+  if (rows.length < 2) return rows[0]?.getBoundingClientRect().height || 1;
+  const first = rows[0].getBoundingClientRect();
+  const second = rows[1].getBoundingClientRect();
+  return Math.max(1, second.top - first.top || first.height);
+}
+
+function magneticStatus(list) {
+  let status = list.querySelector(`.${MAGNETIC_STATUS_CLASS}`);
+  if (status) return status;
+  status = document.createElement('output');
+  status.className = `${MAGNETIC_STATUS_CLASS} sr-only`;
+  status.setAttribute('aria-live', 'polite');
+  status.setAttribute('aria-atomic', 'true');
+  (list.parentElement || list).append(status);
+  return status;
+}
+
+function describeRow(row) {
+  return rowAction(row)?.getAttribute('aria-label') || row.textContent.trim().replace(/\s+/g, ' ') || 'Unavailable item';
+}
+
+export function bindMagneticLists(root = document) {
+  root.querySelectorAll?.('.app-list').forEach(list => {
+    if (list.dataset.magneticBound) return;
+    list.dataset.magneticBound = 'true';
+    const status = magneticStatus(list);
+    let timer;
+    let pointerId = null;
+    let startY = 0;
+    let lastY = 0;
+    let startIndex = -1;
+    let activeIndex = -1;
+    let rows = [];
+    let interval = 1;
+    let pickerActive = false;
+    let suppressClick = false;
+
+    const clearTimer = () => { clearTimeout(timer); timer = null; };
+    const setActive = index => {
+      if (!rows.length) return;
+      const nextIndex = Math.max(0, Math.min(rows.length - 1, index));
+      rows.forEach((row, rowIndex) => row.classList.toggle('is-magnetic-target', rowIndex === nextIndex));
+      if (nextIndex !== activeIndex) buzz(8);
+      activeIndex = nextIndex;
+      const row = rows[activeIndex];
+      status.textContent = `Picker: ${describeRow(row)}${enabledAction(row) ? '' : ', unavailable'}`;
+      row.scrollIntoView?.({block: 'nearest', behavior: globalThis.window?.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
+    };
+    const reset = () => {
+      clearTimer();
+      if (pointerId !== null) {
+        try { list.releasePointerCapture?.(pointerId); } catch {}
+      }
+      rows.forEach(row => row.classList.remove('is-magnetic-target'));
+      list.classList.remove('is-magnetic-picker');
+      list.style.removeProperty('touch-action');
+      status.textContent = '';
+      pointerId = null;
+      activeIndex = -1;
+      startIndex = -1;
+      rows = [];
+      pickerActive = false;
+    };
+    const cancel = () => { reset(); };
+    const activate = () => {
+      const action = rows[activeIndex] && enabledAction(rows[activeIndex]);
+      if (!action) { reset(); return; }
+      buzz([18, 35, 18]);
+      action.click();
+      suppressClick = true;
+      reset();
+    };
+    const enter = () => {
+      if (pointerId === null) return;
+      rows = listRows(list);
+      if (!rows.length) return reset();
+      interval = rowInterval(rows);
+      startIndex = nearestRow(rows, startY);
+      activeIndex = startIndex;
+      pickerActive = true;
+      list.classList.add('is-magnetic-picker');
+      list.style.setProperty('touch-action', 'none');
+      list.setPointerCapture?.(pointerId);
+      setActive(activeIndex);
+    };
+    const onPointerDown = event => {
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
+      if (pointerId !== null) return;
+      rows = listRows(list);
+      if (!rows.length) return;
+      pointerId = event.pointerId;
+      startY = lastY = event.clientY;
+      clearTimer();
+      timer = setTimeout(enter, MAGNETIC_HOLD_MS);
+    };
+    const onPointerMove = event => {
+      if (event.pointerId !== pointerId) return;
+      lastY = event.clientY;
+      if (!pickerActive) {
+        if (Math.abs(lastY - startY) > MAGNETIC_MOVE_TOLERANCE) clearTimer();
+        return;
+      }
+      event.preventDefault();
+      const rawIndex = startIndex - Math.round((lastY - startY) / interval);
+      const nextIndex = Math.round(magneticEdgePosition(rawIndex, rows.length, rawIndex < 0 ? rawIndex : rawIndex - rows.length + 1));
+      setActive(nextIndex);
+    };
+    const onPointerUp = event => {
+      if (event.pointerId !== pointerId) return;
+      const box = list.getBoundingClientRect?.();
+      const outside = box && (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom);
+      if (pickerActive && !outside) activate();
+      else reset();
+    };
+    const onClick = event => {
+      if (!suppressClick) return;
+      suppressClick = false;
+      event.preventDefault();
+      event.stopPropagation();
+    };
+    list.addEventListener('pointerdown', onPointerDown);
+    list.addEventListener('pointermove', onPointerMove, {passive: false});
+    list.addEventListener('pointerup', onPointerUp);
+    list.addEventListener('pointercancel', cancel);
+    list.addEventListener('pointerleave', event => { if (!pickerActive && event.pointerId === pointerId) cancel(); });
+    list.addEventListener('blur', cancel);
+    list.addEventListener('click', onClick, true);
+    list.addEventListener('keydown', event => { if (event.key === 'Escape' && pickerActive) { event.preventDefault(); cancel(); } });
+    document.addEventListener?.('keydown', event => { if (event.key === 'Escape' && pickerActive) { event.preventDefault(); cancel(); } });
+    document.addEventListener?.('visibilitychange', cancel);
+    globalThis.window?.addEventListener?.('blur', cancel);
+  });
 }
 export function bindTitleMarquee(root = document) {
   root.querySelectorAll('[data-title-marquee]').forEach(element => {
@@ -69,7 +247,7 @@ export function bindTitleMarquee(root = document) {
     setTimeout(start, 1400);
   });
 }
-export const buzz = pattern => navigator.vibrate?.(pattern);
+export const buzz = pattern => globalThis.navigator?.vibrate?.(pattern);
 let wakeLock;
 export async function keepAwake() { try { if ('wakeLock' in navigator && document.visibilityState === 'visible') wakeLock = await navigator.wakeLock.request('screen'); } catch {} }
 document.addEventListener?.('visibilitychange', () => { if (document.visibilityState === 'visible' && document.body?.dataset.route === 'workout') void keepAwake(); });

@@ -44,8 +44,13 @@ button:focus-visible, .button:focus-visible, .import-button:focus-visible, input
 .empty-state { display: flex; min-height: 52px; align-items: center; padding: 10px 2px; color: var(--muted); }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 ul { margin: 0; padding: 0; list-style: none; }
-.app-list { border-top: 1px solid var(--line); }
+.app-list { border-top: 1px solid var(--line); touch-action: pan-y; }
 .app-list > li { border-bottom: 1px solid var(--line); }
+.app-list.is-magnetic-picker { touch-action: none; }
+.app-list > li.is-magnetic-target { background: var(--accent-soft); box-shadow: inset 4px 0 0 var(--accent); transition: background-color 180ms var(--ease-out), box-shadow 180ms var(--ease-out); }
+.app-list > li.is-magnetic-target .list-link { background: transparent; }
+.app-list > li.is-magnetic-target .list-link:focus-visible { outline-offset: -3px; }
+.app-list > li.is-magnetic-target .list-link.is-disabled, .app-list > li.is-magnetic-target.complete-row .list-link { color: var(--muted); }
 .list-link { display: flex; width: 100%; min-height: 52px; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 2px; border: 0; border-radius: 0; background: transparent; color: inherit; text-decoration: none; }
 .list-link:hover, .list-link:focus-visible { background: var(--surface-raised); }
 .list-link > span:first-child { min-width: 0; }
@@ -57,7 +62,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .complete-row .list-link:hover, .complete-row .list-link:focus-visible, .complete-row .list-link:active { background: transparent; }
 .icon { display: block; color: currentColor; }
 .list-link.is-disabled { color: var(--muted); cursor: not-allowed; opacity: .55; }
-.navigation-list { margin-top: 12px; }
+.navigation-list { min-height: calc(100svh - 82px); margin-top: 12px; }
 .routine-list, .history-list { display: block; }
 .routine-list, .exercise-list, .history-list { max-height: calc(100svh - 82px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 .routine-list > li.today { border-left: 3px solid var(--accent); }
@@ -181,4 +186,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   :root { --bg: #0d1210; --surface: #171e1a; --surface-raised: #203428; --text: #edf2ee; --muted: #a1aca4; --line: #344138; --accent: #8fd0a9; --accent-soft: #21372a; --danger: #ffaaa1; --success: #8fd0a9; }
   .primary { color: #102116; }
   .notice.error { background: #542824; color: #ffd7d2; }
+}
+@media (forced-colors: active) {
+  .app-list > li.is-magnetic-target { background: Highlight; box-shadow: inset 4px 0 0 HighlightText; color: HighlightText; }
 }
