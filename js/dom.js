@@ -212,6 +212,7 @@ export function bindMagneticLists(root = document) {
       if (!rows.length) return;
       const nextIndex = index < 0 || index >= rows.length ? -1 : index;
       const changed = nextIndex !== activeIndex;
+      if (changed) buzz(vibration);
       rows.forEach((row, rowIndex) => {
         const isTarget = nextIndex >= 0 && rowIndex === nextIndex;
         row.classList.toggle('is-magnetic-target', isTarget);
@@ -219,7 +220,6 @@ export function bindMagneticLists(root = document) {
         else row.removeAttribute('aria-current');
       });
       activeIndex = nextIndex;
-      if (changed) buzz(vibration);
       if (activeIndex < 0) {
         status.textContent = 'Picker cancelled — release to cancel';
         return;

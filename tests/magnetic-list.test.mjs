@@ -43,7 +43,7 @@ test('picker falls back to disabled rows when none are selectable', () => {
   assert.equal(magneticPreferredIndex(1, [], 3), 1);
 });
 
-test('picker highlights the held row before the hold vibration', async () => {
+test('picker vibrates before highlighting the held row', async () => {
   const events = [];
   const listeners = {};
   const classList = {
@@ -112,7 +112,7 @@ test('picker highlights the held row before the hold vibration', async () => {
     const vibrationIndex = events.indexOf('vibrate');
     assert.ok(highlightIndex >= 0);
     assert.ok(vibrationIndex >= 0);
-    assert.ok(highlightIndex < vibrationIndex);
+    assert.ok(vibrationIndex < highlightIndex);
   } finally {
     globalThis.document = originalDocument;
     Object.defineProperty(globalThis, 'navigator', originalNavigator);
