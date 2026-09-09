@@ -57,12 +57,12 @@ ul { margin: 0; padding: 0; list-style: none; }
 .app-list > li { border-bottom: 1px solid var(--line); }
 .app-list.is-magnetic-picker { touch-action: none; }
 .app-list > li { position: relative; }
-.app-list > li.is-magnetic-target { margin-inline: -12px; padding-inline: 12px; background: var(--accent-soft); box-shadow: inset 0 2px 0 var(--accent), inset 0 -2px 0 var(--accent); transition: background-color 180ms var(--ease-out), box-shadow 180ms var(--ease-out); }
+.app-list > li.is-magnetic-target { background: var(--accent-soft); box-shadow: inset 0 2px 0 var(--accent), inset 0 -2px 0 var(--accent); transition: background-color 180ms var(--ease-out), box-shadow 180ms var(--ease-out); }
 .app-list > li.is-magnetic-target .list-link { background: transparent; }
 .app-list > li.is-magnetic-target .list-link:focus-visible { outline-offset: -3px; }
 .app-list > li.is-magnetic-target .list-link.is-disabled, .app-list > li.is-magnetic-target.complete-row .list-link { color: var(--muted); }
 .list-link { position: relative; z-index: 0; display: flex; width: 100%; min-height: 52px; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 2px; border: 0; border-radius: 0; background: transparent; color: inherit; text-decoration: none; isolation: isolate; }
-.list-link::before { position: absolute; z-index: 0; inset: 0 -12px; content: ""; background: transparent; }
+.list-link::before { position: absolute; z-index: 0; inset: 0; content: ""; background: transparent; }
 .list-link:hover::before, .list-link:focus-visible::before { background: var(--surface-raised); }
 .list-link > span:not(.sr-only), .list-link > svg { position: relative; z-index: 1; }
 .list-link > span:first-child { min-width: 0; }
@@ -76,7 +76,10 @@ ul { margin: 0; padding: 0; list-style: none; }
 .icon { display: block; color: currentColor; }
 .list-link.is-disabled { color: var(--muted); cursor: not-allowed; opacity: .55; pointer-events: none; }
 main > section:has(> .app-list) { display: flex; height: 100%; min-height: 0; flex-direction: column; overflow: visible; }
-.app-list { width: calc(100% + 24px); margin-inline: -12px; padding-inline: 12px; }
+.app-list { width: 100%; margin-inline: 0; padding-inline: 0; }
+main > section:has(> .app-list) > .app-list { width: calc(100% + 24px); margin-inline: -12px; padding-inline: 12px; }
+main > section:has(> .app-list) > .app-list > li.is-magnetic-target { margin-inline: -12px; padding-inline: 12px; }
+main > section:has(> .app-list) > .app-list .list-link::before { inset-inline: -12px; }
 .navigation-list { flex: 1 1 auto; min-height: 0; margin-top: 12px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 .routine-list, .exercise-list, .history-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 .day-indicator { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); font-size: 0; }
