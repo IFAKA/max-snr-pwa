@@ -113,6 +113,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .dialog-actions button { min-height: 44px; }
 .dialog-actions .primary { margin: 0; }
 .hold-scroll-text, .title-marquee-text { min-width: 0; }
+.title-marquee-text { display: inline-block; }
 [data-hold-scroll] { min-width: 0; overflow: hidden; }
 [data-hold-scroll], [data-title-marquee] { white-space: nowrap; }
 [data-title-marquee] { overflow: hidden; }

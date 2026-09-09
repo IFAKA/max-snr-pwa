@@ -53,8 +53,9 @@ export function bindTitleMarquee(root = document) {
     element.dataset.marqueeBound = 'true';
     const text = element.querySelector('.title-marquee-text') || element;
     const start = () => {
-      if (text.scrollWidth <= element.clientWidth + 1) return;
-      text.style.setProperty('--marquee-distance', `${Math.min(0, element.clientWidth - text.scrollWidth)}px`);
+      const textWidth = text.getBoundingClientRect().width;
+      if (textWidth <= element.clientWidth + 1) return;
+      text.style.setProperty('--marquee-distance', `${Math.min(0, element.clientWidth - textWidth)}px`);
       element.classList.add('is-title-marquee');
     };
     setTimeout(start, 1400);
