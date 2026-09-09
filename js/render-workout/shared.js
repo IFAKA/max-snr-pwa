@@ -13,8 +13,8 @@ export function bindStartDialog() {
   if (!trigger) return;
   const day = trigger.dataset.startDay;
   const dialog = document.createElement('dialog');
-  dialog.className = 'confirm-dialog';
-  dialog.innerHTML = '<form method="dialog"><h2>Start?</h2><div class="dialog-actions"><button class="primary" value="default">Start</button><button value="cancel">Cancel</button></div></form>';
+  dialog.className = 'confirm-dialog bottom-sheet';
+  dialog.innerHTML = '<div class="sheet-handle" aria-hidden="true"></div><form method="dialog"><h2>Start?</h2><div class="dialog-actions"><button class="primary" value="default">Start</button><button value="cancel">Cancel</button></div></form>';
   document.body.append(dialog);
   trigger.addEventListener('click', () => dialog.showModal());
   dialog.addEventListener('close', async () => {
