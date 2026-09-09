@@ -1,4 +1,5 @@
 import { ROUTINE, NAMES } from '../routine-data.js';
+import { STRETCH_MS } from '../constants.js';
 import { getState } from '../state.js';
 import { save } from '../storage.js';
 import { dayNow, buzz } from '../dom.js';
@@ -68,7 +69,7 @@ export async function continueRest() {
 export async function finishLifts() {
   const active = getState().active;
   active.phase = 'stretch';
-  active.timerEndsAt = null;
+  active.timerEndsAt = Date.now() + STRETCH_MS;
   active.restEndsAt = null;
   await save();
 }

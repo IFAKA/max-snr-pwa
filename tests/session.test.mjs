@@ -8,6 +8,7 @@ globalThis.localStorage = {getItem: key => stored.get(key) || null, setItem: (ke
 
 const {emptyState, getState, setState} = await import('../js/state.js');
 const {loadState} = await import('../js/storage.js');
+const {STRETCH_MS} = await import('../js/constants.js');
 const {startPlank, beginLifting} = await import('../js/workout/timers.js');
 const {start, findNext, deferCurrent, substituteCurrent, undoLastSet, completeSet, continueRest, completeStretch, finishWorkout, selectExercise, exerciseSelectionLocked, finishEarly} = await import('../js/workout/session.js');
 
@@ -41,6 +42,19 @@ test('loads accept two decimals but reps remain whole numbers', async () => {
 
   state.active.draft = {weight: '50', reps: '8.5'};
   assert.match((await completeSet()).error, /whole-number reps/);
+});
+
+test('finishing the final set starts the stretch timer', async () => {
+  const state = emptyState();
+  state.active = {tasks: [task('press')], pos: 0, phase: 'lifting', deferredGroups: [], draft: {reps: '8'}};
+  setState(state);
+
+  const before = Date.now();
+  await completeSet();
+
+  assert.equal(state.active.phase, 'stretch');
+  assert.ok(state.active.timerEndsAt >= before + STRETCH_MS - 100);
+  assert.ok(state.active.timerEndsAt <= Date.now() + STRETCH_MS + 100);
 });
 
 test('doing an exercise later moves all remaining sets and selects the next exercise', async () => {
