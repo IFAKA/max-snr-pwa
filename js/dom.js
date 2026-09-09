@@ -53,7 +53,7 @@ const MAGNETIC_HOLD_MS = 400;
 const MAGNETIC_MOVE_TOLERANCE = 10;
 const MAGNETIC_STATUS_CLASS = 'magnetic-list-status';
 const MAGNETIC_DETENT_DISTANCE = 24;
-const MAGNETIC_DETENT_VIBRATION = [24, 36, 24];
+const MAGNETIC_DETENT_VIBRATION = 10;
 
 export function magneticRawRowIndex(startIndex, deltaY, detentDistance = MAGNETIC_DETENT_DISTANCE) {
   const distance = Math.max(1, detentDistance || MAGNETIC_DETENT_DISTANCE);

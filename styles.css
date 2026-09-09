@@ -18,9 +18,9 @@
   font-size: 16px;
 }
 * { box-sizing: border-box; }
-html, body { width: 100%; height: 100%; min-width: 0; min-height: 100%; margin: 0; overflow: hidden; background: var(--bg); color: var(--text); }
+html, body { width: 100%; min-width: 0; min-height: 100%; margin: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior-y: auto; background: var(--bg); color: var(--text); }
 body { font-variant-numeric: tabular-nums; }
-main { width: 100%; max-width: 34rem; height: 100svh; min-height: 0; margin: auto; overflow: hidden; padding: 12px; }
+main { width: 100%; max-width: 34rem; min-height: 100svh; margin: auto; overflow: visible; padding: 12px; }
 h1, h2, h3, p { margin-top: 0; }
 h1 { margin-bottom: 10px; font-size: clamp(30px, 10vw, 50px); line-height: 1; letter-spacing: -.055em; overflow-wrap: anywhere; }
 h2 { margin-bottom: 8px; font-size: 22px; letter-spacing: -.025em; }
@@ -63,9 +63,9 @@ ul { margin: 0; padding: 0; list-style: none; }
 .complete-row .list-link:hover, .complete-row .list-link:focus-visible, .complete-row .list-link:active { background: transparent; }
 .icon { display: block; color: currentColor; }
 .list-link.is-disabled { color: var(--muted); cursor: not-allowed; opacity: .55; }
-main > section:has(> .app-list) { display: flex; min-height: 100%; flex-direction: column; }
-.navigation-list { flex: 1 1 auto; min-height: 0; margin-top: 12px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
-.routine-list, .exercise-list, .history-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+main > section:has(> .app-list) { display: flex; min-height: calc(100svh - 24px); flex-direction: column; }
+.navigation-list { margin-top: 12px; }
+.routine-list, .exercise-list, .history-list { overflow: visible; }
 .routine-list > li.today { border-left: 3px solid var(--accent); }
 .day-indicator { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); font-size: 0; }
 .routine-exercise { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 10px 2px; line-height: 1.3; }
@@ -81,7 +81,7 @@ main > section:has(> .app-list) { display: flex; min-height: 100%; flex-directio
 .history-workout > summary::after, .data-card > summary::after { content: "+"; color: var(--accent); font-size: 22px; }
 .history-workout[open] > summary::after, .data-card[open] > summary::after { content: "−"; }
 .history-body { padding: 0 16px 16px; }
-.history-detail { max-height: calc(100svh - 82px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.history-detail { overflow: visible; }
 .history-exercise { padding: 12px 0; border-top: 1px solid var(--line); }
 .history-exercise ul { display: grid; gap: 8px; }
 .history-exercise li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
@@ -92,7 +92,7 @@ main > section:has(> .app-list) { display: flex; min-height: 100%; flex-directio
 .import-button { display: flex; align-items: center; justify-content: center; padding: 10px; }
 .import-button input { position: absolute; width: 1px; height: 1px; opacity: 0; }
 .list-link input { position: absolute; width: 1px; height: 1px; opacity: 0; }
-.workout-stage { display: flex; height: calc(100svh - 24px); min-height: 0; flex-direction: column; gap: 6px; padding: 0 0 8px; overflow-x: hidden; overflow-y: auto; }
+.workout-stage { display: flex; min-height: calc(100svh - 24px); flex-direction: column; gap: 6px; padding: 0 0 8px; overflow: visible; }
 .stage-info { min-width: 0; }
 .workout-stage h1 { margin: 0 0 6px; font-size: clamp(28px, 9vw, 46px); }
 .thumb-zone { width: 100%; margin-top: auto; padding-bottom: max(8px, env(safe-area-inset-bottom)); }
@@ -103,8 +103,8 @@ main > section:has(> .app-list) { display: flex; min-height: 100%; flex-directio
 .stage-link { margin: 0; }
 .stage-action-list { margin: 0; }
 .set-count { margin: 0; color: var(--muted); font-size: 15px; }
-.workout-picker { height: 100%; overflow: hidden; }
-.exercise-picker-list { max-height: calc(100svh - 76px); overflow-y: auto; }
+.workout-picker { min-height: 100%; }
+.exercise-picker-list { overflow: visible; }
 .stepper-label { display: grid; gap: 4px; color: var(--muted); font-size: 14px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
 .stepper { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; min-height: 58px; align-items: center; overflow: hidden; border: 1px solid var(--line); border-radius: 15px; background: var(--surface); }
 .stepper button { min-height: 56px; padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--accent); font-size: 25px; }
@@ -151,8 +151,8 @@ main > section:has(> .app-list) { display: flex; min-height: 100%; flex-directio
   .routine-group-label { padding-inline: 0; }
   .routine-group-label .list-title { font-size: 17px; }
   .history-body { padding-inline: 12px; }
-  .history-detail { max-height: calc(100svh - 72px); }
-  .workout-stage { height: calc(100svh - 20px); gap: 4px; }
+  .history-detail { overflow: visible; }
+  .workout-stage { min-height: calc(100svh - 20px); gap: 4px; }
   .workout-stage h1 { margin-bottom: 4px; font-size: 26px; line-height: .94; }
   .workout-stage .thumb-zone { gap: 2px; }
   .lifting-stage .thumb-zone { margin-top: 0; }
