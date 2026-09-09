@@ -218,7 +218,7 @@ export function bindMagneticLists(root = document) {
       rows = listRows(list);
       if (!rows.length) return reset();
       startIndex = nearestRow(rows, startY);
-      activeIndex = -1;
+      activeIndex = startIndex;
       pickerActive = true;
       list.classList.add('is-magnetic-picker');
       document.documentElement?.classList.add('is-magnetic-picker-active');
