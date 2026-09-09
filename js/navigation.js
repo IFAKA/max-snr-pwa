@@ -11,8 +11,8 @@ function focusView() {
   const heading = app?.querySelector('h1, h2');
   if (!heading) return;
   heading.setAttribute('tabindex', '-1');
-  heading.focus({preventScroll: true});
-  heading.addEventListener('blur', () => heading.removeAttribute('tabindex'), {once: true});
+  heading.focus({ preventScroll: true });
+  heading.addEventListener('blur', () => heading.removeAttribute('tabindex'), { once: true });
 }
 
 function updateView(render, focus) {
@@ -21,13 +21,15 @@ function updateView(render, focus) {
   return result;
 }
 
-export function renderWithTransition(render, {focus = true} = {}) {
+export function renderWithTransition(render, { focus = true } = {}) {
   if (prefersReducedMotion()) return updateView(render, focus);
   if (typeof document.startViewTransition === 'function') {
     if (activeViewTransition) return updateView(render, focus);
     try {
       activeViewTransition = document.startViewTransition(() => updateView(render, focus));
-      activeViewTransition.finished.finally(() => { activeViewTransition = null; });
+      activeViewTransition.finished.finally(() => {
+        activeViewTransition = null;
+      });
       return activeViewTransition;
     } catch {
       activeViewTransition = null;
@@ -36,7 +38,10 @@ export function renderWithTransition(render, {focus = true} = {}) {
   }
   app?.classList.add('is-view-transitioning');
   const result = updateView(render, focus);
-  (globalThis.requestAnimationFrame || globalThis.setTimeout)(() => app?.classList.remove('is-view-transitioning'), 0);
+  (globalThis.requestAnimationFrame || globalThis.setTimeout)(
+    () => app?.classList.remove('is-view-transitioning'),
+    0,
+  );
   return result;
 }
 
@@ -49,10 +54,10 @@ export function routeForPath(pathname) {
 }
 
 export function isAppUrl(url) {
-  return url.origin === location.origin && [...ROUTES].some(route => url.pathname === route);
+  return url.origin === location.origin && [...ROUTES].some((route) => url.pathname === route);
 }
 
-export function navigateTo(url, {replace = false} = {}) {
+export function navigateTo(url, { replace = false } = {}) {
   const target = new URL(url, location.href);
   const path = `${target.pathname}${target.search}${target.hash}`;
   if (replace) location.replace(path);

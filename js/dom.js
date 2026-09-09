@@ -1,8 +1,14 @@
 export const app = document.querySelector('#app');
-export const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[c]));
-export const dayNow = () => new Intl.DateTimeFormat('en', {weekday: 'long'}).format(new Date());
-export const listMarkup = (items, className = '', label = '') => `<ul class="app-list${className ? ` ${className}` : ''}"${label ? ` aria-label="${esc(label)}"` : ''}>${items.join('')}</ul>`;
-export const titleMarkup = (text, id, level = 'h1', className = '') => `<${level} id="${esc(id)}" class="app-title${className ? ` ${className}` : ''}" data-title-marquee><span class="title-marquee-track"><span class="title-marquee-text">${esc(text)}</span></span></${level}>`;
+export const esc = (value) =>
+  String(value ?? '').replace(
+    /[&<>"']/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c],
+  );
+export const dayNow = () => new Intl.DateTimeFormat('en', { weekday: 'long' }).format(new Date());
+export const listMarkup = (items, className = '', label = '') =>
+  `<ul class="app-list${className ? ` ${className}` : ''}"${label ? ` aria-label="${esc(label)}"` : ''}>${items.join('')}</ul>`;
+export const titleMarkup = (text, id, level = 'h1', className = '') =>
+  `<${level} id="${esc(id)}" class="app-title${className ? ` ${className}` : ''}" data-title-marquee><span class="title-marquee-track"><span class="title-marquee-text">${esc(text)}</span></span></${level}>`;
 const ICONS = {
   home: '<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
   calendar: '<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
@@ -17,14 +23,15 @@ const ICONS = {
   minus: '<path d="M5 12h14"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
 };
-export const icon = (name, label = '') => `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${ICONS[name] || ''}</svg><span class="sr-only">${esc(label)}</span>`;
-export const pageNav = current => {
-  const labels = {today: 'Home', routine: 'Routine', history: 'History'};
+export const icon = (name, label = '') =>
+  `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${ICONS[name] || ''}</svg><span class="sr-only">${esc(label)}</span>`;
+export const pageNav = (current) => {
+  const labels = { today: 'Home', routine: 'Routine', history: 'History' };
   const currentLabel = labels[current] || 'Home';
   return `<nav class="app-nav" aria-label="Primary"><a class="app-brand" href="/" aria-label="MaxSNR home">MAXSNR</a><span class="app-location" aria-current="page">${currentLabel}</span><details class="app-menu"><summary aria-label="Open navigation">Menu</summary><div class="app-menu-list"><a href="/"${current === 'today' ? ' aria-current="page"' : ''}>Home</a><a href="/routine/"${current === 'routine' ? ' aria-current="page"' : ''}>Routine</a><a href="/history/"${current === 'history' ? ' aria-current="page"' : ''}>History</a></div></details></nav>`;
 };
 export function bindHoldScroll(root = document) {
-  root.querySelectorAll('[data-hold-scroll]').forEach(element => {
+  root.querySelectorAll('[data-hold-scroll]').forEach((element) => {
     if (element.dataset.holdBound) return;
     element.dataset.holdBound = 'true';
     const text = element.querySelector('.hold-scroll-text') || element;
@@ -36,12 +43,20 @@ export function bindHoldScroll(root = document) {
     };
     const start = () => {
       if (text.scrollWidth <= element.clientWidth + 1) return;
-      text.style.setProperty('--scroll-distance', `${Math.min(0, element.clientWidth - text.scrollWidth)}px`);
+      text.style.setProperty(
+        '--scroll-distance',
+        `${Math.min(0, element.clientWidth - text.scrollWidth)}px`,
+      );
       element.classList.add('is-hold-scrolling');
     };
-    const schedule = () => { timer = setTimeout(start, 1400); };
+    const schedule = () => {
+      timer = setTimeout(start, 1400);
+    };
     schedule();
-    element.addEventListener('pointerdown', () => { clearTimeout(timer); timer = setTimeout(start, 450); });
+    element.addEventListener('pointerdown', () => {
+      clearTimeout(timer);
+      timer = setTimeout(start, 450);
+    });
     element.addEventListener('pointerup', stop);
     element.addEventListener('pointercancel', stop);
     element.addEventListener('pointerleave', stop);
@@ -63,7 +78,10 @@ export function magneticRawRowIndex(startIndex, deltaY, detentDistance = MAGNETI
 
 export function magneticRowIndex(startIndex, deltaY, rowCount, detentDistance) {
   if (!rowCount) return -1;
-  return Math.max(0, Math.min(rowCount - 1, magneticRawRowIndex(startIndex, deltaY, detentDistance)));
+  return Math.max(
+    0,
+    Math.min(rowCount - 1, magneticRawRowIndex(startIndex, deltaY, detentDistance)),
+  );
 }
 
 export function magneticPickerIndex(rawIndex, rowCount) {
@@ -73,7 +91,11 @@ export function magneticPickerIndex(rawIndex, rowCount) {
 export function magneticPreferredIndex(rawIndex, selectableIndices, rowCount) {
   const index = magneticPickerIndex(rawIndex, rowCount);
   if (index < 0 || !selectableIndices.length) return index;
-  return selectableIndices.reduce((nearest, candidate) => Math.abs(candidate - index) < Math.abs(nearest - index) ? candidate : nearest, selectableIndices[0]);
+  return selectableIndices.reduce(
+    (nearest, candidate) =>
+      Math.abs(candidate - index) < Math.abs(nearest - index) ? candidate : nearest,
+    selectableIndices[0],
+  );
 }
 
 export function magneticEdgePosition(index, rowCount, overshoot = 0) {
@@ -81,11 +103,11 @@ export function magneticEdgePosition(index, rowCount, overshoot = 0) {
   if (index >= 0 && index < rowCount) return index;
   const edge = index < 0 ? 0 : rowCount - 1;
   const distance = overshoot || (index < 0 ? index : index - edge);
-  return edge + (distance / (Math.abs(distance) + 3));
+  return edge + distance / (Math.abs(distance) + 3);
 }
 
 function listRows(list) {
-  return [...list.children].filter(row => row.matches?.('li'));
+  return [...list.children].filter((row) => row.matches?.('li'));
 }
 
 function rowAction(row) {
@@ -94,19 +116,25 @@ function rowAction(row) {
 
 function enabledAction(row) {
   const action = rowAction(row);
-  return action && !action.disabled && action.getAttribute('aria-disabled') !== 'true' && !action.classList.contains('is-disabled')
+  return action &&
+    !action.disabled &&
+    action.getAttribute('aria-disabled') !== 'true' &&
+    !action.classList.contains('is-disabled')
     ? action
     : null;
 }
 
 function nearestRow(rows, y) {
   if (!rows.length) return -1;
-  const boxes = rows.map(row => row.getBoundingClientRect());
+  const boxes = rows.map((row) => row.getBoundingClientRect());
   if (y >= boxes[boxes.length - 1].bottom) return rows.length - 1;
-  return boxes.reduce((nearest, box, index) => {
-    const distance = Math.abs(y - (box.top + box.height / 2));
-    return distance < nearest.distance ? {index, distance} : nearest;
-  }, {index: 0, distance: Infinity}).index;
+  return boxes.reduce(
+    (nearest, box, index) => {
+      const distance = Math.abs(y - (box.top + box.height / 2));
+      return distance < nearest.distance ? { index, distance } : nearest;
+    },
+    { index: 0, distance: Infinity },
+  ).index;
 }
 
 function scrollSurface(list) {
@@ -130,16 +158,26 @@ function magneticStatus(list) {
 }
 
 function describeRow(row) {
-  return rowAction(row)?.getAttribute('aria-label') || row.textContent.trim().replace(/\s+/g, ' ') || 'Unavailable item';
+  return (
+    rowAction(row)?.getAttribute('aria-label') ||
+    row.textContent.trim().replace(/\s+/g, ' ') ||
+    'Unavailable item'
+  );
 }
 
 function pointerOutside(element, event) {
   const box = element.getBoundingClientRect?.();
-  return box && (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom);
+  return (
+    box &&
+    (event.clientX < box.left ||
+      event.clientX > box.right ||
+      event.clientY < box.top ||
+      event.clientY > box.bottom)
+  );
 }
 
 export function bindMagneticLists(root = document) {
-  root.querySelectorAll?.('.app-list').forEach(list => {
+  root.querySelectorAll?.('.app-list').forEach((list) => {
     if (list.dataset.magneticBound) return;
     list.dataset.magneticBound = 'true';
     const status = magneticStatus(list);
@@ -156,14 +194,17 @@ export function bindMagneticLists(root = document) {
     let movedBeforePicker = false;
     const scrollTarget = scrollSurface(list);
 
-    const clearTimer = () => { clearTimeout(timer); timer = null; };
+    const clearTimer = () => {
+      clearTimeout(timer);
+      timer = null;
+    };
     const stopDocumentTracking = () => {
       document.removeEventListener?.('pointermove', onPointerMove);
       document.removeEventListener?.('pointerup', onPointerUp);
       document.removeEventListener?.('pointercancel', cancel);
     };
     const startDocumentTracking = () => {
-      document.addEventListener?.('pointermove', onPointerMove, {passive: false});
+      document.addEventListener?.('pointermove', onPointerMove, { passive: false });
       document.addEventListener?.('pointerup', onPointerUp);
       document.addEventListener?.('pointercancel', cancel);
     };
@@ -185,15 +226,24 @@ export function bindMagneticLists(root = document) {
       }
       const row = rows[activeIndex];
       status.textContent = `Picker: ${describeRow(row)}${enabledAction(row) ? '' : ', unavailable'}`;
-      row.scrollIntoView?.({block: 'nearest', behavior: globalThis.window?.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
+      row.scrollIntoView?.({
+        block: 'nearest',
+        behavior: globalThis.window?.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+          ? 'auto'
+          : 'smooth',
+      });
     };
     const reset = () => {
       clearTimer();
       stopDocumentTracking();
       if (pointerId !== null) {
-        try { list.releasePointerCapture?.(pointerId); } catch {}
+        try {
+          list.releasePointerCapture?.(pointerId);
+        } catch {
+          // Pointer capture may already have been released by the browser.
+        }
       }
-      rows.forEach(row => {
+      rows.forEach((row) => {
         row.classList.remove('is-magnetic-target');
         row.removeAttribute('aria-current');
       });
@@ -210,7 +260,9 @@ export function bindMagneticLists(root = document) {
       pickerActive = false;
       movedBeforePicker = false;
     };
-    const cancel = () => { reset(); };
+    const cancel = () => {
+      reset();
+    };
     const activate = () => {
       const action = rows[activeIndex] && enabledAction(rows[activeIndex]);
       if (!action) {
@@ -227,7 +279,10 @@ export function bindMagneticLists(root = document) {
       if (pointerId === null) return;
       rows = listRows(list);
       if (!rows.length) return reset();
-      selectableIndices = rows.reduce((indices, row, index) => enabledAction(row) ? [...indices, index] : indices, []);
+      selectableIndices = rows.reduce(
+        (indices, row, index) => (enabledAction(row) ? [...indices, index] : indices),
+        [],
+      );
       startIndex = magneticPreferredIndex(nearestRow(rows, startY), selectableIndices, rows.length);
       pickerActive = true;
       list.classList.add('is-magnetic-picker');
@@ -237,7 +292,7 @@ export function bindMagneticLists(root = document) {
       list.setPointerCapture?.(pointerId);
       setActive(startIndex, MAGNETIC_HOLD_VIBRATION);
     };
-    const onPointerDown = event => {
+    const onPointerDown = (event) => {
       if (event.pointerType === 'mouse' && event.button !== 0) return;
       if (pointerId !== null) return;
       rows = listRows(list);
@@ -251,7 +306,7 @@ export function bindMagneticLists(root = document) {
       startDocumentTracking();
       timer = setTimeout(enter, MAGNETIC_HOLD_MS);
     };
-    const onPointerMove = event => {
+    const onPointerMove = (event) => {
       if (event.pointerId !== pointerId) return;
       const previousY = lastY;
       lastY = event.clientY;
@@ -269,7 +324,7 @@ export function bindMagneticLists(root = document) {
       const nextIndex = magneticPreferredIndex(rawIndex, selectableIndices, rows.length);
       setActive(nextIndex);
     };
-    const onPointerUp = event => {
+    const onPointerUp = (event) => {
       if (event.pointerId !== pointerId) return;
       const outside = pointerOutside(list, event);
       if (pickerActive && !outside) activate();
@@ -278,7 +333,7 @@ export function bindMagneticLists(root = document) {
         reset();
       }
     };
-    const onClick = event => {
+    const onClick = (event) => {
       if (!suppressClick) return;
       suppressClick = false;
       event.preventDefault();
@@ -286,17 +341,29 @@ export function bindMagneticLists(root = document) {
     };
     list.addEventListener('pointerdown', onPointerDown);
     list.addEventListener('pointercancel', cancel);
-    list.addEventListener('pointerleave', event => { if (!pickerActive && event.pointerId === pointerId) cancel(); });
+    list.addEventListener('pointerleave', (event) => {
+      if (!pickerActive && event.pointerId === pointerId) cancel();
+    });
     list.addEventListener('blur', cancel);
     list.addEventListener('click', onClick, true);
-    list.addEventListener('keydown', event => { if (event.key === 'Escape' && pickerActive) { event.preventDefault(); cancel(); } });
-    document.addEventListener?.('keydown', event => { if (event.key === 'Escape' && pickerActive) { event.preventDefault(); cancel(); } });
+    list.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && pickerActive) {
+        event.preventDefault();
+        cancel();
+      }
+    });
+    document.addEventListener?.('keydown', (event) => {
+      if (event.key === 'Escape' && pickerActive) {
+        event.preventDefault();
+        cancel();
+      }
+    });
     document.addEventListener?.('visibilitychange', cancel);
     globalThis.window?.addEventListener?.('blur', cancel);
   });
 }
 export function bindTitleMarquee(root = document) {
-  root.querySelectorAll('[data-title-marquee]').forEach(element => {
+  root.querySelectorAll('[data-title-marquee]').forEach((element) => {
     if (element.dataset.marqueeBound) return;
     element.dataset.marqueeBound = 'true';
     const text = element.querySelector('.title-marquee-text') || element;
@@ -308,7 +375,7 @@ export function bindTitleMarquee(root = document) {
       track.style.setProperty('--marquee-distance', `${distance}px`);
       element.classList.add('is-title-marquee');
     };
-    track.addEventListener('animationend', event => {
+    track.addEventListener('animationend', (event) => {
       if (event.animationName !== 'title-marquee') return;
       element.classList.remove('is-title-marquee');
       track.style.removeProperty('--marquee-distance');
@@ -316,7 +383,16 @@ export function bindTitleMarquee(root = document) {
     setTimeout(start, 1400);
   });
 }
-export const buzz = pattern => globalThis.navigator?.vibrate?.(pattern);
-let wakeLock;
-export async function keepAwake() { try { if ('wakeLock' in navigator && document.visibilityState === 'visible') wakeLock = await navigator.wakeLock.request('screen'); } catch {} }
-document.addEventListener?.('visibilitychange', () => { if (document.visibilityState === 'visible' && document.body?.dataset.route === 'workout') void keepAwake(); });
+export const buzz = (pattern) => globalThis.navigator?.vibrate?.(pattern);
+export async function keepAwake() {
+  try {
+    if ('wakeLock' in navigator && document.visibilityState === 'visible')
+      await navigator.wakeLock.request('screen');
+  } catch {
+    // Wake lock is an optional enhancement and can be denied by the browser.
+  }
+}
+document.addEventListener?.('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && document.body?.dataset.route === 'workout')
+    void keepAwake();
+});

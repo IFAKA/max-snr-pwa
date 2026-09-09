@@ -4,11 +4,12 @@ import assert from 'node:assert/strict';
 globalThis.document = {
   querySelector: () => null,
   addEventListener: () => {},
-  body: {dataset: {}},
+  body: { dataset: {} },
   visibilityState: 'visible',
 };
 
-const {magneticEdgePosition, magneticPickerIndex, magneticPreferredIndex, magneticRowIndex} = await import('../js/dom.js');
+const { magneticEdgePosition, magneticPickerIndex, magneticPreferredIndex, magneticRowIndex } =
+  await import('../js/dom.js');
 
 test('magnetic row calculation follows cumulative drag distance', () => {
   assert.equal(magneticRowIndex(2, -24, 6), 1);
@@ -46,14 +47,18 @@ test('picker highlights the held row before the hold vibration', async () => {
   const events = [];
   const listeners = {};
   const classList = {
-    add: name => events.push(`add:${name}`),
+    add: (name) => events.push(`add:${name}`),
     remove: () => {},
     toggle: (name, enabled) => events.push(`toggle:${name}:${enabled}`),
   };
-  const action = {disabled: false, getAttribute: () => null, classList: {contains: () => false}};
+  const action = {
+    disabled: false,
+    getAttribute: () => null,
+    classList: { contains: () => false },
+  };
   const row = {
-    matches: selector => selector === 'li',
-    getBoundingClientRect: () => ({top: 0, bottom: 52, height: 52}),
+    matches: (selector) => selector === 'li',
+    getBoundingClientRect: () => ({ top: 0, bottom: 52, height: 52 }),
     querySelector: () => action,
     classList,
     setAttribute: () => {},
@@ -70,10 +75,12 @@ test('picker highlights the held row before the hold vibration', async () => {
     scrollHeight: 52,
     querySelector: () => null,
     querySelectorAll: () => [],
-    addEventListener: (type, handler) => { listeners[type] = handler; },
-    classList: {add: () => {}, remove: () => {}},
-    style: {setProperty: () => {}, removeProperty: () => {}},
-    getBoundingClientRect: () => ({top: 0, right: 100, bottom: 52, left: 0}),
+    addEventListener: (type, handler) => {
+      listeners[type] = handler;
+    },
+    classList: { add: () => {}, remove: () => {} },
+    style: { setProperty: () => {}, removeProperty: () => {} },
+    getBoundingClientRect: () => ({ top: 0, right: 100, bottom: 52, left: 0 }),
     setPointerCapture: () => {},
     releasePointerCapture: () => {},
   };
@@ -81,18 +88,26 @@ test('picker highlights the held row before the hold vibration', async () => {
   const originalNavigator = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
   globalThis.document = {
     ...originalDocument,
-    documentElement: {classList: {add: () => {}, remove: () => {}}},
-    createElement: () => ({className: '', setAttribute: () => {}, classList: {add: () => {}, remove: () => {}}, textContent: '',}),
+    documentElement: { classList: { add: () => {}, remove: () => {} } },
+    createElement: () => ({
+      className: '',
+      setAttribute: () => {},
+      classList: { add: () => {}, remove: () => {} },
+      textContent: '',
+    }),
     addEventListener: () => {},
-    body: {dataset: {}},
+    body: { dataset: {} },
     scrollingElement: list,
   };
-  Object.defineProperty(globalThis, 'navigator', {configurable: true, value: {vibrate: () => events.push('vibrate')}});
+  Object.defineProperty(globalThis, 'navigator', {
+    configurable: true,
+    value: { vibrate: () => events.push('vibrate') },
+  });
   try {
-    const {bindMagneticLists} = await import('../js/dom.js?picker-order');
-    bindMagneticLists({querySelectorAll: () => [list]});
-    listeners.pointerdown({pointerId: 1, pointerType: 'touch', clientY: 20});
-    await new Promise(resolve => setTimeout(resolve, 430));
+    const { bindMagneticLists } = await import('../js/dom.js?picker-order');
+    bindMagneticLists({ querySelectorAll: () => [list] });
+    listeners.pointerdown({ pointerId: 1, pointerType: 'touch', clientY: 20 });
+    await new Promise((resolve) => setTimeout(resolve, 430));
     const highlightIndex = events.indexOf('toggle:is-magnetic-target:true');
     const vibrationIndex = events.indexOf('vibrate');
     assert.ok(highlightIndex >= 0);

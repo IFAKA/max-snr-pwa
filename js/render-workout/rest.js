@@ -1,24 +1,71 @@
-import { mount, state, runAction, showError, workoutStage, primaryAction, exercisePicker, bindExercisePicker } from './shared.js';
-import { continueRest, countdown, formatDuration, findNext, exerciseSelectionLocked } from '../workout.js';
+import {
+  mount,
+  state,
+  runAction,
+  showError,
+  workoutStage,
+  primaryAction,
+  exercisePicker,
+  bindExercisePicker,
+} from './shared.js';
+import {
+  continueRest,
+  countdown,
+  formatDuration,
+  findNext,
+  exerciseSelectionLocked,
+} from '../workout.js';
 import { buzz, esc, icon, listMarkup } from '../dom.js';
 import { navigateTo } from '../navigation.js';
 
-const advance = button => runAction(button, continueRest);
+const advance = (button) => runAction(button, continueRest);
 
 export function renderRest() {
-  const active = state(), running = active.restEndsAt > Date.now();
-  if (!running) { advance(null); return; }
+  const active = state(),
+    running = active.restEndsAt > Date.now();
+  if (!running) {
+    advance(null);
+    return;
+  }
   if (new URLSearchParams(location.search).get('view') === 'exercises') {
     mount(exercisePicker(active));
     bindExercisePicker(active, () => navigateTo('/workout/'));
     return;
   }
   const nextPosition = Number.isInteger(active.nextPos) ? active.nextPos : findNext(-1, true);
-  const next = active.tasks[nextPosition] || active.tasks.find((task, index) => index > active.pos && !task.skipped) || active.tasks[active.pos + 1];
+  const next =
+    active.tasks[nextPosition] ||
+    active.tasks.find((task, index) => index > active.pos && !task.skipped) ||
+    active.tasks[active.pos + 1];
   const canChange = active.phase === 'rest' && !exerciseSelectionLocked(active);
-  const changeLink = canChange ? listMarkup([`<li><a class="list-link stage-link" href="/workout/?view=exercises"><span>Change exercise</span>${icon('chevron', 'Change exercise')}</a></li>`], 'stage-action-list', 'Workout options') : '';
+  const changeLink = canChange
+    ? listMarkup(
+        [
+          `<li><a class="list-link stage-link" href="/workout/?view=exercises"><span>Change exercise</span>${icon('chevron', 'Change exercise')}</a></li>`,
+        ],
+        'stage-action-list',
+        'Workout options',
+      )
+    : '';
   const setCount = next ? `<p class="set-count">Set ${esc(next.set)} of ${esc(next.sets)}</p>` : '';
-  mount(workoutStage({className: 'rest-stage countdown-stage', title: next ? esc(next.performedName) : 'Rest', body: `${setCount}<div class="big-timer" id="timer" role="timer" aria-live="polite" aria-label="Rest remaining">${formatDuration(active.restEndsAt - Date.now())}</div>`, actions: `${changeLink}${primaryAction('continue', 'End rest')}`}));
-  document.querySelector('#continue')?.addEventListener('click', event => advance(event.currentTarget));
-  countdown(document.querySelector('#timer'), 'restEndsAt', 'rest', async () => { try { buzz([35, 65, 35]); await continueRest(); location.reload(); } catch (error) { showError(error); } });
+  mount(
+    workoutStage({
+      className: 'rest-stage countdown-stage',
+      title: next ? esc(next.performedName) : 'Rest',
+      body: `${setCount}<div class="big-timer" id="timer" role="timer" aria-live="polite" aria-label="Rest remaining">${formatDuration(active.restEndsAt - Date.now())}</div>`,
+      actions: `${changeLink}${primaryAction('continue', 'End rest')}`,
+    }),
+  );
+  document
+    .querySelector('#continue')
+    ?.addEventListener('click', (event) => advance(event.currentTarget));
+  countdown(document.querySelector('#timer'), 'restEndsAt', 'rest', async () => {
+    try {
+      buzz([35, 65, 35]);
+      await continueRest();
+      location.reload();
+    } catch (error) {
+      showError(error);
+    }
+  });
 }

@@ -10,11 +10,21 @@ function routineRows(items) {
     if (isExerciseDefinition(item)) return [exerciseRow(item)];
     const members = (item?.members || item?.items || []).filter(isExerciseDefinition);
     if (!members.length) return [];
-    const rows = [`<li class="routine-group-label">${titleMarkup(item.label, `routine-group-title-${itemIndex}`, 'h2', 'list-title')}</li>`];
-    return rows.concat(members.map((exercise, index) => exerciseRow(exercise, item.type === 'superset' ? `${index ? 'B' : 'A'} · ` : '')));
+    const rows = [
+      `<li class="routine-group-label">${titleMarkup(item.label, `routine-group-title-${itemIndex}`, 'h2', 'list-title')}</li>`,
+    ];
+    return rows.concat(
+      members.map((exercise, index) =>
+        exerciseRow(exercise, item.type === 'superset' ? `${index ? 'B' : 'A'} · ` : ''),
+      ),
+    );
   });
 }
 
 export function routineMarkup(items, className = '') {
-  return listMarkup(routineRows(items), `exercise-list${className ? ` ${className}` : ''}`, 'Exercises');
+  return listMarkup(
+    routineRows(items),
+    `exercise-list${className ? ` ${className}` : ''}`,
+    'Exercises',
+  );
 }

@@ -9,12 +9,14 @@ export function renderExerciseSelection() {
     `<li><a class="list-link" href="/workout/?view=exercise"><span>Continue</span>${icon('chevron', 'Continue workout')}</a></li>`,
     `<li><a class="list-link" href="/workout/?view=exercises&return=select"><span>Change exercise</span>${icon('chevron', 'Change exercise')}</a></li>`,
   ];
-  mount(workoutStage({
-    className: 'exercise-selection-stage',
-    title: esc(task.performedName),
-    body: '<p class="muted">Choose your first exercise.</p>',
-    actions: listMarkup(rows, 'stage-action-list', 'Workout options'),
-  }));
+  mount(
+    workoutStage({
+      className: 'exercise-selection-stage',
+      title: esc(task.performedName),
+      body: '<p class="muted">Choose your first exercise.</p>',
+      actions: listMarkup(rows, 'stage-action-list', 'Workout options'),
+    }),
+  );
 }
 
 export function renderExercisePicker(onSelected) {
