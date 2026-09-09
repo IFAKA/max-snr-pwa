@@ -18,6 +18,7 @@ let cancelDialog = null;
 let backTimer = null;
 let lastBackAt = 0;
 let lastWorkoutPath = '';
+let restoringBack = false;
 
 function isEditableTarget(target) {
   return (
@@ -89,6 +90,10 @@ function handleWorkoutNavigation(event) {
   const currentPath = `${location.pathname}${location.search}${location.hash}`;
   const previousPath = lastWorkoutPath;
   lastWorkoutPath = currentPath;
+  if (restoringBack) {
+    restoringBack = false;
+    return;
+  }
   const previousParams = new URL(previousPath || location.href, location.href).searchParams;
   const currentParams = new URL(currentPath, location.href).searchParams;
   if (
@@ -100,13 +105,13 @@ function handleWorkoutNavigation(event) {
     return;
   }
   if (isMainPhase(state())) {
-    event.preventDefault();
     event.stopImmediatePropagation();
     const now = performance.now();
     const isDoubleBack = now - lastBackAt <= 500;
     lastBackAt = isDoubleBack ? 0 : now;
-    armBackSentinel();
     clearTimeout(backTimer);
+    restoringBack = true;
+    history.forward();
     if (isDoubleBack) openCancelDialog();
     else backTimer = setTimeout(resetBackTimer, 500);
     return;
