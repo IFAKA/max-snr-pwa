@@ -49,10 +49,10 @@ Preserve state schema `version: 2` with `history` and `active`. Preserve Indexed
 
 Any new module must be added to `sw.js` precache and the cache version must be incremented. Keep service-worker fallback/offline behavior intact.
 
-## Validation and deployment
+## Validation and delivery
 
 There is no build script or automated suite. Run `node --check app.js`, `node --check` for every JavaScript module, `git diff --check`, and serve locally with `python3 -m http.server 4173` to smoke test `/`, `/routine/`, `/history/`, and `/workout/`. Exercise start/resume, refresh during every workout phase, sets/supersets, defer/skip, cancellation, completion/history, import/export, migration, localStorage fallback, service-worker precache, and the watch UI readiness gate above. Clear site storage between scenarios. Use browser validation at 225×225, a smaller watch width, and phone dimensions when Chromium is available; otherwise explicitly mark the visual/device gate as not passed.
 
-After validation succeeds, deploy with `npx vercel --prod` and report the production URL. Do not deploy with failing validation. Use two-space indentation, semicolon-terminated JavaScript, concise camelCase names, uppercase constants, and `esc()` for user/history-derived HTML.
+After validation succeeds, commit the requested changes and push the current branch; pushing already triggers deployment, so do not run a separate deployment command. Do not push with failing validation. Use two-space indentation, semicolon-terminated JavaScript, concise camelCase names, uppercase constants, and `esc()` for user/history-derived HTML.
 
 After finishing and validating any requested change, commit it and push the current branch to its configured remote. Never force-push; report the commit and push result.
