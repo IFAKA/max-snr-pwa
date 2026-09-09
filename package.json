@@ -5,10 +5,11 @@
     "prepare": "git rev-parse --is-inside-work-tree >/dev/null 2>&1 && git config core.hooksPath .githooks || true",
     "test": "node --test",
     "lint": "eslint .",
-    "format": "prettier --write app.js js sw.js tests styles.css *.html */index.html *.webmanifest package.json",
-    "format:check": "prettier --check app.js js sw.js tests styles.css *.html */index.html *.webmanifest package.json",
+    "format": "prettier --write app.js js scripts sw.js tests styles.css *.html */index.html *.webmanifest package.json",
+    "format:check": "prettier --check app.js js scripts sw.js tests styles.css *.html */index.html *.webmanifest package.json",
+    "architecture": "node scripts/check-architecture.mjs",
     "syntax": "node --check app.js && find js -type f -name '*.js' -not -path 'js/vendor/*' -print0 | xargs -0 -n1 node --check && node --check sw.js",
-    "check": "npm run lint && npm run format:check && npm run syntax && npm test"
+    "check": "npm run lint && npm run architecture && npm run format:check && npm run syntax && npm test"
   },
   "dependencies": {
     "vercel": "^59.11.7"

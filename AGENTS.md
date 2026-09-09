@@ -56,7 +56,7 @@ Do not add service-worker caching or cache-version changes. Keep IndexedDB/local
 - Keep domain functions pure when possible. Do not mutate function arguments; keep DOM, storage, timers, navigation, and other browser side effects at the edges.
 - Use one shared semantic UI system for all viewport sizes. Structure new UI as semantic atoms, molecules, organisms, templates, and pages without duplicating watch and phone markup.
 - Keep source files under 400 lines and functions under 200 lines. Split oversized files by responsibility; current split candidates are `js/dom.js` (DOM helpers versus magnetic lists) and `js/workout/session.js` (session progression versus completion/cancellation).
-- ESLint enforces unused code, complexity, parameter immutability, file/function size, and the workout dependency boundary. Prettier owns formatting; the pre-commit hook runs the complete check suite.
+- ESLint and `npm run architecture` enforce unused code, complexity, parameter immutability, file/function size, folder naming, and the workout dependency boundary. Prettier owns formatting; the pre-commit hook runs the complete check suite.
 
 ## Validation and delivery
 
