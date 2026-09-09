@@ -3,7 +3,6 @@ import { save } from '../storage.js';
 import { esc } from '../dom.js';
 import { getState } from '../state.js';
 import { activeTask, completeSet } from '../workout.js';
-import { navigateTo } from '../navigation.js';
 
 export function renderLifting() {
   const active = state(), task = activeTask();
@@ -33,7 +32,7 @@ export function renderLifting() {
   };
   bindHoldSteppers(changeValue);
   document.querySelector('#next-step')?.addEventListener('click', event => {
-    if (step !== 'load') { event.preventDefault(); saveDraft(); navigateTo('/workout/?step=load'); }
+    if (step !== 'load') { event.preventDefault(); saveDraft(); history.pushState({route: 'workout'}, '', '/workout/?step=load'); renderLifting(); }
   });
   form.onsubmit = event => runAction(event.submitter, async () => { event.preventDefault(); saveDraft(); const result = await completeSet(); if (result?.error) { showError(new Error(result.error)); return false; } return result; });
 }
