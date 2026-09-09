@@ -55,8 +55,9 @@ ul { margin: 0; padding: 0; list-style: none; }
 .app-list > li.is-magnetic-target .list-link:focus-visible { outline-offset: -3px; }
 .app-list > li.is-magnetic-target .list-link.is-disabled, .app-list > li.is-magnetic-target.complete-row .list-link { color: var(--muted); }
 .list-link { position: relative; z-index: 0; display: flex; width: 100%; min-height: 52px; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 2px; border: 0; border-radius: 0; background: transparent; color: inherit; text-decoration: none; isolation: isolate; }
-.list-link::before { position: absolute; z-index: -1; inset: 0 -12px; content: ""; background: transparent; }
+.list-link::before { position: absolute; z-index: 0; inset: 0 -12px; content: ""; background: transparent; }
 .list-link:hover::before, .list-link:focus-visible::before { background: var(--surface-raised); }
+.list-link > span, .list-link > svg { position: relative; z-index: 1; }
 .list-link > span:first-child { min-width: 0; }
 .list-link > span:first-child { display: flex; flex-direction: column; gap: 3px; }
 .list-link small, .history-workout small { font-size: 16px; }
@@ -67,7 +68,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .complete-row .list-link:hover, .complete-row .list-link:focus-visible, .complete-row .list-link:active { background: transparent; }
 .icon { display: block; color: currentColor; }
 .list-link.is-disabled { color: var(--muted); cursor: not-allowed; opacity: .55; pointer-events: none; }
-main > section:has(> .app-list) { display: flex; height: 100%; min-height: 0; flex-direction: column; overflow: hidden; }
+main > section:has(> .app-list) { display: flex; height: 100%; min-height: 0; flex-direction: column; overflow: visible; }
 .navigation-list { flex: 1 1 auto; min-height: 0; margin-top: 12px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 .routine-list, .exercise-list, .history-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 .day-indicator { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); font-size: 0; }
