@@ -138,12 +138,6 @@ function pointerOutside(element, event) {
   return box && (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom);
 }
 
-function vibrateAfterHighlight(pattern) {
-  const frame = globalThis.window?.requestAnimationFrame;
-  if (!frame) return buzz(pattern);
-  frame(() => buzz(pattern));
-}
-
 export function bindMagneticLists(root = document) {
   root.querySelectorAll?.('.app-list').forEach(list => {
     if (list.dataset.magneticBound) return;
@@ -184,7 +178,7 @@ export function bindMagneticLists(root = document) {
         else row.removeAttribute('aria-current');
       });
       activeIndex = nextIndex;
-      if (changed) vibrateAfterHighlight(vibration);
+      if (changed) buzz(vibration);
       if (activeIndex < 0) {
         status.textContent = 'Picker cancelled — release to cancel';
         return;
