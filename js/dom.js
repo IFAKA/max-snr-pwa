@@ -69,6 +69,12 @@ export function magneticPickerIndex(rawIndex, rowCount) {
   return rawIndex < 0 || rawIndex >= rowCount ? -1 : rawIndex;
 }
 
+export function magneticPreferredIndex(rawIndex, selectableIndices, rowCount) {
+  const index = magneticPickerIndex(rawIndex, rowCount);
+  if (index < 0 || !selectableIndices.length) return index;
+  return selectableIndices.reduce((nearest, candidate) => Math.abs(candidate - index) < Math.abs(nearest - index) ? candidate : nearest, selectableIndices[0]);
+}
+
 export function magneticEdgePosition(index, rowCount, overshoot = 0) {
   if (!rowCount) return -1;
   if (index >= 0 && index < rowCount) return index;
@@ -143,6 +149,7 @@ export function bindMagneticLists(root = document) {
     let startIndex = -1;
     let activeIndex = -1;
     let rows = [];
+    let selectableIndices = [];
     let pickerActive = false;
     let suppressClick = false;
     let movedBeforePicker = false;
@@ -197,6 +204,7 @@ export function bindMagneticLists(root = document) {
       activeIndex = -1;
       startIndex = -1;
       rows = [];
+      selectableIndices = [];
       pickerActive = false;
       movedBeforePicker = false;
     };
@@ -217,7 +225,8 @@ export function bindMagneticLists(root = document) {
       if (pointerId === null) return;
       rows = listRows(list);
       if (!rows.length) return reset();
-      startIndex = nearestRow(rows, startY);
+      selectableIndices = rows.reduce((indices, row, index) => enabledAction(row) ? [...indices, index] : indices, []);
+      startIndex = magneticPreferredIndex(nearestRow(rows, startY), selectableIndices, rows.length);
       activeIndex = startIndex;
       pickerActive = true;
       list.classList.add('is-magnetic-picker');
@@ -256,7 +265,7 @@ export function bindMagneticLists(root = document) {
       }
       event.preventDefault();
       const rawIndex = magneticRawRowIndex(startIndex, lastY - startY);
-      const nextIndex = magneticPickerIndex(rawIndex, rows.length);
+      const nextIndex = magneticPreferredIndex(rawIndex, selectableIndices, rows.length);
       setActive(nextIndex);
     };
     const onPointerUp = event => {
