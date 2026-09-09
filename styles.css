@@ -92,6 +92,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .thumb-zone { display: grid; gap: 8px; }
 .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .controls .secondary { margin-top: 0; }
+.stretch-stage .controls { grid-template-columns: 1fr; }
 .stage-link { margin: 0; }
 .stage-action-list { margin: 0; }
 .set-count { margin: 0; color: var(--muted); font-size: 15px; }
@@ -103,11 +104,6 @@ ul { margin: 0; padding: 0; list-style: none; }
 .stepper button .icon { width: 22px; height: 22px; margin: auto; stroke: currentColor; stroke-width: 2.5; fill: none; }
 .stepper output { display: grid; place-items: center; min-width: 0; font-size: 23px; font-weight: 850; }
 .big-timer { display: block; width: 100%; margin: 30px 0 20px; color: var(--text); font-size: clamp(64px, 20vw, 96px); font-weight: 850; line-height: 1; letter-spacing: -.08em; text-align: center; }
-.confetti { position: fixed; z-index: 10; inset: 0; overflow: hidden; pointer-events: none; }
-.confetti i { position: absolute; top: -12px; left: var(--confetti-x); width: 8px; height: 14px; background: var(--accent); transform: rotate(var(--confetti-rotate)); animation: confetti-fall 1.6s ease-out var(--confetti-delay) forwards; }
-.confetti i:nth-child(3n) { background: #e0a72f; }
-.confetti i:nth-child(3n + 1) { background: #d85d4c; }
-@keyframes confetti-fall { to { transform: translateY(105svh) rotate(720deg); opacity: 0; } }
 .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-top: 22px; }
 .summary-grid div { display: grid; gap: 4px; padding: 14px 6px; border-radius: 14px; background: var(--surface-raised); text-align: center; }
 .summary-grid strong { font-size: 22px; }

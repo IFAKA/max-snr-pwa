@@ -2,6 +2,7 @@ import { app, bindHoldScroll, bindTitleMarquee, dayNow, icon, listMarkup, titleM
 import { getState } from './state.js';
 import { ROUTINE, NAMES } from './routine-data.js';
 import { startRow, bindStartDialog } from './render-workout/shared.js';
+import confetti from './vendor/canvas-confetti.js';
 
 function localDateKey(value) {
   const date = value instanceof Date ? value : new Date(value);
@@ -15,22 +16,13 @@ export function isCurrentDayComplete(history, day, now = new Date()) {
 }
 
 function showCompletionConfetti() {
-  const container = document.createElement('div');
-  container.className = 'confetti';
-  container.setAttribute('aria-hidden', 'true');
-  for (let index = 0; index < 24; index++) {
-    const piece = document.createElement('i');
-    piece.style.setProperty('--confetti-x', `${Math.round(Math.random() * 100)}vw`);
-    piece.style.setProperty('--confetti-delay', `${Math.round(Math.random() * 220)}ms`);
-    piece.style.setProperty('--confetti-rotate', `${Math.round(Math.random() * 360)}deg`);
-    container.append(piece);
-  }
-  document.body.append(container);
-  setTimeout(() => container.remove(), 1800);
+  confetti({particleCount: 100, spread: 70, origin: {y: 0.6}, disableForReducedMotion: true});
 }
 
 export function renderToday() {
-  const state = getState(), day = dayNow(), routine = ROUTINE[day], active = state.active;
+  const state = getState(), params = new URLSearchParams(location.search), redirectDay = params.get('day');
+  const day = params.get('completed') === '1' && Object.prototype.hasOwnProperty.call(ROUTINE, redirectDay) && ROUTINE[redirectDay] ? redirectDay : dayNow();
+  const routine = ROUTINE[day], active = state.active;
   const title = routine ? NAMES[day] : 'Rest';
   const complete = !active && isCurrentDayComplete(state.history, day);
   const startItem = complete
@@ -44,7 +36,7 @@ export function renderToday() {
   bindHoldScroll();
   bindTitleMarquee();
   bindStartDialog();
-  if (new URLSearchParams(location.search).get('completed') === '1') {
+  if (params.get('completed') === '1') {
     history.replaceState(history.state, '', `${location.pathname}${location.hash}`);
     showCompletionConfetti();
   }
