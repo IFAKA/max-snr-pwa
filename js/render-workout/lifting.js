@@ -14,7 +14,7 @@ export function renderLifting() {
     history.replaceState(history.state, '', '/workout/?step=reps');
   }
   const repsValue = draft.reps ?? String(String(task.reps).split('–')[0]);
-  const weightValue = draft.weight ?? '';
+  const weightValue = draft.weight ?? '0';
   const stage = workoutStage({className: 'lifting-stage', title: esc(task.performedName), actions: ''});
   const unit = getState().settings?.unit || 'kg';
   const formMarkup = `<form class="thumb-zone" id="set-form"><p class="set-count">Set ${esc(task.set)} of ${esc(task.sets)}</p>${step === 'load' ? stepperMarkup('weight', `Load · ${unit}`, weightValue, -2.5, 2.5) : stepperMarkup('reps', 'Reps', repsValue, -1, 1)}<input id="reps" type="hidden" value="${esc(repsValue)}"><input id="weight" type="hidden" value="${esc(weightValue)}">${primaryAction('next-step', step === 'load' ? 'Log set' : 'Next', step === 'load' ? 'submit' : 'button')}</form>`;
