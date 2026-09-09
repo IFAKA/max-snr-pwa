@@ -49,7 +49,14 @@ async function boot() {
     }
   }
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-    try { await navigator.serviceWorker.register('/sw.js', {scope: '/'}); } catch {}
+    try {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map(registration => registration.unregister()));
+      if ('caches' in globalThis) {
+        const keys = await caches.keys();
+        await Promise.all(keys.filter(key => key.startsWith('maxsnr-')).map(key => caches.delete(key)));
+      }
+    } catch {}
   }
 }
 

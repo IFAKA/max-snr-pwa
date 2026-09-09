@@ -2,7 +2,7 @@
 
 ## Architecture
 
-This is a dependency-free static PWA using browser-native ES modules. HTML shells live at `index.html`, `routine/`, `history/`, and `workout/`; `styles.css` owns presentation, `icons/` owns artwork, `manifest.webmanifest` owns install metadata, and `sw.js` owns offline caching.
+This is a dependency-free static web app using browser-native ES modules. HTML shells live at `index.html`, `routine/`, `history/`, and `workout/`; `styles.css` owns presentation, `icons/` owns artwork, and `manifest.webmanifest` owns install metadata. Routine/workout state is persisted through IndexedDB with localStorage fallback; there is no runtime service-worker cache.
 
 The JavaScript dependency direction is one way: data/constants/state/storage → workout domain → renderers → `app.js` routing. `js/routine-data.js` defines routines and names. `js/constants.js` defines shared constants and storage identifiers. `js/state.js` owns the in-memory state. `js/storage.js` owns IndexedDB, the `maxsnr` localStorage fallback, and legacy migration. `js/dom.js` contains small browser helpers.
 
@@ -30,7 +30,7 @@ Follow Apple’s primary references before changing UI: [Designing for watchOS](
 - Today is the landing view: show the current workout type as the title, followed by exactly two primary navigation actions, `Routine` and `History`.
 - Routine is a list of days. Selecting a workout day opens a dedicated day view with that day’s title and an exercise list showing exercise name, sets, and reps. The `Start` action opens a native confirmation dialog before starting.
 - Keep long content in a new view or a vertically scrolling list instead of forcing it into one viewport. History and Routine have explicit titles, and browser/native Android back must unwind detail → parent → Today.
-- Prefer native links, buttons, `dialog`, and browser history for navigation and confirmation. Preserve the existing route paths, state schema, and service-worker behavior while using query parameters for detail views.
+- Prefer native links, buttons, `dialog`, and browser history for navigation and confirmation. Preserve the existing route paths and state schema while using query parameters for detail views.
 
 ### Watch UI readiness gate
 
@@ -41,17 +41,17 @@ A UI change is **not ready** unless all of these pass:
 - Every interactive element is reachable by keyboard, has a visible focus state, has an accessible name, and meets the 44px minimum target.
 - All gestures are native or explicitly justified; no custom gesture interferes with scrolling, Digital Crown-like vertical navigation, double-tap primary-action expectations, or assistive technology.
 - Shared components are reused across all equivalent views; no one-off watch-only markup is introduced without documenting why.
-- Static checks, route smoke tests, offline/service-worker checks, and the relevant browser/device viewport checks pass. If browser/device validation is unavailable, report the missing evidence; do not claim the UI is ready.
+- Static checks, route smoke tests, and the relevant browser/device viewport checks pass. If browser/device validation is unavailable, report the missing evidence; do not claim the UI is ready.
 
 ## Compatibility and routing
 
 Preserve state schema `version: 2` with `history` and `active`. Preserve IndexedDB database/object-store names (`maxsnr-workout` / `state`), the `maxsnr` localStorage fallback, and legacy migration behavior. Keep route paths trailing-slash-compatible (`/workout/`, `/history/`). Do not split individual HTML fragments into files.
 
-Any new module must be added to `sw.js` precache and the cache version must be incremented. Keep service-worker fallback/offline behavior intact.
+Do not add service-worker caching or cache-version changes. Keep IndexedDB/localStorage persistence and legacy migration behavior intact.
 
 ## Validation and delivery
 
-There is no build script or automated suite. Run `node --check app.js`, `node --check` for every JavaScript module, `git diff --check`, and serve locally with `python3 -m http.server 4173` to smoke test `/`, `/routine/`, `/history/`, and `/workout/`. Exercise start/resume, refresh during every workout phase, sets/supersets, defer/skip, cancellation, completion/history, import/export, migration, localStorage fallback, service-worker precache, and the watch UI readiness gate above. Clear site storage between scenarios. Use browser validation at 225×225, a smaller watch width, and phone dimensions when Chromium is available; otherwise explicitly mark the visual/device gate as not passed.
+There is no build script or automated suite. Run `node --check app.js`, `node --check` for every JavaScript module, `git diff --check`, and serve locally with `python3 -m http.server 4173` to smoke test `/`, `/routine/`, `/history/`, and `/workout/`. Exercise start/resume, refresh during every workout phase, sets/supersets, defer/skip, cancellation, completion/history, import/export, migration, localStorage fallback, and the watch UI readiness gate above. Clear site storage between scenarios. Use browser validation at 225×225, a smaller watch width, and phone dimensions when Chromium is available; otherwise explicitly mark the visual/device gate as not passed.
 
 After validation succeeds, commit the requested changes and push the current branch; pushing already triggers deployment, so do not run a separate deployment command. Do not push with failing validation. Use two-space indentation, semicolon-terminated JavaScript, concise camelCase names, uppercase constants, and `esc()` for user/history-derived HTML.
 
