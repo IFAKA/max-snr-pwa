@@ -68,7 +68,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .complete-row .list-link:hover, .complete-row .list-link:focus-visible, .complete-row .list-link:active { background: transparent; }
 .icon { display: block; color: currentColor; }
 .list-link.is-disabled { color: var(--muted); cursor: not-allowed; opacity: .55; pointer-events: none; }
-main > section:has(> .app-list) { display: flex; height: 100%; min-height: 0; flex-direction: column; margin-inline: -12px; padding-inline: 12px; overflow: hidden; }
+main > section:has(> .app-list) { display: flex; width: calc(100% + 24px); height: 100%; min-height: 0; flex-direction: column; margin-inline: -12px; padding-inline: 12px; overflow: hidden; }
 .navigation-list { flex: 1 1 auto; min-height: 0; margin-top: 12px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 .routine-list, .exercise-list, .history-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 .day-indicator { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); font-size: 0; }
