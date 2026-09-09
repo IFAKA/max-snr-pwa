@@ -605,20 +605,19 @@ main > section:has(> .app-list) > .app-list .list-link::before {
 .stepper {
   display: grid;
   grid-template-columns: 56px minmax(0, 1fr) 56px;
+  gap: 8px;
+  height: 60px;
   min-height: 60px;
   align-items: center;
-  overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 15px;
-  background: var(--surface);
 }
 .stepper button {
+  height: 100%;
   min-width: 56px;
-  min-height: 60px;
+  min-height: 0;
   padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
+  border: 2px solid var(--line);
+  border-radius: 15px;
+  background: var(--surface);
   color: var(--accent);
   font-size: 28px;
   font-weight: 850;
@@ -641,14 +640,18 @@ main > section:has(> .app-list) > .app-list .list-link::before {
 }
 .stepper output {
   display: grid;
+  height: 100%;
   place-items: center;
   min-width: 0;
+  border: 2px solid var(--line);
+  border-radius: 15px;
+  background: var(--surface);
   font-size: 25px;
   font-weight: 850;
 }
 .lifting-stage #set-form {
   display: grid;
-  gap: 10px;
+  gap: 14px;
 }
 .big-timer {
   display: block;
@@ -879,6 +882,7 @@ main > section:has(> .app-list) > .app-list .list-link::before {
     gap: 5px;
   }
   .stepper {
+    height: 60px;
     min-height: 60px;
   }
   .stepper output {
