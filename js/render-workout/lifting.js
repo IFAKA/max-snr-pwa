@@ -7,12 +7,13 @@ import { activeTask, completeSet } from '../workout.js';
 export function renderLifting() {
   const active = state(), task = activeTask();
   if (!task) return;
+  const step = new URLSearchParams(location.search).get('step') || 'reps';
   const draft = active.draft || {};
   const repsValue = draft.reps ?? String(String(task.reps).split('–')[0]);
   const weightValue = draft.weight ?? '';
   const stage = workoutStage({className: 'lifting-stage', title: esc(task.performedName), actions: ''});
   const unit = getState().settings?.unit || 'kg';
-  const formMarkup = `<form class="thumb-zone" id="set-form"><p class="set-count">Set ${esc(task.set)} of ${esc(task.sets)}</p><div class="lifting-fields">${stepperMarkup('reps', 'Reps', repsValue, -1, 1)}${stepperMarkup('weight', `Load · ${unit}`, weightValue, -2.5, 2.5)}</div><input id="reps" type="hidden" value="${esc(repsValue)}"><input id="weight" type="hidden" value="${esc(weightValue)}">${primaryAction('log-set', 'Log set', 'submit')}</form>`;
+  const formMarkup = `<form class="thumb-zone" id="set-form"><p class="set-count">Set ${esc(task.set)} of ${esc(task.sets)}</p>${step === 'load' ? stepperMarkup('weight', `Load · ${unit}`, weightValue, -2.5, 2.5) : stepperMarkup('reps', 'Reps', repsValue, -1, 1)}<input id="reps" type="hidden" value="${esc(repsValue)}"><input id="weight" type="hidden" value="${esc(weightValue)}">${primaryAction('next-step', step === 'load' ? 'Log set' : 'Next', step === 'load' ? 'submit' : 'button')}</form>`;
   mount(stage.replace('<div class="thumb-zone"></div>', formMarkup));
   const weight = document.querySelector('#weight'), reps = document.querySelector('#reps'), form = document.querySelector('#set-form');
   if (!weight || !reps || !form) return showError(new Error('The set form could not be loaded. Reload the workout.'));
@@ -26,5 +27,8 @@ export function renderLifting() {
     saveDraft();
   };
   bindHoldSteppers(changeValue);
+  document.querySelector('#next-step')?.addEventListener('click', event => {
+    if (step !== 'load') { event.preventDefault(); saveDraft(); history.pushState({route: 'workout'}, '', '/workout/?step=load'); renderLifting(); }
+  });
   form.onsubmit = event => runAction(event.submitter, async () => { event.preventDefault(); saveDraft(); const result = await completeSet(); if (result?.error) { showError(new Error(result.error)); return false; } return result; });
 }
