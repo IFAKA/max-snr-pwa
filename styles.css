@@ -618,9 +618,9 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   min-width: 56px;
   min-height: 0;
   padding: 0;
-  border: 1px solid var(--line);
-  border-radius: 15px;
-  background: var(--surface-raised);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   color: var(--accent);
   font-size: 28px;
   font-weight: 850;
