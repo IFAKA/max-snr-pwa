@@ -53,7 +53,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .list-link small, .history-workout small { font-size: 16px; }
 .list-link > span:last-child { flex: 0 0 auto; color: var(--accent); font-size: 24px; }
 .list-link > .icon { width: 22px; height: 22px; flex: 0 0 22px; color: inherit; stroke: currentColor; stroke-width: 2.2; fill: none; }
-.complete-row .list-link { color: var(--success); cursor: default; font-weight: 850; }
+.complete-row .list-link { background: transparent; color: var(--success); cursor: default; font-weight: 850; }
 .complete-row .list-link:hover, .complete-row .list-link:focus-visible, .complete-row .list-link:active { background: transparent; }
 .icon { display: block; color: currentColor; }
 .list-link.is-disabled { color: var(--muted); cursor: not-allowed; opacity: .55; }
