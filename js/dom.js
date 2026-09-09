@@ -54,10 +54,14 @@ const MAGNETIC_MOVE_TOLERANCE = 10;
 const MAGNETIC_STATUS_CLASS = 'magnetic-list-status';
 const MAGNETIC_DETENT_VIBRATION = [16, 24, 16];
 
+export function magneticRawRowIndex(startIndex, deltaY, rowInterval) {
+  const interval = Math.max(1, rowInterval || 1);
+  return startIndex + Math.round(deltaY / interval);
+}
+
 export function magneticRowIndex(startIndex, deltaY, rowCount, rowInterval) {
   if (!rowCount) return -1;
-  const interval = Math.max(1, rowInterval || 1);
-  return Math.max(0, Math.min(rowCount - 1, startIndex - Math.round(deltaY / interval)));
+  return Math.max(0, Math.min(rowCount - 1, magneticRawRowIndex(startIndex, deltaY, rowInterval)));
 }
 
 export function magneticEdgePosition(index, rowCount, overshoot = 0) {
@@ -227,7 +231,7 @@ export function bindMagneticLists(root = document) {
         return;
       }
       event.preventDefault();
-      const rawIndex = startIndex - Math.round((lastY - startY) / interval);
+      const rawIndex = magneticRawRowIndex(startIndex, lastY - startY, interval);
       const nextIndex = Math.round(magneticEdgePosition(rawIndex, rows.length, rawIndex < 0 ? rawIndex : rawIndex - rows.length + 1));
       setActive(nextIndex);
     };
