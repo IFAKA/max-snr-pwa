@@ -128,6 +128,11 @@ function describeRow(row) {
   return rowAction(row)?.getAttribute('aria-label') || row.textContent.trim().replace(/\s+/g, ' ') || 'Unavailable item';
 }
 
+function pointerOutside(element, event) {
+  const box = element.getBoundingClientRect?.();
+  return box && (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom);
+}
+
 export function bindMagneticLists(root = document) {
   root.querySelectorAll?.('.app-list').forEach(list => {
     if (list.dataset.magneticBound) return;
@@ -221,6 +226,11 @@ export function bindMagneticLists(root = document) {
       if (event.pointerId !== pointerId) return;
       const previousY = lastY;
       lastY = event.clientY;
+      const outside = pointerOutside(list, event);
+      if (pickerActive && outside) {
+        cancel();
+        return;
+      }
       if (!pickerActive) {
         if (Math.abs(lastY - startY) > MAGNETIC_MOVE_TOLERANCE) {
           clearTimer();
@@ -237,8 +247,7 @@ export function bindMagneticLists(root = document) {
     };
     const onPointerUp = event => {
       if (event.pointerId !== pointerId) return;
-      const box = list.getBoundingClientRect?.();
-      const outside = box && (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom);
+      const outside = pointerOutside(list, event);
       if (pickerActive && !outside) activate();
       else {
         if (movedBeforePicker) suppressClick = true;
