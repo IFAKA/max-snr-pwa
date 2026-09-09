@@ -64,6 +64,10 @@ export function magneticRowIndex(startIndex, deltaY, rowCount, rowInterval) {
   return Math.max(0, Math.min(rowCount - 1, magneticRawRowIndex(startIndex, deltaY, rowInterval)));
 }
 
+export function magneticPickerIndex(rawIndex, rowCount) {
+  return rawIndex < 0 || rawIndex >= rowCount ? -1 : rawIndex;
+}
+
 export function magneticEdgePosition(index, rowCount, overshoot = 0) {
   if (!rowCount) return -1;
   if (index >= 0 && index < rowCount) return index;
@@ -154,15 +158,19 @@ export function bindMagneticLists(root = document) {
     const clearTimer = () => { clearTimeout(timer); timer = null; };
     const setActive = index => {
       if (!rows.length) return;
-      const nextIndex = Math.max(0, Math.min(rows.length - 1, index));
+      const nextIndex = index < 0 || index >= rows.length ? -1 : index;
       rows.forEach((row, rowIndex) => {
-        const isTarget = rowIndex === nextIndex;
+        const isTarget = nextIndex >= 0 && rowIndex === nextIndex;
         row.classList.toggle('is-magnetic-target', isTarget);
         if (isTarget) row.setAttribute('aria-current', 'true');
         else row.removeAttribute('aria-current');
       });
       if (nextIndex !== activeIndex) buzz(MAGNETIC_DETENT_VIBRATION);
       activeIndex = nextIndex;
+      if (activeIndex < 0) {
+        status.textContent = 'Picker cancelled — release to cancel';
+        return;
+      }
       const row = rows[activeIndex];
       status.textContent = `Picker: ${describeRow(row)}${enabledAction(row) ? '' : ', unavailable'}`;
       row.scrollIntoView?.({block: 'nearest', behavior: globalThis.window?.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
@@ -242,7 +250,7 @@ export function bindMagneticLists(root = document) {
       }
       event.preventDefault();
       const rawIndex = magneticRawRowIndex(startIndex, lastY - startY, interval);
-      const nextIndex = Math.round(magneticEdgePosition(rawIndex, rows.length, rawIndex < 0 ? rawIndex : rawIndex - rows.length + 1));
+      const nextIndex = magneticPickerIndex(rawIndex, rows.length);
       setActive(nextIndex);
     };
     const onPointerUp = event => {

@@ -8,7 +8,7 @@ globalThis.document = {
   visibilityState: 'visible',
 };
 
-const {magneticEdgePosition, magneticRowIndex} = await import('../js/dom.js');
+const {magneticEdgePosition, magneticPickerIndex, magneticRowIndex} = await import('../js/dom.js');
 
 test('magnetic row calculation follows cumulative drag distance', () => {
   assert.equal(magneticRowIndex(2, -72, 6, 64), 1);
@@ -25,4 +25,10 @@ test('edge friction eases overshoot instead of extending the active row', () => 
   assert.ok(magneticEdgePosition(-1, 4) < 0);
   assert.ok(magneticEdgePosition(4, 4) > 3);
   assert.ok(magneticEdgePosition(4, 4) < 4);
+});
+
+test('picker exposes a cancel detent beyond either list edge', () => {
+  assert.equal(magneticPickerIndex(-1, 4), -1);
+  assert.equal(magneticPickerIndex(4, 4), -1);
+  assert.equal(magneticPickerIndex(2, 4), 2);
 });
