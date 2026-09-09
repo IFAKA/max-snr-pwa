@@ -95,6 +95,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .stage-link { margin: 0; }
 .stage-action-list { margin: 0; }
 .set-count { margin: 0; color: var(--muted); font-size: 15px; }
+.lifting-fields { display: grid; gap: 8px; }
 .workout-picker { height: 100%; overflow: hidden; }
 .exercise-picker-list { max-height: calc(100svh - 76px); overflow-y: auto; }
 .stepper-label { display: grid; gap: 4px; color: var(--muted); font-size: 14px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
