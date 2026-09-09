@@ -169,7 +169,6 @@ main > section:has(> .app-list) { display: flex; height: 100%; min-height: 0; fl
 }
 @media (min-width: 261px) {
   :root { font-size: 20px; }
-  main { padding: 16px; }
   h1 { font-size: clamp(44px, 12vw, 60px); }
   h2 { font-size: 28px; }
   h3 { font-size: 20px; }
