@@ -73,8 +73,6 @@ main > section:has(> .app-list) { display: flex; height: 100%; min-height: 0; fl
 .routine-group-label { padding: 14px 2px 6px; border-top: 1px solid var(--line); }
 .routine-group-label .list-title { display: block; margin: 0; font-size: 14px; line-height: 1.2; letter-spacing: .08em; text-transform: uppercase; }
 .history-list > li { padding: 0; }
-.data-status { flex: 0 0 auto; max-width: 100%; margin-top: 12px; padding: 10px 12px; overflow-wrap: anywhere; border: 1px solid var(--accent); border-radius: 14px; background: var(--accent-soft); color: var(--text); font-size: 15px; line-height: 1.35; }
-.data-status.error { border-color: var(--danger); background: #f9dfdc; color: #74251f; }
 .history-workout > summary { display: flex; min-height: 56px; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 2px; cursor: pointer; list-style: none; }
 .history-workout > summary::-webkit-details-marker, .data-card > summary::-webkit-details-marker { display: none; }
 .history-workout > summary::after, .data-card > summary::after { content: "+"; color: var(--accent); font-size: 22px; }
@@ -174,7 +172,7 @@ main > section:has(> .app-list) { display: flex; height: 100%; min-height: 0; fl
   .list-link { min-height: 64px; padding-block: 14px; }
   .list-link small, .history-workout small { font-size: 18px; }
   .routine-exercise { gap: 12px; padding-block: 14px; font-size: 20px; }
-  .data-status, .set-count, .summary-grid span { font-size: 17px; }
+  .set-count, .summary-grid span { font-size: 17px; }
   button, .button, .import-button { min-height: 52px; }
   .workout-disclosure summary, .text-action { min-height: 52px; }
 }
@@ -184,10 +182,8 @@ main > section:has(> .app-list) { display: flex; height: 100%; min-height: 0; fl
 @media (prefers-color-scheme: dark) {
   :root { --bg: #0d1210; --surface: #171e1a; --surface-raised: #203428; --text: #edf2ee; --muted: #a1aca4; --line: #344138; --accent: #8fd0a9; --accent-soft: #21372a; --danger: #ffaaa1; --success: #8fd0a9; }
   .primary { color: #102116; }
-  .notice.error, .data-status.error { background: #542824; color: #ffd7d2; }
+  .notice.error { background: #542824; color: #ffd7d2; }
 }
 @media (forced-colors: active) {
   .app-list > li.is-magnetic-target { background: Highlight; box-shadow: inset 0 2px 0 HighlightText, inset 0 -2px 0 HighlightText; color: HighlightText; }
-  .data-status { border-color: CanvasText; background: Canvas; color: CanvasText; }
-  .data-status.error { border-color: Mark; background: Canvas; color: CanvasText; }
 }
