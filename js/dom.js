@@ -56,17 +56,6 @@ const MAGNETIC_DETENT_DISTANCE = 24;
 const MAGNETIC_HOLD_VIBRATION = 5;
 const MAGNETIC_DETENT_VIBRATION = [20, 30, 20];
 
-function buzzAfterPaint(pattern) {
-  const schedule = callback => {
-    if (globalThis.window?.requestAnimationFrame) {
-      globalThis.window.requestAnimationFrame(() => setTimeout(callback, 0));
-      return;
-    }
-    setTimeout(callback, 0);
-  };
-  schedule(() => buzz(pattern));
-}
-
 export function magneticRawRowIndex(startIndex, deltaY, detentDistance = MAGNETIC_DETENT_DISTANCE) {
   const distance = Math.max(1, detentDistance || MAGNETIC_DETENT_DISTANCE);
   return startIndex + Math.round(deltaY / distance);
@@ -178,7 +167,7 @@ export function bindMagneticLists(root = document) {
       document.addEventListener?.('pointerup', onPointerUp);
       document.addEventListener?.('pointercancel', cancel);
     };
-    const setActive = (index, vibration = MAGNETIC_DETENT_VIBRATION, deferVibration = false) => {
+    const setActive = (index, vibration = MAGNETIC_DETENT_VIBRATION) => {
       if (!rows.length) return;
       const nextIndex = index < 0 || index >= rows.length ? -1 : index;
       const changed = nextIndex !== activeIndex;
@@ -189,10 +178,7 @@ export function bindMagneticLists(root = document) {
         else row.removeAttribute('aria-current');
       });
       activeIndex = nextIndex;
-      if (changed) {
-        if (deferVibration) buzzAfterPaint(vibration);
-        else buzz(vibration);
-      }
+      if (changed) buzz(vibration);
       if (activeIndex < 0) {
         status.textContent = 'Picker cancelled — release to cancel';
         return;
@@ -249,7 +235,7 @@ export function bindMagneticLists(root = document) {
       status.classList.add('is-magnetic-status-visible');
       list.style.setProperty('touch-action', 'none');
       list.setPointerCapture?.(pointerId);
-      setActive(startIndex, MAGNETIC_HOLD_VIBRATION, true);
+      setActive(startIndex, MAGNETIC_HOLD_VIBRATION);
     };
     const onPointerDown = event => {
       if (event.pointerType === 'mouse' && event.button !== 0) return;
