@@ -107,7 +107,8 @@ main > section:has(> .app-list) > .app-list .list-link::before { inset-inline: -
 .list-link input { position: absolute; width: 1px; height: 1px; opacity: 0; }
 .workout-stage { display: flex; height: calc(100svh - 24px); min-height: 0; flex-direction: column; gap: 6px; padding: 0 0 8px; overflow-x: hidden; overflow-y: auto; }
 .stage-info { min-width: 0; }
-.countdown-stage .stage-info { display: flex; min-height: 0; flex: 1 1 auto; flex-direction: column; justify-content: center; }
+.countdown-stage .stage-info { display: flex; min-height: 0; flex: 1 1 auto; flex-direction: column; }
+.countdown-stage .big-timer { display: grid; flex: 1 1 auto; min-height: 0; place-items: center; margin: 0; }
 .workout-stage h1 { margin: 0 0 6px; font-size: clamp(28px, 9vw, 46px); }
 .thumb-zone { width: 100%; margin-top: auto; padding-bottom: max(8px, env(safe-area-inset-bottom)); }
 .thumb-zone { display: grid; gap: 8px; }
