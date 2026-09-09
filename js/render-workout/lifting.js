@@ -32,11 +32,14 @@ export function renderLifting() {
   const stage = workoutStage({
     className: 'lifting-stage',
     title: esc(task.performedName),
+    body: `<p class="set-count">Set ${esc(task.set)} of ${esc(task.sets)}</p>`,
     actions: '',
   });
   const unit = getState().settings?.unit || 'kg';
-  const formMarkup = `<form class="thumb-zone" id="set-form"><p class="set-count">Set ${esc(task.set)} of ${esc(task.sets)}</p>${step === 'load' ? stepperMarkup('weight', `Load · ${unit}`, weightValue, -2.5, 2.5) : stepperMarkup('reps', 'Reps', repsValue, -1, 1)}<input id="reps" type="hidden" value="${esc(repsValue)}"><input id="weight" type="hidden" value="${esc(weightValue)}">${primaryAction('next-step', step === 'load' ? 'Log set' : 'Next', step === 'load' ? 'submit' : 'button')}</form>`;
-  mount(stage.replace('<div class="thumb-zone"></div>', formMarkup));
+  const formMarkup = `<form id="set-form">${step === 'load' ? stepperMarkup('weight', `Load · ${unit}`, weightValue, -2.5, 2.5) : stepperMarkup('reps', 'Reps', repsValue, -1, 1)}<input id="reps" type="hidden" value="${esc(repsValue)}"><input id="weight" type="hidden" value="${esc(weightValue)}">${primaryAction('next-step', step === 'load' ? 'Log set' : 'Next', step === 'load' ? 'submit' : 'button')}</form>`;
+  mount(
+    stage.replace('<div class="thumb-zone"></div>', `<div class="thumb-zone">${formMarkup}</div>`),
+  );
   const weight = document.querySelector('#weight'),
     reps = document.querySelector('#reps'),
     form = document.querySelector('#set-form');
