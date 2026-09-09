@@ -1,4 +1,4 @@
-import { state, startRow, bindStartDialog } from './render-workout/shared.js';
+import { state, startRow, bindStartDialog, configureWorkoutNavigation } from './render-workout/shared.js';
 import { renderWarmup } from './render-workout/warmup.js';
 import { renderPlank } from './render-workout/plank.js';
 import { renderLifting } from './render-workout/lifting.js';
@@ -24,6 +24,7 @@ export function renderWorkout() {
   const requestedDay = new URLSearchParams(location.search).get('day');
   if (!a && requestedDay && Object.prototype.hasOwnProperty.call(ROUTINE, requestedDay)) return renderStart(requestedDay);
   if (!a) return navigateTo('/');
+  configureWorkoutNavigation(renderWorkout);
   const params = new URLSearchParams(location.search);
   if (params.get('view') === 'exercises') {
     const firstExerciseNotStarted = a.phase === 'lifting' && !a.tasks.some(task => task.completed);

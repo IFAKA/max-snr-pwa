@@ -1,8 +1,106 @@
 import { app, bindHoldScroll, bindTitleMarquee, esc, icon, listMarkup, titleMarkup } from '../dom.js';
 import { save } from '../storage.js';
 import { getState } from '../state.js';
-import { selectExercise, exerciseSelectionLocked, start } from '../workout.js';
+import { selectExercise, exerciseSelectionLocked, start, cancelWorkout } from '../workout.js';
 import { navigateTo } from '../navigation.js';
+
+const MAIN_PHASES = new Set(['warmup', 'plank', 'lifting', 'rest', 'stretch', 'complete']);
+let workoutRouteRenderer = null;
+let cancelDialog = null;
+let backTimer = null;
+let lastBackAt = 0;
+let lastWorkoutPath = '';
+
+function isEditableTarget(target) {
+  return target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement || target?.isContentEditable;
+}
+
+function isMainPhase(active) {
+  if (!active || !MAIN_PHASES.has(active.phase) || location.pathname !== '/workout/') return false;
+  const params = new URLSearchParams(location.search);
+  return !params.has('view') && !(active.phase === 'lifting' && params.get('step') === 'load');
+}
+
+function armBackSentinel() {
+  const path = `${location.pathname}${location.search}${location.hash}`;
+  if (!history.state?.workoutSentinel || history.state.path !== path) history.pushState({...(history.state || {}), route: 'workout', path, workoutSentinel: true}, '', path);
+}
+
+function resetBackTimer() {
+  clearTimeout(backTimer);
+  backTimer = null;
+  lastBackAt = 0;
+}
+
+function bindCancelDialog() {
+  if (cancelDialog) return cancelDialog;
+  const dialog = document.createElement('dialog');
+  dialog.className = 'confirm-dialog bottom-sheet';
+  dialog.setAttribute('aria-labelledby', 'cancel-workout-title');
+  dialog.innerHTML = '<div class="sheet-handle" aria-hidden="true"></div><form method="dialog"><h2 id="cancel-workout-title">Cancel workout?</h2><p>Your completed sets will stay in history.</p><div class="dialog-actions"><button class="primary" value="default">Cancel workout</button><button value="cancel">Keep working out</button></div></form>';
+  document.body.append(dialog);
+  dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close('cancel'); });
+  dialog.addEventListener('close', async () => {
+    if (dialog.returnValue === 'default') {
+      const button = dialog.querySelector('[value="default"]');
+      if (button) button.disabled = true;
+      try {
+        if (await cancelWorkout()) navigateTo('/');
+      } catch (error) {
+        if (button) button.disabled = false;
+        showError(error);
+      }
+    }
+    resetBackTimer();
+    if (isMainPhase(state())) armBackSentinel();
+  });
+  cancelDialog = dialog;
+  return dialog;
+}
+
+function openCancelDialog() {
+  const dialog = bindCancelDialog();
+  if (dialog.open || !isMainPhase(state())) return;
+  dialog.showModal();
+}
+
+function handleWorkoutNavigation(event) {
+  const currentPath = `${location.pathname}${location.search}${location.hash}`;
+  const previousPath = lastWorkoutPath;
+  lastWorkoutPath = currentPath;
+  const previousParams = new URL(previousPath || location.href, location.href).searchParams;
+  const currentParams = new URL(currentPath, location.href).searchParams;
+  if (previousParams.get('step') === 'load' && currentParams.get('step') === 'reps' && state()?.phase === 'lifting') {
+    if (workoutRouteRenderer) workoutRouteRenderer();
+    return;
+  }
+  if (isMainPhase(state())) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    const now = performance.now();
+    const isDoubleBack = now - lastBackAt <= 500;
+    lastBackAt = isDoubleBack ? 0 : now;
+    armBackSentinel();
+    clearTimeout(backTimer);
+    if (isDoubleBack) openCancelDialog();
+    else backTimer = setTimeout(resetBackTimer, 500);
+    return;
+  }
+  if (location.pathname === '/workout/' && workoutRouteRenderer) workoutRouteRenderer();
+}
+
+document.addEventListener('keydown', event => {
+  if (event.key !== 'Escape' || !isMainPhase(state()) || document.querySelector('dialog[open]') || isEditableTarget(event.target)) return;
+  event.preventDefault();
+  openCancelDialog();
+});
+window.addEventListener('popstate', handleWorkoutNavigation);
+
+export function configureWorkoutNavigation(render) {
+  workoutRouteRenderer = render;
+  lastWorkoutPath = `${location.pathname}${location.search}${location.hash}`;
+  if (isMainPhase(state())) armBackSentinel();
+}
 
 export const state = () => getState().active;
 export function workoutStage({className = '', title, body = '', actions = ''}) {
