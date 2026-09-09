@@ -1,11 +1,11 @@
-import { app, bindHoldScroll, esc, icon, listMarkup } from '../dom.js';
+import { app, bindHoldScroll, bindTitleMarquee, esc, icon, listMarkup } from '../dom.js';
 import { save } from '../storage.js';
 import { getState } from '../state.js';
 import { selectExercise, exerciseSelectionLocked, start } from '../workout.js';
 
 export const state = () => getState().active;
 export function workoutStage({className = '', title, body = '', actions = ''}) {
-  return `<section class="workout-stage ${className}" aria-labelledby="workout-title"><div class="stage-info"><h1 id="workout-title" data-hold-scroll><span class="hold-scroll-text">${title}</span></h1>${body}</div><div class="thumb-zone">${actions}</div></section>`;
+  return `<section class="workout-stage ${className}" aria-labelledby="workout-title"><div class="stage-info"><h1 id="workout-title" data-title-marquee><span class="title-marquee-text">${title}</span></h1>${body}</div><div class="thumb-zone">${actions}</div></section>`;
 }
 export const startRow = day => `<li><button class="list-link" type="button" data-start-day="${esc(day)}"><span>Start</span>${icon('chevron', 'Start workout')}</button></li>`;
 export function bindStartDialog() {
@@ -57,6 +57,7 @@ export async function runAction(button, action, onSuccess = () => location.reloa
 export function mount(html) {
   app.innerHTML = html;
   bindHoldScroll(app);
+  bindTitleMarquee(app);
   const saveLater = document.querySelector('#save-later');
   if (saveLater) saveLater.onclick = () => runAction(saveLater, async () => { await save(); return true; }, () => location.assign('/'));
 }
