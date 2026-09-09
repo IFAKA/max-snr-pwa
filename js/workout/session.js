@@ -1,10 +1,9 @@
 import { ROUTINE, NAMES } from '../routine-data.js';
-import { STRETCH_MS } from '../constants.js';
 import { getState } from '../state.js';
 import { save } from '../storage.js';
 import { dayNow, buzz } from '../dom.js';
 import { flatten } from './task-factory.js';
-import { beginLifting, continueRest as advanceRest, startRest } from './timers.js';
+import { beginLifting, clearTimer, continueRest as advanceRest, startRest } from './timers.js';
 
 const taskGroup = task => task?.groupId || task?.exerciseId || task?.id;
 const supersetLead = (active, groupId) => Number.isInteger(active?.supersetLeads?.[groupId]) ? active.supersetLeads[groupId] : 0;
@@ -69,7 +68,7 @@ export async function continueRest() {
 export async function finishLifts() {
   const active = getState().active;
   active.phase = 'stretch';
-  active.timerEndsAt = Date.now() + STRETCH_MS;
+  active.timerEndsAt = null;
   active.restEndsAt = null;
   await save();
 }
@@ -202,9 +201,8 @@ export async function undoLastSet() {
 
 export async function completeStretch() {
   const active = getState().active;
-  active.phase = 'complete';
-  active.completedAt = new Date().toISOString();
-  await save();
+  if (!active) return false;
+  return clearTimer();
 }
 
 export async function finishEarly() {

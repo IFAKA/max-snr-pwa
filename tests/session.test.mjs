@@ -9,8 +9,9 @@ globalThis.localStorage = {getItem: key => stored.get(key) || null, setItem: (ke
 const {emptyState, getState, setState} = await import('../js/state.js');
 const {loadState} = await import('../js/storage.js');
 const {STRETCH_MS} = await import('../js/constants.js');
-const {startPlank, beginLifting} = await import('../js/workout/timers.js');
+const {startPlank, beginLifting, setTimer} = await import('../js/workout/timers.js');
 const {start, findNext, deferCurrent, substituteCurrent, undoLastSet, completeSet, continueRest, completeStretch, finishWorkout, selectExercise, exerciseSelectionLocked, finishEarly} = await import('../js/workout/session.js');
+const {isCurrentDayComplete} = await import('../js/render-today.js');
 
 const task = (exerciseId, set = 1) => ({id: `${exerciseId}-${set}`, exerciseId, originalName: exerciseId, performedName: exerciseId, alternatives: exerciseId === 'press' ? ['DB press'] : [], set, sets: 2, completed: null, skipped: false, groupId: null});
 const supersetTask = (exerciseId, memberIndex, set = 1) => ({...task(exerciseId, set), groupId: 'arms', groupType: 'superset', memberIndex, groupLabel: 'Arms'});
@@ -44,17 +45,38 @@ test('loads accept two decimals but reps remain whole numbers', async () => {
   assert.match((await completeSet()).error, /whole-number reps/);
 });
 
-test('finishing the final set starts the stretch timer', async () => {
+test('finishing the final set opens idle stretch controls', async () => {
   const state = emptyState();
   state.active = {tasks: [task('press')], pos: 0, phase: 'lifting', deferredGroups: [], draft: {reps: '8'}};
   setState(state);
 
-  const before = Date.now();
   await completeSet();
 
   assert.equal(state.active.phase, 'stretch');
+  assert.equal(state.active.timerEndsAt, null);
+});
+
+test('stretch start persists a timer and completion returns to idle', async () => {
+  const state = emptyState();
+  state.active = {tasks: [task('press')], phase: 'stretch', timerEndsAt: null};
+  setState(state);
+  const before = Date.now();
+  await setTimer(STRETCH_MS);
   assert.ok(state.active.timerEndsAt >= before + STRETCH_MS - 100);
-  assert.ok(state.active.timerEndsAt <= Date.now() + STRETCH_MS + 100);
+  await completeStretch();
+  assert.equal(state.active.timerEndsAt, null);
+});
+
+test('Today completion requires the same routine day and local completion date', () => {
+  const now = new Date(2026, 8, 9, 12);
+  const history = [
+    {day: 'Monday', completedAt: new Date(2026, 8, 9, 9).toISOString()},
+    {day: 'Tuesday', completedAt: new Date(2026, 8, 9, 9).toISOString()},
+    {day: 'Monday', completedAt: new Date(2026, 8, 8, 23).toISOString()}
+  ];
+  assert.equal(isCurrentDayComplete(history, 'Monday', now), true);
+  assert.equal(isCurrentDayComplete(history, 'Wednesday', now), false);
+  assert.equal(isCurrentDayComplete(history.slice(1), 'Monday', now), false);
 });
 
 test('doing an exercise later moves all remaining sets and selects the next exercise', async () => {
