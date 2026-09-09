@@ -108,7 +108,7 @@ export function renderHistory() {
 function renderWorkouts(state) {
   const rows = state.history.length
     ? state.history.map(workoutMarkup)
-    : ['<li class="empty-state">No workouts yet</li>'];
+    : ['<li><div class="list-link empty-state">No workouts yet</div></li>'];
   app.innerHTML = `<section aria-labelledby="workouts-title">${titleMarkup('Workouts', 'workouts-title')}${listMarkup(rows, 'history-list', 'Logged workouts')}</section>`;
   bindHoldScroll();
   bindTitleMarquee();

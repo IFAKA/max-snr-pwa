@@ -199,10 +199,6 @@ a:focus-visible {
   color: #74251f;
 }
 .empty-state {
-  display: flex;
-  min-height: 52px;
-  align-items: center;
-  padding: 10px 2px;
   color: var(--muted);
 }
 .sr-only {
