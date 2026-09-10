@@ -52,15 +52,18 @@ export async function adjustRest(ms) {
 export const remaining = (endAt) => Math.max(0, (endAt || 0) - Date.now());
 export function formatDuration(ms) {
   const seconds = Math.ceil(Math.max(0, ms) / 1000);
-  return seconds < 60
-    ? String(seconds)
-    : `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
 }
 export function countdown(el, key, phase, onEnd) {
   let ended = false;
+  const initial = remaining(getState().active?.[key]);
   const tick = () => {
     const left = remaining(getState().active?.[key]);
     el.textContent = formatDuration(left);
+    el.style.setProperty(
+      '--countdown-progress',
+      `${initial ? Math.min(100, (left / initial) * 100) : 0}%`,
+    );
     if (!left && !ended) {
       ended = true;
       void Promise.resolve(onEnd());

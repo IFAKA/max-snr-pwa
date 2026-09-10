@@ -569,6 +569,14 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   min-height: 0;
   place-items: center;
   margin: 0;
+  background: linear-gradient(
+      to right,
+      var(--accent) var(--countdown-progress, 100%),
+      var(--surface-raised) var(--countdown-progress, 100%)
+    )
+    no-repeat bottom / 100% 12px;
+  font-size: clamp(72px, 29vw, 128px);
+  letter-spacing: -0.1em;
 }
 .workout-stage h1 {
   margin: 0 0 6px;
@@ -932,6 +940,10 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   .big-timer {
     margin: 10px 0 6px;
     font-size: 48px;
+  }
+  .countdown-stage .big-timer {
+    margin: 0;
+    font-size: clamp(72px, 32vw, 96px);
   }
 }
 @media (max-width: 600px) {

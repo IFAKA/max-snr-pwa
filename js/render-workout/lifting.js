@@ -11,7 +11,7 @@ import {
 import { save } from '../storage.js';
 import { esc } from '../dom.js';
 import { getState } from '../state.js';
-import { activeTask, completeSet } from '../workout.js';
+import { activeTask, completeSet, lastActivePerformance, lastPerformance } from '../workout.js';
 
 export function renderLifting() {
   const active = state(),
@@ -28,14 +28,16 @@ export function renderLifting() {
     history.replaceState(history.state, '', '/workout/?step=reps');
   }
   const repsValue = draft.reps ?? String(String(task.reps).split('–')[0]);
-  const weightValue = draft.weight ?? '0';
+  const unit = getState().settings?.unit || 'kg';
+  const previous =
+    lastActivePerformance(task.exerciseId, unit) || lastPerformance(task.performedName, unit);
+  const weightValue = draft.weight ?? previous?.weight ?? '';
   const stage = workoutStage({
     className: 'lifting-stage',
     title: esc(task.performedName),
     body: `<p class="set-count">Set ${esc(task.set)} of ${esc(task.sets)}</p>`,
     actions: '',
   });
-  const unit = getState().settings?.unit || 'kg';
   const formMarkup = `<form id="set-form">${step === 'load' ? stepperMarkup('weight', `Load · ${unit}`, weightValue, -2.5, 2.5) : stepperMarkup('reps', 'Reps', repsValue, -1, 1)}<input id="reps" type="hidden" value="${esc(repsValue)}"><input id="weight" type="hidden" value="${esc(weightValue)}">${primaryAction('next-step', step === 'load' ? 'Log set' : 'Next', step === 'load' ? 'submit' : 'button')}</form>`;
   mount(
     stage.replace('<div class="thumb-zone"></div>', `<div class="thumb-zone">${formMarkup}</div>`),

@@ -12,15 +12,24 @@ export function lastActivePerformance(exerciseId, unit) {
   );
 }
 
-export function lastPerformance(name) {
+export function lastPerformance(name, unit) {
   const S = getState();
   for (const workout of S.history)
     for (const t of [...(workout.tasks || workout.queue || [])].reverse()) {
       const actual = t.performedName || t.name;
       if (actual !== name) continue;
-      if (t.completed && !Array.isArray(t.completed)) return t.completed;
-      if (t.completed?.length) return t.completed[t.completed.length - 1];
-      if (t.done?.length) return t.done[t.done.length - 1];
+      const performances =
+        t.completed && !Array.isArray(t.completed)
+          ? [t.completed]
+          : t.completed?.length
+            ? t.completed
+            : t.done?.length
+              ? t.done
+              : [];
+      const match = performances.find(
+        (performance) => !unit || (performance.unit || 'kg') === unit,
+      );
+      if (match) return match;
     }
   return null;
 }

@@ -242,7 +242,7 @@ export function exercisePicker(active) {
   }, []);
   const rows = items.map(({ task, complete }) =>
     complete
-      ? `<li class="complete-row"><div class="list-link" role="status"><span data-hold-scroll><span class="hold-scroll-text">${esc(task.performedName)}</span></span>${icon('check', 'Done')}</div></li>`
+      ? `<li class="complete-row" data-picker-exclude><div class="list-link" role="status"><span data-hold-scroll><span class="hold-scroll-text">${esc(task.performedName)}</span></span>${icon('check', 'Done')}</div></li>`
       : `<li><button class="list-link" type="button" data-exercise-id="${esc(task.exerciseId)}"><span data-hold-scroll><span class="hold-scroll-text">${esc(task.performedName)}</span></span>${icon('chevron', 'Select exercise')}</button></li>`,
   );
   return `<section class="workout-picker" aria-labelledby="exercise-picker-title">${titleMarkup('Exercise', 'exercise-picker-title')}${listMarkup(rows, 'exercise-picker-list', 'Available exercises')}</section>`;
