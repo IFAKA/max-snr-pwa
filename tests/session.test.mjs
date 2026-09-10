@@ -72,6 +72,12 @@ test('new workouts begin at the warmup screen', async () => {
   assert.equal(getState().active.phase, 'warmup');
 });
 
+test('initial exercise selection stays unlocked during warmup', () => {
+  const state = emptyState();
+  state.active = { phase: 'warmup', tasks: [task('press')], pos: 0 };
+  assert.equal(exerciseSelectionLocked(state.active), false);
+});
+
 test('new workouts snapshot changed routine details and reject empty definitions', async () => {
   const originalRoutine = ROUTINE.Adapted;
   const originalName = NAMES.Adapted;

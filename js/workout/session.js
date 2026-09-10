@@ -148,7 +148,9 @@ const restBetweenSets = (active) => {
 };
 
 export const exerciseSelectionLocked = (active) => {
-  if (!active || !['lifting', 'rest'].includes(active.phase)) return true;
+  if (!active) return true;
+  if (active.phase === 'warmup') return false;
+  if (!['lifting', 'rest'].includes(active.phase)) return true;
   const current = active.tasks[active.pos];
   const currentStarted = Boolean(
     current &&
