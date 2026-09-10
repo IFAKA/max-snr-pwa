@@ -292,6 +292,9 @@ ul {
   visibility: hidden;
   pointer-events: none;
 }
+.picker-cancel-row[hidden] {
+  display: none !important;
+}
 .picker-cancel-row.is-picker-cancel-visible {
   opacity: 1;
   visibility: visible;
