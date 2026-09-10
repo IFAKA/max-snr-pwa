@@ -9,6 +9,8 @@ const SELECT_VIBRATION = [6, 14, 6];
 const CANCEL_FADE_MS = 420;
 const DEFAULT_JOYSTICK_MAX_SPEED = 8;
 const JOYSTICK_RESPONSE = 12;
+const JOYSTICK_MIN_SPEED = 2;
+const JOYSTICK_SPEED_EXPONENT = 0.75;
 
 export function magneticJoystickSpeed(
   distanceY,
@@ -27,8 +29,8 @@ export function magneticJoystickSpeed(
   const magnitude = Math.min(limit, Math.abs(Number(distanceY) || 0));
   if (magnitude <= zone || cap === 0) return 0;
   const normalized = (magnitude - zone) / (limit - zone);
-  const eased = normalized ** 1.15;
-  const baseSpeed = Math.min(1, cap);
+  const eased = normalized ** JOYSTICK_SPEED_EXPONENT;
+  const baseSpeed = Math.min(JOYSTICK_MIN_SPEED, cap);
   return Math.sign(distanceY) * (baseSpeed + (cap - baseSpeed) * eased);
 }
 
