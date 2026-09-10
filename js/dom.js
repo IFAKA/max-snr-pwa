@@ -114,7 +114,9 @@ export function magneticEdgePosition(index, rowCount, overshoot = 0) {
 }
 
 function listRows(list) {
-  return [...list.children].filter((row) => row.matches?.('li') && !row.hidden);
+  return [...list.children].filter(
+    (row) => row.matches?.('li:not(.routine-group-label):not(.list-title)') && !row.hidden,
+  );
 }
 
 function ensurePickerCancelRow(list) {
@@ -143,6 +145,8 @@ function enabledAction(row) {
     ? action
     : null;
 }
+
+const pickerSelectable = (row) => !rowAction(row) || Boolean(enabledAction(row));
 
 function nearestRow(rows, y) {
   if (!rows.length) return -1;
@@ -192,7 +196,6 @@ export function bindMagneticLists(root = document) {
     let timer;
     let pointerId = null;
     let startY = 0;
-    let lastY = 0;
     let startIndex = -1;
     let activeIndex = -1;
     let rows = [];
@@ -202,10 +205,7 @@ export function bindMagneticLists(root = document) {
     let movedBeforePicker = false;
     const cancelRow = ensurePickerCancelRow(list);
     const scrollTarget = scrollSurface(list);
-    const clearTimer = () => {
-      clearTimeout(timer);
-      timer = null;
-    };
+    const clearTimer = () => (clearTimeout(timer), (timer = null));
     const stopDocumentTracking = () => {
       document.removeEventListener?.('pointermove', onPointerMove);
       document.removeEventListener?.('pointerup', onPointerUp);
@@ -285,7 +285,7 @@ export function bindMagneticLists(root = document) {
       cancelRow?.removeAttribute('hidden');
       rows = listRows(list);
       selectableIndices = rows.reduce(
-        (indices, row, index) => (enabledAction(row) ? [...indices, index] : indices),
+        (indices, row, index) => (pickerSelectable(row) ? [...indices, index] : indices),
         [],
       );
       const primaryIndices = rows.reduce(
@@ -318,7 +318,7 @@ export function bindMagneticLists(root = document) {
       suppressClick = false;
       movedBeforePicker = false;
       pointerId = event.pointerId;
-      startY = lastY = event.clientY;
+      startY = event.clientY;
       document.documentElement?.classList.add('is-magnetic-picker-active');
       clearTimer();
       startDocumentTracking();
@@ -326,19 +326,18 @@ export function bindMagneticLists(root = document) {
     };
     const onPointerMove = (event) => {
       if (event.pointerId !== pointerId) return;
-      const previousY = lastY;
-      lastY = event.clientY;
+      const deltaY = event.clientY - startY;
       if (!pickerActive) {
-        if (Math.abs(lastY - startY) > MAGNETIC_MOVE_TOLERANCE) {
+        if (Math.abs(deltaY) > MAGNETIC_MOVE_TOLERANCE) {
           clearTimer();
           movedBeforePicker = true;
           event.preventDefault();
-          scrollTarget.scrollTop += previousY - lastY;
+          scrollTarget.scrollTop -= event.movementY || 0;
         }
         return;
       }
       event.preventDefault();
-      const rawIndex = magneticRawRowIndex(startIndex, lastY - startY);
+      const rawIndex = magneticRawRowIndex(startIndex, deltaY);
       const nextIndex = magneticPreferredIndex(rawIndex, selectableIndices, rows.length);
       setActive(nextIndex);
     };
@@ -406,8 +405,8 @@ export async function keepAwake() {
   try {
     if ('wakeLock' in navigator && document.visibilityState === 'visible')
       await navigator.wakeLock.request('screen');
-  } catch {
-    // Wake lock is an optional enhancement and can be denied by the browser.
+  } catch (error) {
+    void error;
   }
 }
 document.addEventListener?.('visibilitychange', () => {

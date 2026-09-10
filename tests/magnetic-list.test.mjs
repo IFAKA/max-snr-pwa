@@ -71,6 +71,10 @@ test('picker falls back to disabled rows when none are selectable', () => {
   assert.equal(magneticPreferredIndex(1, [], 3), 1);
 });
 
+test('picker can use text-only rows as cursor detents', () => {
+  assert.equal(magneticPreferredIndex(2, [1, 2, 3], 4), 2);
+});
+
 test('picker vibrates before highlighting the held row', async () => {
   const events = [];
   const listeners = {};
@@ -85,7 +89,7 @@ test('picker vibrates before highlighting the held row', async () => {
     classList: { contains: () => false },
   };
   const row = {
-    matches: (selector) => selector === 'li',
+    matches: (selector) => selector.startsWith('li'),
     getBoundingClientRect: () => ({ top: 0, bottom: 52, height: 52 }),
     querySelector: () => action,
     classList,
