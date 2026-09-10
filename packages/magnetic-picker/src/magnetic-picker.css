@@ -12,7 +12,7 @@
 }
 
 .is-picker-active {
-  touch-action: pan-y;
+  touch-action: none;
 }
 
 .is-picker-active::after {

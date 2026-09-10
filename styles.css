@@ -247,7 +247,7 @@ ul {
   white-space: nowrap;
 }
 .app-list.is-picker-active {
-  touch-action: pan-y;
+  touch-action: none;
 }
 .app-list.is-picker-active::after {
   position: fixed;
