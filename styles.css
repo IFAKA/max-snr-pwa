@@ -253,11 +253,13 @@ ul {
   position: relative;
 }
 .app-list.is-picker-holding::before {
-  position: absolute;
+  position: sticky;
   z-index: 3;
   inset-inline: 0;
   top: 0;
   height: 3px;
+  display: block;
+  margin-bottom: -3px;
   transform: scaleX(0);
   transform-origin: left;
   background: currentColor;
