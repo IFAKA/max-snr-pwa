@@ -114,15 +114,6 @@ function valueFor(row, action) {
   return row?.getAttribute?.('data-picker-value') ?? action?.getAttribute?.('value') ?? '';
 }
 
-function scrollSurface(list) {
-  let surface = list;
-  while (surface && surface !== document.body) {
-    if (surface.scrollHeight > surface.clientHeight + 1) return surface;
-    surface = surface.parentElement;
-  }
-  return document.scrollingElement || document.documentElement || list;
-}
-
 function nearestRow(rows, y) {
   if (!rows.length) return -1;
   const boxes = rows.map((row) => row.getBoundingClientRect());
@@ -210,7 +201,6 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
   let pointerId = null;
   let startY = 0;
   let pointerY = 0;
-  let lastY = 0;
   let startIndex = -1;
   let activeIndex = -1;
   let virtualRowPosition = -1;
@@ -224,7 +214,6 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
   let destroyed = false;
   let cancelHideTimer = null;
   let cancelVisibilityToken = 0;
-  const scrollTarget = scrollSurface(list);
   const scheduleFrame =
     globalThis.window?.requestAnimationFrame ||
     ((callback) => {
@@ -358,7 +347,6 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     list.style.removeProperty('--picker-zone-width');
     status.textContent = '';
     pointerId = null;
-    lastY = 0;
     activeIndex = -1;
     virtualRowPosition = -1;
     startIndex = -1;
@@ -409,7 +397,6 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     list.setPointerCapture?.(pointerId);
     setActive(startIndex, HOLD_VIBRATION);
     virtualRowPosition = startIndex;
-    lastY = pointerY;
     startAnimation();
   };
   const animate = (timestamp) => {
@@ -452,10 +439,9 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
         clearTimer();
         setHolding(false);
         movedBeforePicker = true;
-        event.preventDefault();
-        scrollTarget.scrollTop -= event.clientY - lastY;
+        suppressClick = true;
+        reset();
       }
-      lastY = event.clientY;
       return;
     }
     event.preventDefault();
@@ -482,7 +468,6 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     pointerId = event.pointerId;
     startY = event.clientY;
     pointerY = event.clientY;
-    list.setPointerCapture?.(pointerId);
     document.documentElement?.classList.add(options.activeDocumentClass);
     selectableIndices = rows.reduce((indices, row, index) => {
       const action = actionFor(row, options.actionSelector);

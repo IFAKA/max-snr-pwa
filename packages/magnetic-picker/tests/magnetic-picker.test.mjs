@@ -312,7 +312,7 @@ test('stationary edge pointer continuously advances and cancels its animation', 
   }
 });
 
-test('captures the pointer immediately for stable picker dragging', async () => {
+test('captures the pointer only after a stationary hold activates the picker', async () => {
   const dom = makePickerDom({ rows: 3 });
   const originalDocument = globalThis.document;
   let selection;
@@ -325,9 +325,10 @@ test('captures the pointer immediately for stable picker dragging', async () => 
       onSelect: (...args) => (selection = args),
     });
     dom.listeners.get('list:pointerdown')({ pointerId: 7, pointerType: 'touch', clientY: 120 });
-    assert.deepEqual(dom.capturedPointerIds, [7]);
+    assert.deepEqual(dom.capturedPointerIds, []);
     assert.equal(dom.styleProperties.has('touch-action'), false);
     await new Promise((resolve) => setTimeout(resolve, 5));
+    assert.deepEqual(dom.capturedPointerIds, [7]);
     dom.listeners.get('document:pointermove')({
       pointerId: 7,
       clientY: 109,
