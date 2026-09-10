@@ -232,6 +232,9 @@ ul {
 .app-list {
   border-top: 1px solid var(--line);
   touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 .app-list > li {
   border-bottom: 1px solid var(--line);
@@ -262,7 +265,11 @@ ul {
   color: var(--muted);
 }
 .picker-cancel-row {
+  position: sticky;
+  z-index: 1;
+  bottom: 0;
   border-top: 8px solid var(--surface);
+  background: var(--surface);
 }
 .picker-cancel-row .list-link {
   color: var(--muted);
