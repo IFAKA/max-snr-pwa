@@ -39,7 +39,7 @@ export function renderToday() {
   const title = routine ? workoutName(day) : 'Rest';
   const complete = !active && isCurrentDayComplete(state.history, day);
   const startItem = complete
-    ? '<li class="complete-row" data-picker-exclude><div class="list-link" role="status"><span>Done</span>' +
+    ? '<li class="complete-row" data-picker-skip><div class="list-link" role="status"><span>Done</span>' +
       icon('check', 'Workout complete') +
       '</div></li>'
     : active

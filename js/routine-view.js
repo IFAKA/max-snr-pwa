@@ -11,7 +11,7 @@ function routineRows(items) {
     const members = (item?.members || item?.items || []).filter(isExerciseDefinition);
     if (!members.length) return [];
     const rows = [
-      `<li class="routine-group-label">${titleMarkup(item.label, `routine-group-title-${itemIndex}`, 'h2', 'list-title')}</li>`,
+      `<li class="routine-group-label" data-picker-skip>${titleMarkup(item.label, `routine-group-title-${itemIndex}`, 'h2', 'list-title')}</li>`,
     ];
     return rows.concat(
       members.map((exercise, index) =>

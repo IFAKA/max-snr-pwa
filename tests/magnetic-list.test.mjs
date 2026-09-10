@@ -176,7 +176,7 @@ test('excluded empty-state rows do not enter picker mode', async () => {
     scrollHeight: 52,
     querySelector: () => null,
     querySelectorAll: (selector) =>
-      selector === '.app-list' ? [list] : selector.includes('[data-picker-exclude]') ? [] : [row],
+      selector === '.app-list' ? [list] : selector.includes('[data-picker-skip]') ? [] : [row],
     addEventListener: (type, handler) => {
       listeners[type] = handler;
     },

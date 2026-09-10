@@ -46,7 +46,7 @@ export function magneticEdgePosition(index, rowCount, overshoot = 0) {
 }
 
 const defaultOptions = {
-  rowSelector: ':scope > li:not([hidden])',
+  rowSelector: ':scope > li:not([hidden]):not([data-picker-skip])',
   actionSelector: 'a, button, label, [role="button"]',
   primarySelector: '[data-picker-primary]',
   onSelect: () => {},
