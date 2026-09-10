@@ -13,6 +13,11 @@ const DEFAULT_JOYSTICK_MAX_SPEED = 16;
 const JOYSTICK_RESPONSE = 30;
 const JOYSTICK_MIN_SPEED = 4;
 const JOYSTICK_SPEED_EXPONENT = 0.6;
+const JOYSTICK_MODES = Object.freeze({
+  MAGNETIC: 'magnetic',
+  EDGE_UP: 'edge-up',
+  EDGE_DOWN: 'edge-down',
+});
 
 export function magneticJoystickSpeed(
   distanceY,
@@ -242,7 +247,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
   let joystickY = 0;
   let joystickPosition = 0;
   let joystickVelocity = 0;
-  let joystickAtLimit = false;
+  let joystickMode = JOYSTICK_MODES.MAGNETIC;
   let joystickFrame = null;
   let joystickFrameTime = null;
   let joystickOverlay = null;
@@ -318,7 +323,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     joystickFrame = null;
     joystickFrameTime = null;
     joystickVelocity = 0;
-    joystickAtLimit = false;
+    joystickMode = JOYSTICK_MODES.MAGNETIC;
   };
   const removeJoystickOverlay = () => {
     joystickOverlay?.remove?.();
@@ -366,17 +371,17 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     const radius = Math.max(1, Number(options.joystickRadius) || DEFAULT_JOYSTICK_RADIUS);
     const verticalDisplacement = joystickY - startY;
     const reachedLimit = Math.abs(verticalDisplacement) >= radius - 1;
-    const speed = reachedLimit
-      ? magneticJoystickSpeed(
-          verticalDisplacement,
-          options.detentDistance,
-          options.joystickDeadZone ?? options.detentDistance,
-          options.joystickMaxSpeed,
-          radius,
-        )
-      : 0;
-    joystickVelocity =
-      speed === 0 ? 0 : magneticJoystickVelocity(joystickVelocity, speed, elapsed);
+    const speed =
+      joystickMode === JOYSTICK_MODES.MAGNETIC || !reachedLimit
+        ? 0
+        : magneticJoystickSpeed(
+            Math.abs(verticalDisplacement),
+            options.detentDistance,
+            options.joystickDeadZone ?? options.detentDistance,
+            options.joystickMaxSpeed,
+            radius,
+          ) * (joystickMode === JOYSTICK_MODES.EDGE_UP ? -1 : 1);
+    joystickVelocity = magneticJoystickVelocity(joystickVelocity, speed, elapsed);
     if (Math.abs(joystickVelocity) > 0.001) {
       joystickPosition = magneticPickerIndex(
         joystickPosition + joystickVelocity * elapsed,
@@ -407,7 +412,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     joystickY = startY;
     joystickPosition = activeIndex;
     joystickVelocity = 0;
-    joystickAtLimit = false;
+    joystickMode = JOYSTICK_MODES.MAGNETIC;
     joystickFrame = scheduleFrame.call(globalThis.window, pickerFrame);
   };
   const setActive = (index, vibration = DETENT_VIBRATION, ensureVisible = true) => {
@@ -467,6 +472,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     startIndex = -1;
     magneticBaseIndex = -1;
     magneticBaseY = 0;
+    joystickMode = JOYSTICK_MODES.MAGNETIC;
     rows = [];
     selectableIndices = [];
     pickerActive = false;
@@ -541,8 +547,8 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     const radius = Math.max(1, Number(options.joystickRadius) || DEFAULT_JOYSTICK_RADIUS);
     const insideLimit = Math.abs(joystickY - startY) < radius - 1;
     if (insideLimit) {
-      if (joystickAtLimit) {
-        joystickAtLimit = false;
+      if (joystickMode !== JOYSTICK_MODES.MAGNETIC) {
+        joystickMode = JOYSTICK_MODES.MAGNETIC;
         joystickVelocity = 0;
         joystickFrameTime = null;
         magneticBaseIndex = activeIndex;
@@ -559,23 +565,14 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
         selectableIndices,
         rows.length,
       );
-      joystickPosition = nextIndex;
       setActive(nextIndex);
       return;
     }
-    const edgeDeltaY = event.clientY - magneticBaseY;
-    const edgeRawIndex = magneticRawRowIndex(
-      magneticBaseIndex,
-      edgeDeltaY,
-      options.detentDistance,
-    );
-    const nextIndex = magneticPreferredIndex(edgeRawIndex, selectableIndices, rows.length);
-    if (!joystickAtLimit) {
-      joystickAtLimit = true;
+    const nextMode = joystickY < startY ? JOYSTICK_MODES.EDGE_UP : JOYSTICK_MODES.EDGE_DOWN;
+    if (joystickMode !== nextMode) {
+      joystickMode = nextMode;
       joystickVelocity = 0;
       joystickFrameTime = null;
-      joystickPosition = nextIndex;
-      setActive(nextIndex, DETENT_VIBRATION, false);
     }
   }
   function onPointerUp(event) {

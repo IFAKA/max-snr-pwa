@@ -80,6 +80,7 @@ function makePickerDom({ rows = 1, disabledIndices = [] } = {}) {
   const styleProperties = new Map();
   const capturedPointerIds = [];
   const overlays = [];
+  let scrollIntoViewCalls = 0;
   const makeElement = () => {
     const properties = new Map();
     const element = {
@@ -121,7 +122,7 @@ function makePickerDom({ rows = 1, disabledIndices = [] } = {}) {
       getBoundingClientRect: () => ({ top: index * 50, bottom: index * 50 + 50, height: 50 }),
       removeAttribute: () => {},
       setAttribute: () => {},
-      scrollIntoView: () => {},
+      scrollIntoView: () => (scrollIntoViewCalls += 1),
       textContent: `Exercise ${index}`,
     };
   });
@@ -165,6 +166,9 @@ function makePickerDom({ rows = 1, disabledIndices = [] } = {}) {
     styleProperties,
     capturedPointerIds,
     overlays,
+    get scrollIntoViewCalls() {
+      return scrollIntoViewCalls;
+    },
   };
 }
 
@@ -503,6 +507,107 @@ test('joystick transitions between magnetic movement and edge scrolling cleanly'
       dom.rowList.findIndex((row) => row.classList.contains('is-picker-target')),
       edgeTarget,
     );
+    picker.destroy();
+  } finally {
+    globalThis.document = originalDocument;
+    globalThis.window = originalWindow;
+  }
+});
+
+test('upper edge scrolling preserves the highlighted middle row handoff', async () => {
+  const dom = makePickerDom({ rows: 12 });
+  dom.list.clientHeight = 100;
+  dom.list.scrollTop = 300;
+  const originalDocument = globalThis.document;
+  const originalWindow = globalThis.window;
+  let frame;
+  globalThis.document = dom.document;
+  globalThis.window = {
+    requestAnimationFrame: (callback) => {
+      frame = callback;
+      return 1;
+    },
+    cancelAnimationFrame: () => {},
+  };
+  try {
+    const picker = createMagneticPicker(dom.list, { cancel: false, holdMs: 0 });
+    dom.listeners.get('list:pointerdown')({
+      pointerId: 1,
+      pointerType: 'touch',
+      clientY: 300,
+    });
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    const initialTarget = dom.rowList.findIndex((row) =>
+      row.classList.contains('is-picker-target'),
+    );
+    const initialScrollCalls = dom.scrollIntoViewCalls;
+    dom.listeners.get('document:pointermove')({
+      pointerId: 1,
+      clientY: 236,
+      preventDefault: () => {},
+    });
+    frame(0);
+    frame(16);
+    assert.ok(dom.list.scrollTop < 300);
+    assert.equal(dom.scrollIntoViewCalls, initialScrollCalls);
+    dom.listeners.get('document:pointermove')({
+      pointerId: 1,
+      clientY: 260,
+      preventDefault: () => {},
+    });
+    assert.equal(
+      dom.rowList.findIndex((row) => row.classList.contains('is-picker-target')),
+      initialTarget,
+    );
+    assert.equal(dom.scrollIntoViewCalls, initialScrollCalls + 1);
+    picker.destroy();
+  } finally {
+    globalThis.document = originalDocument;
+    globalThis.window = originalWindow;
+  }
+});
+
+test('reversing edge direction changes scroll direction without a handoff jump', async () => {
+  const dom = makePickerDom({ rows: 12 });
+  dom.list.clientHeight = 100;
+  dom.list.scrollTop = 300;
+  const originalDocument = globalThis.document;
+  const originalWindow = globalThis.window;
+  let frame;
+  globalThis.document = dom.document;
+  globalThis.window = {
+    requestAnimationFrame: (callback) => {
+      frame = callback;
+      return 1;
+    },
+    cancelAnimationFrame: () => {},
+  };
+  try {
+    const picker = createMagneticPicker(dom.list, { cancel: false, holdMs: 0 });
+    dom.listeners.get('list:pointerdown')({
+      pointerId: 1,
+      pointerType: 'touch',
+      clientY: 300,
+    });
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    dom.listeners.get('document:pointermove')({
+      pointerId: 1,
+      clientY: 364,
+      preventDefault: () => {},
+    });
+    frame(0);
+    frame(100);
+    const lowerEdgeScroll = dom.list.scrollTop;
+    assert.ok(lowerEdgeScroll > 300);
+    dom.listeners.get('document:pointermove')({
+      pointerId: 1,
+      clientY: 236,
+      preventDefault: () => {},
+    });
+    frame(116);
+    assert.equal(dom.list.scrollTop, lowerEdgeScroll);
+    frame(216);
+    assert.ok(dom.list.scrollTop < lowerEdgeScroll);
     picker.destroy();
   } finally {
     globalThis.document = originalDocument;
