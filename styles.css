@@ -260,6 +260,16 @@ ul {
   background: var(--accent-soft);
   transition: background-color 180ms var(--ease-out);
 }
+.app-list > li.is-picker-target::after {
+  position: absolute;
+  z-index: 2;
+  inset-inline: 0;
+  top: 0;
+  bottom: 0;
+  border-block: 2px solid var(--accent);
+  content: '';
+  pointer-events: none;
+}
 .app-list > li.is-picker-target .list-link {
   background: transparent;
 }
@@ -294,6 +304,9 @@ ul {
 }
 .app-list > li.picker-cancel-row.is-picker-target {
   background: var(--danger-soft);
+}
+.app-list > li.picker-cancel-row.is-picker-target::after {
+  border-color: var(--danger);
 }
 .picker-cancel-row.is-picker-target button {
   color: var(--danger);
@@ -460,6 +473,14 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.exercise-list .routine-exercise [data-hold-scroll].is-hold-scrolling .hold-scroll-text {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  animation: none;
+  transform: none;
 }
 .routine-exercise span:last-child {
   white-space: nowrap;
@@ -1092,5 +1113,8 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   }
   .app-list > li.is-picker-target {
     background: Highlight;
+  }
+  .app-list > li.is-picker-target::after {
+    border-color: HighlightText;
   }
 }
