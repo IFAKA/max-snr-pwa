@@ -72,6 +72,7 @@ export function bindMagneticLists(root = document) {
     list.dataset.magneticBound = 'true';
     createMagneticPicker(list, {
       rowSelector: ':scope > li:not([hidden]):not([data-picker-skip])',
+      actionSelector: 'a, button, label, [role="button"]',
       activeListClass: 'is-picker-active',
       activeDocumentClass: 'is-picker-active',
       targetRowClass: 'is-picker-target',
@@ -86,7 +87,7 @@ export function bindMagneticLists(root = document) {
         (!action.disabled &&
           action.getAttribute('aria-disabled') !== 'true' &&
           !action.classList.contains('is-disabled')),
-      onSelect: (action) => action.click(),
+      onSelect: (_value, { action }) => action.click(),
     });
   });
 }

@@ -45,8 +45,8 @@ export function magneticEdgePosition(index, rowCount, overshoot = 0) {
 }
 
 const defaultOptions = {
-  rowSelector: ':scope > li:not([hidden]):not([data-picker-skip])',
-  actionSelector: 'a, button, label, [role="button"]',
+  rowSelector: ':scope > [data-picker-item]:not([hidden]):not([data-picker-skip])',
+  actionSelector: '[data-picker-action]',
   primarySelector: '[data-picker-primary]',
   onSelect: () => {},
   onCancel: () => {},
@@ -54,6 +54,9 @@ const defaultOptions = {
     !action || (!action.disabled && action.getAttribute('aria-disabled') !== 'true'),
   cancel: true,
   cancelLabel: 'Cancel',
+  disabled: false,
+  holdMs: DEFAULT_HOLD_MS,
+  detentDistance: DETENT_DISTANCE,
   activeListClass: 'is-picker-active',
   activeDocumentClass: 'is-picker-active',
   targetRowClass: 'is-picker-target',
@@ -71,6 +74,10 @@ function rowsFor(list, selector) {
 
 function actionFor(row, selector) {
   return row.querySelector?.(selector) || null;
+}
+
+function valueFor(row, action) {
+  return row?.getAttribute?.('data-picker-value') ?? action?.getAttribute?.('value') ?? '';
 }
 
 function scrollSurface(list) {
@@ -102,7 +109,11 @@ function ensureCancelRow(list, label, options) {
   row.className = options.cancelRowClass;
   row.hidden = true;
   row.setAttribute(options.cancelRowAttribute, '');
-  row.innerHTML = `<button type="button" ${options.cancelActionAttribute} aria-label="${label}"><span>${label}</span></button>`;
+  const escapedLabel = String(label).replace(
+    /[&<>"']/g,
+    (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character],
+  );
+  row.innerHTML = `<button type="button" ${options.cancelActionAttribute} aria-label="${escapedLabel}"><span>${escapedLabel}</span></button>`;
   list.append(row);
   return row;
 }
@@ -155,6 +166,9 @@ function bindPickerEvents(list, handlers) {
 
 export function createMagneticPicker(list, suppliedOptions = {}) {
   const options = { ...defaultOptions, ...suppliedOptions };
+  const isDisabled = () =>
+    typeof options.disabled === 'function' ? options.disabled(list) : options.disabled;
+  if (isDisabled()) return { destroy() {} };
   const status = ensureStatus(list, options);
   const cancelRow = options.cancel ? ensureCancelRow(list, options.cancelLabel, options) : null;
   const scrollTarget = scrollSurface(list);
@@ -247,7 +261,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
       return;
     }
     buzz(SELECT_VIBRATION);
-    options.onSelect(action, row);
+    options.onSelect(valueFor(row, action), { row, action, index: activeIndex });
     suppressClick = true;
     reset();
   };
@@ -296,7 +310,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
       return;
     }
     event.preventDefault();
-    const rawIndex = magneticRawRowIndex(startIndex, deltaY);
+    const rawIndex = magneticRawRowIndex(startIndex, deltaY, options.detentDistance);
     setActive(magneticPreferredIndex(rawIndex, selectableIndices, rows.length));
   }
   function onPointerUp(event) {
@@ -320,7 +334,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     document.addEventListener?.('pointermove', onPointerMove, { passive: false });
     document.addEventListener?.('pointerup', onPointerUp);
     document.addEventListener?.('pointercancel', reset);
-    timer = setTimeout(enter, DEFAULT_HOLD_MS);
+    timer = setTimeout(enter, options.holdMs);
   }
   function onClick(event) {
     if (!suppressClick) return;
