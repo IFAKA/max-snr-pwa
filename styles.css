@@ -569,12 +569,6 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   min-height: 0;
   place-items: center;
   margin: 0;
-  background: linear-gradient(
-      to right,
-      var(--accent) var(--countdown-progress, 100%),
-      var(--surface-raised) var(--countdown-progress, 100%)
-    )
-    no-repeat bottom / 100% 12px;
   font-size: clamp(72px, 29vw, 128px);
   letter-spacing: -0.1em;
 }

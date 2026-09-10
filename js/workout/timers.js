@@ -56,14 +56,9 @@ export function formatDuration(ms) {
 }
 export function countdown(el, key, phase, onEnd) {
   let ended = false;
-  const initial = remaining(getState().active?.[key]);
   const tick = () => {
     const left = remaining(getState().active?.[key]);
     el.textContent = formatDuration(left);
-    el.style.setProperty(
-      '--countdown-progress',
-      `${initial ? Math.min(100, (left / initial) * 100) : 0}%`,
-    );
     if (!left && !ended) {
       ended = true;
       void Promise.resolve(onEnd());
