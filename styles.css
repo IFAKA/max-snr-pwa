@@ -241,9 +241,12 @@ ul {
   min-height: var(--list-row-height);
   align-items: center;
   overflow: hidden;
-  padding: var(--list-row-padding);
+  padding: 0;
   border-bottom: 1px solid var(--line);
   white-space: nowrap;
+}
+.app-list > li:not(:has(.list-link)) {
+  padding: var(--list-row-padding);
 }
 .app-list.is-picker-active {
   touch-action: none;
@@ -284,10 +287,6 @@ ul {
   position: sticky;
   z-index: 1;
   bottom: 0;
-  height: var(--list-row-height);
-  min-height: var(--list-row-height);
-  margin-inline: -12px;
-  padding-inline: 12px;
   background: var(--danger-soft);
   opacity: 0;
   visibility: hidden;
@@ -330,11 +329,8 @@ ul {
 .picker-cancel-row button {
   display: flex;
   width: 100%;
-  height: var(--list-row-height);
-  min-height: var(--list-row-height);
   align-items: center;
   justify-content: space-between;
-  padding: var(--list-row-padding);
   border: 0;
   border-radius: 0;
   background: transparent;

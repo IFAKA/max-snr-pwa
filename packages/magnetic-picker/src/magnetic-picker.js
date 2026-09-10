@@ -116,7 +116,7 @@ function ensureCancelRow(list, label, options) {
     (character) =>
       ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character],
   );
-  row.innerHTML = `<button type="button" ${options.cancelActionAttribute} aria-label="${escapedLabel}"><span>${escapedLabel}</span></button>`;
+  row.innerHTML = `<button class="list-link" type="button" ${options.cancelActionAttribute} aria-label="${escapedLabel}"><span>${escapedLabel}</span></button>`;
   list.append(row);
   return row;
 }
