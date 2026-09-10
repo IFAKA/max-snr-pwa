@@ -245,6 +245,14 @@ ul {
 .app-list.is-picker-active {
   touch-action: none;
 }
+.app-list.is-picker-active [data-hold-scroll].is-hold-scrolling .hold-scroll-text {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  animation: none;
+  transform: none;
+}
 .app-list > li {
   position: relative;
 }
