@@ -211,6 +211,21 @@ export function bindStartDialog() {
     }
   });
 }
+export function bindDirectStart() {
+  const trigger = document.querySelector('[data-start-day]');
+  if (!trigger) return;
+  const day = trigger.dataset.startDay;
+  trigger.addEventListener('click', async () => {
+    trigger.disabled = true;
+    try {
+      if (await start(day)) navigateTo('/workout/');
+      else trigger.disabled = false;
+    } catch (error) {
+      trigger.disabled = false;
+      showError(error);
+    }
+  });
+}
 export function exercisePicker(active) {
   const seen = new Set();
   const items = active.tasks.reduce((list, task) => {

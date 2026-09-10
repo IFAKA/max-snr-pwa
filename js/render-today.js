@@ -9,7 +9,7 @@ import {
 } from './dom.js';
 import { getState } from './state.js';
 import { isWorkoutDay, workoutName } from './routine-data.js';
-import { startRow, bindStartDialog } from './render-workout/shared.js';
+import { startRow, bindDirectStart } from './render-workout/shared.js';
 import confetti from './vendor/canvas-confetti.js';
 
 function localDateKey(value) {
@@ -50,7 +50,7 @@ export function renderToday() {
   app.innerHTML = `<section class="today-screen" aria-labelledby="today-title">${titleMarkup(title, 'today-title')}${listMarkup([startItem, `<li><a class="list-link" href="/routine/"><span>Routine</span>${icon('chevron', 'Open routine')}</a></li>`, `<li><a class="list-link" href="/history/"><span>History</span>${icon('chevron', 'Open history')}</a></li>`], 'navigation-list', 'Home navigation')}</section>`;
   bindHoldScroll();
   bindTitleMarquee();
-  bindStartDialog();
+  bindDirectStart();
   if (params.get('completed') === '1') {
     history.replaceState(history.state, '', `${location.pathname}${location.hash}`);
     showCompletionConfetti();
