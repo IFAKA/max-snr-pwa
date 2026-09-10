@@ -86,7 +86,8 @@ const defaultOptions = {
   holdMs: DEFAULT_HOLD_MS,
   detentDistance: DETENT_DISTANCE,
   joystick: true,
-  joystickDeadZone: undefined,
+  joystickRadius: 64,
+  joystickDeadZone: DETENT_DISTANCE,
   joystickMaxSpeed: DEFAULT_JOYSTICK_MAX_SPEED,
   activeListClass: 'is-picker-active',
   activeDocumentClass: 'is-picker-active',
@@ -170,6 +171,15 @@ function describeRow(row, action) {
   );
 }
 
+function joystickDisplacement(originX, originY, clientX, clientY, radius) {
+  const deltaX = clientX - originX;
+  const deltaY = clientY - originY;
+  const distance = Math.hypot(deltaX, deltaY);
+  if (!distance || distance <= radius) return { x: deltaX, y: deltaY };
+  const scale = radius / distance;
+  return { x: deltaX * scale, y: deltaY * scale };
+}
+
 function bindPickerEvents(list, handlers) {
   const { onPointerDown, onPointerLeave, reset, onClick, onKeyDown } = handlers;
   const { onPointerCancel } = handlers;
@@ -206,12 +216,15 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
   const cancelRow = options.cancel ? ensureCancelRow(list, options.cancelLabel, options) : null;
   let timer = null;
   let pointerId = null;
+  let startX = 0;
   let startY = 0;
   let lastY = 0;
   let joystickY = 0;
   let joystickPosition = 0;
   let joystickFrame = null;
   let joystickFrameTime = null;
+  let joystickOverlay = null;
+  let joystickWell = null;
   let startIndex = -1;
   let activeIndex = -1;
   let rows = [];
@@ -280,6 +293,41 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     }
     joystickFrame = null;
     joystickFrameTime = null;
+  };
+  const removeJoystickOverlay = () => {
+    joystickOverlay?.remove?.();
+    joystickOverlay = null;
+    joystickWell = null;
+  };
+  const updateJoystickOverlay = (clientX, clientY) => {
+    if (!joystickWell) return;
+    const radius = Math.max(1, Number(options.joystickRadius) || 64);
+    const displacement = joystickDisplacement(startX, startY, clientX, clientY, radius);
+    joystickWell.style.setProperty('--picker-thumb-x', `${displacement.x}px`);
+    joystickWell.style.setProperty('--picker-thumb-y', `${displacement.y}px`);
+    joystickY = startY + displacement.y;
+  };
+  const showJoystickOverlay = () => {
+    if (!options.joystick || !document.createElement || !document.body?.append) return;
+    const overlay = document.createElement('div');
+    const well = document.createElement('div');
+    const thumb = document.createElement('div');
+    overlay.className = 'picker-joystick-overlay';
+    well.className = 'picker-joystick-well';
+    thumb.className = 'picker-joystick-thumb';
+    overlay.setAttribute('aria-hidden', 'true');
+    well.style.setProperty('--picker-joystick-x', `${startX}px`);
+    well.style.setProperty('--picker-joystick-y', `${startY}px`);
+    well.style.setProperty(
+      '--picker-joystick-radius',
+      `${Math.max(1, Number(options.joystickRadius) || 64)}px`,
+    );
+    well.append(thumb);
+    overlay.append(well);
+    document.body.append(overlay);
+    joystickOverlay = overlay;
+    joystickWell = well;
+    updateJoystickOverlay(startX, startY);
   };
   const requestJoystickFrame = () =>
     globalThis.window?.requestAnimationFrame || globalThis.requestAnimationFrame || null;
@@ -356,6 +404,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
       row.classList.remove(options.targetRowClass);
       row.removeAttribute('aria-current');
     });
+    removeJoystickOverlay();
     hideCancelRow();
     list.classList.remove(options.activeListClass);
     document.documentElement?.classList.remove(options.activeDocumentClass);
@@ -363,6 +412,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     list.style.removeProperty('touch-action');
     status.textContent = '';
     pointerId = null;
+    startX = 0;
     activeIndex = -1;
     startIndex = -1;
     rows = [];
@@ -410,6 +460,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     list.style.setProperty('touch-action', 'none');
     list.setPointerCapture?.(pointerId);
     setActive(startIndex, HOLD_VIBRATION);
+    showJoystickOverlay();
     startJoystick();
   };
   function onPointerMove(event) {
@@ -427,7 +478,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
       return;
     }
     event.preventDefault();
-    joystickY = event.clientY;
+    updateJoystickOverlay(event.clientX ?? startX, event.clientY);
     if (!options.joystick) {
       const rawIndex = magneticRawRowIndex(startIndex, deltaY, options.detentDistance);
       setActive(magneticPreferredIndex(rawIndex, selectableIndices, rows.length));
@@ -452,6 +503,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     movedBeforePicker = false;
     setHolding(true);
     pointerId = event.pointerId;
+    startX = Number.isFinite(event.clientX) ? event.clientX : 0;
     startY = event.clientY;
     lastY = event.clientY;
     list.setPointerCapture?.(pointerId);

@@ -47,6 +47,27 @@ function makePickerDom({ rows = 1, disabledIndices = [] } = {}) {
   };
   const styleProperties = new Map();
   const capturedPointerIds = [];
+  const overlays = [];
+  const makeElement = () => {
+    const properties = new Map();
+    const element = {
+      properties,
+      children: [],
+      removed: false,
+      className: '',
+      classList: { add: () => {}, remove: () => {} },
+      style: {
+        setProperty: (name, value) => properties.set(name, value),
+        removeProperty: (name) => properties.delete(name),
+      },
+      setAttribute: () => {},
+      removeAttribute: () => {},
+      remove: () => (element.removed = true),
+      append: (...children) => element.children.push(...children),
+      textContent: '',
+    };
+    return element;
+  };
   const actions = Array.from({ length: rows }, (_, index) => ({
     disabled: disabledIndices.includes(index),
     getAttribute: (name) => (name === 'aria-label' ? `Exercise ${index}` : null),
@@ -95,20 +116,23 @@ function makePickerDom({ rows = 1, disabledIndices = [] } = {}) {
     releasePointerCapture: () => {},
   };
   const document = {
-    body: {},
+    body: { append: (element) => overlays.push(element) },
     documentElement,
     scrollingElement: list,
-    createElement: () => ({
-      className: '',
-      classList: { add: () => {}, remove: () => {} },
-      setAttribute: () => {},
-      remove: () => {},
-      textContent: '',
-    }),
+    createElement: () => makeElement(),
     addEventListener: (type, handler) => listeners.set(`document:${type}`, handler),
     removeEventListener: () => {},
   };
-  return { document, list, listeners, classes, rowList, styleProperties, capturedPointerIds };
+  return {
+    document,
+    list,
+    listeners,
+    classes,
+    rowList,
+    styleProperties,
+    capturedPointerIds,
+    overlays,
+  };
 }
 
 test('semantic rows pass data-picker-value and context to onSelect', async () => {
@@ -284,7 +308,7 @@ test('stationary joystick input keeps scrolling and dead-zone input stops withou
       preventDefault: () => {},
     });
     frame(0);
-    frame(100);
+    for (let time = 100; time <= 2000; time += 100) frame(time);
     const movedTarget = dom.rowList.findIndex((row) =>
       row.classList.contains?.('is-picker-target'),
     );
@@ -301,6 +325,83 @@ test('stationary joystick input keeps scrolling and dead-zone input stops withou
     dom.listeners.get('document:pointerup')({ pointerId: 1 });
     picker.destroy();
     assert.equal(cancelledFrame, 1);
+  } finally {
+    globalThis.document = originalDocument;
+    globalThis.window = originalWindow;
+  }
+});
+
+test('joystick overlay follows a fixed origin and clamps the thumb to its radius', async () => {
+  const dom = makePickerDom({ rows: 4 });
+  const originalDocument = globalThis.document;
+  globalThis.document = dom.document;
+  try {
+    const picker = createMagneticPicker(dom.list, {
+      cancel: false,
+      holdMs: 0,
+      joystickRadius: 40,
+    });
+    dom.listeners.get('list:pointerdown')({
+      pointerId: 1,
+      pointerType: 'touch',
+      clientX: 80,
+      clientY: 80,
+    });
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    assert.equal(dom.overlays.length, 1);
+    const well = dom.overlays[0].children[0];
+    assert.equal(well.properties.get('--picker-joystick-x'), '80px');
+    assert.equal(well.properties.get('--picker-joystick-y'), '80px');
+
+    dom.listeners.get('document:pointermove')({
+      pointerId: 1,
+      clientX: 180,
+      clientY: 180,
+      preventDefault: () => {},
+    });
+    const thumbX = Number.parseFloat(well.properties.get('--picker-thumb-x'));
+    const thumbY = Number.parseFloat(well.properties.get('--picker-thumb-y'));
+    assert.ok(Math.abs(Math.hypot(thumbX, thumbY) - 40) < 0.001);
+
+    dom.listeners.get('document:pointermove')({
+      pointerId: 1,
+      clientX: 80,
+      clientY: 80,
+      preventDefault: () => {},
+    });
+    assert.equal(well.properties.get('--picker-joystick-x'), '80px');
+    assert.equal(well.properties.get('--picker-joystick-y'), '80px');
+    assert.equal(well.properties.get('--picker-thumb-x'), '0px');
+    assert.equal(well.properties.get('--picker-thumb-y'), '0px');
+    picker.destroy();
+    assert.equal(dom.overlays[0].removed, true);
+  } finally {
+    globalThis.document = originalDocument;
+  }
+});
+
+test('visibility reset removes the joystick overlay and cancels its frame', async () => {
+  const dom = makePickerDom({ rows: 3 });
+  const originalDocument = globalThis.document;
+  const originalWindow = globalThis.window;
+  let cancelledFrame = null;
+  globalThis.document = dom.document;
+  globalThis.window = {
+    requestAnimationFrame: () => 9,
+    cancelAnimationFrame: (id) => (cancelledFrame = id),
+  };
+  try {
+    createMagneticPicker(dom.list, { cancel: false, holdMs: 0 });
+    dom.listeners.get('list:pointerdown')({
+      pointerId: 1,
+      pointerType: 'touch',
+      clientX: 20,
+      clientY: 20,
+    });
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    dom.listeners.get('document:visibilitychange')();
+    assert.equal(dom.overlays[0].removed, true);
+    assert.equal(cancelledFrame, 9);
   } finally {
     globalThis.document = originalDocument;
     globalThis.window = originalWindow;
