@@ -161,7 +161,7 @@ test('hold progress state is removed after activation', async () => {
   try {
     const picker = createMagneticPicker(dom.list, { cancel: false, holdMs: 20 });
     dom.listeners.get('list:pointerdown')({ pointerId: 1, pointerType: 'touch', clientY: 20 });
-    assert.equal(dom.classes.has('is-picker-holding'), true);
+    assert.equal(dom.classes.has('is-picker-holding'), false);
     await new Promise((resolve) => setTimeout(resolve, 30));
     assert.equal(dom.classes.has('is-picker-holding'), false);
     picker.destroy();
@@ -239,7 +239,7 @@ test('movement after activation keeps the picker active', async () => {
   }
 });
 
-test('captures the pointer immediately and anchors small detents at the touched row', async () => {
+test('captures the pointer only after picker activation', async () => {
   const dom = makePickerDom({ rows: 3 });
   const originalDocument = globalThis.document;
   let selection;
@@ -252,9 +252,10 @@ test('captures the pointer immediately and anchors small detents at the touched 
       onSelect: (...args) => (selection = args),
     });
     dom.listeners.get('list:pointerdown')({ pointerId: 7, pointerType: 'touch', clientY: 120 });
-    assert.deepEqual(dom.capturedPointerIds, [7]);
+    assert.deepEqual(dom.capturedPointerIds, []);
     assert.equal(dom.styleProperties.has('touch-action'), false);
     await new Promise((resolve) => setTimeout(resolve, 5));
+    assert.deepEqual(dom.capturedPointerIds, [7]);
     dom.listeners.get('document:pointermove')({
       pointerId: 7,
       clientY: 109,
