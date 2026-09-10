@@ -2,7 +2,6 @@ import {
   app,
   bindHoldScroll,
   bindTitleMarquee,
-  contentListMarkup,
   esc,
   icon,
   listMarkup,
@@ -47,7 +46,7 @@ function workoutDetails(workout) {
   return [...groups]
     .map(
       ([name, entries], index) =>
-        `<section class="history-exercise">${titleMarkup(name, `history-exercise-title-${index}`, 'h2')}${contentListMarkup(
+        `<section class="history-exercise">${titleMarkup(name, `history-exercise-title-${index}`, 'h2')}${listMarkup(
           entries.map(({ task, index: taskIndex }) => setLine(task, taskIndex)),
           'history-set-list',
           `${name} sets`,

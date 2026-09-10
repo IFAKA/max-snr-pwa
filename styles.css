@@ -232,12 +232,6 @@ ul {
   padding: 0;
   list-style: none;
 }
-.content-list {
-  border-top: 1px solid var(--line);
-}
-.content-list > li {
-  border-bottom: 1px solid var(--line);
-}
 .app-list {
   border-top: 1px solid var(--line);
   touch-action: none;
