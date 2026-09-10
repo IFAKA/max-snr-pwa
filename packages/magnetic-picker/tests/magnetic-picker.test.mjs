@@ -39,6 +39,14 @@ test('magnetic joystick speed has a symmetric, smooth, capped dead zone', () => 
   assert.equal(magneticJoystickSpeed(-60, 24, 24, 8), -farther);
 });
 
+test('magnetic joystick reaches full speed at the physical radius', () => {
+  const justOutsideDeadZone = magneticJoystickSpeed(25, 24, 24, 8, 64);
+  const outerLimit = magneticJoystickSpeed(64, 24, 24, 8, 64);
+  assert.ok(justOutsideDeadZone >= 1);
+  assert.equal(outerLimit, 8);
+  assert.equal(magneticJoystickSpeed(-64, 24, 24, 8, 64), -outerLimit);
+});
+
 function makePickerDom({ rows = 1, disabledIndices = [] } = {}) {
   const listeners = new Map();
   const classes = new Set();

@@ -14,17 +14,21 @@ export function magneticJoystickSpeed(
   detentDistance = DETENT_DISTANCE,
   deadZone = detentDistance,
   maxSpeed = DEFAULT_JOYSTICK_MAX_SPEED,
+  radius = 64,
 ) {
   const distance = Math.max(1, Number(detentDistance) || DETENT_DISTANCE);
   const numericZone = Number(deadZone);
   const numericCap = Number(maxSpeed);
   const zone = Math.max(0, Number.isFinite(numericZone) ? numericZone : distance);
   const cap = Math.max(0, Number.isFinite(numericCap) ? numericCap : DEFAULT_JOYSTICK_MAX_SPEED);
-  const magnitude = Math.abs(Number(distanceY) || 0);
+  const numericRadius = Number(radius);
+  const limit = Math.max(zone + 1, Number.isFinite(numericRadius) ? numericRadius : 64);
+  const magnitude = Math.min(limit, Math.abs(Number(distanceY) || 0));
   if (magnitude <= zone || cap === 0) return 0;
-  const normalized = Math.min(1, (magnitude - zone) / (distance * 4));
-  const eased = normalized * normalized * (3 - 2 * normalized);
-  return Math.sign(distanceY) * cap * eased;
+  const normalized = (magnitude - zone) / (limit - zone);
+  const eased = normalized ** 1.15;
+  const baseSpeed = Math.min(1, cap);
+  return Math.sign(distanceY) * (baseSpeed + (cap - baseSpeed) * eased);
 }
 
 export function magneticRawRowIndex(startIndex, deltaY, detentDistance = DETENT_DISTANCE) {
@@ -87,7 +91,7 @@ const defaultOptions = {
   detentDistance: DETENT_DISTANCE,
   joystick: true,
   joystickRadius: 64,
-  joystickDeadZone: DETENT_DISTANCE,
+  joystickDeadZone: undefined,
   joystickMaxSpeed: DEFAULT_JOYSTICK_MAX_SPEED,
   activeListClass: 'is-picker-active',
   activeDocumentClass: 'is-picker-active',
@@ -343,6 +347,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
       options.detentDistance,
       deadZone,
       options.joystickMaxSpeed,
+      options.joystickRadius,
     );
     if (speed) {
       joystickPosition = magneticPickerIndex(joystickPosition + speed * elapsed, rows.length);
