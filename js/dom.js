@@ -85,7 +85,8 @@ export function magneticRowIndex(startIndex, deltaY, rowCount, detentDistance) {
 }
 
 export function magneticPickerIndex(rawIndex, rowCount) {
-  return rawIndex < 0 || rawIndex >= rowCount ? -1 : rawIndex;
+  if (!rowCount) return -1;
+  return Math.max(0, Math.min(rowCount - 1, rawIndex));
 }
 
 export function magneticPreferredIndex(rawIndex, selectableIndices, rowCount) {
@@ -183,16 +184,6 @@ function describeRow(row) {
     'Unavailable item'
   );
 }
-function pointerOutside(element, event) {
-  const box = element.getBoundingClientRect?.();
-  return (
-    box &&
-    (event.clientX < box.left ||
-      event.clientX > box.right ||
-      event.clientY < box.top ||
-      event.clientY > box.bottom)
-  );
-}
 export function bindMagneticLists(root = document) {
   root.querySelectorAll?.('.app-list').forEach((list) => {
     if (list.dataset.magneticBound) return;
@@ -236,10 +227,6 @@ export function bindMagneticLists(root = document) {
         else row.removeAttribute('aria-current');
       });
       activeIndex = nextIndex;
-      if (activeIndex < 0) {
-        status.textContent = 'Picker cancelled — release to cancel';
-        return;
-      }
       const row = rows[activeIndex];
       status.textContent = `Picker: ${describeRow(row)}${enabledAction(row) ? '' : ', unavailable'}`;
       row.scrollIntoView?.({
@@ -294,7 +281,6 @@ export function bindMagneticLists(root = document) {
       if (pointerId === null) return;
       cancelRow?.removeAttribute('hidden');
       rows = listRows(list);
-      if (!rows.length) return reset();
       selectableIndices = rows.reduce(
         (indices, row, index) => (enabledAction(row) ? [...indices, index] : indices),
         [],
@@ -355,8 +341,7 @@ export function bindMagneticLists(root = document) {
     };
     const onPointerUp = (event) => {
       if (event.pointerId !== pointerId) return;
-      const outside = pointerOutside(list, event);
-      if (pickerActive && !outside) activate();
+      if (pickerActive) activate();
       else {
         if (movedBeforePicker) suppressClick = true;
         reset();

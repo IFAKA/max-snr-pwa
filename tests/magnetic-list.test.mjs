@@ -33,15 +33,15 @@ test('edge friction eases overshoot instead of extending the active row', () => 
   assert.ok(magneticEdgePosition(4, 4) < 4);
 });
 
-test('picker exposes a cancel detent beyond either list edge', () => {
-  assert.equal(magneticPickerIndex(-1, 4), -1);
-  assert.equal(magneticPickerIndex(4, 4), -1);
+test('picker clamps to its first and last detents', () => {
+  assert.equal(magneticPickerIndex(-1, 4), 0);
+  assert.equal(magneticPickerIndex(4, 4), 3);
   assert.equal(magneticPickerIndex(2, 4), 2);
 });
 
-test('picker cancel detent remains distinct from exercise rows', () => {
+test('picker cancel detent remains the final row', () => {
   assert.equal(magneticPickerIndex(3, 4), 3);
-  assert.equal(magneticPickerIndex(4, 4), -1);
+  assert.equal(magneticPickerIndex(4, 4), 3);
 });
 
 test('picker prefers the nearest selectable row', () => {
