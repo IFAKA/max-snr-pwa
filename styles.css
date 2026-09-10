@@ -291,15 +291,32 @@ ul {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition:
-    opacity 180ms var(--ease-out),
-    visibility 0s linear 180ms;
 }
 .picker-cancel-row.is-picker-cancel-visible {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  transition-delay: 0s;
+  animation: picker-cancel-fade-in 420ms var(--ease-out) both;
+}
+.picker-cancel-row.is-picker-cancel-hiding {
+  visibility: visible;
+  animation: picker-cancel-fade-out 420ms var(--ease-out) both;
+}
+@keyframes picker-cancel-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes picker-cancel-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 .picker-cancel-row button {
   display: flex;
@@ -325,7 +342,7 @@ ul {
 }
 @media (prefers-reduced-motion: reduce) {
   .picker-cancel-row {
-    transition: none;
+    animation: none !important;
   }
 }
 .list-link {

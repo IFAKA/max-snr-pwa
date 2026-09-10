@@ -4,7 +4,7 @@ const DETENT_DISTANCE = 24;
 const HOLD_VIBRATION = 5;
 const DETENT_VIBRATION = [20, 30, 20];
 const SELECT_VIBRATION = [6, 14, 6];
-const CANCEL_FADE_MS = 180;
+const CANCEL_FADE_MS = 420;
 
 export function magneticRawRowIndex(startIndex, deltaY, detentDistance = DETENT_DISTANCE) {
   const distance = Math.max(1, detentDistance || DETENT_DISTANCE);
@@ -201,6 +201,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     clearCancelHideTimer();
     const visibilityToken = ++cancelVisibilityToken;
     cancelRow.removeAttribute('hidden');
+    cancelRow.classList.remove('is-picker-cancel-hiding');
     cancelRow.classList.remove('is-picker-cancel-visible');
     void cancelRow.offsetWidth;
     const scheduleFrame = globalThis.window?.requestAnimationFrame || ((callback) => setTimeout(callback, 0));
@@ -216,6 +217,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     clearCancelHideTimer();
     cancelVisibilityToken++;
     cancelRow.classList.remove('is-picker-cancel-visible');
+    cancelRow.classList.add('is-picker-cancel-hiding');
     cancelHideTimer = setTimeout(() => {
       cancelRow.setAttribute('hidden', '');
       cancelHideTimer = null;
