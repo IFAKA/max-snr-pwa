@@ -389,11 +389,6 @@ ul {
 .history-workout small {
   font-size: 16px;
 }
-.list-link > span:last-child {
-  flex: 0 0 auto;
-  color: var(--accent);
-  font-size: 24px;
-}
 .list-link > .icon {
   width: 22px;
   height: 22px;
