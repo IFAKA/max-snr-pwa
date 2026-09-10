@@ -288,6 +288,18 @@ ul {
   padding-inline: 12px;
   border-top: 1px solid var(--line);
   background: var(--danger-soft);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 180ms var(--ease-out),
+    visibility 0s linear 180ms;
+}
+.picker-cancel-row.is-picker-cancel-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0s;
 }
 .picker-cancel-row button {
   display: flex;
@@ -310,6 +322,11 @@ ul {
 }
 .picker-cancel-row.is-picker-target button {
   color: var(--danger);
+}
+@media (prefers-reduced-motion: reduce) {
+  .picker-cancel-row {
+    transition: none;
+  }
 }
 .list-link {
   position: relative;

@@ -4,6 +4,7 @@ const DETENT_DISTANCE = 24;
 const HOLD_VIBRATION = 5;
 const DETENT_VIBRATION = [20, 30, 20];
 const SELECT_VIBRATION = [6, 14, 6];
+const CANCEL_FADE_MS = 180;
 
 export function magneticRawRowIndex(startIndex, deltaY, detentDistance = DETENT_DISTANCE) {
   const distance = Math.max(1, detentDistance || DETENT_DISTANCE);
@@ -183,11 +184,33 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
   let suppressClick = false;
   let movedBeforePicker = false;
   let destroyed = false;
+  let cancelHideTimer = null;
 
   const buzz = (pattern) => globalThis.navigator?.vibrate?.(pattern);
   const clearTimer = () => {
     clearTimeout(timer);
     timer = null;
+  };
+  const clearCancelHideTimer = () => {
+    clearTimeout(cancelHideTimer);
+    cancelHideTimer = null;
+  };
+  const showCancelRow = () => {
+    if (!cancelRow) return;
+    clearCancelHideTimer();
+    cancelRow.removeAttribute('hidden');
+    cancelRow.classList.remove('is-picker-cancel-visible');
+    const scheduleFrame = globalThis.window?.requestAnimationFrame || ((callback) => setTimeout(callback, 0));
+    scheduleFrame(() => cancelRow.classList.add('is-picker-cancel-visible'));
+  };
+  const hideCancelRow = () => {
+    if (!cancelRow) return;
+    clearCancelHideTimer();
+    cancelRow.classList.remove('is-picker-cancel-visible');
+    cancelHideTimer = setTimeout(() => {
+      cancelRow.setAttribute('hidden', '');
+      cancelHideTimer = null;
+    }, CANCEL_FADE_MS);
   };
   const stopDocumentTracking = () => {
     document.removeEventListener?.('pointermove', onPointerMove);
@@ -233,7 +256,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
       row.classList.remove(options.targetRowClass);
       row.removeAttribute('aria-current');
     });
-    cancelRow?.setAttribute('hidden', '');
+    hideCancelRow();
     list.classList.remove(options.activeListClass);
     document.documentElement?.classList.remove(options.activeDocumentClass);
     status.classList.remove(options.statusVisibleClass);
@@ -267,7 +290,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
   };
   const enter = () => {
     if (pointerId === null || destroyed) return;
-    cancelRow?.removeAttribute('hidden');
+    showCancelRow();
     rows = rowsFor(list, options.rowSelector);
     selectableIndices = rows.reduce((indices, row, index) => {
       const action = actionFor(row, options.actionSelector);
@@ -364,6 +387,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
       if (destroyed) return;
       destroyed = true;
       reset();
+      clearCancelHideTimer();
       removeListeners();
       cancelRow?.remove();
       status.remove();
