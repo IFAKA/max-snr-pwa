@@ -110,7 +110,7 @@ function renderWorkouts(state) {
   const rows = state.history.length
     ? state.history.map(workoutMarkup)
     : ['<li data-picker-skip><div class="list-link empty-state">No workouts yet</div></li>'];
-  app.innerHTML = `<section aria-labelledby="workouts-title">${titleMarkup('Workouts', 'workouts-title')}${listMarkup(rows, 'history-list', 'Logged workouts')}</section>`;
+  app.innerHTML = `<section aria-labelledby="workouts-title">${titleMarkup('Workouts', 'workouts-title')}${listMarkup(rows, 'scroll-list', 'Logged workouts')}</section>`;
   bindHoldScroll();
   bindTitleMarquee();
 }

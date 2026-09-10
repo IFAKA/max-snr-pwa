@@ -24,7 +24,7 @@ function routineRows(items) {
 export function routineMarkup(items, className = '') {
   return listMarkup(
     routineRows(items),
-    `exercise-list${className ? ` ${className}` : ''}`,
+    `scroll-list${className ? ` ${className}` : ''}`,
     'Exercises',
   );
 }

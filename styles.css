@@ -474,22 +474,16 @@ main > section:has(> .app-list) > .app-list > li.is-picker-target {
 main > section:has(> .app-list) > .app-list .list-link::before {
   inset-inline: -12px;
 }
-.navigation-list {
+.navigation-list,
+.scroll-list {
   flex: 1 1 auto;
   min-height: 0;
-  margin-top: 12px;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
 }
-.routine-list,
-.exercise-list,
-.history-list {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: thin;
+.navigation-list {
+  margin-top: 12px;
 }
 .day-indicator {
   display: inline-block;
@@ -519,7 +513,7 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.exercise-list .routine-exercise [data-hold-scroll].is-hold-scrolling .hold-scroll-text {
+.scroll-list .routine-exercise [data-hold-scroll].is-hold-scrolling .hold-scroll-text {
   display: block;
   max-width: 100%;
   overflow: hidden;
@@ -549,9 +543,6 @@ main > section:has(> .app-list) > .app-list .list-link::before {
 }
 .history-workout strong {
   font-weight: 400;
-}
-.history-list > li {
-  padding: 0;
 }
 .history-workout > summary {
   display: flex;
@@ -720,11 +711,6 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   min-height: 0;
   flex-direction: column;
   overflow: hidden;
-}
-.exercise-picker-list {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
 }
 .workout-stage h1.workout-title[data-title-marquee] {
   overflow: visible;
