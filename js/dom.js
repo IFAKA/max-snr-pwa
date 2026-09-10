@@ -71,7 +71,8 @@ export function bindMagneticLists(root = document) {
     if (list.dataset.magneticBound) return;
     list.dataset.magneticBound = 'true';
     createMagneticPicker(list, {
-      rowSelector: ':scope > li:not(.routine-group-label):not(.list-title):not([hidden])',
+      rowSelector:
+        ':scope > li:not(.routine-group-label):not(.list-title):not([hidden]):not([data-picker-exclude])',
       isSelectable: (action) =>
         !action ||
         (!action.disabled &&

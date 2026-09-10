@@ -154,3 +154,59 @@ test('picker vibrates before highlighting the held row', async () => {
     Object.defineProperty(globalThis, 'navigator', originalNavigator);
   }
 });
+
+test('excluded empty-state rows do not enter picker mode', async () => {
+  const listeners = {};
+  const classes = new Set();
+  const row = {
+    getBoundingClientRect: () => ({ top: 0, bottom: 52, height: 52 }),
+    classList: { add: () => {}, remove: () => {}, toggle: () => {} },
+    hasAttribute: () => false,
+    setAttribute: () => {},
+    removeAttribute: () => {},
+    querySelector: () => null,
+    textContent: 'No workouts yet',
+  };
+  const list = {
+    dataset: {},
+    parentElement: null,
+    append: () => {},
+    clientHeight: 52,
+    scrollHeight: 52,
+    querySelector: () => null,
+    querySelectorAll: (selector) =>
+      selector === '.app-list' ? [list] : selector.includes('[data-picker-exclude]') ? [] : [row],
+    addEventListener: (type, handler) => {
+      listeners[type] = handler;
+    },
+    classList: {
+      add: (name) => classes.add(name),
+      remove: (name) => classes.delete(name),
+    },
+    style: { setProperty: () => {}, removeProperty: () => {} },
+  };
+  const originalDocument = globalThis.document;
+  globalThis.document = {
+    ...originalDocument,
+    documentElement: { classList: { add: () => {}, remove: () => {} } },
+    createElement: () => ({
+      className: '',
+      setAttribute: () => {},
+      removeAttribute: () => {},
+      classList: { add: () => {}, remove: () => {} },
+      textContent: '',
+    }),
+    addEventListener: () => {},
+    body: { dataset: {} },
+    scrollingElement: list,
+  };
+  try {
+    const { bindMagneticLists } = await import('../js/dom.js?empty-state');
+    bindMagneticLists({ querySelectorAll: () => [list] });
+    listeners.pointerdown({ pointerId: 1, pointerType: 'touch', clientY: 20 });
+    await new Promise((resolve) => setTimeout(resolve, 430));
+    assert.equal(classes.has('is-picker-active'), false);
+  } finally {
+    globalThis.document = originalDocument;
+  }
+});
