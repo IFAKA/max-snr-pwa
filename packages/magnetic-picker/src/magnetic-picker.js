@@ -67,6 +67,7 @@ const defaultOptions = {
   statusClass: 'picker-status',
   statusVisibleClass: 'is-picker-status-visible',
   visuallyHiddenClass: 'sr-only',
+  holdingClass: 'is-picker-holding',
 };
 
 function rowsFor(list, selector) {
@@ -112,7 +113,8 @@ function ensureCancelRow(list, label, options) {
   row.setAttribute(options.cancelRowAttribute, '');
   const escapedLabel = String(label).replace(
     /[&<>"']/g,
-    (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character],
+    (character) =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character],
   );
   row.innerHTML = `<button type="button" ${options.cancelActionAttribute} aria-label="${escapedLabel}"><span>${escapedLabel}</span></button>`;
   list.append(row);
@@ -140,7 +142,7 @@ function describeRow(row, action) {
 
 function bindPickerEvents(list, handlers) {
   const { onPointerDown, onPointerLeave, reset, onClick, onKeyDown } = handlers;
-  const onPointerCancel = () => reset(true);
+  const { onPointerCancel } = handlers;
   list.addEventListener('pointerdown', onPointerDown);
   list.addEventListener('pointercancel', onPointerCancel);
   list.addEventListener('pointerleave', onPointerLeave);
@@ -192,6 +194,12 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     clearTimeout(timer);
     timer = null;
   };
+  const setHolding = (holding) => {
+    list.classList.toggle(options.holdingClass, holding);
+    if (holding)
+      list.style.setProperty('--picker-hold-duration', `${Math.max(0, options.holdMs)}ms`);
+    else list.style.removeProperty('--picker-hold-duration');
+  };
   const clearCancelHideTimer = () => {
     clearTimeout(cancelHideTimer);
     cancelHideTimer = null;
@@ -204,7 +212,8 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     cancelRow.classList.remove('is-picker-cancel-hiding');
     cancelRow.classList.remove('is-picker-cancel-visible');
     void cancelRow.offsetWidth;
-    const scheduleFrame = globalThis.window?.requestAnimationFrame || ((callback) => setTimeout(callback, 0));
+    const scheduleFrame =
+      globalThis.window?.requestAnimationFrame || ((callback) => setTimeout(callback, 0));
     scheduleFrame(() =>
       scheduleFrame(() => {
         if (visibilityToken === cancelVisibilityToken && !destroyed)
@@ -226,7 +235,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
   const stopDocumentTracking = () => {
     document.removeEventListener?.('pointermove', onPointerMove);
     document.removeEventListener?.('pointerup', onPointerUp);
-    document.removeEventListener?.('pointercancel', reset);
+    document.removeEventListener?.('pointercancel', onPointerCancel);
   };
   const setActive = (index, vibration = DETENT_VIBRATION) => {
     if (!rows.length) return;
@@ -254,7 +263,9 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     });
   };
   const reset = (notify = false) => {
+    const shouldNotify = notify === true || (Boolean(notify) && pickerActive);
     clearTimer();
+    setHolding(false);
     stopDocumentTracking();
     if (pointerId !== null) {
       try {
@@ -280,7 +291,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     selectableIndices = [];
     pickerActive = false;
     movedBeforePicker = false;
-    if (notify) options.onCancel();
+    if (shouldNotify) options.onCancel();
   };
   const activate = () => {
     const row = rows[activeIndex];
@@ -301,6 +312,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
   };
   const enter = () => {
     if (pointerId === null || destroyed) return;
+    setHolding(false);
     showCancelRow();
     rows = rowsFor(list, options.rowSelector);
     selectableIndices = rows.reduce((indices, row, index) => {
@@ -337,6 +349,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     if (!pickerActive) {
       if (Math.abs(deltaY) > MOVE_TOLERANCE) {
         clearTimer();
+        setHolding(false);
         movedBeforePicker = true;
         event.preventDefault();
         scrollTarget.scrollTop -= event.movementY || 0;
@@ -361,14 +374,19 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     if (!rows.length) return;
     suppressClick = false;
     movedBeforePicker = false;
+    setHolding(true);
     pointerId = event.pointerId;
     startY = event.clientY;
     document.documentElement?.classList.add(options.activeDocumentClass);
     clearTimer();
     document.addEventListener?.('pointermove', onPointerMove, { passive: false });
     document.addEventListener?.('pointerup', onPointerUp);
-    document.addEventListener?.('pointercancel', reset);
+    document.addEventListener?.('pointercancel', onPointerCancel);
     timer = setTimeout(enter, options.holdMs);
+  }
+  function onPointerCancel(event) {
+    if (event.pointerId !== pointerId) return;
+    reset(pickerActive);
   }
   function onClick(event) {
     if (!suppressClick) return;
@@ -382,11 +400,15 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
       reset(true);
     }
   }
-  const onPointerLeave = (event) => !pickerActive && event.pointerId === pointerId && reset(true);
+  const onPointerLeave = (event) => {
+    if (event.pointerId !== pointerId) return;
+    reset(pickerActive);
+  };
   const onContextMenu = (event) => pointerId !== null && event.preventDefault();
   const removeListeners = bindPickerEvents(list, {
     onPointerDown,
     onPointerLeave,
+    onPointerCancel,
     reset,
     onClick,
     onKeyDown,

@@ -44,7 +44,12 @@ function makePickerDom({ rows = 1 } = {}) {
     clientHeight: rows * 50,
     scrollHeight: rows * 50,
     style: { setProperty: () => {}, removeProperty: () => {} },
-    classList: { add: (name) => classes.add(name), remove: (name) => classes.delete(name) },
+    classList: {
+      add: (name) => classes.add(name),
+      remove: (name) => classes.delete(name),
+      toggle: (name, enabled) => (enabled ? classes.add(name) : classes.delete(name)),
+      contains: (name) => classes.has(name),
+    },
     querySelector: () => null,
     querySelectorAll: (selector) => (selector.includes('data-picker-item') ? rowList : []),
     addEventListener: (type, handler) => listeners.set(`list:${type}`, handler),
@@ -126,6 +131,71 @@ test('Escape cancels an active picker through onCancel', async () => {
     dom.listeners.get('list:pointerdown')({ pointerId: 1, pointerType: 'touch', clientY: 20 });
     await new Promise((resolve) => setTimeout(resolve, 5));
     dom.listeners.get('document:keydown')({ key: 'Escape', preventDefault: () => {} });
+    assert.equal(cancellations, 1);
+  } finally {
+    globalThis.document = originalDocument;
+  }
+});
+
+test('hold progress state is removed after activation', async () => {
+  const dom = makePickerDom();
+  const originalDocument = globalThis.document;
+  globalThis.document = dom.document;
+  try {
+    const picker = createMagneticPicker(dom.list, { cancel: false, holdMs: 20 });
+    dom.listeners.get('list:pointerdown')({ pointerId: 1, pointerType: 'touch', clientY: 20 });
+    assert.equal(dom.classes.has('is-picker-holding'), true);
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    assert.equal(dom.classes.has('is-picker-holding'), false);
+    picker.destroy();
+  } finally {
+    globalThis.document = originalDocument;
+  }
+});
+
+test('early movement and pointer cancellation are silent before activation', async () => {
+  const dom = makePickerDom();
+  const originalDocument = globalThis.document;
+  let cancellations = 0;
+  globalThis.document = dom.document;
+  try {
+    const picker = createMagneticPicker(dom.list, {
+      cancel: false,
+      holdMs: 40,
+      onCancel: () => cancellations++,
+    });
+    dom.listeners.get('list:pointerdown')({ pointerId: 1, pointerType: 'touch', clientY: 20 });
+    dom.listeners.get('document:pointermove')({
+      pointerId: 1,
+      clientY: 60,
+      movementY: 40,
+      preventDefault: () => {},
+    });
+    assert.equal(cancellations, 0);
+    dom.listeners.get('document:pointercancel')({ pointerId: 1 });
+    assert.equal(cancellations, 0);
+    picker.destroy();
+  } finally {
+    globalThis.document = originalDocument;
+  }
+});
+
+test('active picker cancellation calls onCancel exactly once', async () => {
+  const dom = makePickerDom();
+  const originalDocument = globalThis.document;
+  let cancellations = 0;
+  globalThis.document = dom.document;
+  try {
+    const picker = createMagneticPicker(dom.list, {
+      cancel: false,
+      holdMs: 0,
+      onCancel: () => cancellations++,
+    });
+    dom.listeners.get('list:pointerdown')({ pointerId: 1, pointerType: 'touch', clientY: 20 });
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    dom.listeners.get('document:pointercancel')({ pointerId: 1 });
+    assert.equal(cancellations, 1);
+    picker.destroy();
     assert.equal(cancellations, 1);
   } finally {
     globalThis.document = originalDocument;

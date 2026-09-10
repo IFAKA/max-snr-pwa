@@ -76,6 +76,7 @@ export function bindMagneticLists(root = document) {
       activeListClass: 'is-picker-active',
       activeDocumentClass: 'is-picker-active',
       targetRowClass: 'is-picker-target',
+      holdingClass: 'is-picker-holding',
       cancelRowClass: 'picker-cancel-row',
       cancelRowAttribute: 'data-picker-cancel-row',
       cancelActionAttribute: 'data-picker-cancel',

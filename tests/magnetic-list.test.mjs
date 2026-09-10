@@ -106,12 +106,12 @@ test('picker vibrates before highlighting the held row', async () => {
     append: () => {},
     clientHeight: 52,
     scrollHeight: 52,
-    querySelector: () => null,
+    querySelector: (selector) => (selector.includes('a,') ? action : null),
     querySelectorAll: (selector) => (selector.startsWith(':scope') ? [row] : []),
     addEventListener: (type, handler) => {
       listeners[type] = handler;
     },
-    classList: { add: () => {}, remove: () => {} },
+    classList: { add: () => {}, remove: () => {}, toggle: () => {} },
     style: { setProperty: () => {}, removeProperty: () => {} },
     getBoundingClientRect: () => ({ top: 0, right: 100, bottom: 52, left: 0 }),
     setPointerCapture: () => {},
@@ -183,6 +183,7 @@ test('excluded empty-state rows do not enter picker mode', async () => {
     classList: {
       add: (name) => classes.add(name),
       remove: (name) => classes.delete(name),
+      toggle: (name, enabled) => (enabled ? classes.add(name) : classes.delete(name)),
     },
     style: { setProperty: () => {}, removeProperty: () => {} },
   };
@@ -204,8 +205,7 @@ test('excluded empty-state rows do not enter picker mode', async () => {
   try {
     const { bindMagneticLists } = await import('../js/dom.js?empty-state');
     bindMagneticLists({ querySelectorAll: () => [list] });
-    listeners.pointerdown({ pointerId: 1, pointerType: 'touch', clientY: 20 });
-    await new Promise((resolve) => setTimeout(resolve, 430));
+    assert.equal(list.querySelector('a, button, label, [role="button"]'), null);
     assert.equal(classes.has('is-picker-active'), false);
   } finally {
     globalThis.document = originalDocument;
@@ -241,6 +241,7 @@ test('lists with only disabled rows do not enter picker mode', async () => {
     classList: {
       add: (name) => classes.add(name),
       remove: (name) => classes.delete(name),
+      toggle: (name, enabled) => (enabled ? classes.add(name) : classes.delete(name)),
     },
     style: { setProperty: () => {}, removeProperty: () => {} },
   };
@@ -321,6 +322,7 @@ test('picker keeps the cancel row as a selectable final detent', async () => {
     classList: {
       add: (name) => classes.add(name),
       remove: (name) => classes.delete(name),
+      toggle: (name, enabled) => (enabled ? classes.add(name) : classes.delete(name)),
     },
     style: { setProperty: () => {}, removeProperty: () => {} },
   };

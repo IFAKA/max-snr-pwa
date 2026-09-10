@@ -15,6 +15,24 @@
   touch-action: none;
 }
 
+.is-picker-holding {
+  position: relative;
+}
+
+.is-picker-holding::before {
+  position: absolute;
+  z-index: 3;
+  inset-inline: 0;
+  top: 0;
+  height: 3px;
+  transform: scaleX(0);
+  transform-origin: left;
+  background: currentColor;
+  content: '';
+  pointer-events: none;
+  animation: picker-hold-progress var(--picker-hold-duration, 400ms) linear both;
+}
+
 .is-picker-target {
   outline: 2px solid currentColor;
   outline-offset: -2px;
@@ -60,8 +78,18 @@
   }
 }
 
+@keyframes picker-hold-progress {
+  to {
+    transform: scaleX(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .picker-cancel-row {
     animation: none !important;
+  }
+
+  .is-picker-holding::before {
+    animation: none;
   }
 }

@@ -249,6 +249,22 @@ ul {
 .app-list.is-picker-active {
   touch-action: none;
 }
+.app-list.is-picker-holding {
+  position: relative;
+}
+.app-list.is-picker-holding::before {
+  position: absolute;
+  z-index: 3;
+  inset-inline: 0;
+  top: 0;
+  height: 3px;
+  transform: scaleX(0);
+  transform-origin: left;
+  background: currentColor;
+  content: '';
+  pointer-events: none;
+  animation: picker-hold-progress var(--picker-hold-duration, 400ms) linear both;
+}
 .app-list.is-picker-active [data-hold-scroll].is-hold-scrolling .hold-scroll-text {
   display: block;
   max-width: 100%;
@@ -327,6 +343,11 @@ ul {
     opacity: 0;
   }
 }
+@keyframes picker-hold-progress {
+  to {
+    transform: scaleX(1);
+  }
+}
 .picker-cancel-row button {
   display: flex;
   width: 100%;
@@ -352,6 +373,9 @@ ul {
 @media (prefers-reduced-motion: reduce) {
   .picker-cancel-row {
     animation: none !important;
+  }
+  .app-list.is-picker-holding::before {
+    animation: none;
   }
 }
 .list-link {
