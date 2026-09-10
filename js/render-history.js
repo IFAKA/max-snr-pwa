@@ -29,11 +29,13 @@ function performanceFor(task) {
   return null;
 }
 function setLine(task, index) {
-  if (task.skipped) return '<li><span class="history-set-label">Skipped</span></li>';
+  if (task.skipped)
+    return '<li><div class="list-link"><span class="history-set-label">Skipped</span></div></li>';
   const p = performanceFor(task);
-  if (!p) return '<li><span class="history-set-label">Not completed</span></li>';
+  if (!p)
+    return '<li><div class="list-link"><span class="history-set-label">Not completed</span></div></li>';
   const load = p.weight === undefined ? '' : ` · ${esc(p.weight)} ${esc(unitFor(p))}`;
-  return `<li><span class="history-set-label">Set ${esc(task.set || index + 1)} · ${esc(p.reps)} reps${load}</span></li>`;
+  return `<li><div class="list-link"><span class="history-set-label">Set ${esc(task.set || index + 1)} · ${esc(p.reps)} reps${load}</span></div></li>`;
 }
 function workoutDetails(workout) {
   const tasks = workout.tasks || workout.queue || [];
@@ -44,7 +46,7 @@ function workoutDetails(workout) {
     groups.get(name).push({ task, index });
   });
   const rows = [...groups].flatMap(([name, entries], index) => [
-    `<li class="history-group-label" data-picker-skip>${titleMarkup(name, `history-exercise-title-${index}`, 'h2', 'list-title')}</li>`,
+    `<li data-picker-skip><h2 class="list-link list-title" id="history-exercise-title-${index}">${esc(name)}</h2></li>`,
     ...entries.map(({ task, index: taskIndex }) => setLine(task, taskIndex)),
   ]);
   return listMarkup(rows, '', 'Workout sets');

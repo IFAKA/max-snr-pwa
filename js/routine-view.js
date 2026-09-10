@@ -1,8 +1,8 @@
-import { esc, listMarkup, titleMarkup } from './dom.js';
+import { esc, listMarkup } from './dom.js';
 import { isExerciseDefinition } from './routine-data.js';
 
 function exerciseRow(exercise, prefix = '') {
-  return `<li class="routine-exercise"><span data-hold-scroll><span class="hold-scroll-text">${prefix}${esc(exercise.name)}</span></span><span>${exercise.sets} × ${exercise.reps}</span></li>`;
+  return `<li><div class="list-link"><span data-hold-scroll><span class="hold-scroll-text">${prefix}${esc(exercise.name)}</span></span><span>${exercise.sets} × ${exercise.reps}</span></div></li>`;
 }
 
 function routineRows(items) {
@@ -11,7 +11,7 @@ function routineRows(items) {
     const members = (item?.members || item?.items || []).filter(isExerciseDefinition);
     if (!members.length) return [];
     const rows = [
-      `<li class="routine-group-label" data-picker-skip>${titleMarkup(item.label, `routine-group-title-${itemIndex}`, 'h2', 'list-title')}</li>`,
+      `<li data-picker-skip><h2 class="list-link list-title" id="routine-group-title-${itemIndex}">${esc(item.label)}</h2></li>`,
     ];
     return rows.concat(
       members.map((exercise, index) =>
