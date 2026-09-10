@@ -113,7 +113,7 @@ export function magneticEdgePosition(index, rowCount, overshoot = 0) {
 }
 
 function listRows(list) {
-  return [...list.children].filter((row) => row.matches?.('li'));
+  return [...list.children].filter((row) => row.matches?.('li') && !row.hidden);
 }
 
 function rowAction(row) {
@@ -198,6 +198,7 @@ export function bindMagneticLists(root = document) {
     let pickerActive = false;
     let suppressClick = false;
     let movedBeforePicker = false;
+    const cancelRow = list.querySelector?.('[data-picker-cancel-row]');
     const scrollTarget = scrollSurface(list);
 
     const clearTimer = () => {
@@ -207,12 +208,12 @@ export function bindMagneticLists(root = document) {
     const stopDocumentTracking = () => {
       document.removeEventListener?.('pointermove', onPointerMove);
       document.removeEventListener?.('pointerup', onPointerUp);
-      document.removeEventListener?.('pointercancel', cancel);
+      document.removeEventListener?.('pointercancel', reset);
     };
     const startDocumentTracking = () => {
       document.addEventListener?.('pointermove', onPointerMove, { passive: false });
       document.addEventListener?.('pointerup', onPointerUp);
-      document.addEventListener?.('pointercancel', cancel);
+      document.addEventListener?.('pointercancel', reset);
     };
     const setActive = (index, vibration = MAGNETIC_DETENT_VIBRATION) => {
       if (!rows.length) return;
@@ -253,6 +254,7 @@ export function bindMagneticLists(root = document) {
         row.classList.remove('is-magnetic-target');
         row.removeAttribute('aria-current');
       });
+      cancelRow?.setAttribute('hidden', '');
       list.classList.remove('is-magnetic-picker');
       document.documentElement?.classList.remove('is-magnetic-picker-active');
       status.classList.remove('is-magnetic-status-visible');
@@ -266,10 +268,8 @@ export function bindMagneticLists(root = document) {
       pickerActive = false;
       movedBeforePicker = false;
     };
-    const cancel = () => {
-      reset();
-    };
     const activate = () => {
+      if (rows[activeIndex]?.hasAttribute?.('data-picker-cancel')) return reset();
       const action = rows[activeIndex] && enabledAction(rows[activeIndex]);
       if (!action) {
         suppressClick = true;
@@ -283,6 +283,7 @@ export function bindMagneticLists(root = document) {
     };
     const enter = () => {
       if (pointerId === null) return;
+      cancelRow?.removeAttribute('hidden');
       rows = listRows(list);
       if (!rows.length) return reset();
       selectableIndices = rows.reduce(
@@ -359,26 +360,26 @@ export function bindMagneticLists(root = document) {
       event.stopPropagation();
     };
     list.addEventListener('pointerdown', onPointerDown);
-    list.addEventListener('pointercancel', cancel);
+    list.addEventListener('pointercancel', reset);
     list.addEventListener('pointerleave', (event) => {
-      if (!pickerActive && event.pointerId === pointerId) cancel();
+      if (!pickerActive && event.pointerId === pointerId) reset();
     });
-    list.addEventListener('blur', cancel);
+    list.addEventListener('blur', reset);
     list.addEventListener('click', onClick, true);
     list.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && pickerActive) {
         event.preventDefault();
-        cancel();
+        reset();
       }
     });
     document.addEventListener?.('keydown', (event) => {
       if (event.key === 'Escape' && pickerActive) {
         event.preventDefault();
-        cancel();
+        reset();
       }
     });
-    document.addEventListener?.('visibilitychange', cancel);
-    globalThis.window?.addEventListener?.('blur', cancel);
+    document.addEventListener?.('visibilitychange', reset);
+    globalThis.window?.addEventListener?.('blur', reset);
   });
 }
 export function bindTitleMarquee(root = document) {

@@ -245,6 +245,9 @@ export function exercisePicker(active) {
       ? `<li class="complete-row"><div class="list-link" role="status"><span data-hold-scroll><span class="hold-scroll-text">${esc(task.performedName)}</span></span>${icon('check', 'Done')}</div></li>`
       : `<li><button class="list-link" type="button" data-exercise-id="${esc(task.exerciseId)}"><span data-hold-scroll><span class="hold-scroll-text">${esc(task.performedName)}</span></span>${icon('chevron', 'Select exercise')}</button></li>`,
   );
+  rows.push(
+    '<li class="picker-cancel-row" data-picker-cancel-row hidden><button class="list-link" type="button" data-picker-cancel aria-label="Cancel exercise picker"><span>Cancel</span></button></li>',
+  );
   return `<section class="workout-picker" aria-labelledby="exercise-picker-title">${titleMarkup('Exercise', 'exercise-picker-title')}${listMarkup(rows, 'exercise-picker-list', 'Available exercises')}</section>`;
 }
 export function bindExercisePicker(active, onSelected = () => navigateTo('/workout/')) {

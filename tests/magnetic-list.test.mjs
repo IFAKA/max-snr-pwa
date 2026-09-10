@@ -39,6 +39,11 @@ test('picker exposes a cancel detent beyond either list edge', () => {
   assert.equal(magneticPickerIndex(2, 4), 2);
 });
 
+test('picker cancel detent remains distinct from exercise rows', () => {
+  assert.equal(magneticPickerIndex(3, 4), 3);
+  assert.equal(magneticPickerIndex(4, 4), -1);
+});
+
 test('picker prefers the nearest selectable row', () => {
   assert.equal(magneticPreferredIndex(0, [1, 2], 3), 1);
   assert.equal(magneticPreferredIndex(2, [0, 1], 3), 1);

@@ -261,6 +261,19 @@ ul {
 .app-list > li.is-magnetic-target.complete-row .list-link {
   color: var(--muted);
 }
+.picker-cancel-row {
+  border-top: 8px solid var(--surface);
+}
+.picker-cancel-row .list-link {
+  color: var(--muted);
+  justify-content: center;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.picker-cancel-row.is-magnetic-target .list-link {
+  color: var(--ink);
+}
 .list-link {
   position: relative;
   z-index: 0;
