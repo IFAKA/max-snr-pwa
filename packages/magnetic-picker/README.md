@@ -97,4 +97,4 @@ onBeforeUnmount(() => picker?.destroy());
 </template>
 ```
 
-Other frameworks use the same lifecycle contract: initialize after semantic markup is mounted, retain the returned instance, and call `destroy()` before unmounting or replacing the list. `onCancel` receives no arguments. After the long-press activates, hold the pointer outside the picker’s centered dead zone to continuously scroll; the farther from center it is, the faster the highlighted row advances. Scrolling stops inside the dead zone, but continues while the pointer remains stationary near an edge. Advanced options include `disabled`, `cancel`, `cancelLabel`, `holdMs`, and `detentDistance`; selector and class overrides are available when integrating with an existing design system.
+Other frameworks use the same lifecycle contract: initialize after semantic markup is mounted, retain the returned instance, and call `destroy()` before unmounting or replacing the list. `onCancel` receives no arguments. Advanced options include `disabled`, `cancel`, `cancelLabel`, `holdMs`, and `detentDistance`; selector and class overrides are available when integrating with an existing design system.

@@ -15,20 +15,6 @@
   touch-action: none;
 }
 
-.is-picker-active::after {
-  position: fixed;
-  z-index: 4;
-  top: var(--picker-zone-top);
-  left: calc(var(--picker-zone-left) + var(--picker-zone-width) - 6px);
-  width: 4px;
-  height: var(--picker-zone-height);
-  display: block;
-  border-radius: 999px;
-  background: color-mix(in srgb, currentColor 55%, transparent);
-  content: '';
-  pointer-events: none;
-}
-
 .is-picker-holding {
   position: relative;
 }
@@ -51,6 +37,7 @@
 
 .is-picker-target {
   background: var(--picker-target-background, transparent);
+  border-block: 2px solid var(--picker-target-border, currentColor);
 }
 
 .picker-cancel-row {

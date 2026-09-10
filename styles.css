@@ -231,7 +231,10 @@ ul {
 }
 .app-list {
   border-top: 1px solid var(--line);
-  touch-action: pan-y;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 .app-list > li {
   display: flex;
@@ -244,23 +247,7 @@ ul {
   white-space: nowrap;
 }
 .app-list.is-picker-active {
-  touch-action: pan-y;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
-}
-.app-list.is-picker-active::after {
-  position: fixed;
-  z-index: 4;
-  top: var(--picker-zone-top);
-  left: calc(var(--picker-zone-left) + var(--picker-zone-width) - 6px);
-  width: 4px;
-  height: var(--picker-zone-height);
-  display: block;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--accent) 70%, transparent);
-  content: '';
-  pointer-events: none;
+  touch-action: none;
 }
 .app-list.is-picker-holding {
   position: relative;
@@ -290,6 +277,7 @@ ul {
 }
 .app-list > li.is-picker-target {
   background: var(--accent-soft);
+  border-block: 2px solid var(--accent);
   transition: background-color 180ms var(--ease-out);
 }
 .app-list.is-picker-active .list-link:active {
