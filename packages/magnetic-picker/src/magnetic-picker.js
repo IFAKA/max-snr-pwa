@@ -527,7 +527,15 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     if (!options.joystick) {
       const rawIndex = magneticRawRowIndex(startIndex, deltaY, options.detentDistance);
       setActive(magneticPreferredIndex(rawIndex, selectableIndices, rows.length));
+      return;
     }
+    const radius = Math.max(1, Number(options.joystickRadius) || DEFAULT_JOYSTICK_RADIUS);
+    const insideLimit = Math.abs(joystickY - startY) < radius - 1;
+    const rawIndex = magneticRawRowIndex(startIndex, deltaY, options.detentDistance);
+    const nextIndex = magneticPreferredIndex(rawIndex, selectableIndices, rows.length);
+    joystickPosition = nextIndex;
+    setActive(nextIndex);
+    if (insideLimit) joystickVelocity = 0;
   }
   function onPointerUp(event) {
     if (event.pointerId !== pointerId) return;

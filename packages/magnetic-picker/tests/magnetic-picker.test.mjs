@@ -315,7 +315,7 @@ test('movement after activation keeps the picker active', async () => {
   }
 });
 
-test('stationary joystick input keeps scrolling and dead-zone input stops without resetting', async () => {
+test('edge joystick input keeps scrolling and inner movement returns to magnetic detents', async () => {
   const dom = makePickerDom({ rows: 5 });
   const originalDocument = globalThis.document;
   const originalWindow = globalThis.window;
@@ -353,7 +353,8 @@ test('stationary joystick input keeps scrolling and dead-zone input stops withou
     });
     frame(200);
     const heldTarget = dom.rowList.findIndex((row) => row.classList.contains('is-picker-target'));
-    assert.equal(heldTarget, movedTarget);
+    assert.equal(heldTarget, 0);
+    assert.notEqual(heldTarget, movedTarget);
     assert.equal(cancelledFrame, null);
     dom.listeners.get('document:pointerup')({ pointerId: 1 });
     picker.destroy();
@@ -437,6 +438,10 @@ test('joystick stays still inside the well and starts only at the limit', async 
     frame(0);
     frame(1000);
     assert.equal(dom.list.scrollTop, 0);
+    assert.equal(
+      dom.rowList.findIndex((row) => row.classList.contains('is-picker-target')),
+      2,
+    );
     dom.listeners.get('document:pointermove')({
       pointerId: 1,
       clientX: 40,
@@ -592,7 +597,7 @@ test('captures the pointer immediately for stable picker dragging', async () => 
       preventDefault: () => {},
     });
     dom.listeners.get('document:pointerup')({ pointerId: 7 });
-    assert.equal(selection[0], 'exercise-2');
+    assert.equal(selection[0], 'exercise-1');
     picker.destroy();
   } finally {
     globalThis.document = originalDocument;
