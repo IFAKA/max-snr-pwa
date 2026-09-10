@@ -242,6 +242,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
   let joystickY = 0;
   let joystickPosition = 0;
   let joystickVelocity = 0;
+  let joystickAtLimit = false;
   let joystickFrame = null;
   let joystickFrameTime = null;
   let joystickOverlay = null;
@@ -315,6 +316,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     joystickFrame = null;
     joystickFrameTime = null;
     joystickVelocity = 0;
+    joystickAtLimit = false;
   };
   const removeJoystickOverlay = () => {
     joystickOverlay?.remove?.();
@@ -403,6 +405,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     joystickY = startY;
     joystickPosition = activeIndex;
     joystickVelocity = 0;
+    joystickAtLimit = false;
     joystickFrame = scheduleFrame.call(globalThis.window, pickerFrame);
   };
   const setActive = (index, vibration = DETENT_VIBRATION, ensureVisible = true) => {
@@ -533,9 +536,23 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     const insideLimit = Math.abs(joystickY - startY) < radius - 1;
     const rawIndex = magneticRawRowIndex(startIndex, deltaY, options.detentDistance);
     const nextIndex = magneticPreferredIndex(rawIndex, selectableIndices, rows.length);
-    joystickPosition = nextIndex;
-    setActive(nextIndex);
-    if (insideLimit) joystickVelocity = 0;
+    if (insideLimit) {
+      if (joystickAtLimit) {
+        joystickAtLimit = false;
+        joystickVelocity = 0;
+        joystickFrameTime = null;
+      }
+      joystickPosition = nextIndex;
+      setActive(nextIndex);
+      return;
+    }
+    if (!joystickAtLimit) {
+      joystickAtLimit = true;
+      joystickVelocity = 0;
+      joystickFrameTime = null;
+      joystickPosition = nextIndex;
+    }
+    setActive(nextIndex, DETENT_VIBRATION, false);
   }
   function onPointerUp(event) {
     if (event.pointerId !== pointerId) return;

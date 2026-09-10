@@ -449,7 +449,60 @@ test('joystick stays still inside the well and starts only at the limit', async 
       preventDefault: () => {},
     });
     frame(1016);
+    frame(1032);
     assert.ok(dom.list.scrollTop > 0);
+    picker.destroy();
+  } finally {
+    globalThis.document = originalDocument;
+    globalThis.window = originalWindow;
+  }
+});
+
+test('joystick transitions between magnetic movement and edge scrolling cleanly', async () => {
+  const dom = makePickerDom({ rows: 10 });
+  dom.list.clientHeight = 100;
+  const originalDocument = globalThis.document;
+  const originalWindow = globalThis.window;
+  let frame;
+  globalThis.document = dom.document;
+  globalThis.window = {
+    requestAnimationFrame: (callback) => {
+      frame = callback;
+      return 1;
+    },
+    cancelAnimationFrame: () => {},
+  };
+  try {
+    const picker = createMagneticPicker(dom.list, { cancel: false, holdMs: 0 });
+    dom.listeners.get('list:pointerdown')({
+      pointerId: 1,
+      pointerType: 'touch',
+      clientX: 40,
+      clientY: 20,
+    });
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    dom.listeners.get('document:pointermove')({
+      pointerId: 1,
+      clientX: 40,
+      clientY: 84,
+      preventDefault: () => {},
+    });
+    frame(0);
+    frame(16);
+    const edgePosition = dom.list.scrollTop;
+    assert.ok(edgePosition > 0);
+    dom.listeners.get('document:pointermove')({
+      pointerId: 1,
+      clientX: 40,
+      clientY: 44,
+      preventDefault: () => {},
+    });
+    frame(32);
+    assert.equal(dom.list.scrollTop, edgePosition);
+    assert.equal(
+      dom.rowList.findIndex((row) => row.classList.contains('is-picker-target')),
+      1,
+    );
     picker.destroy();
   } finally {
     globalThis.document = originalDocument;
