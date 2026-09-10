@@ -22,6 +22,8 @@ function makePickerDom({ rows = 1 } = {}) {
   const documentElement = {
     classList: { add: (name) => classes.add(name), remove: (name) => classes.delete(name) },
   };
+  const styleProperties = new Map();
+  const capturedPointerIds = [];
   const actions = Array.from({ length: rows }, (_, index) => ({
     disabled: false,
     getAttribute: (name) => (name === 'aria-label' ? `Exercise ${index}` : null),
@@ -43,7 +45,10 @@ function makePickerDom({ rows = 1 } = {}) {
     parentElement: null,
     clientHeight: rows * 50,
     scrollHeight: rows * 50,
-    style: { setProperty: () => {}, removeProperty: () => {} },
+    style: {
+      setProperty: (name, value) => styleProperties.set(name, value),
+      removeProperty: (name) => styleProperties.delete(name),
+    },
     classList: {
       add: (name) => classes.add(name),
       remove: (name) => classes.delete(name),
@@ -55,7 +60,7 @@ function makePickerDom({ rows = 1 } = {}) {
     addEventListener: (type, handler) => listeners.set(`list:${type}`, handler),
     removeEventListener: () => {},
     append: () => {},
-    setPointerCapture: () => {},
+    setPointerCapture: (pointerId) => capturedPointerIds.push(pointerId),
     releasePointerCapture: () => {},
   };
   const document = {
@@ -72,7 +77,7 @@ function makePickerDom({ rows = 1 } = {}) {
     addEventListener: (type, handler) => listeners.set(`document:${type}`, handler),
     removeEventListener: () => {},
   };
-  return { document, list, listeners, classes, rowList };
+  return { document, list, listeners, classes, rowList, styleProperties, capturedPointerIds };
 }
 
 test('semantic rows pass data-picker-value and context to onSelect', async () => {
@@ -216,6 +221,35 @@ test('movement after activation keeps the picker active', async () => {
       preventDefault: () => {},
     });
     assert.equal(dom.classes.has('is-picker-active'), true);
+    picker.destroy();
+  } finally {
+    globalThis.document = originalDocument;
+  }
+});
+
+test('captures the pointer immediately and anchors small detents at the touched row', async () => {
+  const dom = makePickerDom({ rows: 3 });
+  const originalDocument = globalThis.document;
+  let selection;
+  globalThis.document = dom.document;
+  try {
+    const picker = createMagneticPicker(dom.list, {
+      cancel: false,
+      holdMs: 0,
+      detentDistance: 11,
+      onSelect: (...args) => (selection = args),
+    });
+    dom.listeners.get('list:pointerdown')({ pointerId: 7, pointerType: 'touch', clientY: 120 });
+    assert.deepEqual(dom.capturedPointerIds, [7]);
+    assert.equal(dom.styleProperties.has('touch-action'), false);
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    dom.listeners.get('document:pointermove')({
+      pointerId: 7,
+      clientY: 109,
+      preventDefault: () => {},
+    });
+    dom.listeners.get('document:pointerup')({ pointerId: 7 });
+    assert.equal(selection[0], 'exercise-1');
     picker.destroy();
   } finally {
     globalThis.document = originalDocument;

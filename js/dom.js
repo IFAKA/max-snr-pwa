@@ -66,17 +66,22 @@ export function bindHoldScroll(root = document) {
 }
 import { createMagneticPicker } from '../packages/magnetic-picker/src/magnetic-picker.js';
 
+const WORKOUT_PICKER_DETENT_DISTANCE = 11;
+
 export function bindMagneticLists(root = document) {
   root.querySelectorAll?.('.app-list').forEach((list) => {
     if (list.dataset.magneticBound) return;
     list.dataset.magneticBound = 'true';
     createMagneticPicker(list, {
-      rowSelector: ':scope > li:not([hidden]):not([data-picker-skip])',
+      rowSelector: ':scope > li:not([hidden])',
       actionSelector: 'a, button, label, [role="button"]',
       activeListClass: 'is-picker-active',
       activeDocumentClass: 'is-picker-active',
       targetRowClass: 'is-picker-target',
       holdingClass: 'is-picker-holding',
+      detentDistance: list.closest?.('.workout-picker')
+        ? WORKOUT_PICKER_DETENT_DISTANCE
+        : undefined,
       cancelRowClass: 'picker-cancel-row',
       cancelRowAttribute: 'data-picker-cancel-row',
       cancelActionAttribute: 'data-picker-cancel',
@@ -84,10 +89,13 @@ export function bindMagneticLists(root = document) {
       statusVisibleClass: 'is-picker-status-visible',
       visuallyHiddenClass: 'sr-only',
       disabled: (list) =>
-        !list.querySelector?.(':scope > li:not([hidden]):not([data-picker-skip])'),
-      isSelectable: (action) =>
-        !action ||
-        (!action.disabled &&
+        !list.querySelector?.(
+          ':scope > li:not([hidden]) a, :scope > li:not([hidden]) button, :scope > li:not([hidden]) label, :scope > li:not([hidden]) [role="button"]',
+        ),
+      isSelectable: (action, row) =>
+        (!action && !row?.hasAttribute?.('data-picker-skip')) ||
+        (Boolean(action) &&
+          !action.disabled &&
           action.getAttribute('aria-disabled') !== 'true' &&
           !action.classList.contains('is-disabled')),
       onSelect: (_value, { action }) => action.click(),
