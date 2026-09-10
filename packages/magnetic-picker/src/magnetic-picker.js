@@ -387,10 +387,14 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
       if (destroyed) return;
       destroyed = true;
       reset();
-      clearCancelHideTimer();
       removeListeners();
-      cancelRow?.remove();
       status.remove();
+      if (cancelRow) {
+        cancelHideTimer = setTimeout(() => {
+          cancelRow.remove();
+          cancelHideTimer = null;
+        }, CANCEL_FADE_MS);
+      }
     },
   };
 }

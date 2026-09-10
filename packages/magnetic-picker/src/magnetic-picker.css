@@ -19,3 +19,25 @@
   outline: 2px solid currentColor;
   outline-offset: -2px;
 }
+
+.picker-cancel-row {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 180ms ease-out,
+    visibility 0s linear 180ms;
+}
+
+.picker-cancel-row.is-picker-cancel-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .picker-cancel-row {
+    transition: none;
+  }
+}
