@@ -161,7 +161,7 @@ test('hold progress state is removed after activation', async () => {
   try {
     const picker = createMagneticPicker(dom.list, { cancel: false, holdMs: 20 });
     dom.listeners.get('list:pointerdown')({ pointerId: 1, pointerType: 'touch', clientY: 20 });
-    assert.equal(dom.classes.has('is-picker-holding'), false);
+    assert.equal(dom.classes.has('is-picker-holding'), true);
     await new Promise((resolve) => setTimeout(resolve, 30));
     assert.equal(dom.classes.has('is-picker-holding'), false);
     picker.destroy();

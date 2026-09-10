@@ -231,7 +231,7 @@ ul {
 }
 .app-list {
   border-top: 1px solid var(--line);
-  touch-action: auto;
+  touch-action: pan-y;
 }
 .app-list > li {
   display: flex;

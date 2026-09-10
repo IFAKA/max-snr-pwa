@@ -363,6 +363,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     if (!rows.length) return;
     suppressClick = false;
     movedBeforePicker = false;
+    setHolding(true);
     pointerId = event.pointerId;
     startY = event.clientY;
     selectableIndices = rows.reduce((indices, row, index) => {
