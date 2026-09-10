@@ -506,6 +506,8 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   font-weight: 800;
   text-overflow: ellipsis;
   white-space: nowrap;
+  /* Keep text-only heading rows above the shared hover/selection layer. */
+  z-index: 1;
 }
 .history-set-label {
   display: block;
