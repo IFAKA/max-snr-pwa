@@ -1,6 +1,6 @@
 # Magnetic Picker
 
-Dependency-free browser ES module that adds long-press, detent-style selection to a vertically scrolling list. It works with plain HTML and framework-managed DOM; create one instance after the list mounts and call `destroy()` before it unmounts.
+Dependency-free browser ES module that adds long-press, virtual-joystick selection to a vertically scrolling list. After the hold activates picker mode, the original touch point remains the fixed center: a one-detent dead zone prevents accidental movement, and holding farther away continuously scrolls in that direction. Release selects the highlighted available row. It works with plain HTML and framework-managed DOM; create one instance after the list mounts and call `destroy()` before it unmounts.
 
 ## Plain HTML and JavaScript
 
@@ -97,4 +97,4 @@ onBeforeUnmount(() => picker?.destroy());
 </template>
 ```
 
-Other frameworks use the same lifecycle contract: initialize after semantic markup is mounted, retain the returned instance, and call `destroy()` before unmounting or replacing the list. `onCancel` receives no arguments. Advanced options include `disabled`, `cancel`, `cancelLabel`, `holdMs`, and `detentDistance`; selector and class overrides are available when integrating with an existing design system.
+Other frameworks use the same lifecycle contract: initialize after semantic markup is mounted, retain the returned instance, and call `destroy()` before unmounting or replacing the list. `onCancel` receives no arguments. Joystick mode is enabled by default. Advanced options include `disabled`, `cancel`, `cancelLabel`, `holdMs`, `detentDistance`, `joystick`, `joystickDeadZone`, and `joystickMaxSpeed` (8 rows per second by default); selector and class overrides are available when integrating with an existing design system. Set `joystick: false` to retain active detent-drag behavior.

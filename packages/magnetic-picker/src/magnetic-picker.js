@@ -7,6 +7,25 @@ const HOLD_VIBRATION = 5;
 const DETENT_VIBRATION = [20, 30, 20];
 const SELECT_VIBRATION = [6, 14, 6];
 const CANCEL_FADE_MS = 420;
+const DEFAULT_JOYSTICK_MAX_SPEED = 8;
+
+export function magneticJoystickSpeed(
+  distanceY,
+  detentDistance = DETENT_DISTANCE,
+  deadZone = detentDistance,
+  maxSpeed = DEFAULT_JOYSTICK_MAX_SPEED,
+) {
+  const distance = Math.max(1, Number(detentDistance) || DETENT_DISTANCE);
+  const numericZone = Number(deadZone);
+  const numericCap = Number(maxSpeed);
+  const zone = Math.max(0, Number.isFinite(numericZone) ? numericZone : distance);
+  const cap = Math.max(0, Number.isFinite(numericCap) ? numericCap : DEFAULT_JOYSTICK_MAX_SPEED);
+  const magnitude = Math.abs(Number(distanceY) || 0);
+  if (magnitude <= zone || cap === 0) return 0;
+  const normalized = Math.min(1, (magnitude - zone) / (distance * 4));
+  const eased = normalized * normalized * (3 - 2 * normalized);
+  return Math.sign(distanceY) * cap * eased;
+}
 
 export function magneticRawRowIndex(startIndex, deltaY, detentDistance = DETENT_DISTANCE) {
   const distance = Math.max(1, detentDistance || DETENT_DISTANCE);
@@ -15,8 +34,7 @@ export function magneticRawRowIndex(startIndex, deltaY, detentDistance = DETENT_
   const acceleratedMagnitude =
     magnitude <= ACCELERATION_START_DETENTS
       ? magnitude
-      : ACCELERATION_START_DETENTS +
-        (magnitude - ACCELERATION_START_DETENTS) ** ACCELERATION_POWER;
+      : ACCELERATION_START_DETENTS + (magnitude - ACCELERATION_START_DETENTS) ** ACCELERATION_POWER;
   return startIndex + Math.round(Math.sign(detents) * acceleratedMagnitude);
 }
 
@@ -67,6 +85,9 @@ const defaultOptions = {
   disabled: false,
   holdMs: DEFAULT_HOLD_MS,
   detentDistance: DETENT_DISTANCE,
+  joystick: true,
+  joystickDeadZone: undefined,
+  joystickMaxSpeed: DEFAULT_JOYSTICK_MAX_SPEED,
   activeListClass: 'is-picker-active',
   activeDocumentClass: 'is-picker-active',
   targetRowClass: 'is-picker-target',
@@ -187,6 +208,10 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
   let pointerId = null;
   let startY = 0;
   let lastY = 0;
+  let joystickY = 0;
+  let joystickPosition = 0;
+  let joystickFrame = null;
+  let joystickFrameTime = null;
   let startIndex = -1;
   let activeIndex = -1;
   let rows = [];
@@ -246,6 +271,49 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     document.removeEventListener?.('pointerup', onPointerUp);
     document.removeEventListener?.('pointercancel', onPointerCancel);
   };
+  const cancelJoystick = () => {
+    if (joystickFrame !== null) {
+      const cancelFrame =
+        globalThis.window?.cancelAnimationFrame || globalThis.cancelAnimationFrame;
+      if (cancelFrame) cancelFrame.call(globalThis.window, joystickFrame);
+      else clearTimeout(joystickFrame);
+    }
+    joystickFrame = null;
+    joystickFrameTime = null;
+  };
+  const requestJoystickFrame = () =>
+    globalThis.window?.requestAnimationFrame || globalThis.requestAnimationFrame || null;
+  const pickerFrame = (time) => {
+    if (!pickerActive || destroyed) return;
+    const currentTime = Number.isFinite(time) ? time : Date.now();
+    const previousTime = joystickFrameTime ?? currentTime;
+    const elapsed = Math.min(0.1, Math.max(0, (currentTime - previousTime) / 1000));
+    joystickFrameTime = currentTime;
+    const deadZone = options.joystickDeadZone ?? options.detentDistance;
+    const speed = magneticJoystickSpeed(
+      joystickY - startY,
+      options.detentDistance,
+      deadZone,
+      options.joystickMaxSpeed,
+    );
+    if (speed) {
+      joystickPosition = magneticPickerIndex(joystickPosition + speed * elapsed, rows.length);
+      setActive(
+        magneticPreferredIndex(Math.round(joystickPosition), selectableIndices, rows.length),
+      );
+    }
+    const scheduleFrame = requestJoystickFrame();
+    joystickFrame = scheduleFrame ? scheduleFrame.call(globalThis.window, pickerFrame) : null;
+  };
+  const startJoystick = () => {
+    if (!options.joystick) return;
+    const scheduleFrame = requestJoystickFrame();
+    if (!scheduleFrame) return;
+    cancelJoystick();
+    joystickY = startY;
+    joystickPosition = activeIndex;
+    joystickFrame = scheduleFrame.call(globalThis.window, pickerFrame);
+  };
   const setActive = (index, vibration = DETENT_VIBRATION) => {
     if (!rows.length) return;
     const nextIndex = index < 0 || index >= rows.length ? -1 : index;
@@ -274,6 +342,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
   const reset = (notify = false) => {
     const shouldNotify = notify === true || (Boolean(notify) && pickerActive);
     clearTimer();
+    cancelJoystick();
     setHolding(false);
     stopDocumentTracking();
     if (pointerId !== null) {
@@ -341,6 +410,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     list.style.setProperty('touch-action', 'none');
     list.setPointerCapture?.(pointerId);
     setActive(startIndex, HOLD_VIBRATION);
+    startJoystick();
   };
   function onPointerMove(event) {
     if (event.pointerId !== pointerId) return;
@@ -357,8 +427,11 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
       return;
     }
     event.preventDefault();
-    const rawIndex = magneticRawRowIndex(startIndex, deltaY, options.detentDistance);
-    setActive(magneticPreferredIndex(rawIndex, selectableIndices, rows.length));
+    joystickY = event.clientY;
+    if (!options.joystick) {
+      const rawIndex = magneticRawRowIndex(startIndex, deltaY, options.detentDistance);
+      setActive(magneticPreferredIndex(rawIndex, selectableIndices, rows.length));
+    }
   }
   function onPointerUp(event) {
     if (event.pointerId !== pointerId) return;
@@ -387,11 +460,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
       const action = actionFor(row, options.actionSelector);
       return options.isSelectable(action, row) ? [...indices, index] : indices;
     }, []);
-    startIndex = magneticEntryIndex(
-      nearestRow(rows, startY),
-      selectableIndices,
-      rows.length,
-    );
+    startIndex = magneticEntryIndex(nearestRow(rows, startY), selectableIndices, rows.length);
     clearTimer();
     document.addEventListener?.('pointermove', onPointerMove, { passive: false });
     document.addEventListener?.('pointerup', onPointerUp);
