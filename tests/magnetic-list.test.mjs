@@ -120,6 +120,7 @@ test('picker vibrates before highlighting the held row', async () => {
     createElement: () => ({
       className: '',
       setAttribute: () => {},
+      removeAttribute: () => {},
       classList: { add: () => {}, remove: () => {} },
       textContent: '',
     }),

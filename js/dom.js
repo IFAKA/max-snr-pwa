@@ -117,6 +117,19 @@ function listRows(list) {
   return [...list.children].filter((row) => row.matches?.('li') && !row.hidden);
 }
 
+function ensurePickerCancelRow(list) {
+  const existing = list.querySelector?.('[data-picker-cancel-row]');
+  if (existing) return existing;
+  const row = document.createElement('li');
+  row.className = 'picker-cancel-row';
+  row.hidden = true;
+  row.setAttribute('data-picker-cancel-row', '');
+  row.innerHTML =
+    '<button class="list-link" type="button" data-picker-cancel aria-label="Cancel picker"><span>Cancel</span></button>';
+  list.append(row);
+  return row;
+}
+
 function rowAction(row) {
   return row.querySelector?.('a, button, label, [role="button"]');
 }
@@ -187,7 +200,7 @@ export function bindMagneticLists(root = document) {
     let pickerActive = false;
     let suppressClick = false;
     let movedBeforePicker = false;
-    const cancelRow = list.querySelector?.('[data-picker-cancel-row]');
+    const cancelRow = ensurePickerCancelRow(list);
     const scrollTarget = scrollSurface(list);
     const clearTimer = () => {
       clearTimeout(timer);
