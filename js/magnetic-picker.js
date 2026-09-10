@@ -245,12 +245,16 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
   };
   const enter = () => {
     if (pointerId === null || destroyed) return;
-    cancelRow?.removeAttribute('hidden');
     rows = rowsFor(list, options.rowSelector);
     selectableIndices = rows.reduce((indices, row, index) => {
       const action = actionFor(row, options.actionSelector);
       return options.isSelectable(action, row) ? [...indices, index] : indices;
     }, []);
+    if (!selectableIndices.length) {
+      reset();
+      return;
+    }
+    cancelRow?.removeAttribute('hidden');
     const primaryIndices = rows.reduce((indices, row, index) => {
       const action = actionFor(row, options.actionSelector);
       return row.matches?.(options.primarySelector) && options.isSelectable(action, row)

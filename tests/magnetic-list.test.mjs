@@ -9,6 +9,7 @@ globalThis.document = {
 };
 
 const {
+  createMagneticPicker,
   magneticEdgePosition,
   magneticEntryIndex,
   magneticPickerIndex,
@@ -203,6 +204,62 @@ test('excluded empty-state rows do not enter picker mode', async () => {
   try {
     const { bindMagneticLists } = await import('../js/dom.js?empty-state');
     bindMagneticLists({ querySelectorAll: () => [list] });
+    listeners.pointerdown({ pointerId: 1, pointerType: 'touch', clientY: 20 });
+    await new Promise((resolve) => setTimeout(resolve, 430));
+    assert.equal(classes.has('is-picker-active'), false);
+  } finally {
+    globalThis.document = originalDocument;
+  }
+});
+
+test('lists with only disabled rows do not enter picker mode', async () => {
+  const listeners = {};
+  const classes = new Set();
+  const action = {
+    disabled: true,
+    getAttribute: () => null,
+    classList: { contains: () => false },
+  };
+  const row = {
+    getBoundingClientRect: () => ({ top: 0, bottom: 52, height: 52 }),
+    classList: { add: () => {}, remove: () => {}, toggle: () => {} },
+    setAttribute: () => {},
+    removeAttribute: () => {},
+    querySelector: () => action,
+    textContent: 'Unavailable workout',
+  };
+  const list = {
+    parentElement: null,
+    append: () => {},
+    clientHeight: 52,
+    scrollHeight: 52,
+    querySelector: () => null,
+    querySelectorAll: (selector) => (selector.startsWith(':scope') ? [row] : []),
+    addEventListener: (type, handler) => {
+      listeners[type] = handler;
+    },
+    classList: {
+      add: (name) => classes.add(name),
+      remove: (name) => classes.delete(name),
+    },
+    style: { setProperty: () => {}, removeProperty: () => {} },
+  };
+  const originalDocument = globalThis.document;
+  globalThis.document = {
+    ...originalDocument,
+    documentElement: { classList: { add: () => {}, remove: () => {} } },
+    createElement: () => ({
+      classList: { add: () => {}, remove: () => {} },
+      setAttribute: () => {},
+      removeAttribute: () => {},
+      remove: () => {},
+    }),
+    addEventListener: () => {},
+    body: { dataset: {} },
+    scrollingElement: list,
+  };
+  try {
+    createMagneticPicker(list);
     listeners.pointerdown({ pointerId: 1, pointerType: 'touch', clientY: 20 });
     await new Promise((resolve) => setTimeout(resolve, 430));
     assert.equal(classes.has('is-picker-active'), false);
