@@ -200,6 +200,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     clearCancelHideTimer();
     cancelRow.removeAttribute('hidden');
     cancelRow.classList.remove('is-picker-cancel-visible');
+    void cancelRow.offsetWidth;
     const scheduleFrame = globalThis.window?.requestAnimationFrame || ((callback) => setTimeout(callback, 0));
     scheduleFrame(() => cancelRow.classList.add('is-picker-cancel-visible'));
   };
