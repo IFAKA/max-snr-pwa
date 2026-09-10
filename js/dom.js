@@ -64,7 +64,7 @@ export function bindHoldScroll(root = document) {
   });
   bindMagneticLists(root);
 }
-import { createMagneticPicker } from './magnetic-picker.js';
+import { createMagneticPicker } from '../packages/magnetic-picker/src/magnetic-picker.js';
 
 export function bindMagneticLists(root = document) {
   root.querySelectorAll?.('.app-list').forEach((list) => {
@@ -72,6 +72,15 @@ export function bindMagneticLists(root = document) {
     list.dataset.magneticBound = 'true';
     createMagneticPicker(list, {
       rowSelector: ':scope > li:not([hidden]):not([data-picker-skip])',
+      activeListClass: 'is-picker-active',
+      activeDocumentClass: 'is-picker-active',
+      targetRowClass: 'is-picker-target',
+      cancelRowClass: 'picker-cancel-row',
+      cancelRowAttribute: 'data-picker-cancel-row',
+      cancelActionAttribute: 'data-picker-cancel',
+      statusClass: 'picker-status',
+      statusVisibleClass: 'is-picker-status-visible',
+      visuallyHiddenClass: 'sr-only',
       isSelectable: (action) =>
         !action ||
         (!action.disabled &&
