@@ -540,7 +540,6 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     }
     const radius = Math.max(1, Number(options.joystickRadius) || DEFAULT_JOYSTICK_RADIUS);
     const insideLimit = Math.abs(joystickY - startY) < radius - 1;
-    const rawIndex = magneticRawRowIndex(startIndex, deltaY, options.detentDistance);
     if (insideLimit) {
       if (joystickAtLimit) {
         joystickAtLimit = false;
@@ -564,7 +563,13 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
       setActive(nextIndex);
       return;
     }
-    const nextIndex = magneticPreferredIndex(rawIndex, selectableIndices, rows.length);
+    const edgeDeltaY = event.clientY - magneticBaseY;
+    const edgeRawIndex = magneticRawRowIndex(
+      magneticBaseIndex,
+      edgeDeltaY,
+      options.detentDistance,
+    );
+    const nextIndex = magneticPreferredIndex(edgeRawIndex, selectableIndices, rows.length);
     if (!joystickAtLimit) {
       joystickAtLimit = true;
       joystickVelocity = 0;

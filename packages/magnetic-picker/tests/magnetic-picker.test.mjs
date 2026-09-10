@@ -551,6 +551,46 @@ test('holding the joystick at its limit auto-scrolls continuously', async () => 
   }
 });
 
+test('holding the joystick at the upper limit scrolls upward', async () => {
+  const dom = makePickerDom({ rows: 12 });
+  dom.list.clientHeight = 100;
+  dom.list.scrollTop = 400;
+  const originalDocument = globalThis.document;
+  const originalWindow = globalThis.window;
+  let frame;
+  globalThis.document = dom.document;
+  globalThis.window = {
+    requestAnimationFrame: (callback) => {
+      frame = callback;
+      return 1;
+    },
+    cancelAnimationFrame: () => {},
+  };
+  try {
+    const picker = createMagneticPicker(dom.list, { cancel: false, holdMs: 0 });
+    dom.listeners.get('list:pointerdown')({
+      pointerId: 1,
+      pointerType: 'touch',
+      clientX: 40,
+      clientY: 300,
+    });
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    dom.listeners.get('document:pointermove')({
+      pointerId: 1,
+      clientX: 40,
+      clientY: 236,
+      preventDefault: () => {},
+    });
+    frame(0);
+    frame(16);
+    assert.ok(dom.list.scrollTop < 400);
+    picker.destroy();
+  } finally {
+    globalThis.document = originalDocument;
+    globalThis.window = originalWindow;
+  }
+});
+
 test('joystick overlay follows a fixed origin and clamps the thumb to its radius', async () => {
   const dom = makePickerDom({ rows: 4 });
   const originalDocument = globalThis.document;
