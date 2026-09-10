@@ -9,6 +9,7 @@
   --accent: #17633f;
   --accent-soft: #dceee3;
   --danger: #a5322a;
+  --danger-soft: #f9dfdc;
   --success: #18794e;
   --radius: 16px;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
@@ -269,7 +270,7 @@ ul {
   z-index: 1;
   bottom: 0;
   border-top: 1px solid var(--line);
-  background: var(--surface);
+  background: var(--danger-soft);
 }
 .picker-cancel-row button {
   display: flex;
@@ -281,10 +282,20 @@ ul {
   border: 0;
   border-radius: 0;
   background: transparent;
-  color: var(--muted);
+  color: var(--danger);
+}
+.picker-cancel-row button:hover,
+.picker-cancel-row button:focus-visible {
+  background: color-mix(in srgb, var(--danger-soft) 78%, var(--danger));
+}
+.app-list > li.picker-cancel-row.is-picker-target {
+  background: var(--danger-soft);
+  box-shadow:
+    inset 0 2px 0 var(--danger),
+    inset 0 -2px 0 var(--danger);
 }
 .picker-cancel-row.is-picker-target button {
-  color: inherit;
+  color: var(--danger);
 }
 .list-link {
   position: relative;
@@ -1050,13 +1061,14 @@ main > section:has(> .app-list) > .app-list .list-link::before {
     --accent: #8fd0a9;
     --accent-soft: #21372a;
     --danger: #ffaaa1;
+    --danger-soft: #542824;
     --success: #8fd0a9;
   }
   .primary {
     color: #102116;
   }
   .notice.error {
-    background: #542824;
+    background: var(--danger-soft);
     color: #ffd7d2;
   }
 }
