@@ -247,7 +247,7 @@ ul {
   white-space: nowrap;
 }
 .app-list.is-picker-active {
-  touch-action: none;
+  touch-action: pan-y;
 }
 .app-list.is-picker-active::after {
   position: fixed;
@@ -256,15 +256,10 @@ ul {
   left: var(--picker-zone-left);
   width: var(--picker-zone-width);
   height: var(--picker-zone-height);
-  display: grid;
-  place-items: center;
+  display: block;
   border-block: 2px solid color-mix(in srgb, var(--accent) 75%, transparent);
-  background: color-mix(in srgb, var(--accent-soft) 24%, transparent);
-  color: var(--muted);
-  content: 'CENTER · HOLD TO PAUSE';
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  background: color-mix(in srgb, var(--accent-soft) 10%, transparent);
+  content: '';
   pointer-events: none;
   text-align: center;
 }

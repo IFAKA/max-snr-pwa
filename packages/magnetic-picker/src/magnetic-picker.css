@@ -12,7 +12,7 @@
 }
 
 .is-picker-active {
-  touch-action: none;
+  touch-action: pan-y;
 }
 
 .is-picker-active::after {
@@ -22,15 +22,10 @@
   left: var(--picker-zone-left);
   width: var(--picker-zone-width);
   height: var(--picker-zone-height);
-  display: grid;
-  place-items: center;
+  display: block;
   border-block: 2px solid color-mix(in srgb, currentColor 75%, transparent);
-  background: color-mix(in srgb, currentColor 12%, transparent);
-  color: currentColor;
-  content: 'CENTER · HOLD TO PAUSE';
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  background: color-mix(in srgb, currentColor 6%, transparent);
+  content: '';
   pointer-events: none;
   text-align: center;
 }

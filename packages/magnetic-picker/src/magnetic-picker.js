@@ -392,7 +392,6 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     list.classList.add(options.activeListClass);
     document.documentElement?.classList.add(options.activeDocumentClass);
     status.classList.add(options.statusVisibleClass);
-    list.style.setProperty('touch-action', 'none');
     updatePickerZone();
     list.setPointerCapture?.(pointerId);
     setActive(startIndex, HOLD_VIBRATION);
