@@ -120,6 +120,7 @@ test('picker vibrates before highlighting the held row', async () => {
     createElement: () => ({
       className: '',
       setAttribute: () => {},
+      removeAttribute: () => {},
       classList: { add: () => {}, remove: () => {} },
       textContent: '',
     }),
@@ -135,6 +136,9 @@ test('picker vibrates before highlighting the held row', async () => {
     const { bindMagneticLists } = await import('../js/dom.js?picker-order');
     bindMagneticLists({ querySelectorAll: () => [list] });
     listeners.pointerdown({ pointerId: 1, pointerType: 'touch', clientY: 20 });
+    let contextMenuPrevented = false;
+    listeners.contextmenu({ preventDefault: () => (contextMenuPrevented = true) });
+    assert.equal(contextMenuPrevented, true);
     await new Promise((resolve) => setTimeout(resolve, 430));
     const highlightIndex = events.indexOf('toggle:is-magnetic-target:true');
     const vibrationIndex = events.indexOf('vibrate');

@@ -116,6 +116,19 @@ function listRows(list) {
   return [...list.children].filter((row) => row.matches?.('li') && !row.hidden);
 }
 
+function ensurePickerCancelRow(list) {
+  const existing = list.querySelector?.('[data-picker-cancel-row]');
+  if (existing) return existing;
+  const row = document.createElement('li');
+  row.className = 'picker-cancel-row';
+  row.hidden = true;
+  row.setAttribute('data-picker-cancel-row', '');
+  row.innerHTML =
+    '<button class="list-link" type="button" data-picker-cancel aria-label="Cancel picker"><span>Cancel</span></button>';
+  list.append(row);
+  return row;
+}
+
 function rowAction(row) {
   return row.querySelector?.('a, button, label, [role="button"]');
 }
@@ -170,7 +183,6 @@ function describeRow(row) {
     'Unavailable item'
   );
 }
-
 function pointerOutside(element, event) {
   const box = element.getBoundingClientRect?.();
   return (
@@ -181,7 +193,6 @@ function pointerOutside(element, event) {
       event.clientY > box.bottom)
   );
 }
-
 export function bindMagneticLists(root = document) {
   root.querySelectorAll?.('.app-list').forEach((list) => {
     if (list.dataset.magneticBound) return;
@@ -197,10 +208,8 @@ export function bindMagneticLists(root = document) {
     let selectableIndices = [];
     let pickerActive = false;
     let suppressClick = false;
-    let movedBeforePicker = false;
-    const cancelRow = list.querySelector?.('[data-picker-cancel-row]');
-    const scrollTarget = scrollSurface(list);
-
+    let movedBeforePicker = false,
+      cancelRow = ensurePickerCancelRow(list);
     const clearTimer = () => {
       clearTimeout(timer);
       timer = null;
@@ -335,7 +344,7 @@ export function bindMagneticLists(root = document) {
           clearTimer();
           movedBeforePicker = true;
           event.preventDefault();
-          scrollTarget.scrollTop += previousY - lastY;
+          scrollSurface(list).scrollTop += previousY - lastY;
         }
         return;
       }
@@ -366,6 +375,7 @@ export function bindMagneticLists(root = document) {
     });
     list.addEventListener('blur', reset);
     list.addEventListener('click', onClick, true);
+    list.addEventListener('contextmenu', (event) => pointerId !== null && event.preventDefault());
     list.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && pickerActive) {
         event.preventDefault();
