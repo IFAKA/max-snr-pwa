@@ -110,9 +110,6 @@ h3 {
 .app-title {
   min-width: 0;
 }
-.history-exercise .app-title {
-  margin: 0 0 8px;
-}
 p {
   line-height: 1.4;
 }
@@ -243,8 +240,10 @@ ul {
   display: flex;
   min-height: var(--list-row-height);
   align-items: center;
+  overflow: hidden;
   padding: var(--list-row-padding);
   border-bottom: 1px solid var(--line);
+  white-space: nowrap;
 }
 .app-list.is-picker-active {
   touch-action: none;
@@ -273,32 +272,13 @@ ul {
   animation: none;
   transform: none;
 }
-.app-list > li {
-  position: relative;
-}
 .app-list > li.is-picker-target {
   background: var(--accent-soft);
+  border-block: 2px solid var(--accent);
   transition: background-color 180ms var(--ease-out);
 }
-.app-list > li.is-picker-target::after {
-  position: absolute;
-  z-index: 2;
-  inset-inline: 0;
-  top: 0;
-  bottom: 0;
-  border-block: 2px solid var(--accent);
-  content: '';
-  pointer-events: none;
-}
-.app-list > li.is-picker-target .list-link {
-  background: transparent;
-}
-.app-list > li.is-picker-target .list-link:focus-visible {
-  outline-offset: -3px;
-}
-.app-list > li.is-picker-target .list-link.is-disabled,
-.app-list > li.is-picker-target.complete-row .list-link {
-  color: var(--muted);
+.app-list.is-picker-active .list-link:active {
+  transform: none;
 }
 .picker-cancel-row {
   position: sticky;
@@ -308,7 +288,6 @@ ul {
   min-height: var(--list-row-height);
   margin-inline: -12px;
   padding-inline: 12px;
-  border-top: 1px solid var(--line);
   background: var(--danger-soft);
   opacity: 0;
   visibility: hidden;
@@ -363,8 +342,6 @@ ul {
 }
 .app-list > li.picker-cancel-row.is-picker-target {
   background: var(--danger-soft);
-}
-.app-list > li.picker-cancel-row.is-picker-target::after {
   border-color: var(--danger);
 }
 .picker-cancel-row.is-picker-target button {
@@ -495,7 +472,7 @@ main > section:has(> .app-list) > .app-list {
   overscroll-behavior: contain;
   scrollbar-width: thin;
 }
-main > section:has(> .app-list) > .app-list > li.is-picker-target {
+main > section:has(> .app-list) > .app-list > li:not(.picker-cancel-row).is-picker-target {
   margin-inline: -12px;
   padding-inline: 12px;
 }
@@ -558,6 +535,22 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
+.history-group-label .list-title {
+  display: block;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-size: 22px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.history-set-label {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .history-workout strong {
   font-weight: 400;
 }
@@ -594,20 +587,6 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
-}
-.history-exercise {
-  padding: 12px 0;
-  border-top: 1px solid var(--line);
-}
-.history-exercise ul {
-  display: grid;
-  gap: 0;
-}
-.history-exercise li {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 8px;
 }
 .data-card {
   margin-top: 24px;
@@ -1155,11 +1134,7 @@ main > section:has(> .app-list) > .app-list .list-link::before {
 @media (forced-colors: active) {
   .app-list > li.is-picker-target {
     color: HighlightText;
-  }
-  .app-list > li.is-picker-target {
     background: Highlight;
-  }
-  .app-list > li.is-picker-target::after {
     border-color: HighlightText;
   }
 }

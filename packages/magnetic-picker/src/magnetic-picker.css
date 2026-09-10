@@ -34,8 +34,8 @@
 }
 
 .is-picker-target {
-  outline: 2px solid currentColor;
-  outline-offset: -2px;
+  background: var(--picker-target-background, transparent);
+  border-block: 2px solid var(--picker-target-border, currentColor);
 }
 
 .picker-cancel-row {

@@ -29,11 +29,11 @@ function performanceFor(task) {
   return null;
 }
 function setLine(task, index) {
-  if (task.skipped) return '<li>Skipped</li>';
+  if (task.skipped) return '<li><span class="history-set-label">Skipped</span></li>';
   const p = performanceFor(task);
-  if (!p) return '<li>Not completed</li>';
+  if (!p) return '<li><span class="history-set-label">Not completed</span></li>';
   const load = p.weight === undefined ? '' : ` · ${esc(p.weight)} ${esc(unitFor(p))}`;
-  return `<li>Set ${esc(task.set || index + 1)} · ${esc(p.reps)} reps${load}</li>`;
+  return `<li><span class="history-set-label">Set ${esc(task.set || index + 1)} · ${esc(p.reps)} reps${load}</span></li>`;
 }
 function workoutDetails(workout) {
   const tasks = workout.tasks || workout.queue || [];
@@ -43,16 +43,11 @@ function workoutDetails(workout) {
     if (!groups.has(name)) groups.set(name, []);
     groups.get(name).push({ task, index });
   });
-  return [...groups]
-    .map(
-      ([name, entries], index) =>
-        `<section class="history-exercise">${titleMarkup(name, `history-exercise-title-${index}`, 'h2')}${listMarkup(
-          entries.map(({ task, index: taskIndex }) => setLine(task, taskIndex)),
-          '',
-          `${name} sets`,
-        )}</section>`,
-    )
-    .join('');
+  const rows = [...groups].flatMap(([name, entries], index) => [
+    `<li class="history-group-label" data-picker-skip>${titleMarkup(name, `history-exercise-title-${index}`, 'h2', 'list-title')}</li>`,
+    ...entries.map(({ task, index: taskIndex }) => setLine(task, taskIndex)),
+  ]);
+  return listMarkup(rows, '', 'Workout sets');
 }
 function workoutMarkup(workout, index) {
   const date = workout.date ? new Date(workout.date).toLocaleDateString() : 'Saved workout';

@@ -83,7 +83,8 @@ export function bindMagneticLists(root = document) {
       statusClass: 'picker-status',
       statusVisibleClass: 'is-picker-status-visible',
       visuallyHiddenClass: 'sr-only',
-      disabled: (list) => !list.querySelector?.('a, button, label, [role="button"]'),
+      disabled: (list) =>
+        !list.querySelector?.(':scope > li:not([hidden]):not([data-picker-skip])'),
       isSelectable: (action) =>
         !action ||
         (!action.disabled &&

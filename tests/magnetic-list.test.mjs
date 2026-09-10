@@ -106,7 +106,12 @@ test('picker vibrates before highlighting the held row', async () => {
     append: () => {},
     clientHeight: 52,
     scrollHeight: 52,
-    querySelector: (selector) => (selector.includes('a,') ? action : null),
+    querySelector: (selector) =>
+      selector.startsWith(':scope') || selector.includes('a,')
+        ? selector.includes('a,')
+          ? action
+          : row
+        : null,
     querySelectorAll: (selector) => (selector.startsWith(':scope') ? [row] : []),
     addEventListener: (type, handler) => {
       listeners[type] = handler;
@@ -207,6 +212,65 @@ test('excluded empty-state rows do not enter picker mode', async () => {
     bindMagneticLists({ querySelectorAll: () => [list] });
     assert.equal(list.querySelector('a, button, label, [role="button"]'), null);
     assert.equal(classes.has('is-picker-active'), false);
+  } finally {
+    globalThis.document = originalDocument;
+  }
+});
+
+test('text-only rows remain magnetic picker detents', async () => {
+  const listeners = {};
+  const classes = new Set();
+  const row = {
+    getBoundingClientRect: () => ({ top: 0, bottom: 52, height: 52 }),
+    classList: { add: () => {}, remove: () => {}, toggle: () => {} },
+    hasAttribute: () => false,
+    matches: () => false,
+    setAttribute: () => {},
+    removeAttribute: () => {},
+    querySelector: () => null,
+    scrollIntoView: () => {},
+    textContent: 'Set 1 · 8 reps',
+  };
+  const list = {
+    dataset: {},
+    parentElement: null,
+    append: () => {},
+    clientHeight: 52,
+    scrollHeight: 52,
+    querySelector: (selector) => (selector.startsWith(':scope') ? row : null),
+    querySelectorAll: (selector) => (selector.startsWith(':scope') ? [row] : []),
+    addEventListener: (type, handler) => {
+      listeners[type] = handler;
+    },
+    classList: {
+      add: (name) => classes.add(name),
+      remove: (name) => classes.delete(name),
+      toggle: (name, enabled) => (enabled ? classes.add(name) : classes.delete(name)),
+    },
+    style: { setProperty: () => {}, removeProperty: () => {} },
+  };
+  const originalDocument = globalThis.document;
+  globalThis.document = {
+    ...originalDocument,
+    documentElement: { classList: { add: () => {}, remove: () => {} } },
+    createElement: () => ({
+      className: '',
+      classList: { add: () => {}, remove: () => {} },
+      setAttribute: () => {},
+      remove: () => {},
+      removeAttribute: () => {},
+      textContent: '',
+    }),
+    addEventListener: () => {},
+    body: {},
+    scrollingElement: list,
+  };
+  try {
+    const { bindMagneticLists } = await import('../js/dom.js?text-rows');
+    bindMagneticLists({ querySelectorAll: () => [list] });
+    listeners.pointerdown({ pointerId: 1, pointerType: 'touch', clientY: 20 });
+    await new Promise((resolve) => setTimeout(resolve, 430));
+    assert.equal(classes.has('is-picker-active'), true);
   } finally {
     globalThis.document = originalDocument;
   }
