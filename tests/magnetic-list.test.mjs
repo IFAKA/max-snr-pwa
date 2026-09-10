@@ -8,8 +8,13 @@ globalThis.document = {
   visibilityState: 'visible',
 };
 
-const { magneticEdgePosition, magneticPickerIndex, magneticPreferredIndex, magneticRowIndex } =
-  await import('../js/dom.js');
+const {
+  magneticEdgePosition,
+  magneticEntryIndex,
+  magneticPickerIndex,
+  magneticPreferredIndex,
+  magneticRowIndex,
+} = await import('../js/dom.js');
 
 test('magnetic row calculation follows cumulative drag distance', () => {
   assert.equal(magneticRowIndex(2, -24, 6), 1);
@@ -37,6 +42,24 @@ test('picker exposes a cancel detent beyond either list edge', () => {
 test('picker prefers the nearest selectable row', () => {
   assert.equal(magneticPreferredIndex(0, [1, 2], 3), 1);
   assert.equal(magneticPreferredIndex(2, [0, 1], 3), 1);
+});
+
+test('picker entry prefers an explicitly primary selectable row', () => {
+  assert.equal(magneticEntryIndex(0, [0, 1, 2], 3, [2]), 2);
+});
+
+test('picker entry ignores disabled primary rows', () => {
+  assert.equal(magneticEntryIndex(0, [0, 1], 3, [2]), 0);
+});
+
+test('picker entry uses the nearest enabled row without a primary', () => {
+  assert.equal(magneticEntryIndex(2, [0, 1], 3), 1);
+});
+
+test('picker movement can reach enabled links after primary entry', () => {
+  const entryIndex = magneticEntryIndex(0, [0, 1, 2], 3, [0]);
+  assert.equal(magneticPreferredIndex(2, [0, 1, 2], 3), 2);
+  assert.equal(entryIndex, 0);
 });
 
 test('picker falls back to disabled rows when none are selectable', () => {

@@ -98,6 +98,12 @@ export function magneticPreferredIndex(rawIndex, selectableIndices, rowCount) {
   );
 }
 
+export function magneticEntryIndex(rawIndex, selectableIndices, rowCount, primaryIndices = []) {
+  const primarySelectable = primaryIndices.filter((index) => selectableIndices.includes(index));
+  if (primarySelectable.length) return primarySelectable[0];
+  return magneticPreferredIndex(rawIndex, selectableIndices, rowCount);
+}
+
 export function magneticEdgePosition(index, rowCount, overshoot = 0) {
   if (!rowCount) return -1;
   if (index >= 0 && index < rowCount) return index;
@@ -283,7 +289,20 @@ export function bindMagneticLists(root = document) {
         (indices, row, index) => (enabledAction(row) ? [...indices, index] : indices),
         [],
       );
-      startIndex = magneticPreferredIndex(nearestRow(rows, startY), selectableIndices, rows.length);
+      const primaryIndices = rows.reduce(
+        (indices, row, index) =>
+          (row.hasAttribute?.('data-picker-primary') || row.dataset?.pickerPrimary !== undefined) &&
+          enabledAction(row)
+            ? [...indices, index]
+            : indices,
+        [],
+      );
+      startIndex = magneticEntryIndex(
+        nearestRow(rows, startY),
+        selectableIndices,
+        rows.length,
+        primaryIndices,
+      );
       pickerActive = true;
       list.classList.add('is-magnetic-picker');
       document.documentElement?.classList.add('is-magnetic-picker-active');
