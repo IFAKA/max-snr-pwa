@@ -11,9 +11,6 @@
     "syntax": "node --check app.js && find js -type f -name '*.js' -not -path 'js/vendor/*' -print0 | xargs -0 -n1 node --check && node --check sw.js",
     "check": "npm run lint && npm run architecture && npm run format:check && npm run syntax && npm test"
   },
-  "dependencies": {
-    "vercel": "^59.11.7"
-  },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "eslint": "^10.10.0",
