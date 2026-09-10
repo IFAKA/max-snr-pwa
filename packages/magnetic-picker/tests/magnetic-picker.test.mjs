@@ -66,9 +66,9 @@ test('magnetic joystick velocity accelerates toward input and decays smoothly', 
 });
 
 test('default joystick dead zone is compact and default speed is fast', () => {
-  assert.equal(magneticJoystickSpeed(12), 0);
-  assert.ok(magneticJoystickSpeed(14) > 2);
-  assert.equal(magneticJoystickSpeed(64), 12);
+  assert.equal(magneticJoystickSpeed(9), 0);
+  assert.ok(magneticJoystickSpeed(11) > 3);
+  assert.equal(magneticJoystickSpeed(64), 16);
 });
 
 function makePickerDom({ rows = 1, disabledIndices = [] } = {}) {
