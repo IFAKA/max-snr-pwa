@@ -89,16 +89,14 @@ export function bindMagneticLists(root = document) {
       statusVisibleClass: 'is-picker-status-visible',
       visuallyHiddenClass: 'sr-only',
       disabled: (list) =>
-        !list.querySelector?.(
-          ':scope > li:not([hidden]) a, :scope > li:not([hidden]) button, :scope > li:not([hidden]) label, :scope > li:not([hidden]) [role="button"]',
-        ),
+        !list.querySelector?.(':scope > li:not([hidden]):not([data-picker-skip])'),
       isSelectable: (action, row) =>
         (!action && !row?.hasAttribute?.('data-picker-skip')) ||
         (Boolean(action) &&
           !action.disabled &&
           action.getAttribute('aria-disabled') !== 'true' &&
           !action.classList.contains('is-disabled')),
-      onSelect: (_value, { action }) => action.click(),
+      onSelect: (_value, { action }) => action?.click(),
     });
   });
 }
