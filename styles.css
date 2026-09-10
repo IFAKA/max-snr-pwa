@@ -231,7 +231,7 @@ ul {
 }
 .app-list {
   border-top: 1px solid var(--line);
-  touch-action: none;
+  touch-action: pan-y;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
@@ -284,9 +284,6 @@ ul {
   transform: none;
 }
 .picker-cancel-row {
-  position: sticky;
-  z-index: 1;
-  bottom: 0;
   background: var(--danger-soft);
   opacity: 0;
   visibility: hidden;
@@ -334,6 +331,9 @@ ul {
   border: 0;
   border-radius: 0;
   background: transparent;
+  color: var(--danger);
+}
+.picker-cancel-row .list-link {
   color: var(--danger);
 }
 .app-list > li.picker-cancel-row.is-picker-target {

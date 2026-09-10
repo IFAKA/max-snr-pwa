@@ -82,15 +82,6 @@ function valueFor(row, action) {
   return row?.getAttribute?.('data-picker-value') ?? action?.getAttribute?.('value') ?? '';
 }
 
-function scrollSurface(list) {
-  let surface = list;
-  while (surface && surface !== document.body) {
-    if (surface.scrollHeight > surface.clientHeight + 1) return surface;
-    surface = surface.parentElement;
-  }
-  return document.scrollingElement || document.documentElement || list;
-}
-
 function nearestRow(rows, y) {
   if (!rows.length) return -1;
   const boxes = rows.map((row) => row.getBoundingClientRect());
@@ -174,7 +165,6 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
   if (isDisabled()) return { destroy() {} };
   const status = ensureStatus(list, options);
   const cancelRow = options.cancel ? ensureCancelRow(list, options.cancelLabel, options) : null;
-  const scrollTarget = scrollSurface(list);
   let timer = null;
   let pointerId = null;
   let startY = 0;
@@ -351,8 +341,6 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
         clearTimer();
         setHolding(false);
         movedBeforePicker = true;
-        event.preventDefault();
-        scrollTarget.scrollTop -= event.movementY || 0;
       }
       return;
     }
