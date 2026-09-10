@@ -367,6 +367,9 @@ ul {
     background: var(--surface-raised);
   }
 }
+html.is-touch-pointer .list-link:hover::before {
+  background: transparent;
+}
 .list-link > span:not(.sr-only),
 .list-link > svg {
   position: relative;
