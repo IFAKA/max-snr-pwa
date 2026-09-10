@@ -53,7 +53,7 @@ function workoutDetails(workout) {
 }
 function workoutMarkup(workout, index) {
   const date = workout.date ? new Date(workout.date).toLocaleDateString() : 'Saved workout';
-  return `<li><a class="list-link" href="/history/?view=workout&id=${index}"><span><strong>${esc(workout.name || 'Workout')}</strong><small>${esc(date)}</small></span>${icon('chevron', 'Open workout')}</a></li>`;
+  return `<li><a class="list-link" href="/history/?view=workout&id=${index}"><span class="history-workout-label"><time>${esc(date)}</time><span aria-hidden="true">·</span><strong>${esc(workout.name || 'Workout')}</strong></span>${icon('chevron', 'Open workout')}</a></li>`;
 }
 function showImportError(message) {
   const status = document.querySelector('#data-status');

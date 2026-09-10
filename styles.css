@@ -381,6 +381,28 @@ ul {
   align-items: center;
   gap: 8px;
 }
+.history-workout-label {
+  align-items: center;
+  flex-direction: row !important;
+  gap: 8px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.history-workout-label time,
+.history-workout-label > span {
+  flex: 0 0 auto;
+}
+.history-workout-label time {
+  color: inherit;
+}
+.history-workout-label strong {
+  min-width: 0;
+  overflow: hidden;
+  font-size: inherit;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .day-label .hold-scroll-text {
   overflow: hidden;
   text-overflow: ellipsis;
