@@ -21,10 +21,6 @@ function routineRows(items) {
   });
 }
 
-export function routineMarkup(items, className = '') {
-  return listMarkup(
-    routineRows(items),
-    `scroll-list${className ? ` ${className}` : ''}`,
-    'Exercises',
-  );
+export function routineMarkup(items) {
+  return listMarkup(routineRows(items), '', 'Exercises');
 }

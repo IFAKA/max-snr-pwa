@@ -18,7 +18,7 @@ import { navigateTo } from './navigation.js';
 
 function renderStart(day) {
   const available = isWorkoutDay(day);
-  app.innerHTML = `<section aria-labelledby="start-title">${titleMarkup(available ? workoutName(day) : 'Rest', 'start-title')}${available ? listMarkup([startRow(day)], 'navigation-list', 'Workout actions') : '<p class="notice">Rest</p>'}</section>`;
+  app.innerHTML = `<section aria-labelledby="start-title">${titleMarkup(available ? workoutName(day) : 'Rest', 'start-title')}${available ? listMarkup([startRow(day)], '', 'Workout actions') : '<p class="notice">Rest</p>'}</section>`;
   bindStartDialog();
   bindHoldScroll();
   bindTitleMarquee();

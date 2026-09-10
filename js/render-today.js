@@ -47,7 +47,7 @@ export function renderToday() {
       : routine
         ? startRow(day)
         : `<li><button class="list-link is-disabled" type="button" disabled><span>Start</span>${icon('dash', 'Unavailable')}</button></li>`;
-  app.innerHTML = `<section class="today-screen" aria-labelledby="today-title">${titleMarkup(title, 'today-title')}${listMarkup([startItem, `<li><a class="list-link" href="/routine/"><span>Routine</span>${icon('chevron', 'Open routine')}</a></li>`, `<li><a class="list-link" href="/history/"><span>History</span>${icon('chevron', 'Open history')}</a></li>`], 'navigation-list', 'Home navigation')}</section>`;
+  app.innerHTML = `<section class="today-screen" aria-labelledby="today-title">${titleMarkup(title, 'today-title')}${listMarkup([startItem, `<li><a class="list-link" href="/routine/"><span>Routine</span>${icon('chevron', 'Open routine')}</a></li>`, `<li><a class="list-link" href="/history/"><span>History</span>${icon('chevron', 'Open history')}</a></li>`], '', 'Home navigation')}</section>`;
   bindHoldScroll();
   bindTitleMarquee();
   bindDirectStart();

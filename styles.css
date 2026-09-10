@@ -240,6 +240,10 @@ ul {
   user-select: none;
 }
 .app-list > li {
+  display: flex;
+  min-height: var(--list-row-height);
+  align-items: center;
+  padding: var(--list-row-padding);
   border-bottom: 1px solid var(--line);
 }
 .app-list.is-picker-active {
@@ -457,9 +461,15 @@ main > section:has(> .app-list) {
   padding-inline: 0;
 }
 main > section:has(> .app-list) > .app-list {
+  flex: 1 1 auto;
+  min-height: 0;
   width: calc(100% + 24px);
   margin-inline: -12px;
+  margin-top: 12px;
+  overflow-y: auto;
   padding-inline: 12px;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
 }
 main > section:has(> .app-list) > .app-list > li.is-picker-target {
   margin-inline: -12px;
@@ -467,17 +477,6 @@ main > section:has(> .app-list) > .app-list > li.is-picker-target {
 }
 main > section:has(> .app-list) > .app-list .list-link::before {
   inset-inline: -12px;
-}
-.navigation-list,
-.scroll-list {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: thin;
-}
-.navigation-list {
-  margin-top: 12px;
 }
 .day-indicator {
   display: inline-block;
@@ -507,7 +506,7 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.scroll-list .routine-exercise [data-hold-scroll].is-hold-scrolling .hold-scroll-text {
+.routine-exercise [data-hold-scroll].is-hold-scrolling .hold-scroll-text {
   display: block;
   max-width: 100%;
   overflow: hidden;
@@ -578,17 +577,7 @@ main > section:has(> .app-list) > .app-list .list-link::before {
 }
 .history-exercise ul {
   display: grid;
-  gap: 8px;
-}
-.history-exercise .history-set-list {
   gap: 0;
-}
-.history-set-list > li {
-  display: flex;
-  min-height: var(--list-row-height);
-  align-items: center;
-  padding: var(--list-row-padding);
-  line-height: 1.3;
 }
 .history-exercise li {
   display: flex;
@@ -689,9 +678,6 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   grid-template-columns: 1fr;
 }
 .stage-link {
-  margin: 0;
-}
-.stage-action-list {
   margin: 0;
 }
 .set-count {

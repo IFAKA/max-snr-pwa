@@ -48,7 +48,7 @@ function workoutDetails(workout) {
       ([name, entries], index) =>
         `<section class="history-exercise">${titleMarkup(name, `history-exercise-title-${index}`, 'h2')}${listMarkup(
           entries.map(({ task, index: taskIndex }) => setLine(task, taskIndex)),
-          'history-set-list',
+          '',
           `${name} sets`,
         )}</section>`,
     )
@@ -100,7 +100,7 @@ export function renderHistory() {
   if (view === 'workouts') return renderWorkouts(state);
   if (view === 'data') return renderData(state);
   if (view === 'workout') return renderWorkoutDetail(state, Number(params.get('id')));
-  app.innerHTML = `<section aria-labelledby="history-title">${titleMarkup('History', 'history-title')}${listMarkup([`<li><a class="list-link" href="/history/?view=workouts"><span>Workouts</span>${icon('chevron', 'Open workouts')}</a></li>`, ...dataRows()], 'navigation-list', 'History options')}</section>`;
+  app.innerHTML = `<section aria-labelledby="history-title">${titleMarkup('History', 'history-title')}${listMarkup([`<li><a class="list-link" href="/history/?view=workouts"><span>Workouts</span>${icon('chevron', 'Open workouts')}</a></li>`, ...dataRows()], '', 'History options')}</section>`;
   bindDataActions(state);
   bindHoldScroll();
   bindTitleMarquee();
@@ -109,7 +109,7 @@ function renderWorkouts(state) {
   const rows = state.history.length
     ? state.history.map(workoutMarkup)
     : ['<li data-picker-skip><div class="list-link empty-state">No workouts yet</div></li>'];
-  app.innerHTML = `<section aria-labelledby="workouts-title">${titleMarkup('Workouts', 'workouts-title')}${listMarkup(rows, 'scroll-list', 'Logged workouts')}</section>`;
+  app.innerHTML = `<section aria-labelledby="workouts-title">${titleMarkup('Workouts', 'workouts-title')}${listMarkup(rows, '', 'Logged workouts')}</section>`;
   bindHoldScroll();
   bindTitleMarquee();
 }
@@ -121,7 +121,7 @@ function renderWorkoutDetail(state, index) {
   bindTitleMarquee();
 }
 function renderData(state) {
-  app.innerHTML = `<section aria-labelledby="data-title">${titleMarkup('Data', 'data-title')}${listMarkup(dataRows(), 'navigation-list', 'Data actions')}<output id="data-status" class="notice error" role="status" aria-live="polite" aria-atomic="true" hidden></output></section>`;
+  app.innerHTML = `<section aria-labelledby="data-title">${titleMarkup('Data', 'data-title')}${listMarkup(dataRows(), '', 'Data actions')}<output id="data-status" class="notice error" role="status" aria-live="polite" aria-atomic="true" hidden></output></section>`;
   bindDataActions(state);
   bindHoldScroll();
   bindTitleMarquee();

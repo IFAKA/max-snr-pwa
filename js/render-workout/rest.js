@@ -43,7 +43,7 @@ export function renderRest() {
         [
           `<li><a class="list-link stage-link" href="/workout/?view=exercises"><span>Change exercise</span>${icon('chevron', 'Change exercise')}</a></li>`,
         ],
-        'stage-action-list',
+        '',
         'Workout options',
       )
     : '';

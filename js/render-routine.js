@@ -24,7 +24,7 @@ export function renderRoutine() {
       ? `<li class="${day === today ? 'today' : ''}"><a class="list-link" href="/routine/?day=${encodeURIComponent(day)}"><span class="day-label" data-hold-scroll><span class="hold-scroll-text">${esc(day)}</span>${day === today ? '<small class="day-indicator" aria-label="Current day"></small>' : ''}</span>${icon('chevron', 'Open day')}</a></li>`
       : `<li class="rest-day"><button class="list-link is-disabled" type="button" disabled><span data-hold-scroll><span class="hold-scroll-text">${esc(day)} · Rest</span></span>${icon('dash', 'Rest day')}</button></li>`,
   );
-  app.innerHTML = `<section aria-labelledby="routine-title">${titleMarkup('Routine', 'routine-title')}${listMarkup(days, 'scroll-list', 'Routine days')}</section>`;
+  app.innerHTML = `<section aria-labelledby="routine-title">${titleMarkup('Routine', 'routine-title')}${listMarkup(days, '', 'Routine days')}</section>`;
   bindHoldScroll();
   bindTitleMarquee();
 }
@@ -39,7 +39,7 @@ function renderDay(day) {
     : [
         `<li><button class="list-link is-disabled" type="button" disabled><span>Start</span>${icon('dash', 'Unavailable')}</button></li>`,
       ];
-  app.innerHTML = `<section aria-labelledby="day-title">${titleMarkup(isWorkoutDay(day) ? workoutName(day) : 'Rest', 'day-title')}${listMarkup(rows, 'navigation-list', 'Workout actions')}</section>`;
+  app.innerHTML = `<section aria-labelledby="day-title">${titleMarkup(isWorkoutDay(day) ? workoutName(day) : 'Rest', 'day-title')}${listMarkup(rows, '', 'Workout actions')}</section>`;
   bindStartDialog();
   bindHoldScroll();
   bindTitleMarquee();

@@ -14,7 +14,7 @@ export function renderExerciseSelection() {
       className: 'exercise-selection-stage',
       title: esc(task.performedName),
       body: '<p class="muted">Choose your first exercise.</p>',
-      actions: listMarkup(rows, 'stage-action-list', 'Workout options'),
+      actions: listMarkup(rows, '', 'Workout options'),
     }),
   );
 }
