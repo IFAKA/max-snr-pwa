@@ -359,14 +359,18 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     const previousTime = joystickFrameTime ?? currentTime;
     const elapsed = Math.min(0.1, Math.max(0, (currentTime - previousTime) / 1000));
     joystickFrameTime = currentTime;
-    const deadZone = options.joystickDeadZone ?? options.detentDistance;
-    const speed = magneticJoystickSpeed(
-      joystickY - startY,
-      options.detentDistance,
-      deadZone,
-      options.joystickMaxSpeed,
-      options.joystickRadius,
-    );
+    const radius = Math.max(1, Number(options.joystickRadius) || DEFAULT_JOYSTICK_RADIUS);
+    const verticalDisplacement = joystickY - startY;
+    const reachedLimit = Math.abs(verticalDisplacement) >= radius - 1;
+    const speed = reachedLimit
+      ? magneticJoystickSpeed(
+          verticalDisplacement,
+          options.detentDistance,
+          options.joystickDeadZone ?? options.detentDistance,
+          options.joystickMaxSpeed,
+          radius,
+        )
+      : 0;
     joystickVelocity =
       speed === 0 ? 0 : magneticJoystickVelocity(joystickVelocity, speed, elapsed);
     if (Math.abs(joystickVelocity) > 0.001) {
