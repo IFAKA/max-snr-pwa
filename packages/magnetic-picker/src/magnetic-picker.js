@@ -366,6 +366,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     setHolding(true);
     pointerId = event.pointerId;
     startY = event.clientY;
+    list.setPointerCapture?.(pointerId);
     selectableIndices = rows.reduce((indices, row, index) => {
       const action = actionFor(row, options.actionSelector);
       return options.isSelectable(action, row) ? [...indices, index] : indices;

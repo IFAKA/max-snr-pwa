@@ -239,7 +239,7 @@ test('movement after activation keeps the picker active', async () => {
   }
 });
 
-test('captures the pointer only after picker activation', async () => {
+test('captures the pointer immediately without disabling native scrolling', async () => {
   const dom = makePickerDom({ rows: 3 });
   const originalDocument = globalThis.document;
   let selection;
@@ -252,10 +252,9 @@ test('captures the pointer only after picker activation', async () => {
       onSelect: (...args) => (selection = args),
     });
     dom.listeners.get('list:pointerdown')({ pointerId: 7, pointerType: 'touch', clientY: 120 });
-    assert.deepEqual(dom.capturedPointerIds, []);
+    assert.deepEqual(dom.capturedPointerIds, [7]);
     assert.equal(dom.styleProperties.has('touch-action'), false);
     await new Promise((resolve) => setTimeout(resolve, 5));
-    assert.deepEqual(dom.capturedPointerIds, [7]);
     dom.listeners.get('document:pointermove')({
       pointerId: 7,
       clientY: 109,
