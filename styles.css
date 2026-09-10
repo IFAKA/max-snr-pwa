@@ -286,10 +286,6 @@ ul {
   background: transparent;
   color: var(--danger);
 }
-.picker-cancel-row button:hover,
-.picker-cancel-row button:focus-visible {
-  background: color-mix(in srgb, var(--danger-soft) 78%, var(--danger));
-}
 .app-list > li.picker-cancel-row.is-picker-target {
   background: var(--danger-soft);
   box-shadow:
