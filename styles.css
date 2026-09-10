@@ -359,9 +359,13 @@ ul {
   content: '';
   background: transparent;
 }
-.list-link:hover::before,
 .list-link:focus-visible::before {
   background: var(--surface-raised);
+}
+@media (hover: hover) and (pointer: fine) {
+  .list-link:hover::before {
+    background: var(--surface-raised);
+  }
 }
 .list-link > span:not(.sr-only),
 .list-link > svg {
