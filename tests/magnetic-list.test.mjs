@@ -148,7 +148,7 @@ test('picker vibrates before highlighting the held row', async () => {
     listeners.pointerdown({ pointerId: 1, pointerType: 'touch', clientY: 20 });
     let contextMenuPrevented = false;
     listeners.contextmenu({ preventDefault: () => (contextMenuPrevented = true) });
-    assert.equal(contextMenuPrevented, false);
+    assert.equal(contextMenuPrevented, true);
     await new Promise((resolve) => setTimeout(resolve, 430));
     listeners.contextmenu({ preventDefault: () => (contextMenuPrevented = true) });
     assert.equal(contextMenuPrevented, true);

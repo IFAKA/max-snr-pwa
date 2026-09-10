@@ -391,7 +391,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     if (event.pointerId !== pointerId) return;
     if (!pickerActive) reset();
   };
-  const onContextMenu = (event) => pickerActive && event.preventDefault();
+  const onContextMenu = (event) => pointerId !== null && event.preventDefault();
   const removeListeners = bindPickerEvents(list, {
     onPointerDown,
     onPointerLeave,
