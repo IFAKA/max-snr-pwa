@@ -1,6 +1,8 @@
 const DEFAULT_HOLD_MS = 400;
 const MOVE_TOLERANCE = 24;
 const DETENT_DISTANCE = 24;
+const ACCELERATION_START_DETENTS = 2;
+const ACCELERATION_POWER = 1.35;
 const HOLD_VIBRATION = 5;
 const DETENT_VIBRATION = [20, 30, 20];
 const SELECT_VIBRATION = [6, 14, 6];
@@ -8,7 +10,14 @@ const CANCEL_FADE_MS = 420;
 
 export function magneticRawRowIndex(startIndex, deltaY, detentDistance = DETENT_DISTANCE) {
   const distance = Math.max(1, detentDistance || DETENT_DISTANCE);
-  return startIndex + Math.round(deltaY / distance);
+  const detents = deltaY / distance;
+  const magnitude = Math.abs(detents);
+  const acceleratedMagnitude =
+    magnitude <= ACCELERATION_START_DETENTS
+      ? magnitude
+      : ACCELERATION_START_DETENTS +
+        (magnitude - ACCELERATION_START_DETENTS) ** ACCELERATION_POWER;
+  return startIndex + Math.round(Math.sign(detents) * acceleratedMagnitude);
 }
 
 export function magneticPickerIndex(rawIndex, rowCount) {

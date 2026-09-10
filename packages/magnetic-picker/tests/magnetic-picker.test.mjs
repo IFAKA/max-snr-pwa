@@ -16,6 +16,18 @@ test('library exports calculations and picker without a DOM at module load', () 
   assert.equal(magneticEntryIndex(0, [0, 1], 2, [1]), 1);
 });
 
+test('magnetic detents accelerate symmetrically away from the touch point', () => {
+  const nearForward = magneticRawRowIndex(0, 24 * 4, 24);
+  const farForward = magneticRawRowIndex(0, 24 * 8, 24);
+  const nearBackward = magneticRawRowIndex(0, -24 * 4, 24);
+  const farBackward = magneticRawRowIndex(0, -24 * 8, 24);
+
+  assert.ok(farForward > 8);
+  assert.equal(farBackward, -farForward);
+  assert.equal(nearBackward, -nearForward);
+  assert.ok(farForward - nearForward > nearForward);
+});
+
 function makePickerDom({ rows = 1 } = {}) {
   const listeners = new Map();
   const classes = new Set();
