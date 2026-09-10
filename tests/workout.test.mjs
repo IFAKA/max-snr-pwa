@@ -100,11 +100,11 @@ test('flatten ignores empty and malformed groups while keeping valid members', (
   assert.equal(flatten([{ type: 'superset', id: 'empty', members: [] }]).length, 0);
 });
 
-test('timer formatting keeps a clear minutes-and-seconds shape', () => {
-  assert.equal(formatDuration(0), '0:00');
-  assert.equal(formatDuration(1000), '0:01');
-  assert.equal(formatDuration(2000), '0:02');
-  assert.equal(formatDuration(59000), '0:59');
+test('timer formatting uses seconds until a full minute', () => {
+  assert.equal(formatDuration(0), '0');
+  assert.equal(formatDuration(1000), '1');
+  assert.equal(formatDuration(2000), '2');
+  assert.equal(formatDuration(59000), '59');
   assert.equal(formatDuration(59999), '1:00');
   assert.equal(formatDuration(60000), '1:00');
   assert.equal(formatDuration(65000), '1:05');
@@ -116,14 +116,19 @@ test('last performance returns the latest matching load in workout history', () 
     {
       tasks: [
         { performedName: 'Press', completed: { weight: 45, reps: 8, rir: '1', unit: 'kg' } },
-        { performedName: 'Press', completed: { weight: 90, reps: 8, rir: '1', unit: 'lb' } },
+        {
+          exerciseId: 'press',
+          performedName: 'Renamed press',
+          completed: { weight: 90, reps: 8, rir: '1', unit: 'lb' },
+        },
       ],
     },
   ];
   setState(state);
-  assert.equal(lastPerformance('Press').weight, 90);
-  assert.equal(lastPerformance('Press', 'lb').weight, 90);
+  assert.equal(lastPerformance('Press').weight, 45);
+  assert.equal(lastPerformance('Renamed press', 'lb').weight, 90);
   assert.equal(lastPerformance('Press', 'kg').weight, 45);
+  assert.equal(lastPerformance('Press', 'lb', 'press').weight, 90);
   setState(emptyState());
   assert.equal(getState().history.length, 0);
 });

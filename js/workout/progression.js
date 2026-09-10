@@ -12,12 +12,12 @@ export function lastActivePerformance(exerciseId, unit) {
   );
 }
 
-export function lastPerformance(name, unit) {
+export function lastPerformance(name, unit, exerciseId) {
   const S = getState();
   for (const workout of S.history)
     for (const t of [...(workout.tasks || workout.queue || [])].reverse()) {
       const actual = t.performedName || t.name;
-      if (actual !== name) continue;
+      if (actual !== name && (!exerciseId || t.exerciseId !== exerciseId)) continue;
       const performances =
         t.completed && !Array.isArray(t.completed)
           ? [t.completed]

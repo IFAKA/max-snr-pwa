@@ -52,7 +52,9 @@ export async function adjustRest(ms) {
 export const remaining = (endAt) => Math.max(0, (endAt || 0) - Date.now());
 export function formatDuration(ms) {
   const seconds = Math.ceil(Math.max(0, ms) / 1000);
-  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+  return seconds < 60
+    ? String(seconds)
+    : `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
 }
 export function countdown(el, key, phase, onEnd) {
   let ended = false;

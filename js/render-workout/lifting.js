@@ -29,7 +29,7 @@ export function renderLifting() {
   }
   const repsValue = draft.reps ?? String(String(task.reps).split('–')[0]);
   const unit = getState().settings?.unit || 'kg';
-  const previous = lastPerformance(task.performedName, unit);
+  const previous = lastPerformance(task.performedName, unit, task.exerciseId);
   const weightValue = draft.weight ?? previous?.weight ?? '';
   const stage = workoutStage({
     className: 'lifting-stage',
