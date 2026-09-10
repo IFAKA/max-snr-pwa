@@ -8,8 +8,8 @@
   --line: #d1ddd4;
   --accent: #17633f;
   --accent-soft: #dceee3;
-  --danger: #a5322a;
-  --danger-soft: #f9dfdc;
+  --danger: #a45149;
+  --danger-soft: #f5e8e6;
   --success: #18794e;
   --radius: 16px;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
@@ -269,6 +269,8 @@ ul {
   position: sticky;
   z-index: 1;
   bottom: 0;
+  margin-inline: -12px;
+  padding-inline: 12px;
   border-top: 1px solid var(--line);
   background: var(--danger-soft);
 }
@@ -1060,8 +1062,8 @@ main > section:has(> .app-list) > .app-list .list-link::before {
     --line: #344138;
     --accent: #8fd0a9;
     --accent-soft: #21372a;
-    --danger: #ffaaa1;
-    --danger-soft: #542824;
+    --danger: #e0a19a;
+    --danger-soft: #2d2422;
     --success: #8fd0a9;
   }
   .primary {
