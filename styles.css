@@ -231,7 +231,7 @@ ul {
 }
 .app-list {
   border-top: 1px solid var(--line);
-  touch-action: none;
+  touch-action: pan-y;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
@@ -248,6 +248,25 @@ ul {
 }
 .app-list.is-picker-active {
   touch-action: none;
+}
+.app-list.is-picker-active::after {
+  position: fixed;
+  z-index: 4;
+  top: var(--picker-zone-top);
+  left: var(--picker-zone-left);
+  width: var(--picker-zone-width);
+  height: var(--picker-zone-height);
+  display: grid;
+  place-items: center;
+  border-block: 2px solid color-mix(in srgb, var(--accent) 75%, transparent);
+  background: color-mix(in srgb, var(--accent-soft) 24%, transparent);
+  color: var(--muted);
+  content: 'CENTER · HOLD TO PAUSE';
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  pointer-events: none;
+  text-align: center;
 }
 .app-list.is-picker-holding {
   position: relative;

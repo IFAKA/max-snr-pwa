@@ -302,7 +302,7 @@ test('stationary edge pointer continuously advances and cancels its animation', 
     const thirdCallback = frames.get(thirdFrame);
     frames.delete(thirdFrame);
     thirdCallback(2000);
-    assert.equal(dom.rowList[3].classList.contains('is-picker-target'), true);
+    assert.equal(dom.rowList[2].classList.contains('is-picker-target'), true);
     dom.listeners.get('document:keydown')({ key: 'Escape', preventDefault: () => {} });
     assert.ok(cancelledFrames.length > 0);
     picker.destroy();
@@ -334,7 +334,7 @@ test('captures the pointer immediately for stable picker dragging', async () => 
       preventDefault: () => {},
     });
     dom.listeners.get('document:pointerup')({ pointerId: 7 });
-    assert.equal(selection[0], 'exercise-1');
+    assert.equal(selection[0], 'exercise-2');
     picker.destroy();
   } finally {
     globalThis.document = originalDocument;

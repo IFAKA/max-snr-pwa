@@ -291,7 +291,19 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     const bounds = list.getBoundingClientRect?.();
     const top = bounds?.top ?? 0;
     const height = bounds?.height || list.clientHeight || 0;
-    return { top, height };
+    return {
+      top,
+      height,
+      left: bounds?.left ?? 0,
+      width: bounds?.width || list.clientWidth || 0,
+    };
+  };
+  const updatePickerZone = () => {
+    const { top, height, left, width } = viewportBounds();
+    list.style.setProperty('--picker-zone-top', `${top + height * 0.2}px`);
+    list.style.setProperty('--picker-zone-height', `${height * 0.6}px`);
+    list.style.setProperty('--picker-zone-left', `${left}px`);
+    list.style.setProperty('--picker-zone-width', `${width}px`);
   };
   const setActive = (index, vibration = DETENT_VIBRATION) => {
     if (!rows.length) return;
@@ -340,6 +352,10 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     document.documentElement?.classList.remove(options.activeDocumentClass);
     status.classList.remove(options.statusVisibleClass);
     list.style.removeProperty('touch-action');
+    list.style.removeProperty('--picker-zone-top');
+    list.style.removeProperty('--picker-zone-height');
+    list.style.removeProperty('--picker-zone-left');
+    list.style.removeProperty('--picker-zone-width');
     status.textContent = '';
     pointerId = null;
     lastY = 0;
@@ -389,6 +405,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     document.documentElement?.classList.add(options.activeDocumentClass);
     status.classList.add(options.statusVisibleClass);
     list.style.setProperty('touch-action', 'none');
+    updatePickerZone();
     list.setPointerCapture?.(pointerId);
     setActive(startIndex, HOLD_VIBRATION);
     virtualRowPosition = startIndex;
@@ -403,6 +420,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
       lastFrameTime === null ? 0 : Math.min(MAX_FRAME_DELTA_MS, frameTime - lastFrameTime);
     lastFrameTime = frameTime;
     const { top, height } = viewportBounds();
+    updatePickerZone();
     const reducedMotion = globalThis.window?.matchMedia?.(
       '(prefers-reduced-motion: reduce)',
     ).matches;
@@ -437,21 +455,11 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
         event.preventDefault();
         scrollTarget.scrollTop -= event.clientY - lastY;
       }
+      lastY = event.clientY;
       return;
     }
     event.preventDefault();
-    virtualRowPosition = Math.max(
-      0,
-      Math.min(
-        rows.length - 1,
-        virtualRowPosition + (event.clientY - lastY) / Math.max(1, options.detentDistance),
-      ),
-    );
     pointerY = event.clientY;
-    lastY = event.clientY;
-    setActive(
-      magneticPreferredIndex(Math.round(virtualRowPosition), selectableIndices, rows.length),
-    );
   }
   function onPointerUp(event) {
     if (event.pointerId !== pointerId) return;

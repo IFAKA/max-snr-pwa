@@ -15,6 +15,26 @@
   touch-action: none;
 }
 
+.is-picker-active::after {
+  position: fixed;
+  z-index: 4;
+  top: var(--picker-zone-top);
+  left: var(--picker-zone-left);
+  width: var(--picker-zone-width);
+  height: var(--picker-zone-height);
+  display: grid;
+  place-items: center;
+  border-block: 2px solid color-mix(in srgb, currentColor 75%, transparent);
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  color: currentColor;
+  content: 'CENTER · HOLD TO PAUSE';
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  pointer-events: none;
+  text-align: center;
+}
+
 .is-picker-holding {
   position: relative;
 }
