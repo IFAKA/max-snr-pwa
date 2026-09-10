@@ -232,9 +232,6 @@ ul {
 .app-list {
   border-top: 1px solid var(--line);
   touch-action: pan-y;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
 }
 .app-list > li {
   display: flex;
@@ -248,6 +245,9 @@ ul {
 }
 .app-list.is-picker-active {
   touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 .app-list.is-picker-active::after {
   position: fixed;
