@@ -185,6 +185,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
   let movedBeforePicker = false;
   let destroyed = false;
   let cancelHideTimer = null;
+  let cancelVisibilityToken = 0;
 
   const buzz = (pattern) => globalThis.navigator?.vibrate?.(pattern);
   const clearTimer = () => {
@@ -198,15 +199,22 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
   const showCancelRow = () => {
     if (!cancelRow) return;
     clearCancelHideTimer();
+    const visibilityToken = ++cancelVisibilityToken;
     cancelRow.removeAttribute('hidden');
     cancelRow.classList.remove('is-picker-cancel-visible');
     void cancelRow.offsetWidth;
     const scheduleFrame = globalThis.window?.requestAnimationFrame || ((callback) => setTimeout(callback, 0));
-    scheduleFrame(() => cancelRow.classList.add('is-picker-cancel-visible'));
+    scheduleFrame(() =>
+      scheduleFrame(() => {
+        if (visibilityToken === cancelVisibilityToken && !destroyed)
+          cancelRow.classList.add('is-picker-cancel-visible');
+      }),
+    );
   };
   const hideCancelRow = () => {
     if (!cancelRow) return;
     clearCancelHideTimer();
+    cancelVisibilityToken++;
     cancelRow.classList.remove('is-picker-cancel-visible');
     cancelHideTimer = setTimeout(() => {
       cancelRow.setAttribute('hidden', '');
