@@ -8,6 +8,7 @@ const DETENT_VIBRATION = [20, 30, 20];
 const SELECT_VIBRATION = [6, 14, 6];
 const CANCEL_FADE_MS = 420;
 const DEFAULT_JOYSTICK_MAX_SPEED = 8;
+const JOYSTICK_RESPONSE = 12;
 
 export function magneticJoystickSpeed(
   distanceY,
@@ -29,6 +30,17 @@ export function magneticJoystickSpeed(
   const eased = normalized ** 1.15;
   const baseSpeed = Math.min(1, cap);
   return Math.sign(distanceY) * (baseSpeed + (cap - baseSpeed) * eased);
+}
+
+export function magneticJoystickVelocity(
+  currentVelocity,
+  targetVelocity,
+  elapsed,
+  response = JOYSTICK_RESPONSE,
+) {
+  const delta = Math.max(0, Math.min(0.1, Number(elapsed) || 0));
+  const factor = 1 - Math.exp(-Math.max(0, Number(response) || JOYSTICK_RESPONSE) * delta);
+  return currentVelocity + (targetVelocity - currentVelocity) * factor;
 }
 
 export function magneticRawRowIndex(startIndex, deltaY, detentDistance = DETENT_DISTANCE) {
@@ -225,6 +237,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
   let lastY = 0;
   let joystickY = 0;
   let joystickPosition = 0;
+  let joystickVelocity = 0;
   let joystickFrame = null;
   let joystickFrameTime = null;
   let joystickOverlay = null;
@@ -297,6 +310,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     }
     joystickFrame = null;
     joystickFrameTime = null;
+    joystickVelocity = 0;
   };
   const removeJoystickOverlay = () => {
     joystickOverlay?.remove?.();
@@ -349,14 +363,18 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
       options.joystickMaxSpeed,
       options.joystickRadius,
     );
-    if (speed) {
-      joystickPosition = magneticPickerIndex(joystickPosition + speed * elapsed, rows.length);
+    joystickVelocity = magneticJoystickVelocity(joystickVelocity, speed, elapsed);
+    if (Math.abs(joystickVelocity) > 0.001) {
+      joystickPosition = magneticPickerIndex(
+        joystickPosition + joystickVelocity * elapsed,
+        rows.length,
+      );
       const rowHeight = rows[activeIndex]?.getBoundingClientRect?.().height || 50;
       const maxScrollTop = Math.max(0, scrollTarget.scrollHeight - scrollTarget.clientHeight);
       const currentScrollTop = Number(scrollTarget.scrollTop) || 0;
       const nextScrollTop = Math.max(
         0,
-        Math.min(maxScrollTop, currentScrollTop + speed * rowHeight * elapsed),
+        Math.min(maxScrollTop, currentScrollTop + joystickVelocity * rowHeight * elapsed),
       );
       scrollTarget.scrollTop = nextScrollTop;
       setActive(
@@ -375,6 +393,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     cancelJoystick();
     joystickY = startY;
     joystickPosition = activeIndex;
+    joystickVelocity = 0;
     joystickFrame = scheduleFrame.call(globalThis.window, pickerFrame);
   };
   const setActive = (index, vibration = DETENT_VIBRATION, ensureVisible = true) => {

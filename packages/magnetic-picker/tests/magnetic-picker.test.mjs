@@ -5,6 +5,7 @@ import {
   createMagneticPicker,
   magneticEntryIndex,
   magneticJoystickSpeed,
+  magneticJoystickVelocity,
   magneticPickerIndex,
   magneticPreferredIndex,
   magneticRawRowIndex,
@@ -45,6 +46,23 @@ test('magnetic joystick reaches full speed at the physical radius', () => {
   assert.ok(justOutsideDeadZone >= 1);
   assert.equal(outerLimit, 8);
   assert.equal(magneticJoystickSpeed(-64, 24, 24, 8, 64), -outerLimit);
+});
+
+test('magnetic joystick velocity accelerates toward input and decays smoothly', () => {
+  const firstFrame = magneticJoystickVelocity(0, 8, 1 / 60);
+  const settled = Array.from({ length: 60 }, (_, index) => index).reduce(
+    (velocity) => magneticJoystickVelocity(velocity, 8, 1 / 60),
+    0,
+  );
+  const releaseFrame = magneticJoystickVelocity(8, 0, 1 / 60);
+  const stopped = Array.from({ length: 120 }, (_, index) => index).reduce(
+    (velocity) => magneticJoystickVelocity(velocity, 0, 1 / 60),
+    8,
+  );
+  assert.ok(firstFrame > 0 && firstFrame < 8);
+  assert.ok(settled > 7.9 && settled < 8);
+  assert.ok(releaseFrame > 0 && releaseFrame < 8);
+  assert.ok(stopped < 0.01);
 });
 
 function makePickerDom({ rows = 1, disabledIndices = [] } = {}) {
