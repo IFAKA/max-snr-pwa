@@ -80,6 +80,8 @@ function makePickerDom({ rows = 1, disabledIndices = [] } = {}) {
   const styleProperties = new Map();
   const capturedPointerIds = [];
   const overlays = [];
+  const interactionEvents = [];
+  let listScrollTop = 0;
   let scrollIntoViewCalls = 0;
   const makeElement = () => {
     const properties = new Map();
@@ -112,7 +114,10 @@ function makePickerDom({ rows = 1, disabledIndices = [] } = {}) {
       classList: {
         add: (name) => rowClasses.add(name),
         remove: (name) => rowClasses.delete(name),
-        toggle: (name, enabled) => (enabled ? rowClasses.add(name) : rowClasses.delete(name)),
+        toggle: (name, enabled) => {
+          if (name === 'is-picker-target' && enabled) interactionEvents.push('highlight');
+          enabled ? rowClasses.add(name) : rowClasses.delete(name);
+        },
         contains: (name) => rowClasses.has(name),
       },
       getAttribute: (name) => (name === 'data-picker-value' ? `exercise-${index}` : null),
@@ -130,7 +135,13 @@ function makePickerDom({ rows = 1, disabledIndices = [] } = {}) {
     parentElement: null,
     clientHeight: rows * 50,
     scrollHeight: rows * 50,
-    scrollTop: 0,
+    get scrollTop() {
+      return listScrollTop;
+    },
+    set scrollTop(value) {
+      interactionEvents.push('scroll');
+      listScrollTop = value;
+    },
     style: {
       setProperty: (name, value) => styleProperties.set(name, value),
       removeProperty: (name) => styleProperties.delete(name),
@@ -166,6 +177,7 @@ function makePickerDom({ rows = 1, disabledIndices = [] } = {}) {
     styleProperties,
     capturedPointerIds,
     overlays,
+    interactionEvents,
     get scrollIntoViewCalls() {
       return scrollIntoViewCalls;
     },
@@ -608,6 +620,59 @@ test('reversing edge direction changes scroll direction without a handoff jump',
     assert.equal(dom.list.scrollTop, lowerEdgeScroll);
     frame(216);
     assert.ok(dom.list.scrollTop < lowerEdgeScroll);
+    picker.destroy();
+  } finally {
+    globalThis.document = originalDocument;
+    globalThis.window = originalWindow;
+  }
+});
+
+test('edge scrolling advances the cursor with the list and clamps them together', async () => {
+  const dom = makePickerDom({ rows: 4 });
+  dom.list.clientHeight = 100;
+  dom.list.scrollHeight = 200;
+  const originalDocument = globalThis.document;
+  const originalWindow = globalThis.window;
+  let frame;
+  globalThis.document = dom.document;
+  globalThis.window = {
+    requestAnimationFrame: (callback) => {
+      frame = callback;
+      return 1;
+    },
+    cancelAnimationFrame: () => {},
+  };
+  try {
+    const picker = createMagneticPicker(dom.list, { cancel: false, holdMs: 0 });
+    dom.listeners.get('list:pointerdown')({
+      pointerId: 1,
+      pointerType: 'touch',
+      clientY: 75,
+    });
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    dom.listeners.get('document:pointermove')({
+      pointerId: 1,
+      clientY: 139,
+      preventDefault: () => {},
+    });
+    frame(0);
+    for (let time = 100; time <= 2000; time += 100) frame(time);
+    assert.equal(dom.list.scrollTop, 100);
+    assert.equal(
+      dom.rowList.findIndex((row) => row.classList.contains('is-picker-target')),
+      3,
+    );
+    assert.equal(
+      dom.interactionEvents[dom.interactionEvents.length - 2],
+      'highlight',
+    );
+    assert.equal(dom.interactionEvents.at(-1), 'scroll');
+    frame(3000);
+    assert.equal(dom.list.scrollTop, 100);
+    assert.equal(
+      dom.rowList.findIndex((row) => row.classList.contains('is-picker-target')),
+      3,
+    );
     picker.destroy();
   } finally {
     globalThis.document = originalDocument;
