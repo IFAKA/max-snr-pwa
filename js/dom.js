@@ -232,9 +232,11 @@ export function bindMagneticLists(root = document) {
       status.textContent = `Picker: ${describeRow(row)}${enabledAction(row) ? '' : ', unavailable'}`;
       row.scrollIntoView?.({
         block: 'nearest',
-        behavior: globalThis.window?.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-          ? 'auto'
-          : 'smooth',
+        behavior:
+          pickerActive ||
+          globalThis.window?.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+            ? 'auto'
+            : 'smooth',
       });
     };
     const reset = () => {
