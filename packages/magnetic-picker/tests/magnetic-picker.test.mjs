@@ -353,8 +353,7 @@ test('edge joystick input keeps scrolling and inner movement returns to magnetic
     });
     frame(200);
     const heldTarget = dom.rowList.findIndex((row) => row.classList.contains('is-picker-target'));
-    assert.equal(heldTarget, 0);
-    assert.notEqual(heldTarget, movedTarget);
+    assert.equal(heldTarget, movedTarget);
     assert.equal(cancelledFrame, null);
     dom.listeners.get('document:pointerup')({ pointerId: 1 });
     picker.destroy();
@@ -491,6 +490,7 @@ test('joystick transitions between magnetic movement and edge scrolling cleanly'
     frame(16);
     const edgePosition = dom.list.scrollTop;
     assert.ok(edgePosition > 0);
+    const edgeTarget = dom.rowList.findIndex((row) => row.classList.contains('is-picker-target'));
     dom.listeners.get('document:pointermove')({
       pointerId: 1,
       clientX: 40,
@@ -501,7 +501,7 @@ test('joystick transitions between magnetic movement and edge scrolling cleanly'
     assert.equal(dom.list.scrollTop, edgePosition);
     assert.equal(
       dom.rowList.findIndex((row) => row.classList.contains('is-picker-target')),
-      1,
+      edgeTarget,
     );
     picker.destroy();
   } finally {
