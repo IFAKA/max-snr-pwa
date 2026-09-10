@@ -245,6 +245,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
   };
   const enter = () => {
     if (pointerId === null || destroyed) return;
+    cancelRow?.removeAttribute('hidden');
     rows = rowsFor(list, options.rowSelector);
     selectableIndices = rows.reduce((indices, row, index) => {
       const action = actionFor(row, options.actionSelector);
@@ -254,7 +255,6 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
       reset();
       return;
     }
-    cancelRow?.removeAttribute('hidden');
     const primaryIndices = rows.reduce((indices, row, index) => {
       const action = actionFor(row, options.actionSelector);
       return row.matches?.(options.primarySelector) && options.isSelectable(action, row)

@@ -267,3 +267,79 @@ test('lists with only disabled rows do not enter picker mode', async () => {
     globalThis.document = originalDocument;
   }
 });
+
+test('picker keeps the cancel row as a selectable final detent', async () => {
+  const listeners = {};
+  const classes = new Set();
+  const action = {
+    disabled: false,
+    getAttribute: () => null,
+    classList: { contains: () => false },
+  };
+  const row = {
+    getBoundingClientRect: () => ({ top: 0, bottom: 52, height: 52 }),
+    classList: { add: () => {}, remove: () => {}, toggle: () => {} },
+    hasAttribute: () => false,
+    setAttribute: () => {},
+    removeAttribute: () => {},
+    querySelector: () => action,
+    textContent: 'Available workout',
+  };
+  const cancelButton = {
+    disabled: false,
+    getAttribute: () => null,
+    classList: { contains: () => false },
+  };
+  const cancelRow = {
+    hidden: true,
+    getBoundingClientRect: () => ({ top: 52, bottom: 104, height: 52 }),
+    classList: { add: () => {}, remove: () => {}, toggle: () => {} },
+    hasAttribute: (name) => name === 'data-picker-cancel-row',
+    setAttribute: () => {},
+    removeAttribute: (name) => {
+      if (name === 'hidden') cancelRow.hidden = false;
+    },
+    querySelector: () => cancelButton,
+    textContent: 'Cancel',
+  };
+  const list = {
+    parentElement: null,
+    append: (item) => {
+      item.hidden = true;
+      list.cancelRow = item;
+    },
+    clientHeight: 104,
+    scrollHeight: 104,
+    querySelector: () => null,
+    querySelectorAll: (selector) => {
+      if (!selector.startsWith(':scope')) return [];
+      return cancelRow.hidden ? [row] : [row, cancelRow];
+    },
+    addEventListener: (type, handler) => {
+      listeners[type] = handler;
+    },
+    classList: {
+      add: (name) => classes.add(name),
+      remove: (name) => classes.delete(name),
+    },
+    style: { setProperty: () => {}, removeProperty: () => {} },
+  };
+  const originalDocument = globalThis.document;
+  globalThis.document = {
+    ...originalDocument,
+    documentElement: { classList: { add: () => {}, remove: () => {} } },
+    createElement: () => cancelRow,
+    addEventListener: () => {},
+    body: { dataset: {} },
+    scrollingElement: list,
+  };
+  try {
+    createMagneticPicker(list);
+    listeners.pointerdown({ pointerId: 1, pointerType: 'touch', clientY: 20 });
+    await new Promise((resolve) => setTimeout(resolve, 430));
+    assert.equal(cancelRow.hidden, false);
+    assert.equal(classes.has('is-picker-active'), true);
+  } finally {
+    globalThis.document = originalDocument;
+  }
+});
