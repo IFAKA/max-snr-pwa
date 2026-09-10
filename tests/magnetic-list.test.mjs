@@ -14,7 +14,7 @@ const {
   magneticPickerIndex,
   magneticPreferredIndex,
   magneticRowIndex,
-} = await import('../js/dom.js');
+} = await import('../js/magnetic-picker.js');
 
 test('magnetic row calculation follows cumulative drag distance', () => {
   assert.equal(magneticRowIndex(2, -24, 6), 1);
@@ -106,7 +106,7 @@ test('picker vibrates before highlighting the held row', async () => {
     clientHeight: 52,
     scrollHeight: 52,
     querySelector: () => null,
-    querySelectorAll: () => [],
+    querySelectorAll: (selector) => (selector.startsWith(':scope') ? [row] : []),
     addEventListener: (type, handler) => {
       listeners[type] = handler;
     },
@@ -144,7 +144,7 @@ test('picker vibrates before highlighting the held row', async () => {
     listeners.contextmenu({ preventDefault: () => (contextMenuPrevented = true) });
     assert.equal(contextMenuPrevented, true);
     await new Promise((resolve) => setTimeout(resolve, 430));
-    const highlightIndex = events.indexOf('toggle:is-magnetic-target:true');
+    const highlightIndex = events.indexOf('toggle:is-picker-target:true');
     const vibrationIndex = events.indexOf('vibrate');
     assert.ok(highlightIndex >= 0);
     assert.ok(vibrationIndex >= 0);

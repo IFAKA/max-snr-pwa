@@ -31,8 +31,8 @@ body {
   background: var(--bg);
   color: var(--text);
 }
-html.is-magnetic-picker-active,
-html.is-magnetic-picker-active body {
+html.is-picker-active,
+html.is-picker-active body {
   overscroll-behavior-y: none;
 }
 body {
@@ -213,7 +213,7 @@ a:focus-visible {
   white-space: nowrap;
   border: 0;
 }
-.magnetic-list-status {
+.picker-status {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -239,13 +239,13 @@ ul {
 .app-list > li {
   border-bottom: 1px solid var(--line);
 }
-.app-list.is-magnetic-picker {
+.app-list.is-picker-active {
   touch-action: none;
 }
 .app-list > li {
   position: relative;
 }
-.app-list > li.is-magnetic-target {
+.app-list > li.is-picker-target {
   background: var(--accent-soft);
   box-shadow:
     inset 0 2px 0 var(--accent),
@@ -254,14 +254,14 @@ ul {
     background-color 180ms var(--ease-out),
     box-shadow 180ms var(--ease-out);
 }
-.app-list > li.is-magnetic-target .list-link {
+.app-list > li.is-picker-target .list-link {
   background: transparent;
 }
-.app-list > li.is-magnetic-target .list-link:focus-visible {
+.app-list > li.is-picker-target .list-link:focus-visible {
   outline-offset: -3px;
 }
-.app-list > li.is-magnetic-target .list-link.is-disabled,
-.app-list > li.is-magnetic-target.complete-row .list-link {
+.app-list > li.is-picker-target .list-link.is-disabled,
+.app-list > li.is-picker-target.complete-row .list-link {
   color: var(--muted);
 }
 .picker-cancel-row {
@@ -271,10 +271,19 @@ ul {
   border-top: 1px solid var(--line);
   background: var(--surface);
 }
-.picker-cancel-row .list-link {
+.picker-cancel-row button {
+  display: flex;
+  width: 100%;
+  min-height: 52px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 2px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   color: var(--muted);
 }
-.picker-cancel-row.is-magnetic-target .list-link {
+.picker-cancel-row.is-picker-target button {
   color: inherit;
 }
 .list-link {
@@ -387,7 +396,7 @@ main > section:has(> .app-list) > .app-list {
   margin-inline: -12px;
   padding-inline: 12px;
 }
-main > section:has(> .app-list) > .app-list > li.is-magnetic-target {
+main > section:has(> .app-list) > .app-list > li.is-picker-target {
   margin-inline: -12px;
   padding-inline: 12px;
 }
@@ -1046,10 +1055,10 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   }
 }
 @media (forced-colors: active) {
-  .app-list > li.is-magnetic-target {
+  .app-list > li.is-picker-target {
     color: HighlightText;
   }
-  .app-list > li.is-magnetic-target {
+  .app-list > li.is-picker-target {
     background: Highlight;
     box-shadow:
       inset 0 2px 0 HighlightText,
