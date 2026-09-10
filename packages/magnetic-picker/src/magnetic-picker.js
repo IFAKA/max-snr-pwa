@@ -351,8 +351,18 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     );
     if (speed) {
       joystickPosition = magneticPickerIndex(joystickPosition + speed * elapsed, rows.length);
+      const rowHeight = rows[activeIndex]?.getBoundingClientRect?.().height || 50;
+      const maxScrollTop = Math.max(0, scrollTarget.scrollHeight - scrollTarget.clientHeight);
+      const currentScrollTop = Number(scrollTarget.scrollTop) || 0;
+      const nextScrollTop = Math.max(
+        0,
+        Math.min(maxScrollTop, currentScrollTop + speed * rowHeight * elapsed),
+      );
+      scrollTarget.scrollTop = nextScrollTop;
       setActive(
         magneticPreferredIndex(Math.round(joystickPosition), selectableIndices, rows.length),
+        DETENT_VIBRATION,
+        false,
       );
     }
     const scheduleFrame = requestJoystickFrame();
@@ -367,7 +377,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     joystickPosition = activeIndex;
     joystickFrame = scheduleFrame.call(globalThis.window, pickerFrame);
   };
-  const setActive = (index, vibration = DETENT_VIBRATION) => {
+  const setActive = (index, vibration = DETENT_VIBRATION, ensureVisible = true) => {
     if (!rows.length) return;
     const nextIndex = index < 0 || index >= rows.length ? -1 : index;
     const changed = nextIndex !== activeIndex;
@@ -384,13 +394,15 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     status.textContent = `Picker: ${describeRow(row, action)}${
       options.isSelectable(action, row) ? '' : ', unavailable'
     }`;
-    row?.scrollIntoView?.({
-      block: 'nearest',
-      behavior:
-        pickerActive || globalThis.window?.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-          ? 'auto'
-          : 'smooth',
-    });
+    if (ensureVisible)
+      row?.scrollIntoView?.({
+        block: 'nearest',
+        behavior:
+          pickerActive ||
+          globalThis.window?.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+            ? 'auto'
+            : 'smooth',
+      });
   };
   const reset = (notify = false) => {
     const shouldNotify = notify === true || (Boolean(notify) && pickerActive);

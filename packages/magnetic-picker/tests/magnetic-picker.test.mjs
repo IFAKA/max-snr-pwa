@@ -105,6 +105,7 @@ function makePickerDom({ rows = 1, disabledIndices = [] } = {}) {
     parentElement: null,
     clientHeight: rows * 50,
     scrollHeight: rows * 50,
+    scrollTop: 0,
     style: {
       setProperty: (name, value) => styleProperties.set(name, value),
       removeProperty: (name) => styleProperties.delete(name),
@@ -333,6 +334,47 @@ test('stationary joystick input keeps scrolling and dead-zone input stops withou
     dom.listeners.get('document:pointerup')({ pointerId: 1 });
     picker.destroy();
     assert.equal(cancelledFrame, 1);
+  } finally {
+    globalThis.document = originalDocument;
+    globalThis.window = originalWindow;
+  }
+});
+
+test('joystick advances the scroll surface continuously between row changes', async () => {
+  const dom = makePickerDom({ rows: 10 });
+  dom.list.clientHeight = 100;
+  const originalDocument = globalThis.document;
+  const originalWindow = globalThis.window;
+  let frame;
+  globalThis.document = dom.document;
+  globalThis.window = {
+    requestAnimationFrame: (callback) => {
+      frame = callback;
+      return 1;
+    },
+    cancelAnimationFrame: () => {},
+  };
+  try {
+    const picker = createMagneticPicker(dom.list, { cancel: false, holdMs: 0 });
+    dom.listeners.get('list:pointerdown')({
+      pointerId: 1,
+      pointerType: 'touch',
+      clientX: 40,
+      clientY: 20,
+    });
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    dom.listeners.get('document:pointermove')({
+      pointerId: 1,
+      clientX: 40,
+      clientY: 84,
+      preventDefault: () => {},
+    });
+    frame(0);
+    const firstPosition = dom.list.scrollTop;
+    frame(16);
+    assert.ok(dom.list.scrollTop > firstPosition);
+    assert.ok(dom.list.scrollTop < 50);
+    picker.destroy();
   } finally {
     globalThis.document = originalDocument;
     globalThis.window = originalWindow;
