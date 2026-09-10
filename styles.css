@@ -290,7 +290,6 @@ ul {
 }
 .app-list > li.is-picker-target {
   background: var(--accent-soft);
-  border-block: 2px solid var(--accent);
   transition: background-color 180ms var(--ease-out);
 }
 .app-list.is-picker-active .list-link:active {

@@ -51,7 +51,6 @@
 
 .is-picker-target {
   background: var(--picker-target-background, transparent);
-  border-block: 2px solid var(--picker-target-border, currentColor);
 }
 
 .picker-cancel-row {
