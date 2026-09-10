@@ -7,6 +7,9 @@ const HOLD_VIBRATION = 5;
 const DETENT_VIBRATION = [20, 30, 20];
 const SELECT_VIBRATION = [6, 14, 6];
 const CANCEL_FADE_MS = 420;
+const PICKER_DEAD_ZONE_RATIO = 0.15;
+const MAX_SCROLL_ROWS_PER_SECOND = 8;
+const MAX_FRAME_DELTA_MS = 100;
 
 export function magneticRawRowIndex(startIndex, deltaY, detentDistance = DETENT_DISTANCE) {
   const distance = Math.max(1, detentDistance || DETENT_DISTANCE);
@@ -15,8 +18,7 @@ export function magneticRawRowIndex(startIndex, deltaY, detentDistance = DETENT_
   const acceleratedMagnitude =
     magnitude <= ACCELERATION_START_DETENTS
       ? magnitude
-      : ACCELERATION_START_DETENTS +
-        (magnitude - ACCELERATION_START_DETENTS) ** ACCELERATION_POWER;
+      : ACCELERATION_START_DETENTS + (magnitude - ACCELERATION_START_DETENTS) ** ACCELERATION_POWER;
   return startIndex + Math.round(Math.sign(detents) * acceleratedMagnitude);
 }
 
@@ -52,6 +54,26 @@ export function magneticEdgePosition(index, rowCount, overshoot = 0) {
   const edge = index < 0 ? 0 : rowCount - 1;
   const distance = overshoot || (index < 0 ? index : index - edge);
   return edge + distance / (Math.abs(distance) + 3);
+}
+
+export function magneticScrollVelocity(
+  pointerY,
+  viewportTop,
+  viewportHeight,
+  maxRowsPerSecond = MAX_SCROLL_ROWS_PER_SECOND,
+  reducedMotion = false,
+) {
+  const height = Math.max(0, viewportHeight);
+  if (!height || !Number.isFinite(pointerY)) return 0;
+  const center = viewportTop + height / 2;
+  const distanceFromCenter = pointerY - center;
+  const deadZone = Math.min(DETENT_DISTANCE, height * PICKER_DEAD_ZONE_RATIO);
+  const availableDistance = Math.max(1, height / 2 - deadZone);
+  const distanceOutsideZone = Math.abs(distanceFromCenter) - deadZone;
+  if (distanceOutsideZone <= 0) return 0;
+  const progress = Math.min(1, distanceOutsideZone / availableDistance);
+  const ramp = reducedMotion ? progress : progress ** ACCELERATION_POWER;
+  return Math.sign(distanceFromCenter) * Math.min(maxRowsPerSecond, maxRowsPerSecond * ramp);
 }
 
 const defaultOptions = {
@@ -186,9 +208,13 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
   let timer = null;
   let pointerId = null;
   let startY = 0;
+  let pointerY = 0;
   let lastY = 0;
   let startIndex = -1;
   let activeIndex = -1;
+  let virtualRowPosition = -1;
+  let animationFrame = null;
+  let lastFrameTime = null;
   let rows = [];
   let selectableIndices = [];
   let pickerActive = false;
@@ -198,6 +224,13 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
   let cancelHideTimer = null;
   let cancelVisibilityToken = 0;
   const scrollTarget = scrollSurface(list);
+  const scheduleFrame =
+    globalThis.window?.requestAnimationFrame ||
+    ((callback) => {
+      const timerHandle = setTimeout(() => callback(Date.now()), 16);
+      timerHandle.unref?.();
+      return timerHandle;
+    });
   const buzz = (pattern) => globalThis.navigator?.vibrate?.(pattern);
   const clearTimer = () => {
     clearTimeout(timer);
@@ -246,6 +279,19 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     document.removeEventListener?.('pointerup', onPointerUp);
     document.removeEventListener?.('pointercancel', onPointerCancel);
   };
+  const cancelAnimation = () => {
+    if (animationFrame === null) return;
+    const cancelFrame = globalThis.window?.cancelAnimationFrame || clearTimeout;
+    cancelFrame(animationFrame);
+    animationFrame = null;
+    lastFrameTime = null;
+  };
+  const viewportBounds = () => {
+    const bounds = list.getBoundingClientRect?.();
+    const top = bounds?.top ?? 0;
+    const height = bounds?.height || list.clientHeight || 0;
+    return { top, height };
+  };
   const setActive = (index, vibration = DETENT_VIBRATION) => {
     if (!rows.length) return;
     const nextIndex = index < 0 || index >= rows.length ? -1 : index;
@@ -276,6 +322,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     clearTimer();
     setHolding(false);
     stopDocumentTracking();
+    cancelAnimation();
     if (pointerId !== null) {
       try {
         list.releasePointerCapture?.(pointerId);
@@ -294,7 +341,9 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     list.style.removeProperty('touch-action');
     status.textContent = '';
     pointerId = null;
+    lastY = 0;
     activeIndex = -1;
+    virtualRowPosition = -1;
     startIndex = -1;
     rows = [];
     selectableIndices = [];
@@ -341,6 +390,40 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     list.style.setProperty('touch-action', 'none');
     list.setPointerCapture?.(pointerId);
     setActive(startIndex, HOLD_VIBRATION);
+    virtualRowPosition = startIndex;
+    lastY = pointerY;
+    startAnimation();
+  };
+  const animate = (timestamp) => {
+    animationFrame = null;
+    if (!pickerActive || destroyed) return;
+    const frameTime = Number.isFinite(timestamp) ? timestamp : Date.now();
+    const elapsed =
+      lastFrameTime === null ? 0 : Math.min(MAX_FRAME_DELTA_MS, frameTime - lastFrameTime);
+    lastFrameTime = frameTime;
+    const { top, height } = viewportBounds();
+    const reducedMotion = globalThis.window?.matchMedia?.(
+      '(prefers-reduced-motion: reduce)',
+    ).matches;
+    const velocity = magneticScrollVelocity(
+      pointerY,
+      top,
+      height,
+      MAX_SCROLL_ROWS_PER_SECOND,
+      reducedMotion,
+    );
+    virtualRowPosition = Math.max(
+      0,
+      Math.min(rows.length - 1, virtualRowPosition + (velocity * elapsed) / 1000),
+    );
+    const rawIndex = Math.round(virtualRowPosition);
+    setActive(magneticPreferredIndex(rawIndex, selectableIndices, rows.length));
+    animationFrame = scheduleFrame(animate);
+  };
+  const startAnimation = () => {
+    cancelAnimation();
+    lastFrameTime = null;
+    animationFrame = scheduleFrame(animate);
   };
   function onPointerMove(event) {
     if (event.pointerId !== pointerId) return;
@@ -353,12 +436,21 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
         event.preventDefault();
         scrollTarget.scrollTop -= event.clientY - lastY;
       }
-      lastY = event.clientY;
       return;
     }
     event.preventDefault();
-    const rawIndex = magneticRawRowIndex(startIndex, deltaY, options.detentDistance);
-    setActive(magneticPreferredIndex(rawIndex, selectableIndices, rows.length));
+    virtualRowPosition = Math.max(
+      0,
+      Math.min(
+        rows.length - 1,
+        virtualRowPosition + (event.clientY - lastY) / Math.max(1, options.detentDistance),
+      ),
+    );
+    pointerY = event.clientY;
+    lastY = event.clientY;
+    setActive(
+      magneticPreferredIndex(Math.round(virtualRowPosition), selectableIndices, rows.length),
+    );
   }
   function onPointerUp(event) {
     if (event.pointerId !== pointerId) return;
@@ -380,18 +472,14 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     setHolding(true);
     pointerId = event.pointerId;
     startY = event.clientY;
-    lastY = event.clientY;
+    pointerY = event.clientY;
     list.setPointerCapture?.(pointerId);
     document.documentElement?.classList.add(options.activeDocumentClass);
     selectableIndices = rows.reduce((indices, row, index) => {
       const action = actionFor(row, options.actionSelector);
       return options.isSelectable(action, row) ? [...indices, index] : indices;
     }, []);
-    startIndex = magneticEntryIndex(
-      nearestRow(rows, startY),
-      selectableIndices,
-      rows.length,
-    );
+    startIndex = magneticEntryIndex(nearestRow(rows, startY), selectableIndices, rows.length);
     clearTimer();
     document.addEventListener?.('pointermove', onPointerMove, { passive: false });
     document.addEventListener?.('pointerup', onPointerUp);

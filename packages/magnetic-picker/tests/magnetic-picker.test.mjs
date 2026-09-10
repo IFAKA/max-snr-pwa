@@ -7,6 +7,7 @@ import {
   magneticPickerIndex,
   magneticPreferredIndex,
   magneticRawRowIndex,
+  magneticScrollVelocity,
 } from '../src/magnetic-picker.js';
 
 test('library exports calculations and picker without a DOM at module load', () => {
@@ -28,6 +29,16 @@ test('magnetic detents accelerate symmetrically away from the touch point', () =
   assert.ok(farForward - nearForward > nearForward);
 });
 
+test('picker scroll velocity uses a centered dead zone and distance ramp', () => {
+  assert.equal(magneticScrollVelocity(100, 0, 200), 0);
+  assert.equal(magneticScrollVelocity(120, 0, 200), 0);
+  assert.ok(magneticScrollVelocity(70, 0, 200) < 0);
+  assert.ok(magneticScrollVelocity(130, 0, 200) > 0);
+  assert.ok(magneticScrollVelocity(70, 0, 200) < magneticScrollVelocity(90, 0, 200));
+  assert.equal(magneticScrollVelocity(1000, 0, 200), 8);
+  assert.equal(magneticScrollVelocity(-1000, 0, 200), -8);
+});
+
 function makePickerDom({ rows = 1 } = {}) {
   const listeners = new Map();
   const classes = new Set();
@@ -40,19 +51,27 @@ function makePickerDom({ rows = 1 } = {}) {
     disabled: false,
     getAttribute: (name) => (name === 'aria-label' ? `Exercise ${index}` : null),
   }));
-  const rowList = Array.from({ length: rows }, (_, index) => ({
-    action: actions[index],
-    classList: { add: () => {}, remove: () => {}, toggle: () => {} },
-    getAttribute: (name) => (name === 'data-picker-value' ? `exercise-${index}` : null),
-    hasAttribute: () => false,
-    matches: () => false,
-    querySelector: () => actions[index],
-    getBoundingClientRect: () => ({ top: index * 50, bottom: index * 50 + 50, height: 50 }),
-    removeAttribute: () => {},
-    setAttribute: () => {},
-    scrollIntoView: () => {},
-    textContent: `Exercise ${index}`,
-  }));
+  const rowList = Array.from({ length: rows }, (_, index) => {
+    const rowClasses = new Set();
+    return {
+      action: actions[index],
+      classList: {
+        add: (name) => rowClasses.add(name),
+        remove: (name) => rowClasses.delete(name),
+        toggle: (name, enabled) => (enabled ? rowClasses.add(name) : rowClasses.delete(name)),
+        contains: (name) => rowClasses.has(name),
+      },
+      getAttribute: (name) => (name === 'data-picker-value' ? `exercise-${index}` : null),
+      hasAttribute: () => false,
+      matches: () => false,
+      querySelector: () => actions[index],
+      getBoundingClientRect: () => ({ top: index * 50, bottom: index * 50 + 50, height: 50 }),
+      removeAttribute: () => {},
+      setAttribute: () => {},
+      scrollIntoView: () => {},
+      textContent: `Exercise ${index}`,
+    };
+  });
   const list = {
     parentElement: null,
     clientHeight: rows * 50,
@@ -236,6 +255,60 @@ test('movement after activation keeps the picker active', async () => {
     picker.destroy();
   } finally {
     globalThis.document = originalDocument;
+  }
+});
+
+test('stationary edge pointer continuously advances and cancels its animation', async () => {
+  const dom = makePickerDom({ rows: 4 });
+  const originalDocument = globalThis.document;
+  const originalWindow = globalThis.window;
+  const frames = new Map();
+  const cancelledFrames = [];
+  let nextFrameId = 1;
+  globalThis.document = dom.document;
+  globalThis.window = {
+    requestAnimationFrame: (callback) => {
+      const id = nextFrameId++;
+      frames.set(id, callback);
+      return id;
+    },
+    cancelAnimationFrame: (id) => {
+      cancelledFrames.push(id);
+      frames.delete(id);
+    },
+  };
+  try {
+    const picker = createMagneticPicker(dom.list, {
+      cancel: false,
+      holdMs: 0,
+      detentDistance: 1000,
+    });
+    dom.listeners.get('list:pointerdown')({ pointerId: 1, pointerType: 'touch', clientY: 20 });
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    dom.listeners.get('document:pointermove')({
+      pointerId: 1,
+      clientY: 1000,
+      preventDefault: () => {},
+    });
+    const firstFrame = frames.keys().next().value;
+    const firstCallback = frames.get(firstFrame);
+    frames.delete(firstFrame);
+    firstCallback(0);
+    const secondFrame = frames.keys().next().value;
+    const secondCallback = frames.get(secondFrame);
+    frames.delete(secondFrame);
+    secondCallback(1000);
+    const thirdFrame = frames.keys().next().value;
+    const thirdCallback = frames.get(thirdFrame);
+    frames.delete(thirdFrame);
+    thirdCallback(2000);
+    assert.equal(dom.rowList[3].classList.contains('is-picker-target'), true);
+    dom.listeners.get('document:keydown')({ key: 'Escape', preventDefault: () => {} });
+    assert.ok(cancelledFrames.length > 0);
+    picker.destroy();
+  } finally {
+    globalThis.document = originalDocument;
+    globalThis.window = originalWindow;
   }
 });
 
