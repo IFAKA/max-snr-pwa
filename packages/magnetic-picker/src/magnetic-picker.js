@@ -7,7 +7,8 @@ const HOLD_VIBRATION = 5;
 const DETENT_VIBRATION = [20, 30, 20];
 const SELECT_VIBRATION = [6, 14, 6];
 const CANCEL_FADE_MS = 420;
-const PICKER_DEAD_ZONE_RATIO = 0.15;
+const PICKER_DEAD_ZONE_RATIO = 0.3;
+const PICKER_SCROLL_POWER = 1.7;
 const MAX_SCROLL_ROWS_PER_SECOND = 8;
 const MAX_FRAME_DELTA_MS = 100;
 
@@ -67,12 +68,12 @@ export function magneticScrollVelocity(
   if (!height || !Number.isFinite(pointerY)) return 0;
   const center = viewportTop + height / 2;
   const distanceFromCenter = pointerY - center;
-  const deadZone = Math.min(DETENT_DISTANCE, height * PICKER_DEAD_ZONE_RATIO);
+  const deadZone = Math.min(height / 2 - 1, height * PICKER_DEAD_ZONE_RATIO);
   const availableDistance = Math.max(1, height / 2 - deadZone);
   const distanceOutsideZone = Math.abs(distanceFromCenter) - deadZone;
   if (distanceOutsideZone <= 0) return 0;
   const progress = Math.min(1, distanceOutsideZone / availableDistance);
-  const ramp = reducedMotion ? progress : progress ** ACCELERATION_POWER;
+  const ramp = reducedMotion ? progress : progress ** PICKER_SCROLL_POWER;
   return Math.sign(distanceFromCenter) * Math.min(maxRowsPerSecond, maxRowsPerSecond * ramp);
 }
 

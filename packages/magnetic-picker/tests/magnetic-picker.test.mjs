@@ -31,10 +31,10 @@ test('magnetic detents accelerate symmetrically away from the touch point', () =
 
 test('picker scroll velocity uses a centered dead zone and distance ramp', () => {
   assert.equal(magneticScrollVelocity(100, 0, 200), 0);
-  assert.equal(magneticScrollVelocity(120, 0, 200), 0);
-  assert.ok(magneticScrollVelocity(70, 0, 200) < 0);
-  assert.ok(magneticScrollVelocity(130, 0, 200) > 0);
-  assert.ok(magneticScrollVelocity(70, 0, 200) < magneticScrollVelocity(90, 0, 200));
+  assert.equal(magneticScrollVelocity(140, 0, 200), 0);
+  assert.ok(magneticScrollVelocity(30, 0, 200) < 0);
+  assert.ok(magneticScrollVelocity(170, 0, 200) > 0);
+  assert.ok(magneticScrollVelocity(20, 0, 200) < magneticScrollVelocity(30, 0, 200));
   assert.equal(magneticScrollVelocity(1000, 0, 200), 8);
   assert.equal(magneticScrollVelocity(-1000, 0, 200), -8);
 });
