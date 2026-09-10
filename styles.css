@@ -268,18 +268,14 @@ ul {
   position: sticky;
   z-index: 1;
   bottom: 0;
-  border-top: 8px solid var(--surface);
+  border-top: 1px solid var(--line);
   background: var(--surface);
 }
 .picker-cancel-row .list-link {
   color: var(--muted);
-  justify-content: center;
-  font-size: 13px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
 }
 .picker-cancel-row.is-magnetic-target .list-link {
-  color: var(--ink);
+  color: inherit;
 }
 .list-link {
   position: relative;
