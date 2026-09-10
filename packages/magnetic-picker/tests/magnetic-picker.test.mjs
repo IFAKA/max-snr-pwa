@@ -239,7 +239,7 @@ test('movement after activation keeps the picker active', async () => {
   }
 });
 
-test('captures the pointer immediately without disabling native scrolling', async () => {
+test('captures the pointer immediately for stable picker dragging', async () => {
   const dom = makePickerDom({ rows: 3 });
   const originalDocument = globalThis.document;
   let selection;
