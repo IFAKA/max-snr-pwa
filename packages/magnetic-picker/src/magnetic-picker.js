@@ -7,7 +7,8 @@ const HOLD_VIBRATION = 5;
 const DETENT_VIBRATION = [20, 30, 20];
 const SELECT_VIBRATION = [6, 14, 6];
 const CANCEL_FADE_MS = 420;
-const DEFAULT_JOYSTICK_RADIUS = 80;
+const DEFAULT_JOYSTICK_DEAD_ZONE = 10;
+const DEFAULT_JOYSTICK_RADIUS = 64;
 const DEFAULT_JOYSTICK_MAX_SPEED = 16;
 const JOYSTICK_RESPONSE = 30;
 const JOYSTICK_MIN_SPEED = 4;
@@ -16,7 +17,7 @@ const JOYSTICK_SPEED_EXPONENT = 0.6;
 export function magneticJoystickSpeed(
   distanceY,
   detentDistance = DETENT_DISTANCE,
-  deadZone = 0,
+  deadZone = DEFAULT_JOYSTICK_DEAD_ZONE,
   maxSpeed = DEFAULT_JOYSTICK_MAX_SPEED,
   radius = DEFAULT_JOYSTICK_RADIUS,
 ) {
@@ -106,7 +107,7 @@ const defaultOptions = {
   detentDistance: DETENT_DISTANCE,
   joystick: true,
   joystickRadius: DEFAULT_JOYSTICK_RADIUS,
-  joystickDeadZone: 0,
+  joystickDeadZone: DEFAULT_JOYSTICK_DEAD_ZONE,
   joystickMaxSpeed: DEFAULT_JOYSTICK_MAX_SPEED,
   activeListClass: 'is-picker-active',
   activeDocumentClass: 'is-picker-active',

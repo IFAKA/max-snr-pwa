@@ -65,10 +65,10 @@ test('magnetic joystick velocity accelerates toward input and decays smoothly', 
   assert.ok(stopped < 0.01);
 });
 
-test('default joystick has no dead zone and default speed is fast', () => {
-  assert.equal(magneticJoystickSpeed(0), 0);
-  assert.ok(magneticJoystickSpeed(1) > 0);
-  assert.equal(magneticJoystickSpeed(80), 16);
+test('default joystick keeps a comfortable dead zone and fast edge speed', () => {
+  assert.equal(magneticJoystickSpeed(9), 0);
+  assert.ok(magneticJoystickSpeed(11) > 3);
+  assert.equal(magneticJoystickSpeed(64), 16);
 });
 
 function makePickerDom({ rows = 1, disabledIndices = [] } = {}) {
@@ -398,6 +398,47 @@ test('joystick advances the scroll surface continuously between row changes', as
     frame(16);
     assert.ok(dom.list.scrollTop > firstPosition);
     assert.ok(dom.list.scrollTop < 50);
+    picker.destroy();
+  } finally {
+    globalThis.document = originalDocument;
+    globalThis.window = originalWindow;
+  }
+});
+
+test('holding the joystick at its limit auto-scrolls continuously', async () => {
+  const dom = makePickerDom({ rows: 12 });
+  dom.list.clientHeight = 100;
+  const originalDocument = globalThis.document;
+  const originalWindow = globalThis.window;
+  let frame;
+  globalThis.document = dom.document;
+  globalThis.window = {
+    requestAnimationFrame: (callback) => {
+      frame = callback;
+      return 1;
+    },
+    cancelAnimationFrame: () => {},
+  };
+  try {
+    const picker = createMagneticPicker(dom.list, { cancel: false, holdMs: 0 });
+    dom.listeners.get('list:pointerdown')({
+      pointerId: 1,
+      pointerType: 'touch',
+      clientX: 40,
+      clientY: 20,
+    });
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    dom.listeners.get('document:pointermove')({
+      pointerId: 1,
+      clientX: 40,
+      clientY: 200,
+      preventDefault: () => {},
+    });
+    frame(0);
+    frame(16);
+    const firstPosition = dom.list.scrollTop;
+    frame(32);
+    assert.ok(dom.list.scrollTop > firstPosition);
     picker.destroy();
   } finally {
     globalThis.document = originalDocument;
