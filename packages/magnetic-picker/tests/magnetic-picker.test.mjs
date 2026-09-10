@@ -202,6 +202,26 @@ test('active picker cancellation calls onCancel exactly once', async () => {
   }
 });
 
+test('movement after activation keeps the picker active', async () => {
+  const dom = makePickerDom({ rows: 3 });
+  const originalDocument = globalThis.document;
+  globalThis.document = dom.document;
+  try {
+    const picker = createMagneticPicker(dom.list, { cancel: false, holdMs: 0 });
+    dom.listeners.get('list:pointerdown')({ pointerId: 1, pointerType: 'touch', clientY: 20 });
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    dom.listeners.get('document:pointermove')({
+      pointerId: 1,
+      clientY: 70,
+      preventDefault: () => {},
+    });
+    assert.equal(dom.classes.has('is-picker-active'), true);
+    picker.destroy();
+  } finally {
+    globalThis.document = originalDocument;
+  }
+});
+
 test('generated accessibility elements use package default classes', () => {
   const dom = makePickerDom();
   let status;
