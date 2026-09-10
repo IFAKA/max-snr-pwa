@@ -302,7 +302,7 @@ ul {
   flex-direction: column;
   gap: 3px;
 }
-.list-link > .day-label {
+.list-link > span.day-label {
   flex-direction: row;
   align-items: center;
   gap: 8px;
