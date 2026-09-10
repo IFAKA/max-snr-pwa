@@ -232,6 +232,12 @@ ul {
   padding: 0;
   list-style: none;
 }
+.content-list {
+  border-top: 1px solid var(--line);
+}
+.content-list > li {
+  border-bottom: 1px solid var(--line);
+}
 .app-list {
   border-top: 1px solid var(--line);
   touch-action: none;
@@ -284,6 +290,8 @@ ul {
   position: sticky;
   z-index: 1;
   bottom: 0;
+  height: var(--list-row-height);
+  min-height: var(--list-row-height);
   margin-inline: -12px;
   padding-inline: 12px;
   border-top: 1px solid var(--line);
