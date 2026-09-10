@@ -595,6 +595,16 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   display: grid;
   gap: 8px;
 }
+.history-exercise .history-set-list {
+  gap: 0;
+}
+.history-set-list > li {
+  display: flex;
+  min-height: var(--list-row-height);
+  align-items: center;
+  padding: var(--list-row-padding);
+  line-height: 1.3;
+}
 .history-exercise li {
   display: flex;
   flex-wrap: wrap;
