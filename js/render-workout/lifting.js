@@ -11,7 +11,7 @@ import {
 import { save } from '../storage.js';
 import { esc } from '../dom.js';
 import { getState } from '../state.js';
-import { activeTask, completeSet, lastActivePerformance, lastPerformance } from '../workout.js';
+import { activeTask, completeSet, lastPerformance } from '../workout.js';
 
 export function renderLifting() {
   const active = state(),
@@ -29,8 +29,7 @@ export function renderLifting() {
   }
   const repsValue = draft.reps ?? String(String(task.reps).split('–')[0]);
   const unit = getState().settings?.unit || 'kg';
-  const previous =
-    lastActivePerformance(task.exerciseId, unit) || lastPerformance(task.performedName, unit);
+  const previous = lastPerformance(task.performedName, unit);
   const weightValue = draft.weight ?? previous?.weight ?? '';
   const stage = workoutStage({
     className: 'lifting-stage',
