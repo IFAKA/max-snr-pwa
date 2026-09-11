@@ -52,6 +52,38 @@ export function magneticJoystickVelocity(
   return currentVelocity + (targetVelocity - currentVelocity) * factor;
 }
 
+export function magneticJoystickEdgeSpeed(
+  distanceX,
+  distanceY,
+  detentDistance = DETENT_DISTANCE,
+  deadZone = DEFAULT_JOYSTICK_DEAD_ZONE,
+  maxSpeed = DEFAULT_JOYSTICK_MAX_SPEED,
+  radius = DEFAULT_JOYSTICK_RADIUS,
+) {
+  const numericX = Number(distanceX) || 0;
+  const numericY = Number(distanceY) || 0;
+  const radialDistance = Math.hypot(numericX, numericY);
+  const numericRadius = Math.max(1, Number(radius) || DEFAULT_JOYSTICK_RADIUS);
+  if (radialDistance < numericRadius) return 0;
+  const verticalRatio = Math.abs(numericY) / radialDistance;
+  if (radialDistance === numericRadius)
+    return magneticJoystickSpeed(
+      numericRadius,
+      detentDistance,
+      deadZone,
+      maxSpeed,
+      numericRadius,
+    ) * verticalRatio;
+  const outsideSpeed = magneticJoystickSpeed(
+    Math.max(1, radialDistance - numericRadius),
+    detentDistance,
+    0,
+    maxSpeed,
+    numericRadius,
+  );
+  return outsideSpeed * verticalRatio;
+}
+
 export function magneticRawRowIndex(startIndex, deltaY, detentDistance = DETENT_DISTANCE) {
   return Math.round(magneticRawRowPosition(startIndex, deltaY, detentDistance));
 }
@@ -245,6 +277,8 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
   let startY = 0;
   let lastY = 0;
   let joystickY = 0;
+  let joystickDeltaX = 0;
+  let joystickDeltaY = 0;
   let joystickPosition = 0;
   let joystickVelocity = 0;
   let joystickMode = JOYSTICK_MODES.MAGNETIC;
@@ -347,6 +381,8 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
   const updateJoystickOverlay = (clientX, clientY) => {
     if (!joystickWell) return;
     const radius = Math.max(1, Number(options.joystickRadius) || DEFAULT_JOYSTICK_RADIUS);
+    joystickDeltaX = clientX - startX;
+    joystickDeltaY = clientY - startY;
     const displacement = joystickDisplacement(startX, startY, clientX, clientY, radius);
     joystickWell.style.setProperty('--picker-thumb-x', `${displacement.x}px`);
     joystickWell.style.setProperty('--picker-thumb-y', `${displacement.y}px`);
@@ -383,13 +419,13 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     const elapsed = Math.min(0.1, Math.max(0, (currentTime - previousTime) / 1000));
     joystickFrameTime = currentTime;
     const radius = Math.max(1, Number(options.joystickRadius) || DEFAULT_JOYSTICK_RADIUS);
-    const verticalDisplacement = joystickY - startY;
-    const reachedLimit = Math.abs(verticalDisplacement) >= radius - 1;
+    const reachedLimit = Math.hypot(joystickDeltaX, joystickDeltaY) >= radius - 1;
     const speed =
       joystickMode === JOYSTICK_MODES.MAGNETIC || !reachedLimit
         ? 0
-        : magneticJoystickSpeed(
-            Math.abs(verticalDisplacement),
+        : magneticJoystickEdgeSpeed(
+            joystickDeltaX,
+            joystickDeltaY,
             options.detentDistance,
             options.joystickDeadZone ?? options.detentDistance,
             options.joystickMaxSpeed,
@@ -419,9 +455,13 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     if (!scheduleFrame) return;
     cancelJoystick();
     joystickY = startY;
+    joystickDeltaX = 0;
+    joystickDeltaY = 0;
     joystickPosition = activeIndex;
     joystickVelocity = 0;
     joystickMode = JOYSTICK_MODES.MAGNETIC;
+    joystickDeltaX = 0;
+    joystickDeltaY = 0;
     joystickFrame = scheduleFrame.call(globalThis.window, pickerFrame);
   };
   const setActive = (index, vibration = DETENT_VIBRATION, ensureVisible = true) => {
