@@ -427,7 +427,12 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     }`;
     if (ensureVisible)
       row?.scrollIntoView?.({
-        block: 'nearest',
+        block:
+          joystickMode === JOYSTICK_MODES.EDGE_UP
+            ? 'start'
+            : joystickMode === JOYSTICK_MODES.EDGE_DOWN
+              ? 'end'
+              : 'nearest',
         behavior:
           joystickMode !== JOYSTICK_MODES.MAGNETIC
             ? 'smooth'
