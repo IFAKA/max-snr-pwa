@@ -637,7 +637,7 @@ test('upper edge scrolling preserves the highlighted middle row handoff', async 
     );
     assert.ok(dom.scrollIntoViewCalls > initialScrollCalls);
     assert.ok(
-      dom.scrollIntoViewOptions.some((options) => options?.block === 'start'),
+      dom.scrollIntoViewOptions.some((options) => options?.block === 'end'),
     );
     const edgeScrollCalls = dom.scrollIntoViewCalls;
     dom.listeners.get('document:pointermove')({
@@ -692,7 +692,7 @@ test('reversing edge direction changes scroll direction without a handoff jump',
     );
     assert.ok(lowerEdgeTarget > 6);
     assert.ok(
-      dom.scrollIntoViewOptions.some((options) => options?.block === 'end'),
+      dom.scrollIntoViewOptions.some((options) => options?.block === 'start'),
     );
     dom.listeners.get('document:pointermove')({
       pointerId: 1,

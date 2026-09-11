@@ -434,9 +434,9 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
       row?.scrollIntoView?.({
         block:
           joystickMode === JOYSTICK_MODES.EDGE_UP
-            ? 'start'
+            ? 'end'
             : joystickMode === JOYSTICK_MODES.EDGE_DOWN
-              ? 'end'
+              ? 'start'
               : 'nearest',
         behavior:
           joystickMode !== JOYSTICK_MODES.MAGNETIC
