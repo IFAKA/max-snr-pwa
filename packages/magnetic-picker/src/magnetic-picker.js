@@ -383,26 +383,16 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
           ) * (joystickMode === JOYSTICK_MODES.EDGE_UP ? -1 : 1);
     joystickVelocity = magneticJoystickVelocity(joystickVelocity, speed, elapsed);
     if (Math.abs(joystickVelocity) > 0.001) {
-      const previousPosition = joystickPosition;
       joystickPosition = magneticPickerIndex(
         joystickPosition + joystickVelocity * elapsed,
         rows.length,
       );
-      const positionDelta = joystickPosition - previousPosition;
       const nextIndex = magneticPreferredIndex(
         Math.round(joystickPosition),
         selectableIndices,
         rows.length,
       );
-      setActive(nextIndex, DETENT_VIBRATION, false);
-      const rowHeight = rows[activeIndex]?.getBoundingClientRect?.().height || 50;
-      const maxScrollTop = Math.max(0, scrollTarget.scrollHeight - scrollTarget.clientHeight);
-      const currentScrollTop = Number(scrollTarget.scrollTop) || 0;
-      const nextScrollTop = Math.max(
-        0,
-        Math.min(maxScrollTop, currentScrollTop + positionDelta * rowHeight),
-      );
-      scrollTarget.scrollTop = nextScrollTop;
+      setActive(nextIndex, DETENT_VIBRATION, nextIndex !== activeIndex);
     }
     const scheduleFrame = requestJoystickFrame();
     joystickFrame = scheduleFrame ? scheduleFrame.call(globalThis.window, pickerFrame) : null;

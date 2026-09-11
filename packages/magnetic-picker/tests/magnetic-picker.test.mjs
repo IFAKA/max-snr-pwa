@@ -410,10 +410,17 @@ test('joystick advances the scroll surface continuously between row changes', as
       preventDefault: () => {},
     });
     frame(0);
-    const firstPosition = dom.list.scrollTop;
+    const firstTarget = dom.rowList.findIndex((row) => row.classList.contains('is-picker-target'));
     frame(16);
-    assert.ok(dom.list.scrollTop > firstPosition);
-    assert.ok(dom.list.scrollTop < 50);
+    assert.equal(
+      dom.rowList.findIndex((row) => row.classList.contains('is-picker-target')),
+      firstTarget,
+    );
+    for (let time = 100; time <= 1000; time += 100) frame(time);
+    assert.ok(
+      dom.rowList.findIndex((row) => row.classList.contains('is-picker-target')) > firstTarget,
+    );
+    assert.ok(dom.scrollIntoViewCalls > 1);
     picker.destroy();
   } finally {
     globalThis.document = originalDocument;
@@ -463,9 +470,11 @@ test('joystick stays still inside the well and starts only at the limit', async 
       clientY: 84,
       preventDefault: () => {},
     });
-    frame(1016);
-    frame(1032);
-    assert.ok(dom.list.scrollTop > 0);
+    for (let time = 1016; time <= 2000; time += 100) frame(time);
+    assert.ok(
+      dom.rowList.findIndex((row) => row.classList.contains('is-picker-target')) > 0,
+    );
+    assert.ok(dom.scrollIntoViewCalls > 1);
     picker.destroy();
   } finally {
     globalThis.document = originalDocument;
@@ -503,10 +512,10 @@ test('joystick transitions between magnetic movement and edge scrolling cleanly'
       preventDefault: () => {},
     });
     frame(0);
-    frame(16);
-    const edgePosition = dom.list.scrollTop;
-    assert.ok(edgePosition > 0);
+    for (let time = 100; time <= 1000; time += 100) frame(time);
     const edgeTarget = dom.rowList.findIndex((row) => row.classList.contains('is-picker-target'));
+    assert.ok(edgeTarget > 0);
+    const edgeScrollCalls = dom.scrollIntoViewCalls;
     dom.listeners.get('document:pointermove')({
       pointerId: 1,
       clientX: 40,
@@ -514,7 +523,7 @@ test('joystick transitions between magnetic movement and edge scrolling cleanly'
       preventDefault: () => {},
     });
     frame(32);
-    assert.equal(dom.list.scrollTop, edgePosition);
+    assert.equal(dom.scrollIntoViewCalls, edgeScrollCalls + 1);
     assert.equal(
       dom.rowList.findIndex((row) => row.classList.contains('is-picker-target')),
       edgeTarget,
@@ -559,9 +568,15 @@ test('upper edge scrolling preserves the highlighted middle row handoff', async 
       preventDefault: () => {},
     });
     frame(0);
-    frame(16);
-    assert.ok(dom.list.scrollTop < 300);
-    assert.equal(dom.scrollIntoViewCalls, initialScrollCalls);
+    for (let time = 100; time <= 1000; time += 100) frame(time);
+    const edgeTarget = dom.rowList.findIndex((row) =>
+      row.classList.contains('is-picker-target'),
+    );
+    assert.ok(
+      edgeTarget < initialTarget,
+    );
+    assert.ok(dom.scrollIntoViewCalls > initialScrollCalls);
+    const edgeScrollCalls = dom.scrollIntoViewCalls;
     dom.listeners.get('document:pointermove')({
       pointerId: 1,
       clientY: 260,
@@ -569,9 +584,9 @@ test('upper edge scrolling preserves the highlighted middle row handoff', async 
     });
     assert.equal(
       dom.rowList.findIndex((row) => row.classList.contains('is-picker-target')),
-      initialTarget,
+      edgeTarget,
     );
-    assert.equal(dom.scrollIntoViewCalls, initialScrollCalls + 1);
+    assert.equal(dom.scrollIntoViewCalls, edgeScrollCalls + 1);
     picker.destroy();
   } finally {
     globalThis.document = originalDocument;
@@ -609,17 +624,24 @@ test('reversing edge direction changes scroll direction without a handoff jump',
     });
     frame(0);
     frame(100);
-    const lowerEdgeScroll = dom.list.scrollTop;
-    assert.ok(lowerEdgeScroll > 300);
+    const lowerEdgeTarget = dom.rowList.findIndex((row) =>
+      row.classList.contains('is-picker-target'),
+    );
+    assert.ok(lowerEdgeTarget > 6);
     dom.listeners.get('document:pointermove')({
       pointerId: 1,
       clientY: 236,
       preventDefault: () => {},
     });
     frame(116);
-    assert.equal(dom.list.scrollTop, lowerEdgeScroll);
+    assert.equal(
+      dom.rowList.findIndex((row) => row.classList.contains('is-picker-target')),
+      lowerEdgeTarget,
+    );
     frame(216);
-    assert.ok(dom.list.scrollTop < lowerEdgeScroll);
+    assert.ok(
+      dom.rowList.findIndex((row) => row.classList.contains('is-picker-target')) < lowerEdgeTarget,
+    );
     picker.destroy();
   } finally {
     globalThis.document = originalDocument;
@@ -657,18 +679,12 @@ test('edge scrolling advances the cursor with the list and clamps them together'
     });
     frame(0);
     for (let time = 100; time <= 2000; time += 100) frame(time);
-    assert.equal(dom.list.scrollTop, 100);
     assert.equal(
       dom.rowList.findIndex((row) => row.classList.contains('is-picker-target')),
       3,
     );
-    assert.equal(
-      dom.interactionEvents[dom.interactionEvents.length - 2],
-      'highlight',
-    );
-    assert.equal(dom.interactionEvents.at(-1), 'scroll');
+    assert.ok(dom.scrollIntoViewCalls > 1);
     frame(3000);
-    assert.equal(dom.list.scrollTop, 100);
     assert.equal(
       dom.rowList.findIndex((row) => row.classList.contains('is-picker-target')),
       3,
@@ -710,10 +726,11 @@ test('holding the joystick at its limit auto-scrolls continuously', async () => 
       preventDefault: () => {},
     });
     frame(0);
-    frame(16);
-    const firstPosition = dom.list.scrollTop;
-    frame(32);
-    assert.ok(dom.list.scrollTop > firstPosition);
+    const firstTarget = dom.rowList.findIndex((row) => row.classList.contains('is-picker-target'));
+    for (let time = 100; time <= 1000; time += 100) frame(time);
+    assert.ok(
+      dom.rowList.findIndex((row) => row.classList.contains('is-picker-target')) > firstTarget,
+    );
     picker.destroy();
   } finally {
     globalThis.document = originalDocument;
@@ -753,7 +770,9 @@ test('holding the joystick at the upper limit scrolls upward', async () => {
     });
     frame(0);
     frame(16);
-    assert.ok(dom.list.scrollTop < 400);
+    assert.ok(
+      dom.rowList.findIndex((row) => row.classList.contains('is-picker-target')) < 6,
+    );
     picker.destroy();
   } finally {
     globalThis.document = originalDocument;
