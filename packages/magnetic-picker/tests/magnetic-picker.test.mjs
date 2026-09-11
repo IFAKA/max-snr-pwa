@@ -479,7 +479,7 @@ test('joystick advances the scroll surface continuously between row changes', as
     );
     assert.ok(dom.scrollIntoViewCalls > 1);
     assert.ok(
-      dom.scrollIntoViewOptions.some((options) => options?.behavior === 'smooth'),
+      dom.scrollIntoViewOptions.every((options) => options?.behavior === 'auto'),
     );
     picker.destroy();
   } finally {
