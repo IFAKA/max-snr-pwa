@@ -477,6 +477,7 @@ test('joystick advances the scroll surface continuously between row changes', as
     assert.ok(
       dom.rowList.findIndex((row) => row.classList.contains('is-picker-target')) > firstTarget,
     );
+    assert.ok(dom.list.scrollTop > 0);
     assert.ok(dom.scrollIntoViewCalls > 1);
     assert.ok(
       dom.scrollIntoViewOptions.every((options) => options?.behavior === 'auto'),

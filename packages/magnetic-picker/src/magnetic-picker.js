@@ -397,6 +397,8 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
           ) * (joystickMode === JOYSTICK_MODES.EDGE_UP ? -1 : 1);
     joystickVelocity = magneticJoystickVelocity(joystickVelocity, speed, elapsed);
     if (Math.abs(joystickVelocity) > 0.001) {
+      if (joystickMode !== JOYSTICK_MODES.MAGNETIC && 'scrollTop' in scrollTarget)
+        scrollTarget.scrollTop += joystickVelocity * elapsed * options.detentDistance;
       joystickPosition = magneticPickerIndex(
         joystickPosition + joystickVelocity * elapsed,
         rows.length,
