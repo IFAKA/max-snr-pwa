@@ -711,6 +711,70 @@ test('reversing edge direction changes scroll direction without a handoff jump',
   }
 });
 
+test('re-enters edge scrolling after returning to magnetic mode without releasing', async () => {
+  const dom = makePickerDom({ rows: 12 });
+  dom.list.clientHeight = 100;
+  dom.list.scrollTop = 300;
+  const originalDocument = globalThis.document;
+  const originalWindow = globalThis.window;
+  let frame;
+  globalThis.document = dom.document;
+  globalThis.window = {
+    requestAnimationFrame: (callback) => {
+      frame = callback;
+      return 1;
+    },
+    cancelAnimationFrame: () => {},
+  };
+  try {
+    const picker = createMagneticPicker(dom.list, { cancel: false, holdMs: 0 });
+    dom.listeners.get('list:pointerdown')({
+      pointerId: 1,
+      pointerType: 'touch',
+      clientY: 300,
+    });
+    await new Promise((resolve) => setTimeout(resolve, 5));
+
+    dom.listeners.get('document:pointermove')({
+      pointerId: 1,
+      clientY: 364,
+      preventDefault: () => {},
+    });
+    frame(0);
+    frame(1000);
+    const firstEdgeTarget = dom.rowList.findIndex((row) =>
+      row.classList.contains('is-picker-target'),
+    );
+
+    dom.listeners.get('document:pointermove')({
+      pointerId: 1,
+      clientY: 320,
+      preventDefault: () => {},
+    });
+    frame(1016);
+    const magneticTarget = dom.rowList.findIndex((row) =>
+      row.classList.contains('is-picker-target'),
+    );
+    assert.equal(magneticTarget, firstEdgeTarget);
+
+    dom.listeners.get('document:pointermove')({
+      pointerId: 1,
+      clientY: 364,
+      preventDefault: () => {},
+    });
+    frame(1032);
+    frame(2032);
+    const secondEdgeTarget = dom.rowList.findIndex((row) =>
+      row.classList.contains('is-picker-target'),
+    );
+    assert.ok(secondEdgeTarget > firstEdgeTarget);
+    picker.destroy();
+  } finally {
+    globalThis.document = originalDocument;
+    globalThis.window = originalWindow;
+  }
+});
+
 test('edge scrolling advances the cursor with the list and clamps them together', async () => {
   const dom = makePickerDom({ rows: 4 });
   dom.list.clientHeight = 100;

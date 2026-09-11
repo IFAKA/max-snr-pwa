@@ -330,6 +330,17 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     joystickVelocity = 0;
     joystickMode = JOYSTICK_MODES.MAGNETIC;
   };
+  const setJoystickMode = (nextMode, clientY) => {
+    if (joystickMode === nextMode) return;
+    joystickMode = nextMode;
+    joystickVelocity = 0;
+    joystickFrameTime = null;
+    if (nextMode === JOYSTICK_MODES.MAGNETIC) {
+      magneticBaseIndex = activeIndex;
+      magneticBasePosition = joystickPosition;
+      magneticBaseY = clientY;
+    }
+  };
   const removeJoystickOverlay = () => {
     joystickOverlay?.remove?.();
     joystickOverlay = null;
@@ -546,15 +557,13 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     }
     const radius = Math.max(1, Number(options.joystickRadius) || DEFAULT_JOYSTICK_RADIUS);
     const insideLimit = Math.abs(joystickY - startY) < radius - 1;
-    if (insideLimit) {
-      if (joystickMode !== JOYSTICK_MODES.MAGNETIC) {
-        joystickMode = JOYSTICK_MODES.MAGNETIC;
-        joystickVelocity = 0;
-        joystickFrameTime = null;
-        magneticBaseIndex = activeIndex;
-        magneticBasePosition = joystickPosition;
-        magneticBaseY = event.clientY;
-      }
+    const nextMode = insideLimit
+      ? JOYSTICK_MODES.MAGNETIC
+      : joystickY < startY
+        ? JOYSTICK_MODES.EDGE_UP
+        : JOYSTICK_MODES.EDGE_DOWN;
+    setJoystickMode(nextMode, event.clientY);
+    if (nextMode === JOYSTICK_MODES.MAGNETIC) {
       const magneticDeltaY = event.clientY - magneticBaseY;
       joystickPosition = magneticPickerIndex(
         magneticBasePosition +
@@ -573,12 +582,6 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
       );
       setActive(nextIndex);
       return;
-    }
-    const nextMode = joystickY < startY ? JOYSTICK_MODES.EDGE_UP : JOYSTICK_MODES.EDGE_DOWN;
-    if (joystickMode !== nextMode) {
-      joystickMode = nextMode;
-      joystickVelocity = 0;
-      joystickFrameTime = null;
     }
   }
   function onPointerUp(event) {
