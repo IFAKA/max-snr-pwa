@@ -55,8 +55,6 @@ export function magneticJoystickVelocity(
 export function magneticJoystickEdgeSpeed(
   distanceX,
   distanceY,
-  detentDistance = DETENT_DISTANCE,
-  deadZone = DEFAULT_JOYSTICK_DEAD_ZONE,
   maxSpeed = DEFAULT_JOYSTICK_MAX_SPEED,
   radius = DEFAULT_JOYSTICK_RADIUS,
 ) {
@@ -66,22 +64,11 @@ export function magneticJoystickEdgeSpeed(
   const numericRadius = Math.max(1, Number(radius) || DEFAULT_JOYSTICK_RADIUS);
   if (radialDistance < numericRadius) return 0;
   const verticalRatio = Math.abs(numericY) / radialDistance;
-  if (radialDistance === numericRadius)
-    return magneticJoystickSpeed(
-      numericRadius,
-      detentDistance,
-      deadZone,
-      maxSpeed,
-      numericRadius,
-    ) * verticalRatio;
-  const outsideSpeed = magneticJoystickSpeed(
-    Math.max(1, radialDistance - numericRadius),
-    detentDistance,
-    0,
-    maxSpeed,
-    numericRadius,
-  );
-  return outsideSpeed * verticalRatio;
+  const outsideRatio =
+    radialDistance === numericRadius
+      ? 1
+      : Math.min(1, (radialDistance - numericRadius) / numericRadius);
+  return Math.max(0, Number(maxSpeed) || DEFAULT_JOYSTICK_MAX_SPEED) * outsideRatio * verticalRatio;
 }
 
 export function magneticRawRowIndex(startIndex, deltaY, detentDistance = DETENT_DISTANCE) {
@@ -426,8 +413,6 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
         : magneticJoystickEdgeSpeed(
             joystickDeltaX,
             joystickDeltaY,
-            options.detentDistance,
-            options.joystickDeadZone ?? options.detentDistance,
             options.joystickMaxSpeed,
             radius,
           ) * (joystickMode === JOYSTICK_MODES.EDGE_UP ? -1 : 1);
@@ -597,7 +582,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
       return;
     }
     const radius = Math.max(1, Number(options.joystickRadius) || DEFAULT_JOYSTICK_RADIUS);
-    const insideLimit = Math.abs(joystickY - startY) < radius - 1;
+    const insideLimit = Math.hypot(joystickDeltaX, joystickDeltaY) < radius - 1;
     const nextMode = insideLimit
       ? JOYSTICK_MODES.MAGNETIC
       : joystickY < startY

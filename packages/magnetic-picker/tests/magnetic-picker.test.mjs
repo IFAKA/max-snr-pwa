@@ -73,14 +73,14 @@ test('default joystick keeps a comfortable dead zone and fast edge speed', () =>
 });
 
 test('joystick edge speed uses radial distance and vertical angle', () => {
-  const vertical = magneticJoystickEdgeSpeed(0, 128, 24, 0, 16, 64);
-  const diagonal = magneticJoystickEdgeSpeed(96, 96, 24, 0, 16, 64);
-  const horizontal = magneticJoystickEdgeSpeed(128, 0, 24, 0, 16, 64);
+  const vertical = magneticJoystickEdgeSpeed(0, 128, 16, 64);
+  const diagonal = magneticJoystickEdgeSpeed(96, 96, 16, 64);
+  const horizontal = magneticJoystickEdgeSpeed(128, 0, 16, 64);
 
   assert.equal(vertical, 16);
   assert.ok(diagonal > 0 && diagonal < vertical);
   assert.equal(horizontal, 0);
-  assert.ok(magneticJoystickEdgeSpeed(0, 65, 24, 0, 16, 64) < vertical);
+  assert.ok(magneticJoystickEdgeSpeed(0, 65, 16, 64) < vertical);
 });
 
 function makePickerDom({ rows = 1, disabledIndices = [] } = {}) {
