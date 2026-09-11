@@ -120,36 +120,10 @@ small {
 .today-screen {
   padding-top: 0;
 }
-.app-status {
-  margin-top: 12px;
-}
-.app-status summary {
-  min-height: 52px;
-  padding: 14px 16px;
-  border: 2px solid var(--line);
-  border-radius: 15px;
-  background: var(--surface-raised);
-  color: var(--muted);
-  cursor: pointer;
-  font-weight: 650;
-  list-style-position: inside;
-}
-.app-status[open] summary {
-  border-radius: 15px 15px 0 0;
-}
-.app-status-content {
-  padding: 12px;
-  border: 2px solid var(--line);
-  border-top: 0;
-  border-radius: 0 0 15px 15px;
-  background: var(--surface);
-}
-.app-status-content button {
-  width: 100%;
-}
-.app-status-content p {
+.app-update-status {
   min-height: 1.4em;
   margin: 8px 0 0;
+  padding-inline: 2px;
   color: var(--muted);
   font-size: 0.9rem;
 }
