@@ -210,29 +210,25 @@ function joystickDisplacement(originX, originY, clientX, clientY, radius) {
 }
 
 function bindPickerEvents(list, handlers) {
-  const { onPointerDown, onPointerLeave, reset, onClick, onKeyDown } = handlers;
-  const { onPointerCancel } = handlers;
-  list.addEventListener('pointerdown', onPointerDown);
-  list.addEventListener('pointercancel', onPointerCancel);
-  list.addEventListener('pointerleave', onPointerLeave);
-  list.addEventListener('blur', reset);
-  list.addEventListener('click', onClick, true);
-  list.addEventListener('contextmenu', handlers.onContextMenu);
-  list.addEventListener('keydown', onKeyDown);
-  document.addEventListener?.('keydown', onKeyDown);
-  document.addEventListener?.('visibilitychange', reset);
-  globalThis.window?.addEventListener?.('blur', reset);
+  const listeners = [
+    [list, 'pointerdown', handlers.onPointerDown],
+    [list, 'pointercancel', handlers.onPointerCancel],
+    [list, 'pointerleave', handlers.onPointerLeave],
+    [list, 'blur', handlers.reset],
+    [list, 'click', handlers.onClick, true],
+    [list, 'contextmenu', handlers.onContextMenu],
+    [list, 'keydown', handlers.onKeyDown],
+    [document, 'keydown', handlers.onKeyDown],
+    [document, 'visibilitychange', handlers.reset],
+    [globalThis.window, 'blur', handlers.reset],
+  ];
+  listeners.forEach(([target, type, listener, capture]) =>
+    target?.addEventListener?.(type, listener, capture),
+  );
   return () => {
-    list.removeEventListener('pointerdown', onPointerDown);
-    list.removeEventListener('pointercancel', onPointerCancel);
-    list.removeEventListener('pointerleave', onPointerLeave);
-    list.removeEventListener('blur', reset);
-    list.removeEventListener('click', onClick, true);
-    list.removeEventListener('contextmenu', handlers.onContextMenu);
-    list.removeEventListener('keydown', onKeyDown);
-    document.removeEventListener?.('keydown', onKeyDown);
-    document.removeEventListener?.('visibilitychange', reset);
-    globalThis.window?.removeEventListener?.('blur', reset);
+    listeners.forEach(([target, type, listener, capture]) =>
+      target?.removeEventListener?.(type, listener, capture),
+    );
   };
 }
 
@@ -314,9 +310,11 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     }, CANCEL_FADE_MS);
   };
   const stopDocumentTracking = () => {
-    document.removeEventListener?.('pointermove', onPointerMove);
-    document.removeEventListener?.('pointerup', onPointerUp);
-    document.removeEventListener?.('pointercancel', onPointerCancel);
+    [
+      ['pointermove', onPointerMove],
+      ['pointerup', onPointerUp],
+      ['pointercancel', onPointerCancel],
+    ].forEach(([type, listener]) => document.removeEventListener?.(type, listener));
   };
   const cancelJoystick = () => {
     if (joystickFrame !== null) {
@@ -451,6 +449,15 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
             : 'smooth',
       });
   };
+  const refreshRows = () => {
+    rows = rowsFor(list, options.rowSelector);
+    selectableIndices = rows.reduce((indices, row, index) => {
+      const action = actionFor(row, options.actionSelector);
+      if (options.isSelectable(action, row)) indices.push(index);
+      return indices;
+    }, []);
+    return selectableIndices.length > 0;
+  };
   const reset = (notify = false) => {
     const shouldNotify = notify === true || (Boolean(notify) && pickerActive);
     clearTimer();
@@ -510,15 +517,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     if (pointerId === null || destroyed) return;
     setHolding(false);
     showCancelRow();
-    rows = rowsFor(list, options.rowSelector);
-    selectableIndices = rows.reduce((indices, row, index) => {
-      const action = actionFor(row, options.actionSelector);
-      return options.isSelectable(action, row) ? [...indices, index] : indices;
-    }, []);
-    if (!selectableIndices.length) {
-      reset();
-      return;
-    }
+    if (!refreshRows()) return reset();
     if (startIndex < 0)
       startIndex = magneticEntryIndex(nearestRow(rows, startY), selectableIndices, rows.length);
     magneticBaseIndex = startIndex;
@@ -566,8 +565,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     if (nextMode === JOYSTICK_MODES.MAGNETIC) {
       const magneticDeltaY = event.clientY - magneticBaseY;
       joystickPosition = magneticPickerIndex(
-        magneticBasePosition +
-          magneticRawRowPosition(0, magneticDeltaY, options.detentDistance),
+        magneticBasePosition + magneticRawRowPosition(0, magneticDeltaY, options.detentDistance),
         rows.length,
       );
       const magneticRawIndex = magneticRawRowIndex(
@@ -575,11 +573,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
         magneticDeltaY,
         options.detentDistance,
       );
-      const nextIndex = magneticPreferredIndex(
-        magneticRawIndex,
-        selectableIndices,
-        rows.length,
-      );
+      const nextIndex = magneticPreferredIndex(magneticRawIndex, selectableIndices, rows.length);
       setActive(nextIndex);
       return;
     }
@@ -597,7 +591,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     if (event.pointerType === 'mouse')
       document.documentElement?.classList.remove('is-touch-pointer');
     else document.documentElement?.classList.add('is-touch-pointer');
-    rows = rowsFor(list, options.rowSelector);
+    refreshRows();
     if (!rows.length) return;
     suppressClick = false;
     movedBeforePicker = false;
@@ -608,10 +602,6 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     lastY = event.clientY;
     list.setPointerCapture?.(pointerId);
     document.documentElement?.classList.add(options.activeDocumentClass);
-    selectableIndices = rows.reduce((indices, row, index) => {
-      const action = actionFor(row, options.actionSelector);
-      return options.isSelectable(action, row) ? [...indices, index] : indices;
-    }, []);
     startIndex = magneticEntryIndex(nearestRow(rows, startY), selectableIndices, rows.length);
     clearTimer();
     document.addEventListener?.('pointermove', onPointerMove, { passive: false });

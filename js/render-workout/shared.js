@@ -1,12 +1,4 @@
-import {
-  app,
-  bindHoldScroll,
-  bindTitleMarquee,
-  esc,
-  icon,
-  listMarkup,
-  titleMarkup,
-} from '../dom.js';
+import { app, bindViewInteractions, esc, icon, listMarkup, titleMarkup } from '../dom.js';
 import { save } from '../storage.js';
 import { getState } from '../state.js';
 import { selectExercise, exerciseSelectionLocked, start, cancelWorkout } from '../workout.js';
@@ -324,8 +316,7 @@ export async function runAction(button, action, onSuccess = () => location.reloa
 }
 export function mount(html) {
   app.innerHTML = html;
-  bindHoldScroll(app);
-  bindTitleMarquee(app);
+  bindViewInteractions(app);
   const saveLater = document.querySelector('#save-later');
   if (saveLater)
     saveLater.onclick = () =>

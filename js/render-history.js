@@ -1,12 +1,4 @@
-import {
-  app,
-  bindHoldScroll,
-  bindTitleMarquee,
-  esc,
-  icon,
-  listMarkup,
-  titleMarkup,
-} from './dom.js';
+import { app, bindViewInteractions, esc, icon, listMarkup, titleMarkup } from './dom.js';
 import { getState, setState } from './state.js';
 import { migrate, persist } from './storage.js';
 import { validateBackup } from './backup.js';
@@ -99,27 +91,23 @@ export function renderHistory() {
   if (view === 'workout') return renderWorkoutDetail(state, Number(params.get('id')));
   app.innerHTML = `<section aria-labelledby="history-title">${titleMarkup('History', 'history-title')}${listMarkup([`<li><a class="list-link" href="/history/?view=workouts"><span>Workouts</span>${icon('chevron', 'Open workouts')}</a></li>`, ...dataRows()], '', 'History options')}</section>`;
   bindDataActions(state);
-  bindHoldScroll();
-  bindTitleMarquee();
+  bindViewInteractions();
 }
 function renderWorkouts(state) {
   const rows = state.history.length
     ? state.history.map(workoutMarkup)
     : ['<li data-picker-skip><div class="list-link empty-state">No workouts yet</div></li>'];
   app.innerHTML = `<section aria-labelledby="workouts-title">${titleMarkup('Workouts', 'workouts-title')}${listMarkup(rows, '', 'Logged workouts')}</section>`;
-  bindHoldScroll();
-  bindTitleMarquee();
+  bindViewInteractions();
 }
 function renderWorkoutDetail(state, index) {
   const workout = state.history[index];
   if (!workout) return renderWorkouts(state);
   app.innerHTML = `<section aria-labelledby="workout-title">${titleMarkup(workout.name || 'Workout', 'workout-title')}<div class="history-detail">${workoutDetails(workout)}</div></section>`;
-  bindHoldScroll();
-  bindTitleMarquee();
+  bindViewInteractions();
 }
 function renderData(state) {
   app.innerHTML = `<section aria-labelledby="data-title">${titleMarkup('Data', 'data-title')}${listMarkup(dataRows(), '', 'Data actions')}<output id="data-status" class="notice error" role="status" aria-live="polite" aria-atomic="true" hidden></output></section>`;
   bindDataActions(state);
-  bindHoldScroll();
-  bindTitleMarquee();
+  bindViewInteractions();
 }

@@ -1,12 +1,4 @@
-import {
-  app,
-  bindHoldScroll,
-  bindTitleMarquee,
-  esc,
-  icon,
-  listMarkup,
-  titleMarkup,
-} from './dom.js';
+import { app, bindViewInteractions, esc, icon, listMarkup, titleMarkup } from './dom.js';
 import { configuredDays, dayItems, isWorkoutDay, workoutName } from './routine-data.js';
 import { routineMarkup } from './routine-view.js';
 import { startRow, bindStartDialog } from './render-workout/shared.js';
@@ -25,8 +17,7 @@ export function renderRoutine() {
       : `<li class="rest-day"><button class="list-link is-disabled" type="button" disabled><span data-hold-scroll><span class="hold-scroll-text">${esc(day)} · Rest</span></span>${icon('dash', 'Rest day')}</button></li>`,
   );
   app.innerHTML = `<section aria-labelledby="routine-title">${titleMarkup('Routine', 'routine-title')}${listMarkup(days, '', 'Routine days')}</section>`;
-  bindHoldScroll();
-  bindTitleMarquee();
+  bindViewInteractions();
 }
 
 function renderDay(day) {
@@ -41,13 +32,11 @@ function renderDay(day) {
       ];
   app.innerHTML = `<section aria-labelledby="day-title">${titleMarkup(isWorkoutDay(day) ? workoutName(day) : 'Rest', 'day-title')}${listMarkup(rows, '', 'Workout actions')}</section>`;
   bindStartDialog();
-  bindHoldScroll();
-  bindTitleMarquee();
+  bindViewInteractions();
 }
 
 function renderExercises(day) {
   const items = dayItems(day);
   app.innerHTML = `<section aria-labelledby="exercise-title">${titleMarkup('Exercises', 'exercise-title')}${routineMarkup(items)}</section>`;
-  bindHoldScroll();
-  bindTitleMarquee();
+  bindViewInteractions();
 }

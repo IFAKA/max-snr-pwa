@@ -11,7 +11,7 @@ import { renderRest } from './render-workout/rest.js';
 import { renderStretch } from './render-workout/stretch.js';
 import { renderCompletion } from './render-workout/completion.js';
 import { renderExerciseSelection, renderExercisePicker } from './render-workout/select.js';
-import { bindTitleMarquee, bindHoldScroll, keepAwake } from './dom.js';
+import { bindViewInteractions, keepAwake } from './dom.js';
 import { app, listMarkup, titleMarkup } from './dom.js';
 import { isWorkoutDay, configuredDays, workoutName } from './routine-data.js';
 import { navigateTo } from './navigation.js';
@@ -20,8 +20,7 @@ function renderStart(day) {
   const available = isWorkoutDay(day);
   app.innerHTML = `<section aria-labelledby="start-title">${titleMarkup(available ? workoutName(day) : 'Rest', 'start-title')}${available ? listMarkup([startRow(day)], '', 'Workout actions') : '<p class="notice">Rest</p>'}</section>`;
   bindStartDialog();
-  bindHoldScroll();
-  bindTitleMarquee();
+  bindViewInteractions();
 }
 
 export function renderWorkout() {
