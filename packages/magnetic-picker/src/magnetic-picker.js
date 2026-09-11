@@ -429,10 +429,12 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
       row?.scrollIntoView?.({
         block: 'nearest',
         behavior:
-          pickerActive ||
+          joystickMode !== JOYSTICK_MODES.MAGNETIC
+            ? 'smooth'
+            : pickerActive ||
           globalThis.window?.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-            ? 'auto'
-            : 'smooth',
+              ? 'auto'
+              : 'smooth',
       });
   };
   const reset = (notify = false) => {

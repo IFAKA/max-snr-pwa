@@ -81,6 +81,7 @@ function makePickerDom({ rows = 1, disabledIndices = [] } = {}) {
   const capturedPointerIds = [];
   const overlays = [];
   const interactionEvents = [];
+  const scrollIntoViewOptions = [];
   let listScrollTop = 0;
   let scrollIntoViewCalls = 0;
   const makeElement = () => {
@@ -127,7 +128,10 @@ function makePickerDom({ rows = 1, disabledIndices = [] } = {}) {
       getBoundingClientRect: () => ({ top: index * 50, bottom: index * 50 + 50, height: 50 }),
       removeAttribute: () => {},
       setAttribute: () => {},
-      scrollIntoView: () => (scrollIntoViewCalls += 1),
+      scrollIntoView: (options) => {
+        scrollIntoViewCalls += 1;
+        scrollIntoViewOptions.push(options);
+      },
       textContent: `Exercise ${index}`,
     };
   });
@@ -178,6 +182,7 @@ function makePickerDom({ rows = 1, disabledIndices = [] } = {}) {
     capturedPointerIds,
     overlays,
     interactionEvents,
+    scrollIntoViewOptions,
     get scrollIntoViewCalls() {
       return scrollIntoViewCalls;
     },
@@ -421,6 +426,9 @@ test('joystick advances the scroll surface continuously between row changes', as
       dom.rowList.findIndex((row) => row.classList.contains('is-picker-target')) > firstTarget,
     );
     assert.ok(dom.scrollIntoViewCalls > 1);
+    assert.ok(
+      dom.scrollIntoViewOptions.some((options) => options?.behavior === 'smooth'),
+    );
     picker.destroy();
   } finally {
     globalThis.document = originalDocument;
