@@ -53,6 +53,10 @@ export function magneticJoystickVelocity(
 }
 
 export function magneticRawRowIndex(startIndex, deltaY, detentDistance = DETENT_DISTANCE) {
+  return Math.round(magneticRawRowPosition(startIndex, deltaY, detentDistance));
+}
+
+function magneticRawRowPosition(startIndex, deltaY, detentDistance = DETENT_DISTANCE) {
   const distance = Math.max(1, detentDistance || DETENT_DISTANCE);
   const detents = deltaY / distance;
   const magnitude = Math.abs(detents);
@@ -60,7 +64,7 @@ export function magneticRawRowIndex(startIndex, deltaY, detentDistance = DETENT_
     magnitude <= ACCELERATION_START_DETENTS
       ? magnitude
       : ACCELERATION_START_DETENTS + (magnitude - ACCELERATION_START_DETENTS) ** ACCELERATION_POWER;
-  return startIndex + Math.round(Math.sign(detents) * acceleratedMagnitude);
+  return startIndex + Math.sign(detents) * acceleratedMagnitude;
 }
 
 export function magneticPickerIndex(rawIndex, rowCount) {
@@ -254,6 +258,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
   let joystickWell = null;
   let startIndex = -1;
   let magneticBaseIndex = -1;
+  let magneticBasePosition = 0;
   let magneticBaseY = 0;
   let activeIndex = -1;
   let rows = [];
@@ -471,6 +476,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     activeIndex = -1;
     startIndex = -1;
     magneticBaseIndex = -1;
+    magneticBasePosition = 0;
     magneticBaseY = 0;
     joystickMode = JOYSTICK_MODES.MAGNETIC;
     rows = [];
@@ -512,6 +518,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     if (startIndex < 0)
       startIndex = magneticEntryIndex(nearestRow(rows, startY), selectableIndices, rows.length);
     magneticBaseIndex = startIndex;
+    magneticBasePosition = startIndex;
     magneticBaseY = startY;
     pickerActive = true;
     list.classList.add(options.activeListClass);
@@ -552,9 +559,15 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
         joystickVelocity = 0;
         joystickFrameTime = null;
         magneticBaseIndex = activeIndex;
+        magneticBasePosition = joystickPosition;
         magneticBaseY = event.clientY;
       }
       const magneticDeltaY = event.clientY - magneticBaseY;
+      joystickPosition = magneticPickerIndex(
+        magneticBasePosition +
+          magneticRawRowPosition(0, magneticDeltaY, options.detentDistance),
+        rows.length,
+      );
       const magneticRawIndex = magneticRawRowIndex(
         magneticBaseIndex,
         magneticDeltaY,

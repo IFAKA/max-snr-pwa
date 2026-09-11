@@ -385,6 +385,58 @@ test('edge joystick input keeps scrolling and inner movement returns to magnetic
   }
 });
 
+test('entering edge mode continues from the last magnetic row', async () => {
+  const dom = makePickerDom({ rows: 10 });
+  const originalDocument = globalThis.document;
+  const originalWindow = globalThis.window;
+  let frame;
+  globalThis.document = dom.document;
+  globalThis.window = {
+    requestAnimationFrame: (callback) => {
+      frame = callback;
+      return 1;
+    },
+    cancelAnimationFrame: () => {},
+  };
+  try {
+    const picker = createMagneticPicker(dom.list, { cancel: false, holdMs: 0 });
+    dom.listeners.get('list:pointerdown')({
+      pointerId: 1,
+      pointerType: 'touch',
+      clientY: 20,
+    });
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    dom.listeners.get('document:pointermove')({
+      pointerId: 1,
+      clientY: 68,
+      preventDefault: () => {},
+    });
+    const lastMagneticTarget = dom.rowList.findIndex((row) =>
+      row.classList.contains('is-picker-target'),
+    );
+    assert.equal(lastMagneticTarget, 2);
+    dom.listeners.get('document:pointermove')({
+      pointerId: 1,
+      clientY: 120,
+      preventDefault: () => {},
+    });
+    frame(0);
+    assert.equal(
+      dom.rowList.findIndex((row) => row.classList.contains('is-picker-target')),
+      lastMagneticTarget,
+    );
+    frame(1000);
+    assert.ok(
+      dom.rowList.findIndex((row) => row.classList.contains('is-picker-target')) >=
+        lastMagneticTarget,
+    );
+    picker.destroy();
+  } finally {
+    globalThis.document = originalDocument;
+    globalThis.window = originalWindow;
+  }
+});
+
 test('joystick advances the scroll surface continuously between row changes', async () => {
   const dom = makePickerDom({ rows: 10 });
   dom.list.clientHeight = 100;
