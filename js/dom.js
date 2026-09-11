@@ -10,14 +10,9 @@ export const listMarkup = (items, className = '', label = '') =>
 export const titleMarkup = (text, id, level = 'h1', className = '') =>
   `<${level} id="${esc(id)}" class="app-title${className ? ` ${className}` : ''}" data-title-marquee><span class="title-marquee-track"><span class="title-marquee-text">${esc(text)}</span></span></${level}>`;
 const ICONS = {
-  home: '<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
-  calendar: '<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
-  history: '<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5M12 7v5l3 2"/>',
   download: '<path d="M12 3v12m0 0 4-4m-4 4-4-4M4 21h16"/>',
   upload: '<path d="M12 16V4m0 0L8 8m4-4 4 4M4 20h16"/>',
   check: '<path d="m5 12 4 4L19 6"/>',
-  play: '<path d="m8 5 11 7-11 7z"/>',
-  more: '<circle cx="5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1" fill="currentColor" stroke="none"/>',
   chevron: '<path d="m9 5 7 7-7 7"/>',
   dash: '<path d="M5 12h14"/>',
   minus: '<path d="M5 12h14"/>',
@@ -25,11 +20,6 @@ const ICONS = {
 };
 export const icon = (name, label = '') =>
   `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${ICONS[name] || ''}</svg><span class="sr-only">${esc(label)}</span>`;
-export const pageNav = (current) => {
-  const labels = { today: 'Home', routine: 'Routine', history: 'History' };
-  const currentLabel = labels[current] || 'Home';
-  return `<nav class="app-nav" aria-label="Primary"><a class="app-brand" href="/" aria-label="MaxSNR home">MAXSNR</a><span class="app-location" aria-current="page">${currentLabel}</span><details class="app-menu"><summary aria-label="Open navigation">Menu</summary><div class="app-menu-list"><a href="/"${current === 'today' ? ' aria-current="page"' : ''}>Home</a><a href="/routine/"${current === 'routine' ? ' aria-current="page"' : ''}>Routine</a><a href="/history/"${current === 'history' ? ' aria-current="page"' : ''}>History</a></div></details></nav>`;
-};
 export function bindHoldScroll(root = document) {
   root.querySelectorAll('[data-hold-scroll]').forEach((element) => {
     if (element.dataset.holdBound) return;
