@@ -4,6 +4,8 @@ import { renderToday } from './js/render-today.js';
 import { renderHistory } from './js/render-history.js';
 import { renderRoutine } from './js/render-routine.js';
 import { renderWorkout } from './js/render-workout.js';
+import { keepAwake, releaseWakeLock } from './js/dom.js';
+import { setServiceWorkerRegistration } from './js/update-app.js';
 
 const renderers = {
   today: renderToday,
@@ -50,6 +52,8 @@ async function boot() {
     } else if (route === 'today' && !history.state?.route) {
       history.replaceState({ route: 'today' }, '', location.href);
     }
+    if (route === 'workout') void keepAwake();
+    else void releaseWakeLock();
     (renderers[route] || renderToday)();
   } catch (error) {
     const target = document.querySelector('#app');
@@ -63,20 +67,13 @@ async function boot() {
       );
     }
   }
-  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-    try {
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(registrations.map((registration) => registration.unregister()));
-      if ('caches' in globalThis) {
-        const keys = await caches.keys();
-        await Promise.all(
-          keys.filter((key) => key.startsWith('maxsnr-')).map((key) => caches.delete(key)),
-        );
-      }
-    } catch {
-      // Service-worker cleanup is best effort and must not block the app.
-    }
-  }
+}
+
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  void navigator.serviceWorker
+    .register('/sw.js', { scope: '/' })
+    .then(setServiceWorkerRegistration)
+    .catch(() => {});
 }
 
 boot();

@@ -57,36 +57,39 @@ export function bindHoldScroll(root = document) {
 import { createMagneticPicker } from '../packages/magnetic-picker/src/magnetic-picker.js';
 
 const WORKOUT_PICKER_DETENT_DISTANCE = 11;
+const APP_PICKER_OPTIONS = {
+  rowSelector: ':scope > li:not([hidden])',
+  actionSelector: 'a, button, label, [role="button"]',
+  activeListClass: 'is-picker-active',
+  activeDocumentClass: 'is-picker-active',
+  targetRowClass: 'is-picker-target',
+  holdingClass: 'is-picker-holding',
+  cancelRowClass: 'picker-cancel-row',
+  cancelRowAttribute: 'data-picker-cancel-row',
+  cancelActionAttribute: 'data-picker-cancel',
+  statusClass: 'picker-status',
+  statusVisibleClass: 'is-picker-status-visible',
+  visuallyHiddenClass: 'sr-only',
+  isSelectable: (action, row) =>
+    (!action && !row?.hasAttribute?.('data-picker-skip')) ||
+    (Boolean(action) &&
+      !action.disabled &&
+      action.getAttribute('aria-disabled') !== 'true' &&
+      !action.classList.contains('is-disabled')),
+  onSelect: (_value, { action }) => action?.click(),
+};
 
 export function bindMagneticLists(root = document) {
   root.querySelectorAll?.('.app-list').forEach((list) => {
     if (list.dataset.magneticBound) return;
     list.dataset.magneticBound = 'true';
     createMagneticPicker(list, {
-      rowSelector: ':scope > li:not([hidden])',
-      actionSelector: 'a, button, label, [role="button"]',
-      activeListClass: 'is-picker-active',
-      activeDocumentClass: 'is-picker-active',
-      targetRowClass: 'is-picker-target',
-      holdingClass: 'is-picker-holding',
+      ...APP_PICKER_OPTIONS,
       detentDistance: list.closest?.('.workout-picker')
         ? WORKOUT_PICKER_DETENT_DISTANCE
         : undefined,
-      cancelRowClass: 'picker-cancel-row',
-      cancelRowAttribute: 'data-picker-cancel-row',
-      cancelActionAttribute: 'data-picker-cancel',
-      statusClass: 'picker-status',
-      statusVisibleClass: 'is-picker-status-visible',
-      visuallyHiddenClass: 'sr-only',
       disabled: (list) =>
         !list.querySelector?.(':scope > li:not([hidden]):not([data-picker-skip])'),
-      isSelectable: (action, row) =>
-        (!action && !row?.hasAttribute?.('data-picker-skip')) ||
-        (Boolean(action) &&
-          !action.disabled &&
-          action.getAttribute('aria-disabled') !== 'true' &&
-          !action.classList.contains('is-disabled')),
-      onSelect: (_value, { action }) => action?.click(),
     });
   });
 }
@@ -111,11 +114,36 @@ export function bindTitleMarquee(root = document) {
     setTimeout(start, 1400);
   });
 }
+export function bindViewInteractions(root = document) {
+  bindHoldScroll(root);
+  bindTitleMarquee(root);
+}
 export const buzz = (pattern) => globalThis.navigator?.vibrate?.(pattern);
+let wakeLock = null;
 export async function keepAwake() {
   try {
-    if ('wakeLock' in navigator && document.visibilityState === 'visible')
-      await navigator.wakeLock.request('screen');
+    if (
+      'wakeLock' in navigator &&
+      document.visibilityState === 'visible' &&
+      document.body?.dataset.route === 'workout' &&
+      !wakeLock
+    ) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => {
+        wakeLock = null;
+      });
+    }
+  } catch (error) {
+    wakeLock = null;
+    void error;
+  }
+}
+export async function releaseWakeLock() {
+  if (!wakeLock) return;
+  const current = wakeLock;
+  wakeLock = null;
+  try {
+    await current.release();
   } catch (error) {
     void error;
   }
@@ -124,3 +152,4 @@ document.addEventListener?.('visibilitychange', () => {
   if (document.visibilityState === 'visible' && document.body?.dataset.route === 'workout')
     void keepAwake();
 });
+globalThis.window?.addEventListener?.('pagehide', () => void releaseWakeLock());
