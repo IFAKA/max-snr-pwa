@@ -347,6 +347,9 @@ ul {
 }
 .app-list > li.picker-cancel-row.is-picker-target {
   background: var(--danger-soft);
+  box-shadow:
+    inset 0 2px var(--danger),
+    inset 0 -2px var(--danger);
   border-color: var(--danger);
 }
 @media (prefers-reduced-motion: reduce) {
