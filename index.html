@@ -12,7 +12,12 @@
     <title>MaxSNR</title>
   </head>
   <body data-route="today">
-    <main id="app"></main>
+    <main id="app" aria-busy="true">
+      <div id="app-loading" class="loading-screen" role="status" aria-live="polite">
+        <span class="loading-spinner" aria-hidden="true"></span>
+        <span>Loading MaxSNR…</span>
+      </div>
+    </main>
     <script type="module" src="/app.js"></script>
   </body>
 </html>
