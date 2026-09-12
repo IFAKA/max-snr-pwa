@@ -1,3 +1,4 @@
+// Touch the worker when precached app modules change so installed clients refresh them.
 const CACHE_NAME = 'maxsnr-v1';
 const PRECACHE_URLS = [
   '/',
