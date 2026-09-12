@@ -71,7 +71,7 @@ async function boot() {
 
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   void navigator.serviceWorker
-    .register('/sw.js', { scope: '/' })
+    .register('/sw.js', { scope: '/', updateViaCache: 'none' })
     .then(setServiceWorkerRegistration)
     .catch(() => {});
 }

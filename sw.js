@@ -1,5 +1,5 @@
 // Touch the worker when precached app modules change so installed clients refresh them.
-const CACHE_NAME = 'maxsnr-v1';
+const CACHE_NAME = 'maxsnr-v2';
 const PRECACHE_URLS = [
   '/',
   '/routine/',
@@ -45,7 +45,17 @@ const PRECACHE_URLS = [
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS)));
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) =>
+      Promise.all(
+        PRECACHE_URLS.map(async (url) => {
+          const response = await fetch(new Request(url, { cache: 'reload' }));
+          if (!response.ok) throw new Error(`Precache failed for ${url}`);
+          await cache.put(url, response);
+        }),
+      ),
+    ),
+  );
 });
 
 self.addEventListener('activate', (event) => {
