@@ -230,6 +230,21 @@ test('semantic rows pass data-picker-value and context to onSelect', async () =>
   }
 });
 
+test('mouse pointer downs stay available for native link and button clicks', () => {
+  const dom = makePickerDom();
+  const originalDocument = globalThis.document;
+  globalThis.document = dom.document;
+  try {
+    const picker = createMagneticPicker(dom.list, { cancel: false });
+    dom.listeners.get('list:pointerdown')({ pointerId: 1, pointerType: 'mouse', button: 0, clientY: 20 });
+    assert.deepEqual(dom.capturedPointerIds, []);
+    assert.equal(dom.classes.has('is-picker-active'), false);
+    picker.destroy();
+  } finally {
+    globalThis.document = originalDocument;
+  }
+});
+
 test('disabled option prevents setup and remains safe to destroy', () => {
   const dom = makePickerDom();
   const originalDocument = globalThis.document;

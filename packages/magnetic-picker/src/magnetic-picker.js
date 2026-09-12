@@ -615,9 +615,11 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
   }
   function onPointerDown(event) {
     if ((event.pointerType === 'mouse' && event.button !== 0) || pointerId !== null) return;
-    if (event.pointerType === 'mouse')
+    if (event.pointerType === 'mouse') {
       document.documentElement?.classList.remove('is-touch-pointer');
-    else document.documentElement?.classList.add('is-touch-pointer');
+      return;
+    }
+    document.documentElement?.classList.add('is-touch-pointer');
     refreshRows();
     if (!rows.length) return;
     suppressClick = false;
