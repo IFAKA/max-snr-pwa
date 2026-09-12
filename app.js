@@ -14,22 +14,6 @@ const renderers = {
   workout: renderWorkout,
 };
 
-const LOADING_MIN_DURATION = 360;
-const LOADING_EXIT_DURATION = 160;
-const loadingStartedAt = performance.now();
-
-async function finishLoading() {
-  const loading = document.querySelector('#app-loading');
-  if (!loading) return;
-
-  const remaining = Math.max(0, LOADING_MIN_DURATION - (performance.now() - loadingStartedAt));
-  if (remaining) await new Promise((resolve) => setTimeout(resolve, remaining));
-  loading.classList.add('is-loading-complete');
-  await new Promise((resolve) => setTimeout(resolve, LOADING_EXIT_DURATION));
-  loading.remove();
-  document.querySelector('#app')?.setAttribute('aria-busy', 'false');
-}
-
 async function boot() {
   try {
     await loadState();
@@ -82,8 +66,6 @@ async function boot() {
         `MaxSNR could not start: ${error?.message || 'Reload the app and try again.'}`,
       );
     }
-  } finally {
-    await finishLoading();
   }
 }
 

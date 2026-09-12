@@ -55,44 +55,6 @@ main {
   min-height: 0;
   view-transition-name: app;
 }
-.loading-screen {
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 14px;
-  height: 100%;
-  color: var(--muted);
-  font-size: 0.9rem;
-  letter-spacing: 0.01em;
-  transition:
-    opacity 160ms ease-out,
-    transform 160ms var(--ease-out);
-}
-.loading-screen.is-loading-complete {
-  opacity: 0;
-  transform: translateY(-4px);
-}
-.loading-spinner {
-  width: 26px;
-  height: 26px;
-  border: 3px solid color-mix(in srgb, var(--accent) 18%, transparent);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: loading-spin 720ms linear infinite;
-}
-@keyframes loading-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .loading-spinner {
-    animation: none;
-  }
-  .loading-screen {
-    transition: none;
-  }
-}
 #app.is-view-transitioning {
   opacity: 0;
   transform: translateY(6px);
