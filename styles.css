@@ -449,6 +449,23 @@ html.is-touch-pointer .list-link:hover::before {
 .list-link small {
   font-size: 16px;
 }
+.app-update-button {
+  font-weight: 400;
+}
+.app-update-button[data-update-state='checking'] .icon {
+  animation: app-update-spin 900ms linear infinite;
+}
+.app-update-button[data-update-state='success'] .icon {
+  color: var(--success);
+}
+.app-update-button[data-update-state='error'] .icon {
+  color: var(--danger);
+}
+@keyframes app-update-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 .list-link > .icon {
   width: 22px;
   height: 22px;

@@ -48,8 +48,8 @@ export function renderToday() {
       : routine
         ? startRow(day)
         : `<li><button class="list-link is-disabled" type="button" disabled><span>Start</span>${icon('dash', 'Unavailable')}</button></li>`;
-  const updateItem = `<li><button class="list-link" id="update-app" type="button"><span>Update app</span>${icon('chevron', 'Check for app updates')}</button></li>`;
-  app.innerHTML = `<section class="today-screen" aria-labelledby="today-title">${titleMarkup(title, 'today-title')}${listMarkup([startItem, `<li><a class="list-link" href="/routine/"><span>Routine</span>${icon('chevron', 'Open routine')}</a></li>`, `<li><a class="list-link" href="/history/"><span>History</span>${icon('chevron', 'Open history')}</a></li>`, updateItem], '', 'Home navigation')}<p id="app-update-status" class="app-update-status" role="status" aria-live="polite" aria-atomic="true"></p></section>`;
+  const updateItem = `<li><button class="list-link app-update-button" id="update-app" type="button" disabled><span>Update app</span>${icon('chevron', 'Check for app updates')}</button></li>`;
+  app.innerHTML = `<section class="today-screen" aria-labelledby="today-title">${titleMarkup(title, 'today-title')}${listMarkup([startItem, `<li><a class="list-link" href="/routine/"><span>Routine</span>${icon('chevron', 'Open routine')}</a></li>`, `<li><a class="list-link" href="/history/"><span>History</span>${icon('chevron', 'Open history')}</a></li>`, updateItem], '', 'Home navigation')}<p id="app-update-status" class="app-update-status sr-only" role="status" aria-live="polite" aria-atomic="true"></p></section>`;
   bindHoldScroll();
   bindTitleMarquee();
   bindDirectStart();
