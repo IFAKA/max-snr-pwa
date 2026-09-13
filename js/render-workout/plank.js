@@ -1,7 +1,8 @@
 import { mount, state, runAction, showError, workoutStage, primaryAction } from './shared.js';
-import { skipPlank, beginLifting, countdown } from '../workout.js';
+import { skipPlank, beginLifting } from '../workout.js';
 import { buzz } from '../dom.js';
 import { navigateTo } from '../navigation.js';
+import { bindCountdown, countdownMarkup } from './countdown.js';
 
 export function renderPlank() {
   const active = state(),
@@ -14,7 +15,11 @@ export function renderPlank() {
     workoutStage({
       className: 'countdown-stage',
       title: 'Plank',
-      body: '<div class="big-timer" id="timer" role="timer" aria-live="polite">1:00</div>',
+      body: countdownMarkup({
+        remainingMs: active.timerEndsAt - Date.now(),
+        label: 'Plank remaining',
+        variant: 'plank',
+      }),
       actions: primaryAction('skip-plank', 'Finish'),
     }),
   );
@@ -23,13 +28,18 @@ export function renderPlank() {
     ?.addEventListener('click', (event) =>
       runAction(event.currentTarget, skipPlank, () => navigateTo('/workout/?view=select')),
     );
-  countdown(document.querySelector('#timer'), 'timerEndsAt', 'plank', async () => {
-    try {
-      buzz([35, 70]);
-      await beginLifting();
-      navigateTo('/workout/?view=select');
-    } catch (error) {
-      showError(error);
-    }
+  bindCountdown({
+    element: document.querySelector('#timer'),
+    getEndAt: () => state()?.timerEndsAt,
+    shouldRun: () => state()?.phase === 'plank' && Boolean(state()?.timerEndsAt),
+    onEnd: async () => {
+      try {
+        buzz([35, 70]);
+        await beginLifting();
+        navigateTo('/workout/?view=select');
+      } catch (error) {
+        showError(error);
+      }
+    },
   });
 }

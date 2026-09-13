@@ -805,6 +805,16 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   letter-spacing: -0.08em;
   text-align: center;
 }
+.countdown--rest {
+  color: var(--accent);
+}
+.countdown--plank {
+  color: var(--success);
+}
+.countdown--stretch,
+.countdown--activity {
+  color: var(--text);
+}
 .confirm-dialog {
   box-sizing: border-box;
   width: min(calc(100% - 24px), 24rem);

@@ -1,8 +1,9 @@
 import { mount, state, runAction, showError, workoutStage, primaryAction } from './shared.js';
-import { completeStretch, countdown, finishWorkout, formatDuration, setTimer } from '../workout.js';
+import { completeStretch, finishWorkout, setTimer } from '../workout.js';
 import { STRETCH_MS } from '../constants.js';
 import { buzz } from '../dom.js';
 import { navigateTo, renderWithTransition } from '../navigation.js';
+import { bindCountdown, countdownMarkup } from './countdown.js';
 
 export function renderStretch() {
   const active = state();
@@ -11,7 +12,11 @@ export function renderStretch() {
       workoutStage({
         className: 'stretch-stage countdown-stage',
         title: 'Stretch',
-        body: '<div class="big-timer" aria-label="Stretch timer, 30 seconds">30</div>',
+        body: countdownMarkup({
+          remainingMs: STRETCH_MS,
+          label: 'Stretch timer, 30 seconds',
+          variant: 'stretch',
+        }),
         actions: `<div class="controls">${primaryAction('start-stretch', 'Start')}<button class="secondary" id="finish-stretch" type="button">Finish</button></div>`,
       }),
     );
@@ -41,7 +46,11 @@ export function renderStretch() {
     workoutStage({
       className: 'stretch-stage countdown-stage',
       title: 'Stretch',
-      body: `<div class="big-timer" id="timer" role="timer" aria-live="polite">${formatDuration(active.timerEndsAt - Date.now())}</div>`,
+      body: countdownMarkup({
+        remainingMs: active.timerEndsAt - Date.now(),
+        label: 'Stretch remaining',
+        variant: 'stretch',
+      }),
       actions: '<button class="secondary" id="cancel-stretch" type="button">Cancel</button>',
     }),
   );
@@ -52,13 +61,18 @@ export function renderStretch() {
         renderWithTransition(() => renderStretch()),
       ),
     );
-  countdown(document.querySelector('#timer'), 'timerEndsAt', 'stretch', async () => {
-    try {
-      buzz([35, 70]);
-      await completeStretch();
-      renderWithTransition(() => renderStretch(), { focus: false });
-    } catch (error) {
-      showError(error);
-    }
+  bindCountdown({
+    element: document.querySelector('#timer'),
+    getEndAt: () => state()?.timerEndsAt,
+    shouldRun: () => state()?.phase === 'stretch' && Boolean(state()?.timerEndsAt),
+    onEnd: async () => {
+      try {
+        buzz([35, 70]);
+        await completeStretch();
+        renderWithTransition(() => renderStretch(), { focus: false });
+      } catch (error) {
+        showError(error);
+      }
+    },
   });
 }

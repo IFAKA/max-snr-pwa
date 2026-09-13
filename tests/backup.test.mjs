@@ -106,3 +106,7 @@ test('migrates additive activity data and legacy plank sessions without losing s
   assert.equal(migrated.history[0].tasks[0].completed.reps, 8);
   assert.equal(migrated.health.activities[0].type, 'walk');
 });
+
+test('migrate normalizes malformed history before render-facing consumers use it', () => {
+  assert.deepEqual(migrate({ history: { broken: true } }).history, []);
+});

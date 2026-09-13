@@ -8,15 +8,10 @@ import {
   exercisePicker,
   bindExercisePicker,
 } from './shared.js';
-import {
-  continueRest,
-  countdown,
-  formatDuration,
-  findNext,
-  exerciseSelectionLocked,
-} from '../workout.js';
+import { continueRest, findNext, exerciseSelectionLocked } from '../workout.js';
 import { buzz, esc, icon, listMarkup } from '../dom.js';
 import { navigateTo } from '../navigation.js';
+import { bindCountdown, countdownMarkup } from './countdown.js';
 
 const advance = (button) => runAction(button, continueRest);
 
@@ -52,20 +47,25 @@ export function renderRest() {
     workoutStage({
       className: 'rest-stage countdown-stage',
       title: next ? esc(next.performedName) : 'Rest',
-      body: `${setCount}<div class="big-timer" id="timer" role="timer" aria-live="polite" aria-label="Rest remaining">${formatDuration(active.restEndsAt - Date.now())}</div>`,
+      body: `${setCount}${countdownMarkup({ remainingMs: active.restEndsAt - Date.now(), label: 'Rest remaining', variant: 'rest' })}`,
       actions: `${changeLink}${primaryAction('continue', 'End rest')}`,
     }),
   );
   document
     .querySelector('#continue')
     ?.addEventListener('click', (event) => advance(event.currentTarget));
-  countdown(document.querySelector('#timer'), 'restEndsAt', 'rest', async () => {
-    try {
-      buzz([35, 65, 35]);
-      await continueRest();
-      location.reload();
-    } catch (error) {
-      showError(error);
-    }
+  bindCountdown({
+    element: document.querySelector('#timer'),
+    getEndAt: () => state()?.restEndsAt,
+    shouldRun: () => state()?.phase === 'rest' && Boolean(state()?.restEndsAt),
+    onEnd: async () => {
+      try {
+        buzz([35, 65, 35]);
+        await continueRest();
+        location.reload();
+      } catch (error) {
+        showError(error);
+      }
+    },
   });
 }

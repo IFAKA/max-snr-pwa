@@ -41,6 +41,7 @@ export function migrate(raw) {
     health: { ...emptyState().health, ...(raw.health || {}) },
     version: 2,
   };
+  next.history = Array.isArray(next.history) ? next.history : [];
   next.history.forEach((workout) => {
     delete workout.note;
   });
