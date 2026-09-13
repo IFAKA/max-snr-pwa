@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 const PRIORITIES = {
   chest: 1,
   sideDelts: 1.35,
@@ -301,8 +302,106 @@ export function prescriptionAllocation() {
   return Object.fromEntries(ALLOCATION.map(([key, sets]) => [EXERCISES[key].id, sets]));
 }
 
-function totalSets() {
-  return ALLOCATION.reduce((sum, [, sets]) => sum + sets, 0);
+function totalSets(allocation = ALLOCATION) {
+  return allocation.reduce((sum, [, sets]) => sum + sets, 0);
+}
+
+const TRAINING_DAYS = {
+  2: ['Monday', 'Thursday'],
+  3: ['Monday', 'Wednesday', 'Friday'],
+  4: ['Monday', 'Tuesday', 'Thursday', 'Saturday'],
+};
+
+function splitAllocation(daysPerWeek, allocation = ALLOCATION) {
+  return allocation.map(([key, weeklySets]) => {
+    const shares = Array(daysPerWeek).fill(0);
+    for (let set = 0; set < weeklySets; set++) shares[set % daysPerWeek]++;
+    return [key, shares];
+  });
+}
+
+function dayTemplate(byDay) {
+  const order = [
+    'inclinePress',
+    'pulldown',
+    'legPress',
+    'legCurl',
+    'lateralRaise',
+    'curl',
+    'pushdown',
+    'crunch',
+    'row',
+    'calfRaise',
+    'wristExtension',
+  ];
+  return byDay.map((items, day) => {
+    const get = (id) => items.find((item) => item.id === EXERCISES[id].id);
+    const pairs = new Set(['lateralRaise:curl', 'pushdown:crunch']);
+    const result = [];
+    order.forEach((id) => {
+      if (['curl', 'crunch'].includes(id)) return;
+      const pairKey =
+        id === 'lateralRaise' ? 'lateralRaise:curl' : id === 'pushdown' ? 'pushdown:crunch' : null;
+      if (pairKey && pairs.has(pairKey)) {
+        const members = pairKey.split(':').map(get).filter(Boolean);
+        if (members.length)
+          result.push(
+            pair(
+              `${pairKey === 'lateralRaise:curl' ? 'priority-pair' : 'arm-core-pair'}-${day}`,
+              pairKey === 'lateralRaise:curl'
+                ? 'Low-interference priority pair'
+                : 'Arms + trunk pair',
+              members,
+            ),
+          );
+      } else {
+        const item = get(id);
+        if (item) result.push(item);
+      }
+    });
+    return result;
+  });
+}
+
+export function buildRoutine(daysPerWeek, allocation = ALLOCATION) {
+  const byDay = Array.from({ length: daysPerWeek }, () => []);
+  splitAllocation(daysPerWeek, allocation).forEach(([key, shares]) => {
+    shares.forEach((sets, day) => {
+      if (sets) byDay[day].push(copy(EXERCISES[key], sets));
+    });
+  });
+  return { days: TRAINING_DAYS[daysPerWeek], routine: dayTemplate(byDay) };
+}
+
+function candidateSessionMinutes(routine) {
+  return routine.map((items) => {
+    let minutes = 0;
+    items.forEach((item) => {
+      const members = item.type === 'superset' ? item.members : [item];
+      const rounds = item.type === 'superset' ? Math.max(...members.map((m) => m.sets)) : item.sets;
+      minutes += members.reduce(
+        (sum, member) => sum + member.setupSeconds + member.executionSeconds * member.sets,
+        0,
+      );
+      minutes +=
+        (Math.max(0, rounds - 1) * Math.max(...members.map((member) => member.restMs))) / 1000;
+    });
+    return Math.max(1, minutes / 60);
+  });
+}
+
+function overloadPenaltyRate(state) {
+  const observations = (state?.history || [])
+    .map((workout) => {
+      const sets = (workout.tasks || []).filter((task) => task.completed && !task.skipped).length;
+      const duration = Number(workout.durationMs) / 60000;
+      const overload = Math.max(0, sets - 14);
+      return overload && Number.isFinite(duration)
+        ? Math.max(0, duration - sets * 1.5 - 10) / overload ** 2
+        : null;
+    })
+    .filter((value) => value !== null);
+  return observations.length ? Math.min(2, Math.max(...observations)) : 0;
 }
 
 export function compareFrequencies(overrides = {}) {
@@ -312,11 +411,28 @@ export function compareFrequencies(overrides = {}) {
     (sum, [muscle, sets]) => sum + diminishingReturn(sets) * (priorities[muscle] || 1),
     0,
   );
-  const sessionMinutes = routineDurationEstimate(overrides.state);
+  const observed = routineDurationEstimate(overrides.state);
   return [2, 3, 4].map((days) => {
-    const workMinutes = Math.round(totalSets() * 1.5);
-    const transitionAndRest = { 2: 40, 3: 49, 4: 64 }[days];
-    const minutes = Math.round(workMinutes + transitionAndRest + (sessionMinutes - 51) * days);
+    const allocation = overrides.allocation || ALLOCATION;
+    const candidate = buildRoutine(days, allocation);
+    const baselineSessions = candidateSessionMinutes(candidate.routine);
+    const defaultTwoDay = candidateSessionMinutes(buildRoutine(2, allocation).routine);
+    const calibration =
+      observed / Math.max(1, defaultTwoDay.reduce((sum, value) => sum + value, 0) / 2);
+    const sessionSets = candidate.routine.map((items) =>
+      items
+        .flatMap((item) => (item.type === 'superset' ? item.members : [item]))
+        .reduce((sum, item) => sum + item.sets, 0),
+    );
+    const congestion =
+      overloadPenaltyRate(overrides.state) *
+      sessionSets.reduce((sum, sets) => sum + Math.max(0, sets - 14) ** 2, 0);
+    const transition = { 2: 0, 3: 20, 4: 80 }[days];
+    const minutes = Math.round(
+      baselineSessions.reduce((sum, value) => sum + value * calibration, 0) +
+        congestion +
+        transition,
+    );
     const components = {
       aesthetic,
       health: config.healthCoverageValue,
@@ -335,9 +451,9 @@ export function compareFrequencies(overrides = {}) {
     return {
       days,
       minutes,
-      sessionMinutes,
+      sessionMinutes: observed,
       sessions: days,
-      totalSets: totalSets(),
+      totalSets: totalSets(allocation),
       aestheticScore: aesthetic,
       components,
       utility,
@@ -367,47 +483,53 @@ function pair(id, label, members) {
   };
 }
 
-export function optimizeRoutine({ daysPerWeek = selectedFrequency().days } = {}) {
-  if (daysPerWeek !== 2)
-    throw new Error('The current optimizer supports the selected two-day frontier only.');
-  const byDay = [[], []];
-  const allocations = ALLOCATION.map(([key, weeklySets]) => [
-    key,
-    Math.ceil(weeklySets / 2),
-    Math.floor(weeklySets / 2),
-  ]);
-  allocations.forEach(([key, first, second]) => {
-    if (first) byDay[0].push(copy(EXERCISES[key], first));
-    if (second) byDay[1].push(copy(EXERCISES[key], second));
-  });
-  const get = (day, id) => byDay[day].find((item) => item.id === EXERCISES[id].id);
-  const makeDay = (day) =>
-    [
-      get(day, 'inclinePress'),
-      get(day, 'pulldown'),
-      get(day, 'legPress'),
-      get(day, 'legCurl'),
-      pair(
-        `priority-pair-${day}`,
-        'Low-interference priority pair',
-        [get(day, 'lateralRaise'), get(day, 'curl')].filter(Boolean),
-      ),
-      pair(
-        `arm-core-pair-${day}`,
-        'Arms + trunk pair',
-        [get(day, 'pushdown'), get(day, 'crunch')].filter(Boolean),
-      ),
-      get(day, 'row'),
-      get(day, 'calfRaise'),
-      get(day, 'wristExtension'),
-    ].filter((item) => item?.type === 'exercise' || item.members?.length);
+export function optimizeRoutine({
+  daysPerWeek = selectedFrequency().days,
+  allocation = ALLOCATION,
+} = {}) {
+  if (!TRAINING_DAYS[daysPerWeek]) throw new Error('Frequency must be 2, 3, or 4 days.');
+  const generated = buildRoutine(daysPerWeek, allocation);
   return {
-    days: ['Monday', 'Thursday'],
-    names: ['MAX-SNR A', 'MAX-SNR B'],
-    routine: byDay.map((_, dayIndex) => makeDay(dayIndex)),
+    days: generated.days,
+    names: generated.days.map((_, index) => `MAX-SNR ${String.fromCharCode(65 + index)}`),
+    routine: generated.routine,
     comparison: compareFrequencies(),
     allocation: weeklyAllocation(),
   };
 }
 
 export const OPTIMIZER_OUTPUT = optimizeRoutine();
+
+export const DEFAULT_PRESCRIPTION_VERSION = 1;
+export function createPrescription(daysPerWeek = 2, metadata = {}) {
+  const allocationEntriesForPrescription = metadata.allocation || ALLOCATION;
+  const output = optimizeRoutine({ daysPerWeek, allocation: allocationEntriesForPrescription });
+  const allocation = Object.fromEntries(
+    allocationEntriesForPrescription.map(([key, sets]) => [EXERCISES[key].id, sets]),
+  );
+  return {
+    version: DEFAULT_PRESCRIPTION_VERSION,
+    daysPerWeek,
+    days: output.days,
+    exercises: Object.values(EXERCISES).map(({ id, name }) => ({ id, name })),
+    exerciseIds: Object.values(EXERCISES).map(({ id }) => id),
+    weeklySetAllocation: allocation,
+    perSessionSetDistribution: output.routine.map((day) =>
+      day
+        .flatMap((item) => (item.type === 'superset' ? item.members : [item]))
+        .map((item) => ({ exerciseId: item.id, sets: item.sets })),
+    ),
+    exerciseOrdering: output.routine.map((day) => day.map((item) => item.id)),
+    supersets: output.routine.flatMap((day) =>
+      day
+        .filter((item) => item.type === 'superset')
+        .map((item) => ({ id: item.id, members: item.members.map(({ id }) => id) })),
+    ),
+    routine: output.routine,
+    names: output.names,
+    createdAt: metadata.createdAt || Date.now(),
+    lastEvaluatedAt: metadata.lastEvaluatedAt || 0,
+    lastChangeReason: metadata.lastChangeReason || 'Initial prescription',
+    evidence: metadata.evidence || [],
+  };
+}

@@ -1,6 +1,7 @@
 import { OPTIMIZER_OUTPUT } from './workout/optimizer.js';
+import { getState } from './state.js';
 
-export const ROUTINE = {
+const DEFAULT_ROUTINE = {
   Monday: OPTIMIZER_OUTPUT.routine[0],
   Tuesday: null,
   Wednesday: null,
@@ -10,10 +11,14 @@ export const ROUTINE = {
   Sunday: null,
 };
 
-export const NAMES = {
+const DEFAULT_NAMES = {
   Monday: OPTIMIZER_OUTPUT.names[0],
   Thursday: OPTIMIZER_OUTPUT.names[1],
 };
+export const ROUTINE = DEFAULT_ROUTINE;
+export const NAMES = DEFAULT_NAMES;
+const activeRoutine = () => getState().prescription?.routine || DEFAULT_ROUTINE;
+const activeNames = () => getState().prescription?.names || DEFAULT_NAMES;
 
 export const isExerciseDefinition = (item) =>
   Boolean(
@@ -30,7 +35,7 @@ export const isExerciseDefinition = (item) =>
 const groupMembers = (item) =>
   item?.type === 'superset' ? item.members : item?.type === 'equipmentBlock' ? item.items : null;
 
-export const dayItems = (day) => (Array.isArray(ROUTINE[day]) ? ROUTINE[day] : []);
+export const dayItems = (day) => (Array.isArray(activeRoutine()[day]) ? activeRoutine()[day] : []);
 export const isWorkoutDay = (day) =>
   dayItems(day).some(
     (item) =>
@@ -38,5 +43,5 @@ export const isWorkoutDay = (day) =>
       (Array.isArray(groupMembers(item)) && groupMembers(item).some(isExerciseDefinition)),
   );
 export const workoutName = (day) =>
-  typeof NAMES[day] === 'string' && NAMES[day].trim() ? NAMES[day] : day;
-export const configuredDays = () => Object.keys(ROUTINE);
+  typeof activeNames()[day] === 'string' && activeNames()[day].trim() ? activeNames()[day] : day;
+export const configuredDays = () => Object.keys(activeRoutine());

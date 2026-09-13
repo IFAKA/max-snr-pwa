@@ -14,6 +14,7 @@ export {
 } from './workout/metrics.js';
 export { nextDoubleProgression, parseRepRange } from './workout/progression.js';
 export { adaptiveRecommendations, rollingExerciseTrend } from './workout/adaptation.js';
+export { evaluatePrescription, evaluateAndPersist } from './workout/coordinator.js';
 export {
   bodyHealthSummary,
   selectRecommendation,

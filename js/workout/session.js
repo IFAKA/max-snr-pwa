@@ -4,6 +4,7 @@ import { save } from '../storage.js';
 import { dayNow, buzz } from '../dom.js';
 import { flatten } from './task-factory.js';
 import { beginLifting, clearTimer, continueRest as advanceRest, startRest } from './timers.js';
+import { evaluateAndPersist } from './coordinator.js';
 
 const taskGroup = (task) => task?.groupId || task?.exerciseId || task?.id;
 const supersetLead = (active, groupId) =>
@@ -361,6 +362,7 @@ export async function finishWorkout() {
   state.history.unshift(snapshot);
   state.active = null;
   await save();
+  await evaluateAndPersist(state);
 }
 
 export async function cancelWorkout() {

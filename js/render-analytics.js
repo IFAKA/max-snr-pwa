@@ -8,7 +8,7 @@ import {
   sessionTimingComparison,
   weeklyGymAnalytics,
 } from './workout/metrics.js';
-import { OPTIMIZER_OUTPUT, compareFrequencies, selectedFrequency } from './workout/optimizer.js';
+import { EXERCISES, compareFrequencies, selectedFrequency } from './workout/optimizer.js';
 import {
   allocationDecisionReport,
   marginalCandidateReport,
@@ -101,12 +101,21 @@ export function renderAnalytics() {
   const metrics = weeklyGymAnalytics(state);
   const health = healthCoverage(state);
   const sedentary = sedentaryStatus(state);
-  const selected = selectedFrequency(state);
+  const prescriptionEntries = Object.entries(state.prescription?.weeklySetAllocation || {})
+    .map(([id, sets]) => [Object.keys(EXERCISES).find((key) => EXERCISES[key].id === id), sets])
+    .filter(([key]) => key);
+  const allocation = {};
+  prescriptionEntries.forEach(([key, sets]) =>
+    Object.keys(EXERCISES[key].primary || {}).forEach((muscle) => {
+      allocation[muscle] = (allocation[muscle] || 0) + sets;
+    }),
+  );
+  const selected = selectedFrequency({ state, allocation: prescriptionEntries });
   const timing = sessionTimingComparison(state.history, selected.sessionMinutes);
   const sensitivity = sensitivityAnalysis();
   const decisions = allocationDecisionReport();
   const recommendations = adaptiveRecommendations({
-    allocation: OPTIMIZER_OUTPUT.allocation,
+    allocation,
     adherence: metrics.sessions / 2,
     trends: rollingMuscleTrends(state.history),
     actualTimeCost: Object.fromEntries(
@@ -174,7 +183,7 @@ export function renderAnalytics() {
     )
     .join('');
   const threeWins = sensitivity.twoVsThree.filter((item) => item.winner === 3).length;
-  const frequencyRows = compareFrequencies({ state })
+  const frequencyRows = compareFrequencies({ state, allocation: prescriptionEntries })
     .map(
       (candidate) =>
         `<li><div class="list-link"><span>${candidate.days} days · ${candidate.minutes} min/week</span><strong>${raw(candidate.utility)}</strong></div></li>`,

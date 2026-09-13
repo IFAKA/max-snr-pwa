@@ -18,7 +18,7 @@ export function renderRoutine() {
       ? `<li class="${day === today ? 'today' : ''}"><a class="list-link" href="/routine/?day=${encodeURIComponent(day)}"><span class="day-label" data-hold-scroll><span class="hold-scroll-text">${esc(day)}</span>${day === today ? '<small class="day-indicator" aria-label="Current day"></small>' : ''}</span>${icon('chevron', 'Open day')}</a></li>`
       : `<li class="rest-day"><button class="list-link is-disabled" type="button" disabled><span data-hold-scroll><span class="hold-scroll-text">${esc(day)} · Rest</span></span>${icon('dash', 'Rest day')}</button></li>`,
   );
-  const frontier = selectedFrequency(getState());
+  const frontier = selectedFrequency({ state: getState() });
   app.innerHTML = `<section aria-labelledby="routine-title">${titleMarkup('Routine', 'routine-title')}<p class="routine-summary">${frontier.days} gym days · about ${frontier.minutes} min/week. The optimizer favors the lowest-visit option that still trains all major muscle groups twice weekly.</p>${listMarkup(days, '', 'Routine days')}</section>`;
   bindViewInteractions();
 }

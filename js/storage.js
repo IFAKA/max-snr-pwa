@@ -1,6 +1,7 @@
 import { DB_NAME, DB_VERSION, STORAGE_KEY, REST_MS } from './constants.js';
 import { emptyState, getState, normalizeWeeklyGoal, setState } from './state.js';
 import { validateBackup } from './backup.js';
+import { createPrescription } from './workout/optimizer.js';
 
 let dbPromise;
 function openDb() {
@@ -42,6 +43,14 @@ export function migrate(raw) {
     version: 2,
   };
   next.history = Array.isArray(next.history) ? next.history : [];
+  if (!next.prescription) {
+    next.prescription = createPrescription(2, {
+      createdAt: Date.now(),
+      lastEvaluatedAt: Date.now(),
+      lastChangeReason: 'Migrated existing two-day routine',
+      evidence: { migrated: true, historicalSessionsIgnored: next.history.length },
+    });
+  }
   next.history.forEach((workout) => {
     delete workout.note;
   });
@@ -157,9 +166,16 @@ export async function loadState() {
       return [];
     }
   });
-  if (!candidates.length) return setState(emptyState());
+  if (!candidates.length) {
+    const next = emptyState();
+    next.prescription = createPrescription(2);
+    return setState(next);
+  }
   const latest = candidates.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))[0];
-  return setState(migrate(latest));
+  const migrated = migrate(latest);
+  setState(migrated);
+  if (!latest.prescription) await persist();
+  return migrated;
 }
 export async function persist() {
   const current = getState();

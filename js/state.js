@@ -21,6 +21,7 @@ export const emptyState = () => ({
   version: 2,
   history: [],
   active: null,
+  prescription: null,
   settings: {
     unit: 'kg',
     weeklyGoal: DEFAULT_WEEKLY_GOAL,
