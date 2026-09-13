@@ -173,6 +173,22 @@ export const EXERCISES = {
     supersetSafe: true,
     health: ['trunk'],
   }),
+  wristExtension: exercise({
+    id: 'wrist-extension',
+    name: 'Wrist Extension',
+    sets: 1,
+    reps: '12–20',
+    rir: '1–2',
+    station: 'dumbbells',
+    restMs: 60000,
+    primary: { forearms: 1 },
+    secondary: {},
+    setupSeconds: 20,
+    executionSeconds: 30,
+    fatigue: 1,
+    supersetSafe: true,
+    health: ['arms'],
+  }),
 };
 
 const ALLOCATION = [
@@ -186,6 +202,7 @@ const ALLOCATION = [
   ['pushdown', 4],
   ['calfRaise', 4],
   ['crunch', 4],
+  ['wristExtension', 2],
 ];
 
 export function fractionalSets(definition, sets = definition.sets) {
@@ -300,6 +317,7 @@ export function optimizeRoutine({ daysPerWeek = selectedFrequency().days } = {})
       ),
       get(day, 'row'),
       get(day, 'calfRaise'),
+      get(day, 'wristExtension'),
     ].filter((item) => item?.type === 'exercise' || item.members?.length);
   return {
     days: ['Monday', 'Thursday'],
