@@ -94,6 +94,11 @@ export function validateBackup(raw) {
     unit: raw.settings?.unit === 'lb' ? 'lb' : 'kg',
     weeklyGoal: normalizeWeeklyGoal(raw.settings?.weeklyGoal),
   };
+  next.health = {
+    movementMinutes: Array.isArray(next.health?.movementMinutes) ? next.health.movementMinutes : [],
+    cardioMinutes: Array.isArray(next.health?.cardioMinutes) ? next.health.cardioMinutes : [],
+    measurements: Array.isArray(next.health?.measurements) ? next.health.measurements : [],
+  };
   next.updatedAt = Number.isFinite(raw.updatedAt) ? raw.updatedAt : 0;
   return next;
 }

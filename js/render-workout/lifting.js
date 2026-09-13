@@ -31,13 +31,14 @@ export function renderLifting() {
   const unit = getState().settings?.unit || 'kg';
   const previous = lastPerformance(task.performedName, unit, task.exerciseId);
   const weightValue = draft.weight ?? previous?.weight ?? '';
+  const rirValue = draft.rir ?? previous?.rir ?? '2';
   const stage = workoutStage({
     className: 'lifting-stage',
     title: esc(task.performedName),
-    body: `<p class="set-count">Set ${esc(task.set)} of ${esc(task.sets)}</p>`,
+    body: `<p class="set-count">Set ${esc(task.set)} of ${esc(task.sets)}</p><p class="previous-performance">Previous: ${previous ? `${esc(previous.weight ?? 'bodyweight')} ${esc(previous.unit || unit)} × ${esc(previous.reps)} @ ${esc(previous.rir ?? '—')} RIR` : 'No logged set'}</p>`,
     actions: '',
   });
-  const formMarkup = `<form id="set-form">${step === 'load' ? stepperMarkup('weight', `Load · ${unit}`, weightValue, -2.5, 2.5) : stepperMarkup('reps', 'Reps', repsValue, -1, 1)}<input id="reps" type="hidden" value="${esc(repsValue)}"><input id="weight" type="hidden" value="${esc(weightValue)}">${primaryAction('next-step', step === 'load' ? 'Log set' : 'Next', step === 'load' ? 'submit' : 'button')}</form>`;
+  const formMarkup = `<form id="set-form">${step === 'load' ? `${stepperMarkup('weight', `Load · ${unit}`, weightValue, -2.5, 2.5)}<label class="rir-label" for="rir">RIR<select id="rir"><option ${rirValue === '0' ? 'selected' : ''}>0</option><option ${rirValue === '1' ? 'selected' : ''}>1</option><option ${rirValue === '2' ? 'selected' : ''}>2</option><option ${rirValue === '3+' ? 'selected' : ''}>3+</option></select></label>` : stepperMarkup('reps', 'Reps', repsValue, -1, 1)}<input id="reps" type="hidden" value="${esc(repsValue)}"><input id="weight" type="hidden" value="${esc(weightValue)}">${primaryAction('next-step', step === 'load' ? 'Log set' : 'Next', step === 'load' ? 'submit' : 'button')}</form>`;
   mount(
     stage.replace('<div class="thumb-zone"></div>', `<div class="thumb-zone">${formMarkup}</div>`),
   );
@@ -49,6 +50,8 @@ export function renderLifting() {
   const saveDraft = () => {
     active.draft.weight = weight.value;
     active.draft.reps = reps.value;
+    const rir = document.querySelector('#rir');
+    if (rir) active.draft.rir = rir.value;
     save().catch(showError);
   };
   const changeValue = (button, multiplier = 1) => {

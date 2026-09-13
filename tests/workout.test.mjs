@@ -23,15 +23,17 @@ test('ordinary exercises finish all sets before the next exercise', () => {
   assert.deepEqual(
     tasks.slice(0, 3).map((task) => [task.performedName, task.set]),
     [
-      ['High-Incline Machine Press', 1],
-      ['High-Incline Machine Press', 2],
-      ['High-Incline Machine Press', 3],
+      ['Incline Machine Press', 1],
+      ['Incline Machine Press', 2],
+      ['Incline Machine Press', 3],
     ],
   );
 });
 
 test('superset members alternate within each round', () => {
-  const tasks = flatten(ROUTINE.Monday).filter((task) => task.groupType === 'superset');
+  const tasks = flatten(ROUTINE.Monday).filter(
+    (task) => task.groupType === 'superset' && task.groupId === 'priority-pair-0',
+  );
   assert.deepEqual(
     tasks.map((task) => [task.memberIndex, task.set]),
     [

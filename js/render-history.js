@@ -89,7 +89,7 @@ export function renderHistory() {
   if (view === 'workouts') return renderWorkouts(state);
   if (view === 'data') return renderData(state);
   if (view === 'workout') return renderWorkoutDetail(state, Number(params.get('id')));
-  app.innerHTML = `<section aria-labelledby="history-title">${titleMarkup('History', 'history-title')}${listMarkup([`<li><a class="list-link" href="/history/?view=workouts"><span>Workouts</span>${icon('chevron', 'Open workouts')}</a></li>`, ...dataRows()], '', 'History options')}</section>`;
+  app.innerHTML = `<section aria-labelledby="history-title">${titleMarkup('History', 'history-title')}${listMarkup([`<li><a class="list-link" href="/history/?view=workouts"><span>Workouts</span>${icon('chevron', 'Open workouts')}</a></li>`, `<li><a class="list-link" href="/history/?view=analytics"><span>Analytics</span>${icon('chevron', 'Open analytics')}</a></li>`, ...dataRows()], '', 'History options')}</section>`;
   bindDataActions(state);
   bindViewInteractions();
 }

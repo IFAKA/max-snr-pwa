@@ -1,5 +1,29 @@
 import { getState } from '../state.js';
 
+export function parseRepRange(range) {
+  const values =
+    String(range || '')
+      .match(/\d+/g)
+      ?.map(Number) || [];
+  return { lower: values[0] || 1, upper: values[1] || values[0] || 1 };
+}
+
+export function nextDoubleProgression({ load = 0, reps, targetRepRange, rir, increment = 2.5 }) {
+  const { lower, upper } = parseRepRange(targetRepRange);
+  const currentRir = Number.parseInt(rir, 10);
+  if (Number.isFinite(reps) && reps >= upper && (!Number.isFinite(currentRir) || currentRir <= 2))
+    return {
+      action: 'increase-load',
+      load: Number((Number(load || 0) + increment).toFixed(2)),
+      reps: lower,
+    };
+  return {
+    action: 'repeat-load',
+    load: Number(load || 0),
+    reps: Math.max(lower, Number(reps) || lower),
+  };
+}
+
 export function lastActivePerformance(exerciseId, unit) {
   const tasks = getState().active?.tasks || [];
   return (

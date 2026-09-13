@@ -4,6 +4,7 @@ import { renderToday } from './js/render-today.js';
 import { renderHistory } from './js/render-history.js';
 import { renderRoutine } from './js/render-routine.js';
 import { renderWorkout } from './js/render-workout.js';
+import { renderAnalytics } from './js/render-analytics.js';
 import { keepAwake, releaseWakeLock } from './js/dom.js';
 import { setServiceWorkerRegistration } from './js/update-app.js';
 
@@ -54,7 +55,8 @@ async function boot() {
     }
     if (route === 'workout') void keepAwake();
     else void releaseWakeLock();
-    (renderers[route] || renderToday)();
+    if (route === 'history' && params.get('view') === 'analytics') renderAnalytics();
+    else (renderers[route] || renderToday)();
   } catch (error) {
     const target = document.querySelector('#app');
     if (target) {

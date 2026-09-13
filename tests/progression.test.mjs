@@ -1,0 +1,51 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { nextDoubleProgression, parseRepRange } from '../js/workout/progression.js';
+import { adaptiveRecommendations, rollingExerciseTrend } from '../js/workout/adaptation.js';
+
+test('parses target rep ranges', () => {
+  assert.deepEqual(parseRepRange('6–10'), { lower: 6, upper: 10 });
+  assert.deepEqual(parseRepRange('12'), { lower: 12, upper: 12 });
+});
+
+test('double progression increases load only at the upper bound and target RIR', () => {
+  assert.deepEqual(
+    nextDoubleProgression({ load: 50, reps: 10, targetRepRange: '6–10', rir: '2' }),
+    { action: 'increase-load', load: 52.5, reps: 6 },
+  );
+  assert.deepEqual(nextDoubleProgression({ load: 50, reps: 9, targetRepRange: '6–10', rir: '1' }), {
+    action: 'repeat-load',
+    load: 50,
+    reps: 9,
+  });
+  assert.deepEqual(
+    nextDoubleProgression({ load: 50, reps: 10, targetRepRange: '6–10', rir: '0' }),
+    { action: 'increase-load', load: 52.5, reps: 6 },
+  );
+});
+
+test('rolling trend uses recent completed workouts and adaptation defaults to keep', () => {
+  const history = [
+    {
+      completedAt: '2026-09-10',
+      tasks: [{ exerciseId: 'press', completed: { reps: 10, weight: 50 } }],
+    },
+    {
+      completedAt: '2026-09-03',
+      tasks: [{ exerciseId: 'press', completed: { reps: 8, weight: 47.5 } }],
+    },
+  ];
+  assert.equal(rollingExerciseTrend(history, 'press').improving, true);
+  assert.equal(
+    adaptiveRecommendations({
+      allocation: { upperChest: 5 },
+      trends: { upperChest: { improving: false } },
+      adherence: 1,
+    })[0].action,
+    'ADD 1 SET/WEEK',
+  );
+  assert.equal(
+    adaptiveRecommendations({ allocation: { upperChest: 5 }, adherence: 0.5 })[0].action,
+    'KEEP',
+  );
+});

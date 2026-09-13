@@ -6,6 +6,7 @@ export const emptyState = () => ({
   history: [],
   active: null,
   settings: { unit: 'kg', weeklyGoal: DEFAULT_WEEKLY_GOAL },
+  health: { movementMinutes: [], cardioMinutes: [], measurements: [] },
   updatedAt: 0,
 });
 let state = emptyState();

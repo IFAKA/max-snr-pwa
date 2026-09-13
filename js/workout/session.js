@@ -62,6 +62,7 @@ export async function start(day = dayNow()) {
   state.active = {
     id: Date.now(),
     date: new Date().toISOString(),
+    startedAt: Date.now(),
     day,
     name: workoutName(day),
     tasks,
@@ -230,6 +231,7 @@ export async function completeSet() {
     completedAt: new Date().toISOString(),
     actualName: task.performedName,
     originalName: task.originalName,
+    targetRepRange: task.targetRepRange || task.reps,
   };
   if (hasWeight) {
     task.completed.weight = weight;
@@ -351,6 +353,7 @@ export async function finishWorkout() {
       completed: task.completed ? { ...task.completed } : null,
     })),
   };
+  snapshot.durationMs = Math.max(0, Date.now() - (state.active.startedAt || Date.now()));
   delete snapshot.draft;
   delete snapshot.nextPos;
   delete snapshot.restEndsAt;

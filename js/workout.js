@@ -5,6 +5,10 @@ export {
   progressionSuggestion,
 } from './workout/progression.js';
 export { completedWorkoutsThisWeek, weeklyGoalSummary, phaseProgress } from './workout/metrics.js';
+export { weeklyGymAnalytics, healthCoverage } from './workout/metrics.js';
+export { nextDoubleProgression, parseRepRange } from './workout/progression.js';
+export { adaptiveRecommendations, rollingExerciseTrend } from './workout/adaptation.js';
+export { compareFrequencies, selectedFrequency, weeklyAllocation } from './workout/optimizer.js';
 export {
   start,
   activeTask,

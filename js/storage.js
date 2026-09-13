@@ -38,6 +38,7 @@ export function migrate(raw) {
     ...emptyState(),
     ...raw,
     settings: { ...emptyState().settings, ...(raw.settings || {}) },
+    health: { ...emptyState().health, ...(raw.health || {}) },
     version: 2,
   };
   next.history.forEach((workout) => {
@@ -47,6 +48,11 @@ export function migrate(raw) {
   next.settings = {
     unit: next.settings.unit === 'lb' ? 'lb' : 'kg',
     weeklyGoal: normalizeWeeklyGoal(next.settings.weeklyGoal),
+  };
+  next.health = {
+    movementMinutes: Array.isArray(next.health.movementMinutes) ? next.health.movementMinutes : [],
+    cardioMinutes: Array.isArray(next.health.cardioMinutes) ? next.health.cardioMinutes : [],
+    measurements: Array.isArray(next.health.measurements) ? next.health.measurements : [],
   };
   if (next.active?.queue && !next.active.tasks) {
     const old = next.active;
