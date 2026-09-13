@@ -450,11 +450,11 @@ ul {
   background: var(--surface-raised);
 }
 @media (hover: hover) and (pointer: fine) {
-  .list-link:hover::before {
+  .list-link:is(a, button, label):hover::before {
     background: var(--surface-raised);
   }
 }
-html.is-touch-pointer .list-link:hover::before {
+html.is-touch-pointer .list-link:is(a, button, label):hover::before {
   background: transparent;
 }
 .list-link > span:not(.sr-only),
