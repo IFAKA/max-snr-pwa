@@ -663,10 +663,7 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   min-width: 0;
 }
 .countdown-stage .stage-info {
-  display: flex;
   min-height: 0;
-  flex: 1 1 auto;
-  flex-direction: column;
 }
 .countdown-stage .big-timer {
   display: grid;
@@ -676,6 +673,16 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   margin: 0;
   font-size: clamp(72px, 29vw, 128px);
   letter-spacing: -0.1em;
+}
+.countdown-stage .thumb-zone {
+  min-height: 0;
+  margin-top: 0;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+.countdown-stage .thumb-zone .big-timer {
+  flex: 1 1 auto;
 }
 .workout-stage h1 {
   margin: 0 0 6px;
@@ -973,6 +980,9 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   .countdown-stage .big-timer {
     margin: 0;
     font-size: clamp(72px, 32vw, 96px);
+  }
+  .countdown-stage .thumb-zone {
+    flex: 1 1 auto;
   }
 }
 @media (max-width: 600px) {

@@ -65,7 +65,7 @@ export function renderToday() {
         : recommendation.type === 'rest'
           ? `<li><div class="list-link" role="status"><span>${recommendation.metric}</span>${icon('check', 'On track')}</div></li>`
           : `<li><a class="list-link" href="/workout/?activity=${encodeURIComponent(recommendation.type)}"><span>Start · ${recommendation.metric}</span>${icon('chevron', 'Start activity')}</a></li>`;
-  const updateItem = `<li><button class="list-link app-update-button" id="update-app" type="button" disabled><span>Update app</span>${icon('chevron', 'Check for app updates')}</button></li>`;
+  const updateItem = `<li><button class="list-link app-update-button" id="update-app" type="button"><span class="app-update-label">Check for updates</span>${icon('chevron', 'Check for app updates')}</button></li>`;
   app.innerHTML = `<section class="today-screen" aria-labelledby="today-title">${titleMarkup(title, 'today-title')}${listMarkup([startItem, `<li><a class="list-link" href="/routine/"><span>Routine</span>${icon('chevron', 'Open routine')}</a></li>`, `<li><a class="list-link" href="/history/"><span>History</span>${icon('chevron', 'Open history')}</a></li>`, updateItem], '', 'Home navigation')}<p id="app-update-status" class="app-update-status sr-only" role="status" aria-live="polite" aria-atomic="true"></p></section>`;
   bindHoldScroll();
   bindTitleMarquee();

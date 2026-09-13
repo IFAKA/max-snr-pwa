@@ -108,14 +108,14 @@ function candidates(summary, { resistanceDue = false, measurementDue = false, st
       type: 'walk',
       title: 'Walk',
       durationMinutes: 30,
-      metric: '30:00',
+      metric: '30m',
       dimensions: ['aerobic', 'movement', 'sedentary'],
     },
     {
       type: 'move',
       title: 'Move',
       durationMinutes: 3,
-      metric: '03:00',
+      metric: '3m',
       dimensions: ['movement', 'sedentary'],
     },
   ];
@@ -133,7 +133,7 @@ function candidates(summary, { resistanceDue = false, measurementDue = false, st
     if (score > 0)
       result.push({
         ...activity,
-        metric: activity.type === 'walk' ? `${Math.round(duration)}:00` : activity.metric,
+        metric: activity.type === 'walk' ? `${Math.round(duration)}m` : activity.metric,
         score,
         reason: `Heuristic marginal value combines deficient ${activity.dimensions.join(', ')} dimensions and subtracts time cost.`,
       });

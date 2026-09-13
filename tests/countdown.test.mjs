@@ -23,3 +23,8 @@ test('timed activity definitions provide countdown durations', () => {
   assert.equal(activityDefinition('move').durationMs, 3 * 60 * 1000);
   assert.equal(activityDefinition('measurement').durationMs, 0);
 });
+
+test('timed activity definitions use compact navigation metrics', () => {
+  assert.equal(activityDefinition('walk').metric, '30m');
+  assert.equal(activityDefinition('move').metric, '3m');
+});

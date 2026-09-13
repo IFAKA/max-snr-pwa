@@ -1,14 +1,14 @@
 export const ACTIVITY_DEFINITIONS = {
   walk: {
     title: 'Walk',
-    metric: '30:00',
+    metric: '30m',
     minutes: 30,
     durationMs: 30 * 60 * 1000,
     dimensions: ['aerobic', 'movement', 'sedentary'],
   },
   run: {
     title: 'Run',
-    metric: '20:00',
+    metric: '20m',
     minutes: 20,
     durationMs: 20 * 60 * 1000,
     intensity: 'vigorous',
@@ -16,14 +16,14 @@ export const ACTIVITY_DEFINITIONS = {
   },
   cycle: {
     title: 'Cycle',
-    metric: '30:00',
+    metric: '30m',
     minutes: 30,
     durationMs: 30 * 60 * 1000,
     dimensions: ['aerobic', 'movement', 'sedentary'],
   },
   move: {
     title: 'Move',
-    metric: '03:00',
+    metric: '3m',
     minutes: 3,
     durationMs: 3 * 60 * 1000,
     dimensions: ['movement', 'sedentary'],

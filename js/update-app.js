@@ -5,7 +5,7 @@ let availabilityCheck = null;
 
 const UPDATE_ICONS = {
   checking: '<circle cx="12" cy="12" r="8"/>',
-  current: '<path d="M5 12h14"/>',
+  current: '<path d="M20 11a8 8 0 1 0 1 4m-1-4v4h-4"/>',
   available: '<path d="M12 3v12m0 0 4-4m-4 4-4-4M4 21h16"/>',
   success: '<path d="m5 12 4 4L19 6"/>',
   error: '<path d="m6 6 12 12M18 6 6 18"/>',
@@ -13,7 +13,7 @@ const UPDATE_ICONS = {
 
 const UPDATE_LABELS = {
   checking: 'Checking for app updates',
-  current: 'No app update available',
+  current: 'Check for updates',
   available: 'Install app update',
   success: 'App updated',
   error: 'App update failed',
@@ -27,9 +27,10 @@ function announce(message) {
 function setUpdateState(button, state, message = '') {
   if (!button) return;
   const svg = button.querySelector('svg');
-  const label = button.querySelector('.sr-only');
+  const label = button.querySelector('.app-update-label');
   if (svg) svg.innerHTML = UPDATE_ICONS[state] || UPDATE_ICONS.current;
   if (label) label.textContent = UPDATE_LABELS[state] || UPDATE_LABELS.current;
+  button.setAttribute('aria-label', UPDATE_LABELS[state] || UPDATE_LABELS.current);
   button.dataset.updateState = state;
   if (message) announce(message);
 }
@@ -37,18 +38,18 @@ function setUpdateState(button, state, message = '') {
 function restoreButton(button) {
   updateInProgress = false;
   if (button) {
-    button.disabled = true;
+    button.disabled = false;
     button.removeAttribute('aria-busy');
     setUpdateState(button, 'error');
     setTimeout(() => {
-      if (button.disabled) setUpdateState(button, 'current');
+      if (button.dataset.updateState === 'error') setUpdateState(button, 'current');
     }, 4000);
   }
 }
 
 function setUpdateAvailable(button, available) {
   if (!button) return;
-  button.disabled = !available;
+  button.disabled = false;
   button.removeAttribute('aria-busy');
   setUpdateState(button, available ? 'available' : 'current');
 }
