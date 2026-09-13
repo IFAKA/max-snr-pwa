@@ -98,6 +98,15 @@ export function validateBackup(raw) {
     movementMinutes: Array.isArray(next.health?.movementMinutes) ? next.health.movementMinutes : [],
     cardioMinutes: Array.isArray(next.health?.cardioMinutes) ? next.health.cardioMinutes : [],
     measurements: Array.isArray(next.health?.measurements) ? next.health.measurements : [],
+    sedentary: {
+      ...emptyState().health.sedentary,
+      ...(next.health?.sedentary || {}),
+      logs: Array.isArray(next.health?.sedentary?.logs) ? next.health.sedentary.logs : [],
+      reminders: {
+        ...emptyState().health.sedentary.reminders,
+        ...(next.health?.sedentary?.reminders || {}),
+      },
+    },
   };
   next.updatedAt = Number.isFinite(raw.updatedAt) ? raw.updatedAt : 0;
   return next;

@@ -6,6 +6,9 @@ test('accepts a minimal version 2 backup', () => {
   const backup = validateBackup({ version: 2, history: [], active: null });
   assert.equal(backup.version, 2);
   assert.deepEqual(backup.history, []);
+  assert.equal(backup.health.sedentary.profileHoursPerDay, 10);
+  assert.equal(backup.health.sedentary.exposureClass, 'high');
+  assert.deepEqual(backup.health.sedentary.logs, []);
 });
 
 test('rejects executable strings in numeric performance fields', () => {

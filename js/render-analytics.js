@@ -2,19 +2,40 @@ import { app, bindViewInteractions, esc, listMarkup, titleMarkup } from './dom.j
 import { getState } from './state.js';
 import { persist } from './storage.js';
 import { adaptiveRecommendations } from './workout/adaptation.js';
-import { healthCoverage, weeklyGymAnalytics } from './workout/metrics.js';
-import { OPTIMIZER_OUTPUT } from './workout/optimizer.js';
+import {
+  healthCoverage,
+  sedentaryStatus,
+  sessionTimingComparison,
+  weeklyGymAnalytics,
+} from './workout/metrics.js';
+import { OPTIMIZER_OUTPUT, selectedFrequency } from './workout/optimizer.js';
+import {
+  allocationDecisionReport,
+  marginalCandidateReport,
+  marginalSetReport,
+  sensitivityAnalysis,
+} from './workout/optimizer-analysis.js';
 
 const today = () => new Date().toISOString();
-const fields = ['weight', 'waist', 'shoulders', 'chest', 'arms', 'forearms', 'thighs', 'calves'];
-const input = (id, label) =>
-  `<label class="analytics-field"><span>${label}</span><input id="${id}" name="${id}" type="number" min="0" step="0.1" inputmode="decimal" /></label>`;
+const measurementFields = [
+  'weight',
+  'waist',
+  'shoulders',
+  'chest',
+  'arms',
+  'forearms',
+  'thighs',
+  'calves',
+];
+const input = (id, label, step = '0.1') =>
+  `<label class="analytics-field"><span>${label}</span><input id="${id}" name="${id}" type="number" min="0" step="${step}" inputmode="decimal" /></label>`;
+const raw = (value) => String(value);
 
 function valueRows(values) {
   return Object.entries(values || {})
     .map(
       ([key, value]) =>
-        `<li><div class="list-link"><span>${esc(key)}</span><strong>${Number(value).toFixed(1)}</strong></div></li>`,
+        `<li><div class="list-link"><span>${esc(key)}</span><strong>${raw(value)}</strong></div></li>`,
     )
     .join('');
 }
@@ -23,10 +44,10 @@ function measurementRows(measurements) {
   const recent = measurements?.slice(-2) || [];
   if (recent.length < 2)
     return '<li><div class="list-link empty-state">Log two measurements to see rolling trends.</div></li>';
-  return fields
+  return measurementFields
     .map((key) => {
       const delta = Number(recent[1][key] || 0) - Number(recent[0][key] || 0);
-      return `<li><div class="list-link"><span>${esc(key)}</span><strong>${Number(recent[1][key] || 0).toFixed(1)} (${delta >= 0 ? '+' : ''}${delta.toFixed(1)})</strong></div></li>`;
+      return `<li><div class="list-link"><span>${esc(key)}</span><strong>${raw(Number(recent[1][key] || 0))} (${delta >= 0 ? '+' : ''}${raw(delta)})</strong></div></li>`;
     })
     .join('');
 }
@@ -47,8 +68,18 @@ function bindAnalytics() {
     });
     state.health.measurements.push({
       date: today(),
-      ...Object.fromEntries(fields.map((key) => [key, Number(form.get(key) || 0)])),
+      ...Object.fromEntries(measurementFields.map((key) => [key, Number(form.get(key) || 0)])),
     });
+    state.health.sedentary.logs.push({
+      date: today(),
+      hours: Number(form.get('sedentaryHours') || state.health.sedentary.profileHoursPerDay),
+      longestUninterruptedMinutes: Number(form.get('longestSit') || 0),
+      interruptions: Number(form.get('interruptions') || 0),
+    });
+    state.health.sedentary.reminders = {
+      enabled: form.get('reminders') === 'on',
+      intervalMinutes: Number(form.get('reminderInterval') || 45),
+    };
     await persist();
     renderAnalytics();
   });
@@ -59,18 +90,30 @@ export function renderAnalytics() {
   const state = getState();
   const metrics = weeklyGymAnalytics(state);
   const health = healthCoverage(state);
+  const sedentary = sedentaryStatus(state);
+  const selected = selectedFrequency();
+  const timing = sessionTimingComparison(state.history, selected.minutes / selected.days);
+  const sensitivity = sensitivityAnalysis();
+  const decisions = allocationDecisionReport();
   const recommendations = adaptiveRecommendations({
     allocation: OPTIMIZER_OUTPUT.allocation,
     adherence: metrics.sessions / 2,
   });
   const summary = [
-    ['Gym sessions', metrics.sessions],
-    ['Gym minutes', metrics.minutes],
-    ['Movement minutes', metrics.movementMinutes],
-    ['Cardio minutes', metrics.cardioMinutes],
+    ['Strength', `${health.resistanceDays}/2 days`],
+    ['Aerobic MVPA', `${raw(metrics.cardioEquivalent)}/150 moderate-equivalent min`],
     [
-      'WHO aerobic equivalent',
-      health.aerobicMinimumMet ? 'On track' : `${metrics.cardioEquivalent}/150 min`,
+      'Sedentary exposure',
+      `${raw(sedentary.profileHoursPerDay)} h/day · ${sedentary.exposureClass}`,
+    ],
+    ['Sitting interruptions', sedentary.interruptions],
+    ['Longest sitting logged', `${raw(sedentary.longestUninterruptedMinutes)} min`],
+    ['Daily movement', `${raw(metrics.movementMinutes)} min logged`],
+    [
+      'Gym timing',
+      timing.observedCount
+        ? `${raw(timing.mean)} min observed vs ${raw(timing.estimate)} min model`
+        : 'Awaiting session timestamps',
     ],
   ]
     .map(
@@ -84,7 +127,31 @@ export function renderAnalytics() {
         `<li><div class="list-link"><span>${esc(item.muscle || 'System')}</span><small>${esc(item.action)}</small></div></li>`,
     )
     .join('');
-  const logForm = `<details class="analytics-details"><summary>Log this week</summary><form id="activity-form" class="analytics-form">${input('movement', 'Movement minutes')} ${input('cardio', 'Cardio minutes')}<label class="analytics-field"><span>Cardio intensity</span><select id="intensity" name="intensity"><option value="moderate">Moderate</option><option value="vigorous">Vigorous</option></select></label>${fields.map((key) => input(key, key)).join('')}<button class="primary" type="submit">Save log</button></form></details>`;
-  app.innerHTML = `<section aria-labelledby="analytics-title">${titleMarkup('Max-SNR analytics', 'analytics-title')}${listMarkup(summary, '', 'Weekly activity summary')}<h2>Measurement trend</h2><ul class="app-list">${measurementRows(state.health.measurements)}</ul><h2>Direct sets by muscle</h2><ul class="app-list">${valueRows(metrics.directSets) || '<li><div class="list-link empty-state">Complete a workout to populate this.</div></li>'}</ul><h2>Effective sets by muscle</h2><ul class="app-list">${valueRows(metrics.effectiveSets) || '<li><div class="list-link empty-state">Complete a workout to populate this.</div></li>'}</ul><h2>Optimizer recommendations</h2><ul class="app-list">${recommendationsMarkup}</ul>${logForm}</section>`;
+  const marginalRows = marginalSetReport()
+    .map(
+      (set) =>
+        `<li><div class="list-link"><span>${esc(set.exercise)} · set ${set.set}</span><small>u/min ${raw(set.utilityPerMinute)} · direct ${esc(JSON.stringify(set.direct))} · fractional ${esc(JSON.stringify(set.fractional))}</small></div></li>`,
+    )
+    .join('');
+  const candidateRows = marginalCandidateReport()
+    .map(
+      (set) =>
+        `<li><div class="list-link"><span>Next: ${esc(set.exercise)} set ${set.nextSet}</span><small>u/min ${raw(set.utilityPerMinute)}</small></div></li>`,
+    )
+    .join('');
+  const decisionRows = [
+    ['Calves', decisions.calfFourth.reason],
+    ['Wrist extensions', decisions.wristExtension.reason],
+    ['Side delts', decisions.sideDelts.reason],
+    ['Lats', decisions.lats.reason],
+  ]
+    .map(
+      ([label, reason]) =>
+        `<li><div class="list-link"><span>${esc(label)}</span><small>${esc(reason)}</small></div></li>`,
+    )
+    .join('');
+  const threeWins = sensitivity.twoVsThree.filter((item) => item.winner === 3).length;
+  const logForm = `<details class="analytics-details"><summary>Log health data</summary><form id="activity-form" class="analytics-form">${input('movement', 'Light/general movement minutes')} ${input('cardio', 'Cardio minutes')}<label class="analytics-field"><span>Cardio intensity</span><select id="intensity" name="intensity"><option value="moderate">Moderate</option><option value="vigorous">Vigorous</option></select></label>${input('sedentaryHours', 'Approximate sitting hours/day')} ${input('longestSit', 'Longest uninterrupted sitting period (optional)', '1')} ${input('interruptions', 'Movement interruptions today', '1')}${measurementFields.map((key) => input(key, key)).join('')}<label class="analytics-field"><span><input name="reminders" type="checkbox" /> Enable movement reminder</span></label>${input('reminderInterval', 'Reminder interval (behavioral choice, not a proven threshold)', '1')}<button class="primary" type="submit">Save log</button></form></details>`;
+  app.innerHTML = `<section aria-labelledby="analytics-title">${titleMarkup('Max-SNR analytics', 'analytics-title')}${listMarkup(summary, '', 'Weekly health dimensions')}<h2>Sedentary behavior</h2><p class="routine-summary">${esc(sedentary.recommendation)} Reminders replace sitting with brief movement; their interval is configurable and is not presented as a safety cutoff.</p><h2>Measurement trend</h2><ul class="app-list">${measurementRows(state.health.measurements)}</ul><h2>Direct sets by muscle</h2><ul class="app-list">${valueRows(metrics.directSets) || '<li><div class="list-link empty-state">Complete a workout to populate this.</div></li>'}</ul><h2>Fractional indirect sets by muscle</h2><ul class="app-list">${valueRows(metrics.fractionalSets) || '<li><div class="list-link empty-state">Complete a workout to populate this.</div></li>'}</ul><h2>Effective sets by muscle</h2><ul class="app-list">${valueRows(metrics.effectiveSets) || '<li><div class="list-link empty-state">Complete a workout to populate this.</div></li>'}</ul><h2>Optimizer recommendations</h2><ul class="app-list">${recommendationsMarkup}</ul><details class="analytics-details"><summary>Marginal utility per individual set</summary><p class="routine-summary">Raw model units per modeled minute. Values are ordinal heuristics, not biological measurements.</p><ul class="app-list">${marginalRows}</ul><h3>Allocation decisions</h3><ul class="app-list">${decisionRows}</ul><h3>Next-set candidates</h3><ul class="app-list">${candidateRows}</ul></details><details class="analytics-details"><summary>Frequency sensitivity</summary><p class="routine-summary">Three days wins ${threeWins} of ${sensitivity.twoVsThree.length} configured 2-vs-3 scenarios. At default time and visit costs, three days needs relief greater than ${raw(sensitivity.threeDayReliefThreshold(0.08, 2))} model units to beat two days.</p></details>${logForm}</section>`;
   bindAnalytics();
 }

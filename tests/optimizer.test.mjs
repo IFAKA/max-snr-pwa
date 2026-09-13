@@ -9,7 +9,15 @@ import {
   optimizeRoutine,
   selectedFrequency,
   weeklyAllocation,
+  weeklyMuscleSets,
+  prescriptionAllocation,
 } from '../js/workout/optimizer.js';
+import {
+  allocationDecisionReport,
+  marginalCandidateReport,
+  marginalSetReport,
+  sensitivityAnalysis,
+} from '../js/workout/optimizer-analysis.js';
 import { flatten } from '../js/workout/task-factory.js';
 
 test('marginal return diminishes as weekly sets increase', () => {
@@ -47,7 +55,58 @@ test('routine is generated from allocation and preserves metadata through flatte
 
 test('weekly allocation covers the priority and health layers', () => {
   const allocation = weeklyAllocation();
-  ['sideDelts', 'arms', 'upperChest', 'lats', 'abs', 'lowerBody', 'calves'].forEach((muscle) => {
+  [
+    'sideDelts',
+    'arms',
+    'upperChest',
+    'lats',
+    'abs',
+    'quads',
+    'hamstrings',
+    'glutes',
+    'calves',
+  ].forEach((muscle) => {
     assert.ok(allocation[muscle] > 0, muscle);
   });
+});
+
+test('direct and fractional allocation remain separately inspectable', () => {
+  const sets = weeklyMuscleSets();
+  assert.equal(sets.sideDelts.direct, 4);
+  assert.equal(sets.sideDelts.fractional, 1.25);
+  assert.equal(sets.lats.direct, 4);
+  assert.equal(sets.lats.fractional, 1.35);
+  assert.equal(sets.calves.fractional, 0);
+  assert.equal(prescriptionAllocation()['standing-calf-raise'], 3);
+  assert.equal(prescriptionAllocation()['wrist-extension'], 2);
+});
+
+test('marginal reports include every prescribed set and next-set candidates', () => {
+  assert.equal(marginalSetReport().length, 41);
+  const candidates = marginalCandidateReport();
+  assert.ok(candidates.find((candidate) => candidate.exerciseId === 'standing-calf-raise'));
+  assert.ok(candidates.find((candidate) => candidate.exerciseId === 'wrist-extension'));
+  assert.ok(candidates.every((candidate) => Number.isFinite(candidate.utilityPerMinute)));
+});
+
+test('frequency sensitivity exposes ranges and the relief threshold for three days', () => {
+  const sensitivity = sensitivityAnalysis();
+  assert.ok(sensitivity.oneAtATime.some((item) => item.parameter === 'priority:sideDelts'));
+  assert.equal(sensitivity.threeDayReliefThreshold(0.08, 2), 4.22);
+  assert.equal(
+    sensitivity.twoVsThree.some((item) => item.winner === 3),
+    true,
+  );
+});
+
+test('allocation decisions explain the calf, wrist, delt, and lat tradeoffs', () => {
+  const decisions = allocationDecisionReport();
+  assert.equal(decisions.calfFourth.selected, false);
+  assert.equal(decisions.wristExtension.selectedSets, 2);
+  assert.equal(decisions.sideDelts.directSets, 4);
+  assert.equal(decisions.lats.directSets, 4);
+  assert.ok(
+    decisions.wristExtension.secondSet.utilityPerMinute >
+      decisions.calfFourth.candidate.utilityPerMinute,
+  );
 });

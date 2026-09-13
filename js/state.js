@@ -6,7 +6,17 @@ export const emptyState = () => ({
   history: [],
   active: null,
   settings: { unit: 'kg', weeklyGoal: DEFAULT_WEEKLY_GOAL },
-  health: { movementMinutes: [], cardioMinutes: [], measurements: [] },
+  health: {
+    movementMinutes: [],
+    cardioMinutes: [],
+    measurements: [],
+    sedentary: {
+      profileHoursPerDay: 10,
+      exposureClass: 'high',
+      logs: [],
+      reminders: { enabled: false, intervalMinutes: 45 },
+    },
+  },
   updatedAt: 0,
 });
 let state = emptyState();

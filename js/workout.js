@@ -5,10 +5,28 @@ export {
   progressionSuggestion,
 } from './workout/progression.js';
 export { completedWorkoutsThisWeek, weeklyGoalSummary, phaseProgress } from './workout/metrics.js';
-export { weeklyGymAnalytics, healthCoverage } from './workout/metrics.js';
+export {
+  healthCoverage,
+  observedSessionDurations,
+  sedentaryStatus,
+  sessionTimingComparison,
+  weeklyGymAnalytics,
+} from './workout/metrics.js';
 export { nextDoubleProgression, parseRepRange } from './workout/progression.js';
 export { adaptiveRecommendations, rollingExerciseTrend } from './workout/adaptation.js';
-export { compareFrequencies, selectedFrequency, weeklyAllocation } from './workout/optimizer.js';
+export {
+  compareFrequencies,
+  selectedFrequency,
+  setBreakdown,
+  weeklyAllocation,
+  weeklyMuscleSets,
+} from './workout/optimizer.js';
+export {
+  allocationDecisionReport,
+  marginalCandidateReport,
+  marginalSetReport,
+  sensitivityAnalysis,
+} from './workout/optimizer-analysis.js';
 export {
   start,
   activeTask,
