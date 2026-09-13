@@ -4,7 +4,7 @@ import { getState } from '../state.js';
 import { selectExercise, exerciseSelectionLocked, start, cancelWorkout } from '../workout.js';
 import { navigateTo } from '../navigation.js';
 
-const MAIN_PHASES = new Set(['warmup', 'plank', 'lifting', 'rest', 'stretch', 'complete']);
+const MAIN_PHASES = new Set(['warmup', 'lifting', 'rest', 'stretch', 'complete']);
 let workoutRouteRenderer = null;
 let cancelDialog = null;
 let openCancelSheet = null;

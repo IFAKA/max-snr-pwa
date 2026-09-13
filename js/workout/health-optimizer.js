@@ -1,0 +1,185 @@
+const WEEKLY_AEROBIC_MINUTES = 150;
+const HIGH_SEDENTARY_HOURS = 8;
+const STABILITY_DELTA = 10;
+const MEASUREMENT_INTERVAL_DAYS = 14;
+
+const dateKey = (value) => {
+  const date = value instanceof Date ? value : new Date(value || 0);
+  return Number.isNaN(date.getTime()) ? '' : date.toISOString().slice(0, 10);
+};
+
+const monday = (date) => {
+  const value = new Date(date);
+  value.setHours(0, 0, 0, 0);
+  const day = value.getDay() || 7;
+  value.setDate(value.getDate() - day + 1);
+  return value;
+};
+
+const inWeek = (value, now) => {
+  const timestamp = Date.parse(value || '');
+  return Number.isFinite(timestamp) && timestamp >= monday(now).getTime();
+};
+
+const completedToday = (history, day, now) =>
+  (history || []).some(
+    (item) =>
+      item.completed !== false &&
+      (item.completedAt || item.date) &&
+      item.day === day &&
+      dateKey(item.completedAt || item.date) === dateKey(now),
+  );
+
+const legacyMinutes = (state, key, now) =>
+  (state?.health?.[key] || [])
+    .filter((entry) => inWeek(entry.date, now))
+    .reduce((sum, entry) => sum + Number(entry.minutes || 0), 0);
+
+export function bodyHealthSummary(state, now = new Date()) {
+  const activities = state?.health?.activities || [];
+  const cardio = activities.filter(
+    (item) =>
+      item.completed !== false &&
+      item.dimensions?.includes('aerobic') &&
+      inWeek(item.startedAt || item.date, now),
+  );
+  const cardioEquivalent =
+    legacyMinutes(state, 'cardioMinutes', now) +
+    cardio.reduce(
+      (sum, activity) =>
+        sum +
+        Number(activity.durationMinutes || activity.minutes || 0) *
+          (activity.intensity === 'vigorous' ? 2 : 1),
+      0,
+    );
+  const movementMinutes =
+    legacyMinutes(state, 'movementMinutes', now) +
+    activities
+      .filter(
+        (item) =>
+          item.completed !== false &&
+          item.dimensions?.includes('movement') &&
+          inWeek(item.startedAt || item.date, now),
+      )
+      .reduce(
+        (sum, activity) => sum + Number(activity.durationMinutes || activity.minutes || 0),
+        0,
+      );
+  const sedentary = state?.health?.sedentary || {};
+  const profileHours = Number(sedentary.profileHoursPerDay);
+  const latest = sedentary.logs?.at(-1) || null;
+  const sedentaryHours = Number.isFinite(Number(latest?.hours))
+    ? Number(latest.hours)
+    : Number.isFinite(profileHours)
+      ? profileHours
+      : null;
+  const resistanceDays = (state?.history || []).filter(
+    (item) => item.completed !== false && inWeek(item.completedAt || item.date, now),
+  ).length;
+  return {
+    resistanceDays,
+    resistanceMet: resistanceDays >= 2,
+    aerobicEquivalent: cardioEquivalent,
+    aerobicMet: cardioEquivalent >= WEEKLY_AEROBIC_MINUTES,
+    movementMinutes,
+    sedentaryHours,
+    sedentaryHigh: sedentaryHours !== null && sedentaryHours >= HIGH_SEDENTARY_HOURS,
+    measurements: state?.health?.measurements || [],
+  };
+}
+
+function candidates(summary, { resistanceDue = false, measurementDue = false } = {}) {
+  const result = [];
+  if (resistanceDue)
+    result.push({
+      type: 'resistance',
+      title: 'Resistance',
+      metric: 'Full body',
+      durationMinutes: null,
+      score: 100,
+      reason: 'The planned resistance session is due.',
+    });
+  const aerobicDeficit = Math.max(0, WEEKLY_AEROBIC_MINUTES - summary.aerobicEquivalent);
+  if (aerobicDeficit > 0 && summary.sedentaryHigh)
+    result.push({
+      type: 'walk',
+      title: 'Walk',
+      metric: '30:00',
+      durationMinutes: 30,
+      score: 80 + Math.min(15, aerobicDeficit / 10),
+      reason: 'One brisk walk can add aerobic activity while replacing sedentary time.',
+    });
+  else if (aerobicDeficit > 0)
+    result.push({
+      type: 'walk',
+      title: 'Walk',
+      metric: `${Math.min(30, Math.max(10, Math.ceil(aerobicDeficit)))}:00`,
+      durationMinutes: Math.min(30, Math.max(10, Math.ceil(aerobicDeficit))),
+      score: 55 + Math.min(15, aerobicDeficit / 10),
+      reason: 'A low-disruption walk is the cheapest available aerobic progress.',
+    });
+  else if (summary.sedentaryHigh)
+    result.push({
+      type: 'move',
+      title: 'Move',
+      metric: '03:00',
+      durationMinutes: 3,
+      score: 45,
+      reason:
+        'Replace some sitting with light movement; this interval is a configurable behavior heuristic.',
+    });
+  if (measurementDue)
+    result.push({
+      type: 'measurement',
+      title: 'Check-in',
+      metric: 'Waist',
+      durationMinutes: null,
+      score: 20,
+      reason: 'A trend measurement is due; a single reading is not treated as a diagnosis.',
+    });
+  if (!result.length)
+    result.push({
+      type: 'rest',
+      title: 'On track',
+      metric: 'No action needed',
+      durationMinutes: null,
+      score: 0,
+      reason: 'No meaningful marginal intervention is currently justified.',
+    });
+  return result.sort((a, b) => b.score - a.score);
+}
+
+function dueMeasurement(measurements, now) {
+  const latest = measurements
+    .map((item) => Date.parse(item.date || ''))
+    .filter(Number.isFinite)
+    .sort((a, b) => b - a)[0];
+  return !latest || now.getTime() - latest >= MEASUREMENT_INTERVAL_DAYS * 86400000;
+}
+
+export function selectRecommendation(state, { day = '', now = new Date() } = {}) {
+  const summary = bodyHealthSummary(state, now);
+  const resistanceDue = Boolean(state?.active) || Boolean(day);
+  const options = candidates(summary, {
+    resistanceDue: resistanceDue && !completedToday(state?.history, day, now),
+    measurementDue: dueMeasurement(summary.measurements, now),
+  });
+  const selected = options[0];
+  const previous = state?.settings?.recommendation;
+  if (previous?.type === selected.type) return { ...selected, stable: true };
+  if (
+    previous?.type &&
+    previous.type !== selected.type &&
+    Number(previous.score) >= selected.score - STABILITY_DELTA
+  ) {
+    const retained = options.find((option) => option.type === previous.type);
+    if (retained) return { ...retained, stable: true };
+  }
+  return { ...selected, stable: false };
+}
+
+export const HEALTH_GUIDELINES = {
+  weeklyAerobicMinutes: WEEKLY_AEROBIC_MINUTES,
+  highSedentaryHours: HIGH_SEDENTARY_HOURS,
+  measurementIntervalDays: MEASUREMENT_INTERVAL_DAYS,
+};

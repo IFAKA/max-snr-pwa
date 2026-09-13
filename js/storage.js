@@ -48,8 +48,17 @@ export function migrate(raw) {
   next.settings = {
     unit: next.settings.unit === 'lb' ? 'lb' : 'kg',
     weeklyGoal: normalizeWeeklyGoal(next.settings.weeklyGoal),
+    recommendation:
+      next.settings.recommendation && typeof next.settings.recommendation === 'object'
+        ? next.settings.recommendation
+        : null,
+    profile:
+      next.settings.profile && typeof next.settings.profile === 'object'
+        ? next.settings.profile
+        : emptyState().settings.profile,
   };
   next.health = {
+    activities: Array.isArray(next.health.activities) ? next.health.activities : [],
     movementMinutes: Array.isArray(next.health.movementMinutes) ? next.health.movementMinutes : [],
     cardioMinutes: Array.isArray(next.health.cardioMinutes) ? next.health.cardioMinutes : [],
     measurements: Array.isArray(next.health.measurements) ? next.health.measurements : [],
@@ -98,6 +107,10 @@ export function migrate(raw) {
       supersetLeads: next.active.supersetLeads || {},
       draft: next.active.draft || {},
     };
+  if (next.active?.phase === 'plank') {
+    next.active.phase = 'lifting';
+    next.active.timerEndsAt = null;
+  }
   return next;
 }
 async function readDb() {

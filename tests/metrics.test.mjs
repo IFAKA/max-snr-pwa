@@ -33,6 +33,16 @@ test('weekly gym analytics separates direct and fractional muscle sets', () => {
     health: {
       movementMinutes: [{ date: '2026-09-08', minutes: 20 }],
       cardioMinutes: [{ date: '2026-09-08', minutes: 30 }],
+      activities: [
+        {
+          type: 'walk',
+          completed: true,
+          startedAt: '2026-09-08T12:00:00Z',
+          durationMinutes: 10,
+          intensity: 'moderate',
+          dimensions: ['aerobic', 'movement'],
+        },
+      ],
     },
   };
   const result = weeklyGymAnalytics(state, new Date('2026-09-09T12:00:00'));
@@ -41,6 +51,8 @@ test('weekly gym analytics separates direct and fractional muscle sets', () => {
   assert.equal(result.directSets.upperChest, 2);
   assert.equal(result.effectiveSets.arms, 0.5);
   assert.equal(result.cardioMinutes, 30);
+  assert.equal(result.activityMinutes, 10);
+  assert.equal(result.activityCardioEquivalent, 10);
   assert.equal(healthCoverage(state, new Date('2026-09-09T12:00:00')).resistanceMet, false);
 });
 

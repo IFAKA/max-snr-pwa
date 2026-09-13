@@ -1,10 +1,15 @@
 import { mount, state, runAction, workoutStage, primaryAction } from './shared.js';
-import { startPlank } from '../workout.js';
+import { beginLifting } from '../workout.js';
+import { navigateTo } from '../navigation.js';
 
 export function renderWarmup() {
   if (!state()) return;
-  mount(workoutStage({ title: 'Warm up', actions: primaryAction('plank', 'Start plank') }));
+  mount(
+    workoutStage({ title: 'Ready', actions: primaryAction('begin-lifting', 'Choose exercise') }),
+  );
   document
-    .querySelector('#plank')
-    ?.addEventListener('click', (event) => runAction(event.currentTarget, startPlank));
+    .querySelector('#begin-lifting')
+    ?.addEventListener('click', (event) =>
+      runAction(event.currentTarget, beginLifting, () => navigateTo('/workout/?view=select')),
+    );
 }

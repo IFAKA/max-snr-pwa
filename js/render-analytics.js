@@ -8,7 +8,7 @@ import {
   sessionTimingComparison,
   weeklyGymAnalytics,
 } from './workout/metrics.js';
-import { OPTIMIZER_OUTPUT, selectedFrequency } from './workout/optimizer.js';
+import { OPTIMIZER_OUTPUT, compareFrequencies, selectedFrequency } from './workout/optimizer.js';
 import {
   allocationDecisionReport,
   marginalCandidateReport,
@@ -101,14 +101,17 @@ export function renderAnalytics() {
   });
   const summary = [
     ['Strength', `${health.resistanceDays}/2 days`],
-    ['Aerobic MVPA', `${raw(metrics.cardioEquivalent)}/150 moderate-equivalent min`],
+    [
+      'Aerobic MVPA',
+      `${raw(metrics.cardioEquivalent + metrics.activityCardioEquivalent)}/150 moderate-equivalent min`,
+    ],
     [
       'Sedentary exposure',
       `${raw(sedentary.profileHoursPerDay)} h/day · ${sedentary.exposureClass}`,
     ],
     ['Sitting interruptions', sedentary.interruptions],
     ['Longest sitting logged', `${raw(sedentary.longestUninterruptedMinutes)} min`],
-    ['Daily movement', `${raw(metrics.movementMinutes)} min logged`],
+    ['Daily movement', `${raw(metrics.movementMinutes + metrics.activityMinutes)} min logged`],
     [
       'Gym timing',
       timing.observedCount
@@ -151,7 +154,13 @@ export function renderAnalytics() {
     )
     .join('');
   const threeWins = sensitivity.twoVsThree.filter((item) => item.winner === 3).length;
+  const frequencyRows = compareFrequencies()
+    .map(
+      (candidate) =>
+        `<li><div class="list-link"><span>${candidate.days} days · ${candidate.minutes} min/week</span><strong>${raw(candidate.utility)}</strong></div></li>`,
+    )
+    .join('');
   const logForm = `<details class="analytics-details"><summary>Log health data</summary><form id="activity-form" class="analytics-form">${input('movement', 'Light/general movement minutes')} ${input('cardio', 'Cardio minutes')}<label class="analytics-field"><span>Cardio intensity</span><select id="intensity" name="intensity"><option value="moderate">Moderate</option><option value="vigorous">Vigorous</option></select></label>${input('sedentaryHours', 'Approximate sitting hours/day')} ${input('longestSit', 'Longest uninterrupted sitting period (optional)', '1')} ${input('interruptions', 'Movement interruptions today', '1')}${measurementFields.map((key) => input(key, key)).join('')}<label class="analytics-field"><span><input name="reminders" type="checkbox" /> Enable movement reminder</span></label>${input('reminderInterval', 'Reminder interval (behavioral choice, not a proven threshold)', '1')}<button class="primary" type="submit">Save log</button></form></details>`;
-  app.innerHTML = `<section aria-labelledby="analytics-title">${titleMarkup('Max-SNR analytics', 'analytics-title')}${listMarkup(summary, '', 'Weekly health dimensions')}<h2>Sedentary behavior</h2><p class="routine-summary">${esc(sedentary.recommendation)} Reminders replace sitting with brief movement; their interval is configurable and is not presented as a safety cutoff.</p><h2>Measurement trend</h2><ul class="app-list">${measurementRows(state.health.measurements)}</ul><h2>Direct sets by muscle</h2><ul class="app-list">${valueRows(metrics.directSets) || '<li><div class="list-link empty-state">Complete a workout to populate this.</div></li>'}</ul><h2>Fractional indirect sets by muscle</h2><ul class="app-list">${valueRows(metrics.fractionalSets) || '<li><div class="list-link empty-state">Complete a workout to populate this.</div></li>'}</ul><h2>Effective sets by muscle</h2><ul class="app-list">${valueRows(metrics.effectiveSets) || '<li><div class="list-link empty-state">Complete a workout to populate this.</div></li>'}</ul><h2>Optimizer recommendations</h2><ul class="app-list">${recommendationsMarkup}</ul><details class="analytics-details"><summary>Marginal utility per individual set</summary><p class="routine-summary">Raw model units per modeled minute. Values are ordinal heuristics, not biological measurements.</p><ul class="app-list">${marginalRows}</ul><h3>Allocation decisions</h3><ul class="app-list">${decisionRows}</ul><h3>Next-set candidates</h3><ul class="app-list">${candidateRows}</ul></details><details class="analytics-details"><summary>Frequency sensitivity</summary><p class="routine-summary">Three days wins ${threeWins} of ${sensitivity.twoVsThree.length} configured 2-vs-3 scenarios. At default time and visit costs, three days needs relief greater than ${raw(sensitivity.threeDayReliefThreshold(0.08, 2))} model units to beat two days.</p></details>${logForm}</section>`;
+  app.innerHTML = `<section aria-labelledby="analytics-title">${titleMarkup('Max-SNR analytics', 'analytics-title')}${listMarkup(summary, '', 'Weekly health dimensions')}<h2>Sedentary behavior</h2><p class="routine-summary">${esc(sedentary.recommendation)} Reminders replace sitting with brief movement; their interval is configurable and is not presented as a safety cutoff.</p><h2>Measurement trend</h2><ul class="app-list">${measurementRows(state.health.measurements)}</ul><h2>Direct sets by muscle</h2><ul class="app-list">${valueRows(metrics.directSets) || '<li><div class="list-link empty-state">Complete a workout to populate this.</div></li>'}</ul><h2>Fractional indirect sets by muscle</h2><ul class="app-list">${valueRows(metrics.fractionalSets) || '<li><div class="list-link empty-state">Complete a workout to populate this.</div></li>'}</ul><h2>Effective sets by muscle</h2><ul class="app-list">${valueRows(metrics.effectiveSets) || '<li><div class="list-link empty-state">Complete a workout to populate this.</div></li>'}</ul><h2>Optimizer recommendations</h2><ul class="app-list">${recommendationsMarkup}</ul><details class="analytics-details"><summary>Marginal utility per individual set</summary><p class="routine-summary">Raw model units per modeled minute. Values are ordinal heuristics, not biological measurements.</p><ul class="app-list">${marginalRows}</ul><h3>Allocation decisions</h3><ul class="app-list">${decisionRows}</ul><h3>Next-set candidates</h3><ul class="app-list">${candidateRows}</ul></details><details class="analytics-details"><summary>Frequency sensitivity</summary><p class="routine-summary">The current model winner is ${selected.days} days. Three days wins ${threeWins} of ${sensitivity.twoVsThree.length} configured 2-vs-3 scenarios. At default time and visit costs, three days needs relief greater than ${raw(sensitivity.threeDayReliefThreshold(0.08, 2))} model units to beat two days.</p><ul class="app-list">${frequencyRows}</ul></details>${logForm}</section>`;
   bindAnalytics();
 }

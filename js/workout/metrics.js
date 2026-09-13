@@ -93,6 +93,27 @@ export function weeklyGymAnalytics(state, now = new Date()) {
       });
     }),
   );
+  const activities = (state?.health?.activities || []).filter((activity) =>
+    inCurrentWeek(activity.completedAt || activity.startedAt || activity.date, now),
+  );
+  const activityMinutes = (dimension) =>
+    activities
+      .filter(
+        (activity) => activity.completed !== false && activity.dimensions?.includes(dimension),
+      )
+      .reduce(
+        (sum, activity) => sum + Number(activity.durationMinutes || activity.minutes || 0),
+        0,
+      );
+  const activityCardioEquivalent = activities
+    .filter((activity) => activity.completed !== false && activity.dimensions?.includes('aerobic'))
+    .reduce(
+      (sum, activity) =>
+        sum +
+        Number(activity.durationMinutes || activity.minutes || 0) *
+          (activity.intensity === 'vigorous' ? 2 : 1),
+      0,
+    );
   return {
     sessions: workouts.length,
     minutes: Math.round(
@@ -114,6 +135,8 @@ export function weeklyGymAnalytics(state, now = new Date()) {
         (sum, entry) => sum + Number(entry.minutes || 0) * (entry.intensity === 'vigorous' ? 2 : 1),
         0,
       ),
+    activityMinutes: activityMinutes('movement'),
+    activityCardioEquivalent,
   };
 }
 
@@ -122,9 +145,10 @@ export function healthCoverage(state, now = new Date()) {
   return {
     resistanceDays: metrics.sessions,
     resistanceMet: metrics.sessions >= 2,
-    aerobicEquivalentMinutes: metrics.cardioEquivalent,
-    aerobicMinimumMet: metrics.cardioEquivalent >= 150,
-    movementLogged: metrics.movementMinutes > 0,
+    aerobicEquivalentMinutes: metrics.cardioEquivalent + metrics.activityCardioEquivalent,
+    aerobicMinimumMet: metrics.cardioEquivalent + metrics.activityCardioEquivalent >= 150,
+    movementLogged: metrics.movementMinutes + metrics.activityMinutes > 0,
+    sedentaryIndependent: sedentaryStatus(state).exposureClass === 'high',
   };
 }
 

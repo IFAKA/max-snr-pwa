@@ -47,6 +47,12 @@ function workoutMarkup(workout, index) {
   const date = workout.date ? new Date(workout.date).toLocaleDateString() : 'Saved workout';
   return `<li><a class="list-link" href="/history/?view=workout&id=${index}"><span class="history-workout-label"><time>${esc(date)}</time><span aria-hidden="true">·</span><strong>${esc(workout.name || 'Workout')}</strong></span>${icon('chevron', 'Open workout')}</a></li>`;
 }
+function activityMarkup(activity) {
+  const date = activity.completedAt || activity.startedAt || activity.date;
+  const label = activity.type === 'measurement' ? 'Check-in' : activity.type;
+  const metric = activity.durationMinutes ? ` · ${activity.durationMinutes} min` : '';
+  return `<li><div class="list-link"><span><time>${esc(date ? new Date(date).toLocaleDateString() : 'Saved activity')}</time><span aria-hidden="true"> · </span><strong>${esc(label)}</strong></span><small>${esc(metric)}</small></div></li>`;
+}
 function showImportError(message) {
   const status = document.querySelector('#data-status');
   if (!status) return;
@@ -87,9 +93,10 @@ export function renderHistory() {
   const params = new URLSearchParams(location.search);
   const view = params.get('view');
   if (view === 'workouts') return renderWorkouts(state);
+  if (view === 'activities') return renderActivities(state);
   if (view === 'data') return renderData(state);
   if (view === 'workout') return renderWorkoutDetail(state, Number(params.get('id')));
-  app.innerHTML = `<section aria-labelledby="history-title">${titleMarkup('History', 'history-title')}${listMarkup([`<li><a class="list-link" href="/history/?view=workouts"><span>Workouts</span>${icon('chevron', 'Open workouts')}</a></li>`, `<li><a class="list-link" href="/history/?view=analytics"><span>Analytics</span>${icon('chevron', 'Open analytics')}</a></li>`, ...dataRows()], '', 'History options')}</section>`;
+  app.innerHTML = `<section aria-labelledby="history-title">${titleMarkup('History', 'history-title')}${listMarkup([`<li><a class="list-link" href="/history/?view=workouts"><span>Workouts</span>${icon('chevron', 'Open workouts')}</a></li>`, `<li><a class="list-link" href="/history/?view=activities"><span>Activities</span>${icon('chevron', 'Open activities')}</a></li>`, `<li><a class="list-link" href="/history/?view=analytics"><span>Analytics</span>${icon('chevron', 'Open analytics')}</a></li>`, ...dataRows()], '', 'History options')}</section>`;
   bindDataActions(state);
   bindViewInteractions();
 }
@@ -98,6 +105,13 @@ function renderWorkouts(state) {
     ? state.history.map(workoutMarkup)
     : ['<li data-picker-skip><div class="list-link empty-state">No workouts yet</div></li>'];
   app.innerHTML = `<section aria-labelledby="workouts-title">${titleMarkup('Workouts', 'workouts-title')}${listMarkup(rows, '', 'Logged workouts')}</section>`;
+  bindViewInteractions();
+}
+function renderActivities(state) {
+  const rows = state.health.activities.length
+    ? state.health.activities.slice().reverse().map(activityMarkup)
+    : ['<li data-picker-skip><div class="list-link empty-state">No activities yet</div></li>'];
+  app.innerHTML = `<section aria-labelledby="activities-title">${titleMarkup('Activities', 'activities-title')}${listMarkup(rows, '', 'Completed activities')}</section>`;
   bindViewInteractions();
 }
 function renderWorkoutDetail(state, index) {

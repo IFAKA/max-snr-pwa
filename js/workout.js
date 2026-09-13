@@ -15,6 +15,11 @@ export {
 export { nextDoubleProgression, parseRepRange } from './workout/progression.js';
 export { adaptiveRecommendations, rollingExerciseTrend } from './workout/adaptation.js';
 export {
+  bodyHealthSummary,
+  selectRecommendation,
+  HEALTH_GUIDELINES,
+} from './workout/health-optimizer.js';
+export {
   compareFrequencies,
   selectedFrequency,
   setBreakdown,

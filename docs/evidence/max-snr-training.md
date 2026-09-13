@@ -1,6 +1,12 @@
-# Max-SNR training evidence and assumptions
+# Max-SNR body-health evidence and assumptions
 
 Updated 2026-09-13. This is a programming record, not a claim that a formula can predict an individual's exact hypertrophy.
+
+## Epistemic labels
+
+**FACT / GUIDELINE** is a recommendation or result directly supported by a cited source. **ESTIMATE** is a provisional personal cost or measurement derived from available app data. **HEURISTIC** is a transparent prioritization rule. **ASSUMPTION** is a user or product prior. **UNKNOWN** is intentionally not filled with invented precision.
+
+The app keeps resistance training, aerobic activity, daily movement, sedentary exposure, body measurements, and recovery as separate dimensions. It never collapses them into a biological 0–100 score, infers body-fat percentage from photos, or treats one noisy measurement as decisive.
 
 ## Evidence that changes the design
 
@@ -9,6 +15,8 @@ Updated 2026-09-13. This is a programming record, not a claim that a formula can
 - The 2025 superset systematic review/meta-analysis (DOI [10.1007/s40279-025-02176-8](https://doi.org/10.1007/s40279-025-02176-8)) found similar chronic hypertrophy and strength, with shorter sessions, but greater acute exertion. The app therefore pairs antagonist or low-interference work and keeps demanding compounds out of high-interference pairings.
 - WHO's [Guidelines on Physical Activity and Sedentary Behaviour](https://www.who.int/publications/i/item/9789240015128) recommend 150–300 moderate minutes or 75–150 vigorous minutes weekly, plus muscle strengthening involving major muscle groups on at least two days. The guideline also supports reducing sedentary time; gym training does not erase ten seated hours.
 - WHO also says adults with high sedentary exposure should do more than the recommended moderate-to-vigorous activity levels to help reduce detrimental effects, while recommending that sedentary time be limited and replaced with activity of any intensity. It does not establish a universal maximum sitting duration or magic interruption interval. The BMJ harmonised meta-analysis ([Ekelund et al. 2019](https://www.bmj.com/content/366/bmj.l4570)) supports a non-linear association between less sedentary time, more activity, and lower mortality risk, but observational associations do not justify an app-defined clinical cutoff.
+
+The WHO guideline does not establish an exact safe sitting threshold, exact interruption interval, or exact amount of activity beyond the minimum for this individual. The app therefore treats the supplied approximately 10 hours/day as a high-exposure user prior, while any 45–60 minute reminder and 2–5 minute movement activity remain configurable behavioural heuristics.
 
 ## Programming assumptions
 

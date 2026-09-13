@@ -681,6 +681,14 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   margin: 0 0 6px;
   font-size: clamp(28px, 9vw, 46px);
 }
+.activity-stage .workout-metric {
+  margin: 8px 0 0;
+  color: var(--text);
+  font-size: clamp(42px, 18vw, 84px);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.06em;
+  line-height: 0.95;
+}
 .thumb-zone {
   width: 100%;
   display: grid;

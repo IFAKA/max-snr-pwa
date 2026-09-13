@@ -93,8 +93,17 @@ export function validateBackup(raw) {
   next.settings = {
     unit: raw.settings?.unit === 'lb' ? 'lb' : 'kg',
     weeklyGoal: normalizeWeeklyGoal(raw.settings?.weeklyGoal),
+    recommendation:
+      raw.settings?.recommendation && typeof raw.settings.recommendation === 'object'
+        ? raw.settings.recommendation
+        : null,
+    profile:
+      raw.settings?.profile && typeof raw.settings.profile === 'object'
+        ? raw.settings.profile
+        : emptyState().settings.profile,
   };
   next.health = {
+    activities: Array.isArray(next.health?.activities) ? next.health.activities : [],
     movementMinutes: Array.isArray(next.health?.movementMinutes) ? next.health.movementMinutes : [],
     cardioMinutes: Array.isArray(next.health?.cardioMinutes) ? next.health.cardioMinutes : [],
     measurements: Array.isArray(next.health?.measurements) ? next.health.measurements : [],

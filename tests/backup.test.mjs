@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { validateBackup } from '../js/backup.js';
+import { migrate } from '../js/storage.js';
 
 test('accepts a minimal version 2 backup', () => {
   const backup = validateBackup({ version: 2, history: [], active: null });
@@ -79,4 +80,29 @@ test('removes legacy workout notes from imported backups', () => {
   });
   assert.equal('note' in backup.history[0], false);
   assert.equal('note' in backup.active, false);
+});
+
+test('migrates additive activity data and legacy plank sessions without losing sets', () => {
+  const migrated = migrate({
+    version: 2,
+    history: [
+      {
+        name: 'Old workout',
+        completedAt: '2026-09-08',
+        tasks: [{ name: 'Press', completed: { reps: 8 } }],
+      },
+    ],
+    active: {
+      name: 'Old workout',
+      phase: 'plank',
+      timerEndsAt: 123,
+      tasks: [{ name: 'Press', completed: null }],
+      pos: 0,
+    },
+    health: { activities: [{ type: 'walk', completed: true, durationMinutes: 30 }] },
+  });
+  assert.equal(migrated.active.phase, 'lifting');
+  assert.equal(migrated.active.timerEndsAt, null);
+  assert.equal(migrated.history[0].tasks[0].completed.reps, 8);
+  assert.equal(migrated.health.activities[0].type, 'walk');
 });
