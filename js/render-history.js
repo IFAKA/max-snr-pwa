@@ -103,14 +103,18 @@ export function renderHistory() {
 function renderWorkouts(state) {
   const rows = state.history.length
     ? state.history.map(workoutMarkup)
-    : ['<li data-picker-skip><div class="list-link empty-state">No workouts yet</div></li>'];
+    : [
+        '<li data-picker-skip><div class="list-link empty-state"><span>No workouts yet</span></div></li>',
+      ];
   app.innerHTML = `<section aria-labelledby="workouts-title">${titleMarkup('Workouts', 'workouts-title')}${listMarkup(rows, '', 'Logged workouts')}</section>`;
   bindViewInteractions();
 }
 function renderActivities(state) {
   const rows = state.health.activities.length
     ? state.health.activities.slice().reverse().map(activityMarkup)
-    : ['<li data-picker-skip><div class="list-link empty-state">No activities yet</div></li>'];
+    : [
+        '<li data-picker-skip><div class="list-link empty-state"><span>No activities yet</span></div></li>',
+      ];
   app.innerHTML = `<section aria-labelledby="activities-title">${titleMarkup('Activities', 'activities-title')}${listMarkup(rows, '', 'Completed activities')}</section>`;
   bindViewInteractions();
 }
