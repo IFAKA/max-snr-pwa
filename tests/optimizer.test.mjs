@@ -29,8 +29,9 @@ test('marginal return diminishes as weekly sets increase', () => {
 test('indirect contributions are fractional and exercise-specific', () => {
   assert.deepEqual(fractionalSets(EXERCISES.inclinePress, 4), {
     upperChest: 4,
+    chest: 1,
     sideDelts: 1,
-    arms: 1,
+    triceps: 0.8,
   });
 });
 
@@ -57,7 +58,8 @@ test('weekly allocation covers the priority and health layers', () => {
   const allocation = weeklyAllocation();
   [
     'sideDelts',
-    'arms',
+    'biceps',
+    'triceps',
     'upperChest',
     'lats',
     'abs',
@@ -73,7 +75,10 @@ test('weekly allocation covers the priority and health layers', () => {
 test('direct and fractional allocation remain separately inspectable', () => {
   const sets = weeklyMuscleSets();
   assert.equal(sets.sideDelts.direct, 4);
-  assert.equal(sets.sideDelts.fractional, 1.25);
+  assert.ok(Math.abs(sets.sideDelts.fractional - 1.25) < 1e-9);
+  assert.equal(sets.triceps.direct, 4);
+  assert.equal(sets.biceps.direct, 4);
+  assert.ok(Math.abs(sets.rearDelts.fractional - 0.45) < 1e-9);
   assert.equal(sets.lats.direct, 4);
   assert.equal(sets.lats.fractional, 1.35);
   assert.equal(sets.calves.fractional, 0);

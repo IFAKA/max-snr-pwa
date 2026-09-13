@@ -1,7 +1,7 @@
 import { app, bindViewInteractions, esc, listMarkup, titleMarkup } from './dom.js';
 import { getState } from './state.js';
 import { persist } from './storage.js';
-import { adaptiveRecommendations } from './workout/adaptation.js';
+import { adaptiveRecommendations, rollingMuscleTrends } from './workout/adaptation.js';
 import {
   healthCoverage,
   sedentaryStatus,
@@ -29,7 +29,10 @@ const measurementFields = [
 ];
 const input = (id, label, step = '0.1') =>
   `<label class="analytics-field"><span>${label}</span><input id="${id}" name="${id}" type="number" min="0" step="${step}" inputmode="decimal" /></label>`;
-const raw = (value) => String(value);
+const raw = (value) =>
+  typeof value === 'number' && Number.isFinite(value)
+    ? String(Number(value.toFixed(1)))
+    : String(value);
 
 function valueRows(values) {
   return Object.entries(values || {})
@@ -39,6 +42,13 @@ function valueRows(values) {
     )
     .join('');
 }
+
+const contribution = (values) =>
+  JSON.stringify(
+    Object.fromEntries(
+      Object.entries(values || {}).map(([key, value]) => [key, Number(Number(value).toFixed(1))]),
+    ),
+  );
 
 function measurementRows(measurements) {
   const recent = measurements?.slice(-2) || [];
@@ -91,13 +101,23 @@ export function renderAnalytics() {
   const metrics = weeklyGymAnalytics(state);
   const health = healthCoverage(state);
   const sedentary = sedentaryStatus(state);
-  const selected = selectedFrequency();
-  const timing = sessionTimingComparison(state.history, selected.minutes / selected.days);
+  const selected = selectedFrequency(state);
+  const timing = sessionTimingComparison(state.history, selected.sessionMinutes);
   const sensitivity = sensitivityAnalysis();
   const decisions = allocationDecisionReport();
   const recommendations = adaptiveRecommendations({
     allocation: OPTIMIZER_OUTPUT.allocation,
     adherence: metrics.sessions / 2,
+    trends: rollingMuscleTrends(state.history),
+    actualTimeCost: Object.fromEntries(
+      Object.entries(metrics.effectiveSets).map(([muscle, sets]) => [
+        muscle,
+        metrics.minutes
+          ? (metrics.minutes * sets) /
+            Object.values(metrics.effectiveSets).reduce((sum, value) => sum + value, 0)
+          : 0,
+      ]),
+    ),
   });
   const summary = [
     ['Strength', `${health.resistanceDays}/2 days`],
@@ -133,7 +153,7 @@ export function renderAnalytics() {
   const marginalRows = marginalSetReport()
     .map(
       (set) =>
-        `<li><div class="list-link"><span>${esc(set.exercise)} · set ${set.set}</span><small>u/min ${raw(set.utilityPerMinute)} · direct ${esc(JSON.stringify(set.direct))} · fractional ${esc(JSON.stringify(set.fractional))}</small></div></li>`,
+        `<li><div class="list-link"><span>${esc(set.exercise)} · set ${set.set}</span><small>u/min ${raw(set.utilityPerMinute)} · direct ${esc(contribution(set.direct))} · fractional ${esc(contribution(set.fractional))}</small></div></li>`,
     )
     .join('');
   const candidateRows = marginalCandidateReport()
@@ -154,7 +174,7 @@ export function renderAnalytics() {
     )
     .join('');
   const threeWins = sensitivity.twoVsThree.filter((item) => item.winner === 3).length;
-  const frequencyRows = compareFrequencies()
+  const frequencyRows = compareFrequencies({ state })
     .map(
       (candidate) =>
         `<li><div class="list-link"><span>${candidate.days} days · ${candidate.minutes} min/week</span><strong>${raw(candidate.utility)}</strong></div></li>`,

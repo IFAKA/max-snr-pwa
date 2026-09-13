@@ -1,4 +1,6 @@
 import { DEFAULT_WEEKLY_GOAL, normalizeWeeklyGoal } from '../state.js';
+import { legacyCardioEquivalentMinutes, moderateEquivalentMinutes } from './health-metrics.js';
+import { routineDurationEstimate } from './duration-estimator.js';
 
 function mondayStart(date = new Date()) {
   const start = new Date(date);
@@ -110,8 +112,7 @@ export function weeklyGymAnalytics(state, now = new Date()) {
     .reduce(
       (sum, activity) =>
         sum +
-        Number(activity.durationMinutes || activity.minutes || 0) *
-          (activity.intensity === 'vigorous' ? 2 : 1),
+        moderateEquivalentMinutes(activity.durationMinutes || activity.minutes, activity.intensity),
       0,
     );
   return {
@@ -129,12 +130,10 @@ export function weeklyGymAnalytics(state, now = new Date()) {
     cardioMinutes: (state?.health?.cardioMinutes || [])
       .filter((entry) => inCurrentWeek(entry.date, now))
       .reduce((sum, entry) => sum + Number(entry.minutes || 0), 0),
-    cardioEquivalent: (state?.health?.cardioMinutes || [])
-      .filter((entry) => inCurrentWeek(entry.date, now))
-      .reduce(
-        (sum, entry) => sum + Number(entry.minutes || 0) * (entry.intensity === 'vigorous' ? 2 : 1),
-        0,
-      ),
+    cardioEquivalent: legacyCardioEquivalentMinutes(state?.health?.cardioMinutes, (date) =>
+      inCurrentWeek(date, now),
+    ),
+    estimatedRoutineMinutes: routineDurationEstimate(state),
     activityMinutes: activityMinutes('movement'),
     activityCardioEquivalent,
   };

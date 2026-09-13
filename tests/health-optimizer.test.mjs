@@ -43,6 +43,7 @@ test('adequate dimensions allow doing nothing', () => {
     ],
     health: {
       ...base().health,
+      movementMinutes: [{ date: '2026-09-08', minutes: 20 }],
       cardioMinutes: [{ date: '2026-09-08', minutes: 150, intensity: 'moderate' }],
       sedentary: { profileHoursPerDay: 6, logs: [] },
     },
@@ -77,8 +78,30 @@ test('high sitting does not infer corrective exercise', () => {
     }),
     { day: '', now },
   );
-  assert.equal(result.type, 'move');
+  assert.equal(result.type, 'walk');
   assert.doesNotMatch(result.title, /posture|face pull|mobility|activation/i);
+});
+
+test('vigorous legacy cardio uses the same moderate-equivalent calculation', () => {
+  const state = base({
+    health: {
+      ...base().health,
+      cardioMinutes: [{ date: '2026-09-09', minutes: 75, intensity: 'vigorous' }],
+    },
+  });
+  assert.equal(bodyHealthSummary(state, now).aerobicEquivalent, 150);
+});
+
+test('overlap value falls when aerobic is already covered', () => {
+  const state = base({
+    health: {
+      ...base().health,
+      cardioMinutes: [{ date: '2026-09-09', minutes: 150 }],
+    },
+  });
+  const result = selectRecommendation(state, { day: '', now });
+  assert.equal(result.type, 'walk');
+  assert.match(result.reason, /movement.*sedentary/);
 });
 
 test('small changes retain an existing recommendation', () => {

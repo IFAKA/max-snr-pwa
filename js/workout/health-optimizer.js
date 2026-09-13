@@ -2,6 +2,9 @@ const WEEKLY_AEROBIC_MINUTES = 150;
 const HIGH_SEDENTARY_HOURS = 8;
 const STABILITY_DELTA = 10;
 const MEASUREMENT_INTERVAL_DAYS = 14;
+const MOVEMENT_TARGET_MINUTES = 20;
+import { legacyCardioEquivalentMinutes, moderateEquivalentMinutes } from './health-metrics.js';
+import { activityDurationEstimate } from './duration-estimator.js';
 
 const dateKey = (value) => {
   const date = value instanceof Date ? value : new Date(value || 0);
@@ -44,12 +47,11 @@ export function bodyHealthSummary(state, now = new Date()) {
       inWeek(item.startedAt || item.date, now),
   );
   const cardioEquivalent =
-    legacyMinutes(state, 'cardioMinutes', now) +
+    legacyCardioEquivalentMinutes(state?.health?.cardioMinutes, (date) => inWeek(date, now)) +
     cardio.reduce(
       (sum, activity) =>
         sum +
-        Number(activity.durationMinutes || activity.minutes || 0) *
-          (activity.intensity === 'vigorous' ? 2 : 1),
+        moderateEquivalentMinutes(activity.durationMinutes || activity.minutes, activity.intensity),
       0,
     );
   const movementMinutes =
@@ -88,7 +90,7 @@ export function bodyHealthSummary(state, now = new Date()) {
   };
 }
 
-function candidates(summary, { resistanceDue = false, measurementDue = false } = {}) {
+function candidates(summary, { resistanceDue = false, measurementDue = false, state } = {}) {
   const result = [];
   if (resistanceDue)
     result.push({
@@ -100,34 +102,42 @@ function candidates(summary, { resistanceDue = false, measurementDue = false } =
       reason: 'The planned resistance session is due.',
     });
   const aerobicDeficit = Math.max(0, WEEKLY_AEROBIC_MINUTES - summary.aerobicEquivalent);
-  if (aerobicDeficit > 0 && summary.sedentaryHigh)
-    result.push({
+  const movementDeficit = Math.max(0, MOVEMENT_TARGET_MINUTES - summary.movementMinutes);
+  const activities = [
+    {
       type: 'walk',
       title: 'Walk',
-      metric: '30:00',
       durationMinutes: 30,
-      score: 80 + Math.min(15, aerobicDeficit / 10),
-      reason: 'One brisk walk can add aerobic activity while replacing sedentary time.',
-    });
-  else if (aerobicDeficit > 0)
-    result.push({
-      type: 'walk',
-      title: 'Walk',
-      metric: `${Math.min(30, Math.max(10, Math.ceil(aerobicDeficit)))}:00`,
-      durationMinutes: Math.min(30, Math.max(10, Math.ceil(aerobicDeficit))),
-      score: 55 + Math.min(15, aerobicDeficit / 10),
-      reason: 'A low-disruption walk is the cheapest available aerobic progress.',
-    });
-  else if (summary.sedentaryHigh)
-    result.push({
+      metric: '30:00',
+      dimensions: ['aerobic', 'movement', 'sedentary'],
+    },
+    {
       type: 'move',
       title: 'Move',
-      metric: '03:00',
       durationMinutes: 3,
-      score: 45,
-      reason:
-        'Replace some sitting with light movement; this interval is a configurable behavior heuristic.',
-    });
+      metric: '03:00',
+      dimensions: ['movement', 'sedentary'],
+    },
+  ];
+  activities.forEach((activity) => {
+    const duration = activityDurationEstimate(state, activity.type, activity.durationMinutes);
+    const aerobicValue = activity.dimensions.includes('aerobic')
+      ? Math.min(aerobicDeficit, duration * 1.5) / 3
+      : 0;
+    const movementValue = activity.dimensions.includes('movement')
+      ? Math.min(movementDeficit, duration) * 1.25
+      : 0;
+    const sedentaryValue =
+      activity.dimensions.includes('sedentary') && summary.sedentaryHigh ? 30 : 0;
+    const score = aerobicValue + movementValue + sedentaryValue - duration * 0.1;
+    if (score > 0)
+      result.push({
+        ...activity,
+        metric: activity.type === 'walk' ? `${Math.round(duration)}:00` : activity.metric,
+        score,
+        reason: `Heuristic marginal value combines deficient ${activity.dimensions.join(', ')} dimensions and subtracts time cost.`,
+      });
+  });
   if (measurementDue)
     result.push({
       type: 'measurement',
@@ -163,6 +173,7 @@ export function selectRecommendation(state, { day = '', now = new Date() } = {})
   const options = candidates(summary, {
     resistanceDue: resistanceDue && !completedToday(state?.history, day, now),
     measurementDue: dueMeasurement(summary.measurements, now),
+    state,
   });
   const selected = options[0];
   const previous = state?.settings?.recommendation;

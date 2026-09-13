@@ -49,3 +49,15 @@ test('rolling trend uses recent completed workouts and adaptation defaults to ke
     'KEEP',
   );
 });
+
+test('adaptation can reallocate one set from low priority to a stagnant priority muscle', () => {
+  const recommendations = adaptiveRecommendations({
+    allocation: { calves: 3, sideDelts: 4 },
+    trends: { sideDelts: { improving: false } },
+    actualTimeCost: { calves: 5, sideDelts: 10 },
+    adherence: 1,
+  });
+  const move = recommendations.find((item) => item.action.startsWith('REALLOCATE'));
+  assert.equal(move.muscle, 'calves');
+  assert.equal(move.to, 'sideDelts');
+});

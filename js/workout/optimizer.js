@@ -1,6 +1,9 @@
 const PRIORITIES = {
+  chest: 1,
   sideDelts: 1.35,
-  arms: 1.3,
+  rearDelts: 1.15,
+  biceps: 1.3,
+  triceps: 1.3,
   upperChest: 1.25,
   lats: 1.2,
   abs: 1.15,
@@ -11,6 +14,7 @@ const PRIORITIES = {
   glutes: 0.7,
   calves: 0.7,
 };
+import { routineDurationEstimate } from './duration-estimator.js';
 
 export const HEURISTICS = {
   healthCoverageValue: 12,
@@ -48,7 +52,7 @@ export const EXERCISES = {
     station: 'press-machine',
     restMs: 120000,
     primary: { upperChest: 1 },
-    secondary: { sideDelts: 0.25, arms: 0.25 },
+    secondary: { chest: 0.25, sideDelts: 0.25, triceps: 0.2 },
     setupSeconds: 90,
     executionSeconds: 35,
     fatigue: 3,
@@ -64,7 +68,7 @@ export const EXERCISES = {
     station: 'pulldown',
     restMs: 120000,
     primary: { lats: 1 },
-    secondary: { upperBack: 0.35, arms: 0.3 },
+    secondary: { upperBack: 0.35, biceps: 0.3 },
     setupSeconds: 60,
     executionSeconds: 35,
     fatigue: 3,
@@ -80,7 +84,7 @@ export const EXERCISES = {
     station: 'row-machine',
     restMs: 90000,
     primary: { upperBack: 1 },
-    secondary: { lats: 0.45, arms: 0.3 },
+    secondary: { lats: 0.45, biceps: 0.3, rearDelts: 0.15 },
     setupSeconds: 60,
     executionSeconds: 35,
     fatigue: 2,
@@ -143,7 +147,7 @@ export const EXERCISES = {
     rir: '1–2',
     station: 'cable',
     restMs: 60000,
-    primary: { arms: 1 },
+    primary: { biceps: 1 },
     secondary: { forearms: 0.25 },
     setupSeconds: 20,
     executionSeconds: 30,
@@ -159,7 +163,7 @@ export const EXERCISES = {
     rir: '1–2',
     station: 'cable',
     restMs: 60000,
-    primary: { arms: 1 },
+    primary: { triceps: 1 },
     secondary: { upperChest: 0.15 },
     setupSeconds: 20,
     executionSeconds: 30,
@@ -308,10 +312,11 @@ export function compareFrequencies(overrides = {}) {
     (sum, [muscle, sets]) => sum + diminishingReturn(sets) * (priorities[muscle] || 1),
     0,
   );
+  const sessionMinutes = routineDurationEstimate(overrides.state);
   return [2, 3, 4].map((days) => {
     const workMinutes = Math.round(totalSets() * 1.5);
     const transitionAndRest = { 2: 40, 3: 49, 4: 64 }[days];
-    const minutes = workMinutes + transitionAndRest;
+    const minutes = Math.round(workMinutes + transitionAndRest + (sessionMinutes - 51) * days);
     const components = {
       aesthetic,
       health: config.healthCoverageValue,
@@ -330,6 +335,7 @@ export function compareFrequencies(overrides = {}) {
     return {
       days,
       minutes,
+      sessionMinutes,
       sessions: days,
       totalSets: totalSets(),
       aestheticScore: aesthetic,
