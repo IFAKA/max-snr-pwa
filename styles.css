@@ -927,7 +927,7 @@ main > section:has(> .app-list) > .app-list .list-link::before {
     padding: 10px 12px;
   }
   h1 {
-    font-size: 30px;
+    font-size: 28px;
   }
   .confirm-dialog {
     padding: 14px;
