@@ -1044,7 +1044,9 @@ main > section:has(> .app-list) > .app-list .list-link::before {
     --list-row-height: 64px;
   }
   h1 {
-    font-size: clamp(44px, 12vw, 60px);
+    margin-bottom: 16px;
+    font-size: clamp(38px, 10vw, 50px);
+    line-height: 1.05;
   }
   h2 {
     font-size: 28px;
