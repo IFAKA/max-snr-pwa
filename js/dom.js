@@ -9,19 +9,7 @@ export const listMarkup = (items, className = '', label = '') =>
   `<ul class="app-list${className ? ` ${className}` : ''}"${label ? ` aria-label="${esc(label)}"` : ''}>${Array.isArray(items) ? items.join('') : ''}</ul>`;
 export const titleMarkup = (text, id, level = 'h1', className = '') =>
   `<${level} id="${esc(id)}" class="app-title${className ? ` ${className}` : ''}" data-title-marquee><span class="title-marquee-track"><span class="title-marquee-text">${esc(text)}</span></span></${level}>`;
-const ICONS = {
-  download: '<path d="M12 3v12m0 0 4-4m-4 4-4-4M4 21h16"/>',
-  upload: '<path d="M12 16V4m0 0L8 8m4-4 4 4M4 20h16"/>',
-  check: '<path d="m5 12 4 4L19 6"/>',
-  chevron: '<path d="m9 5 7 7-7 7"/>',
-  reload:
-    '<path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/>',
-  dash: '<path d="M5 12h14"/>',
-  minus: '<path d="M5 12h14"/>',
-  plus: '<path d="M12 5v14M5 12h14"/>',
-};
-export const icon = (name, label = '') =>
-  `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${ICONS[name] || ''}</svg><span class="sr-only">${esc(label)}</span>`;
+export { icon } from './icons.js';
 export function bindHoldScroll(root = document) {
   root.querySelectorAll('[data-hold-scroll]').forEach((element) => {
     if (element.dataset.holdBound) return;

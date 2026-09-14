@@ -1,14 +1,16 @@
+import { iconPaths } from './icons.js';
+
 let registration = null;
 let updateInProgress = false;
 let reloadAfterActivation = false;
 let availabilityCheck = null;
 
 const UPDATE_ICONS = {
-  checking: '<circle cx="12" cy="12" r="8"/>',
-  current: '<path d="M20 11a8 8 0 1 0 1 4m-1-4v4h-4"/>',
-  available: '<path d="M12 3v12m0 0 4-4m-4 4-4-4M4 21h16"/>',
-  success: '<path d="m5 12 4 4L19 6"/>',
-  error: '<path d="m6 6 12 12M18 6 6 18"/>',
+  checking: iconPaths('loader'),
+  current: iconPaths('refresh'),
+  available: iconPaths('download'),
+  success: iconPaths('check'),
+  error: iconPaths('x'),
 };
 
 const UPDATE_LABELS = {
