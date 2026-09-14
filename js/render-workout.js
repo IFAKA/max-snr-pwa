@@ -4,7 +4,6 @@ import {
   bindStartDialog,
   configureWorkoutNavigation,
 } from './render-workout/shared.js';
-import { renderWarmup } from './render-workout/warmup.js';
 import { renderLifting } from './render-workout/lifting.js';
 import { renderPlank } from './render-workout/plank.js';
 import { renderRest } from './render-workout/rest.js';
@@ -57,12 +56,12 @@ export function renderWorkout() {
   void keepAwake();
   (
     ({
-      warmup: renderWarmup,
+      warmup: renderExerciseSelection,
       plank: renderPlank,
       lifting: renderLifting,
       rest: renderRest,
       stretch: renderStretch,
       complete: renderCompletion,
-    })[a.phase] || renderWarmup
+    })[a.phase] || renderExerciseSelection
   )();
 }
