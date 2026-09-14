@@ -68,7 +68,7 @@ export async function start(day = dayNow()) {
     name: workoutName(day),
     tasks,
     pos: 0,
-    phase: 'warmup',
+    phase: 'lifting',
     deferredGroups: [],
     supersetLeads: {},
     draft: {},

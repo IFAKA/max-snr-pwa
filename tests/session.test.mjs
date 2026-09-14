@@ -66,10 +66,10 @@ test('next-task traversal ignores skipped sets', () => {
   assert.equal(findNext(), 2);
 });
 
-test('new workouts begin at the warmup screen', async () => {
+test('new workouts begin at exercise selection', async () => {
   setState(emptyState());
   await start('Monday');
-  assert.equal(getState().active.phase, 'warmup');
+  assert.equal(getState().active.phase, 'lifting');
 });
 
 test('initial exercise selection stays unlocked during warmup', () => {
