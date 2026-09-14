@@ -572,7 +572,6 @@ main > section:has(> .app-list) > .app-list {
   min-height: 0;
   width: calc(100% + 24px);
   margin-inline: -12px;
-  margin-top: 12px;
   overflow-y: auto;
   padding-inline: 12px;
   overscroll-behavior: contain;
