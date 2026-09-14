@@ -15,10 +15,26 @@ const DEFAULT_NAMES = {
   Monday: OPTIMIZER_OUTPUT.names[0],
   Thursday: OPTIMIZER_OUTPUT.names[1],
 };
+const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const FALLBACK_TRAINING_DAYS = {
+  2: ['Monday', 'Thursday'],
+  3: ['Monday', 'Wednesday', 'Friday'],
+  4: ['Monday', 'Tuesday', 'Thursday', 'Saturday'],
+};
 export const ROUTINE = DEFAULT_ROUTINE;
 export const NAMES = DEFAULT_NAMES;
 const activeRoutine = () => getState().prescription?.routine || DEFAULT_ROUTINE;
 const activeNames = () => getState().prescription?.names || DEFAULT_NAMES;
+
+function routineDays() {
+  const routine = activeRoutine();
+  if (!Array.isArray(routine)) return Object.keys(routine);
+  const prescription = getState().prescription;
+  const days = Array.isArray(prescription?.days)
+    ? prescription.days
+    : FALLBACK_TRAINING_DAYS[routine.length] || WEEKDAYS.slice(0, routine.length);
+  return days.slice(0, routine.length);
+}
 
 export const isExerciseDefinition = (item) =>
   Boolean(
@@ -35,7 +51,11 @@ export const isExerciseDefinition = (item) =>
 const groupMembers = (item) =>
   item?.type === 'superset' ? item.members : item?.type === 'equipmentBlock' ? item.items : null;
 
-export const dayItems = (day) => (Array.isArray(activeRoutine()[day]) ? activeRoutine()[day] : []);
+export const dayItems = (day) => {
+  const routine = activeRoutine();
+  const key = Array.isArray(routine) ? routineDays().indexOf(day) : day;
+  return Array.isArray(routine[key]) ? routine[key] : [];
+};
 export const isWorkoutDay = (day) =>
   dayItems(day).some(
     (item) =>
@@ -43,5 +63,9 @@ export const isWorkoutDay = (day) =>
       (Array.isArray(groupMembers(item)) && groupMembers(item).some(isExerciseDefinition)),
   );
 export const workoutName = (day) =>
-  typeof activeNames()[day] === 'string' && activeNames()[day].trim() ? activeNames()[day] : day;
-export const configuredDays = () => Object.keys(activeRoutine());
+  (() => {
+    const names = activeNames();
+    const key = Array.isArray(names) ? routineDays().indexOf(day) : day;
+    return typeof names[key] === 'string' && names[key].trim() ? names[key] : day;
+  })();
+export const configuredDays = () => routineDays();

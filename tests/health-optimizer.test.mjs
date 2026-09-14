@@ -32,6 +32,7 @@ test('one walk overlaps aerobic and sedentary deficits', () => {
   const result = selectRecommendation(state, { day: '', now });
   assert.equal(result.type, 'walk');
   assert.equal(result.durationMinutes, 30);
+  assert.equal(result.metric, '30m');
   assert.match(result.reason, /aerobic.*sedentary/i);
 });
 

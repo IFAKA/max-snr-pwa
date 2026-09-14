@@ -611,13 +611,20 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   align-items: center;
   min-width: 0;
   margin: 0;
-  overflow: hidden;
+  overflow: visible;
+  overflow-wrap: anywhere;
   font-size: inherit;
   font-weight: 800;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  line-height: 1.15;
+  padding-block: 12px;
   /* Keep text-only heading rows above the shared hover/selection layer. */
   z-index: 1;
+}
+.app-list > li:has(> .list-title) {
+  height: auto;
+  min-height: 64px;
 }
 .history-set-label {
   display: block;

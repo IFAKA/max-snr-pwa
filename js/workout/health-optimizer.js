@@ -133,7 +133,7 @@ function candidates(summary, { resistanceDue = false, measurementDue = false, st
     if (score > 0)
       result.push({
         ...activity,
-        metric: activity.type === 'walk' ? `${Math.round(duration)}m` : activity.metric,
+        metric: activity.metric,
         score,
         reason: `Heuristic marginal value combines deficient ${activity.dimensions.join(', ')} dimensions and subtracts time cost.`,
       });

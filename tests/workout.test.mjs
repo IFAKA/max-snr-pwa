@@ -67,6 +67,25 @@ test('routine helpers safely reflect configured days and missing names', () => {
   }
 });
 
+test('array prescriptions expose weekday names instead of array indexes', () => {
+  const original = getState().prescription;
+  try {
+    setState({
+      ...emptyState(),
+      prescription: {
+        routine: [[{ type: 'exercise', id: 'press', name: 'Press', sets: 1, reps: '8' }]],
+        names: ['MAX-SNR A'],
+        days: ['Thursday'],
+      },
+    });
+    assert.deepEqual(configuredDays(), ['Thursday']);
+    assert.equal(dayItems('Thursday').length, 1);
+    assert.equal(workoutName('Thursday'), 'MAX-SNR A');
+  } finally {
+    setState({ ...emptyState(), prescription: original });
+  }
+});
+
 test('flatten ignores empty and malformed groups while keeping valid members', () => {
   const template = [
     { type: 'superset', id: 'empty', members: [] },
