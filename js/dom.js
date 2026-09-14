@@ -14,6 +14,7 @@ const ICONS = {
   upload: '<path d="M12 16V4m0 0L8 8m4-4 4 4M4 20h16"/>',
   check: '<path d="m5 12 4 4L19 6"/>',
   chevron: '<path d="m9 5 7 7-7 7"/>',
+  reload: '<path d="M20 11a8 8 0 1 0 1 4m-1-4v4h-4"/>',
   dash: '<path d="M5 12h14"/>',
   minus: '<path d="M5 12h14"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
