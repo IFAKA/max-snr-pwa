@@ -52,6 +52,7 @@ export function bindHoldScroll(root = document) {
     element.addEventListener('pointerleave', stop);
     element.addEventListener('blur', stop);
   });
+  bindMagneticLists(root);
 }
 import { createMagneticPicker } from '../packages/magnetic-picker/src/magnetic-picker.js';
 

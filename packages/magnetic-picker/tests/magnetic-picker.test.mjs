@@ -1056,6 +1056,29 @@ test('pointer leave after activation keeps the picker active', async () => {
   }
 });
 
+test('pointer leave before activation does not cancel the pending hold', async () => {
+  const dom = makePickerDom({ rows: 3 });
+  const originalDocument = globalThis.document;
+  globalThis.document = dom.document;
+  try {
+    const picker = createMagneticPicker(dom.list, { cancel: false, holdMs: 400 });
+    dom.listeners.get('list:pointerdown')({
+      pointerId: 9,
+      pointerType: 'touch',
+      clientX: 40,
+      clientY: 20,
+    });
+    dom.listeners.get('list:pointerleave')({ pointerId: 9 });
+    await new Promise((resolve) => setTimeout(resolve, 430));
+    assert.equal(dom.classes.has('is-picker-active'), true);
+    dom.listeners.get('document:pointerup')({ pointerId: 9 });
+    assert.equal(dom.classes.has('is-picker-active'), false);
+    picker.destroy();
+  } finally {
+    globalThis.document = originalDocument;
+  }
+});
+
 test('generated accessibility elements use package default classes', () => {
   const dom = makePickerDom();
   let status;

@@ -656,7 +656,8 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
   }
   const onPointerLeave = (event) => {
     if (event.pointerId !== pointerId) return;
-    if (!pickerActive) reset();
+    // Pointer capture keeps the gesture alive while a small-hand user moves
+    // slightly beyond the row before the long-press threshold is reached.
   };
   const onContextMenu = (event) => pickerActive && event.preventDefault();
   const removeListeners = bindPickerEvents(list, {
