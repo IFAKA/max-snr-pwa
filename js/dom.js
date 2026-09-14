@@ -7,8 +7,10 @@ export const esc = (value) =>
 export const dayNow = () => new Intl.DateTimeFormat('en', { weekday: 'long' }).format(new Date());
 export const listMarkup = (items, className = '', label = '') =>
   `<ul class="app-list${className ? ` ${className}` : ''}"${label ? ` aria-label="${esc(label)}"` : ''}>${Array.isArray(items) ? items.join('') : ''}</ul>`;
-export const titleMarkup = (text, id, level = 'h1', className = '') =>
-  `<${level} id="${esc(id)}" class="app-title${className ? ` ${className}` : ''}" data-title-marquee><span class="title-marquee-track"><span class="title-marquee-text">${esc(text)}</span></span></${level}>`;
+export const titleMarkup = (text, id, level = 'h1', className = '', marquee = false) =>
+  marquee
+    ? `<${level} id="${esc(id)}" class="app-title${className ? ` ${className}` : ''}" data-title-marquee><span class="title-marquee-track"><span class="title-marquee-text">${esc(text)}</span></span></${level}>`
+    : `<${level} id="${esc(id)}" class="app-title${className ? ` ${className}` : ''}">${esc(text)}</${level}>`;
 export { icon } from './icons.js';
 export function bindHoldScroll(root = document) {
   root.querySelectorAll('[data-hold-scroll]').forEach((element) => {

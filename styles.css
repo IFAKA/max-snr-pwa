@@ -889,9 +889,6 @@ main > section:has(> .app-list) > .app-list .list-link::before {
 [data-title-marquee] {
   white-space: nowrap;
 }
-[data-title-marquee] {
-  overflow: hidden;
-}
 [data-title-marquee].is-title-marquee .title-marquee-track {
   animation: title-marquee 7s linear 1 forwards;
 }

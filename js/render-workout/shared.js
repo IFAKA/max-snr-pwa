@@ -177,7 +177,7 @@ export function configureWorkoutNavigation(render) {
 
 export const state = () => getState().active;
 export function workoutStage({ className = '', title, body = '', actions = '' }) {
-  return `<section class="workout-stage ${className}" aria-labelledby="workout-title"><div class="stage-info">${titleMarkup(title, 'workout-title', 'h1', 'workout-title')}${body}</div><div class="thumb-zone">${actions}</div></section>`;
+  return `<section class="workout-stage ${className}" aria-labelledby="workout-title"><div class="stage-info">${titleMarkup(title, 'workout-title', 'h1', 'workout-title', true)}${body}</div><div class="thumb-zone">${actions}</div></section>`;
 }
 export const startRow = (day) =>
   `<li data-picker-primary><button class="list-link" type="button" data-start-day="${esc(day)}"><span>Start</span>${icon('chevron', 'Start workout')}</button></li>`;
