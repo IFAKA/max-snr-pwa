@@ -7,53 +7,43 @@ import { bindCountdown, countdownStage } from './countdown.js';
 
 export function renderStretch() {
   const active = state();
-  if (!active.timerEndsAt) {
-    mount(
-      countdownStage({
-        className: 'stretch-stage',
-        title: 'Stretch',
-        countdown: {
-          remainingMs: STRETCH_MS,
-          label: 'Stretch timer, 30 seconds',
-          variant: 'stretch',
-        },
-        actions: `<div class="controls">${primaryAction('start-stretch', 'Start')}<button class="secondary" id="finish-stretch" type="button">Finish</button></div>`,
-      }),
+  const running = Boolean(active.timerEndsAt && active.timerEndsAt > Date.now());
+  const finish = () =>
+    runAction(null, finishWorkout, () =>
+      navigateTo(`/?completed=1&day=${encodeURIComponent(active.day)}`),
     );
-    document.querySelector('#start-stretch')?.addEventListener('click', (event) =>
-      runAction(
-        event.currentTarget,
-        () => setTimer(STRETCH_MS),
-        () => renderWithTransition(() => renderStretch()),
-      ),
-    );
-    document
-      .querySelector('#finish-stretch')
-      ?.addEventListener('click', (event) =>
-        runAction(event.currentTarget, finishWorkout, () =>
-          navigateTo(`/?completed=1&day=${encodeURIComponent(active.day)}`),
-        ),
-      );
+
+  if (active.timerEndsAt && !running) {
+    void finish().catch(showError);
     return;
   }
-  if (active.timerEndsAt <= Date.now()) {
-    void completeStretch()
-      .then(() => renderWithTransition(() => renderStretch()))
-      .catch(showError);
-    return;
-  }
+
   mount(
     countdownStage({
       className: 'stretch-stage',
       title: 'Stretch',
       countdown: {
-        remainingMs: active.timerEndsAt - Date.now(),
-        label: 'Stretch remaining',
+        remainingMs: running ? active.timerEndsAt - Date.now() : STRETCH_MS,
+        label: running ? 'Stretch remaining' : 'Stretch timer, 30 seconds',
         variant: 'stretch',
       },
-      actions: '<button class="secondary" id="cancel-stretch" type="button">Cancel</button>',
+      actions: `<div class="controls">${running ? '<button class="secondary" id="cancel-stretch" type="button">Cancel</button>' : primaryAction('start-stretch', 'Start')}<button class="secondary" id="finish-stretch" type="button">Finish</button></div>`,
     }),
   );
+  document.querySelector('#start-stretch')?.addEventListener('click', (event) =>
+    runAction(
+      event.currentTarget,
+      () => setTimer(STRETCH_MS),
+      () => renderWithTransition(() => renderStretch()),
+    ),
+  );
+  document
+    .querySelector('#finish-stretch')
+    ?.addEventListener('click', (event) =>
+      runAction(event.currentTarget, finishWorkout, () =>
+        navigateTo(`/?completed=1&day=${encodeURIComponent(active.day)}`),
+      ),
+    );
   document
     .querySelector('#cancel-stretch')
     ?.addEventListener('click', (event) =>
@@ -68,8 +58,7 @@ export function renderStretch() {
     onEnd: async () => {
       try {
         buzz([35, 70]);
-        await completeStretch();
-        renderWithTransition(() => renderStretch(), { focus: false });
+        await finish();
       } catch (error) {
         showError(error);
       }
