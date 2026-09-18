@@ -81,4 +81,4 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') {
     .catch(() => {});
 }
 
-boot();
+await boot();
