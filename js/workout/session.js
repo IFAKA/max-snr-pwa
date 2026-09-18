@@ -142,13 +142,6 @@ export async function resolveDeferred() {
   return { render: true };
 }
 
-const restBetweenSets = (active) => {
-  if (active?.phase !== 'rest') return false;
-  const current = active.tasks[active.pos];
-  const next = active.tasks[active.nextPos];
-  return Boolean(current && next && current.exerciseId === next.exerciseId);
-};
-
 export const exerciseSelectionLocked = (active) => {
   if (!active) return true;
   if (active.phase === 'warmup') return false;
@@ -164,15 +157,17 @@ export const exerciseSelectionLocked = (active) => {
       (task) => task.groupId === current.groupId && task.set === current.set && task.completed,
     ),
   );
-  const forcedPartner =
-    active.phase === 'rest' &&
-    current?.groupType === 'superset' &&
-    supersetPartnerIndex(active, current) >= 0;
   return (
     (currentStarted && active.phase === 'lifting') ||
-    (currentSupersetRoundStarted && active.phase === 'lifting') ||
-    restBetweenSets(active) ||
-    forcedPartner
+    (currentSupersetRoundStarted && active.phase === 'lifting')
+  );
+};
+
+export const exerciseChangeAvailable = (active) => {
+  if (!active || exerciseSelectionLocked(active)) return false;
+  const current = active.tasks[active.pos];
+  return active.tasks.some(
+    (task) => task.exerciseId !== current?.exerciseId && !task.completed && !task.skipped,
   );
 };
 

@@ -12,7 +12,7 @@ function validPerformance(value) {
     Number.isInteger(value.reps) &&
     value.reps > 0 &&
     value.reps <= 1000 &&
-    (value.rir === undefined || ['0', '1', '2', '3+'].includes(String(value.rir)))
+    (value.rir === undefined || ['0', '1', '2', '+3', '3+'].includes(String(value.rir)))
   );
 }
 

@@ -809,15 +809,18 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   letter-spacing: -0.08em;
   text-align: center;
 }
+.countdown {
+  color: #fff;
+}
 .countdown--rest {
-  color: var(--accent);
+  color: #fff;
 }
 .countdown--plank {
-  color: var(--success);
+  color: #fff;
 }
 .countdown--stretch,
 .countdown--activity {
-  color: var(--text);
+  color: #fff;
 }
 .confirm-dialog {
   box-sizing: border-box;

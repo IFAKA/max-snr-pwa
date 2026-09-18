@@ -2,12 +2,16 @@ import {
   mount,
   state,
   runAction,
-  showError,
   primaryAction,
   exercisePicker,
   bindExercisePicker,
 } from './shared.js';
-import { continueRest, findNext, exerciseSelectionLocked } from '../workout.js';
+import {
+  continueRest,
+  findNext,
+  exerciseSelectionLocked,
+  exerciseChangeAvailable,
+} from '../workout.js';
 import { buzz, esc } from '../dom.js';
 import { navigateTo } from '../navigation.js';
 import { bindCountdown, countdownStage } from './countdown.js';
@@ -15,12 +19,7 @@ import { bindCountdown, countdownStage } from './countdown.js';
 const advance = (button) => runAction(button, continueRest);
 
 export function renderRest() {
-  const active = state(),
-    running = active.restEndsAt > Date.now();
-  if (!running) {
-    advance(null);
-    return;
-  }
+  const active = state();
   if (new URLSearchParams(location.search).get('view') === 'exercises') {
     mount(exercisePicker(active));
     bindExercisePicker(active, () => navigateTo('/workout/'));
@@ -31,10 +30,9 @@ export function renderRest() {
     active.tasks[nextPosition] ||
     active.tasks.find((task, index) => index > active.pos && !task.skipped) ||
     active.tasks[active.pos + 1];
-  const canChange = active.phase === 'rest' && !exerciseSelectionLocked(active);
-  const changeButton = canChange
-    ? '<button class="secondary" id="change-exercises" type="button">Change exercises</button>'
-    : '';
+  const canChange =
+    active.phase === 'rest' && !exerciseSelectionLocked(active) && exerciseChangeAvailable(active);
+  const changeButton = `<button class="secondary" id="change-exercises" type="button"${canChange ? '' : ' disabled'}>Change exercises</button>`;
   const setCount = next ? `<p class="set-count">Set ${esc(next.set)} of ${esc(next.sets)}</p>` : '';
   mount(
     countdownStage({
@@ -59,14 +57,6 @@ export function renderRest() {
     element: document.querySelector('#timer'),
     getEndAt: () => state()?.restEndsAt,
     shouldRun: () => state()?.phase === 'rest' && Boolean(state()?.restEndsAt),
-    onEnd: async () => {
-      try {
-        buzz([35, 65, 35]);
-        await continueRest();
-        location.reload();
-      } catch (error) {
-        showError(error);
-      }
-    },
+    onEnd: () => buzz([35, 65, 35]),
   });
 }

@@ -291,7 +291,7 @@ test('selecting an exercise during rest preserves the countdown and changes the 
   assert.equal(state.active.nextPos, null);
 });
 
-test('switching exercises is locked during rest between sets', async () => {
+test('switching exercises is allowed during rest between sets', async () => {
   const state = emptyState();
   const completed = task('press');
   completed.completed = { reps: 8, completedAt: '2026-09-06T12:00:00.000Z' };
@@ -306,8 +306,8 @@ test('switching exercises is locked during rest between sets', async () => {
   };
   setState(state);
 
-  assert.equal(await selectExercise('row'), false);
-  assert.equal(state.active.nextPos, 1);
+  assert.equal(await selectExercise('row'), true);
+  assert.equal(state.active.nextPos, 2);
 });
 
 test('selecting the second superset member makes it the lead for each round', async () => {

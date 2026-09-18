@@ -12,6 +12,25 @@ test('accepts a minimal version 2 backup', () => {
   assert.deepEqual(backup.health.sedentary.logs, []);
 });
 
+test('accepts the current +3 RIR notation', () => {
+  const backup = validateBackup({
+    version: 2,
+    history: [
+      {
+        name: 'Workout',
+        tasks: [
+          {
+            performedName: 'Press',
+            completed: { reps: 8, rir: '+3' },
+          },
+        ],
+      },
+    ],
+    active: null,
+  });
+  assert.equal(backup.history[0].tasks[0].completed.rir, '+3');
+});
+
 test('rejects executable strings in numeric performance fields', () => {
   assert.throws(
     () =>

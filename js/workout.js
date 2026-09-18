@@ -49,6 +49,7 @@ export {
   resolveDeferred,
   selectExercise,
   exerciseSelectionLocked,
+  exerciseChangeAvailable,
   completeSet,
   deferCurrent,
   substituteCurrent,

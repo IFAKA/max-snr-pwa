@@ -11,7 +11,15 @@ import {
 import { save } from '../storage.js';
 import { esc } from '../dom.js';
 import { getState } from '../state.js';
-import { activeTask, completeSet, lastPerformance } from '../workout.js';
+import { activeTask, completeSet, lastPerformance, exerciseChangeAvailable } from '../workout.js';
+import { navigateTo } from '../navigation.js';
+
+const rirValue = (value) => {
+  const number = Number.parseInt(value, 10);
+  return Number.isFinite(number) ? Math.max(0, Math.min(3, number)) : 0;
+};
+
+const formatRir = (value) => (value >= 3 ? '+3' : String(value));
 
 export function renderLifting() {
   const active = state(),
@@ -31,14 +39,18 @@ export function renderLifting() {
   const unit = getState().settings?.unit || 'kg';
   const previous = lastPerformance(task.performedName, unit, task.exerciseId);
   const weightValue = draft.weight ?? previous?.weight ?? '';
-  const rirValue = draft.rir ?? previous?.rir ?? '2';
+  const currentRir = rirValue(draft.rir ?? previous?.rir ?? '0');
   const stage = workoutStage({
     className: 'lifting-stage',
     title: esc(task.performedName),
     body: `<p class="set-count">Set ${esc(task.set)} of ${esc(task.sets)}</p><p class="previous-performance">Previous: ${previous ? `${esc(previous.weight ?? 'bodyweight')} ${esc(previous.unit || unit)} × ${esc(previous.reps)} @ ${esc(previous.rir ?? '—')} RIR` : 'No logged set'}</p>`,
     actions: '',
   });
-  const formMarkup = `<form id="set-form">${step === 'load' ? `${stepperMarkup('weight', `Load · ${unit}`, weightValue, -2.5, 2.5)}<label class="rir-label" for="rir">RIR<select id="rir"><option ${rirValue === '0' ? 'selected' : ''}>0</option><option ${rirValue === '1' ? 'selected' : ''}>1</option><option ${rirValue === '2' ? 'selected' : ''}>2</option><option ${rirValue === '3+' ? 'selected' : ''}>3+</option></select></label>` : stepperMarkup('reps', 'Reps', repsValue, -1, 1)}<input id="reps" type="hidden" value="${esc(repsValue)}"><input id="weight" type="hidden" value="${esc(weightValue)}">${primaryAction('next-step', step === 'load' ? 'Log set' : 'Next', step === 'load' ? 'submit' : 'button')}</form>`;
+  const changeExercise =
+    task.set === 1
+      ? `<button class="secondary" id="change-exercise" type="button"${exerciseChangeAvailable(active) ? '' : ' disabled'}>Change exercise</button>`
+      : '';
+  const formMarkup = `<form id="set-form">${step === 'load' ? `${stepperMarkup('weight', `Load · ${unit}`, weightValue, -2.5, 2.5)}${stepperMarkup('rir', 'RIR', formatRir(currentRir), -1, 1)}` : stepperMarkup('reps', 'Reps', repsValue, -1, 1)}<input id="rir" type="hidden" value="${formatRir(currentRir)}"><input id="reps" type="hidden" value="${esc(repsValue)}"><input id="weight" type="hidden" value="${esc(weightValue)}">${primaryAction('next-step', step === 'load' ? 'Log set' : 'Next', step === 'load' ? 'submit' : 'button')}${changeExercise}</form>`;
   mount(
     stage.replace('<div class="thumb-zone"></div>', `<div class="thumb-zone">${formMarkup}</div>`),
   );
@@ -55,17 +67,20 @@ export function renderLifting() {
     save().catch(showError);
   };
   const changeValue = (button, multiplier = 1) => {
-    const field = button.dataset.stepper === 'reps' ? reps : weight;
+    const stepper = button.dataset.stepper;
+    const field =
+      stepper === 'reps' ? reps : stepper === 'rir' ? document.querySelector('#rir') : weight;
     const step = Number(button.dataset.step) * multiplier;
-    const next = Math.max(
-      button.dataset.stepper === 'reps' ? 1 : 0,
-      Number(field.value || 0) + step,
-    );
+    const maximum = stepper === 'rir' ? 3 : Number.POSITIVE_INFINITY;
+    const next = Math.max(stepper === 'reps' ? 1 : 0, Number(field.value || 0) + step);
+    const bounded = Math.min(maximum, next);
     field.value =
-      button.dataset.stepper === 'reps'
-        ? String(Math.round(next))
-        : next.toFixed(2).replace(/\.00$/, '');
-    document.querySelector(`#${button.dataset.stepper}-value`).textContent = field.value;
+      stepper === 'reps'
+        ? String(Math.round(bounded))
+        : stepper === 'rir'
+          ? formatRir(Math.round(bounded))
+          : bounded.toFixed(2).replace(/\.00$/, '');
+    document.querySelector(`#${stepper}-value`).textContent = field.value;
     saveDraft();
   };
   bindHoldSteppers(changeValue);
@@ -88,4 +103,7 @@ export function renderLifting() {
       }
       return result;
     });
+  document
+    .querySelector('#change-exercise')
+    ?.addEventListener('click', () => navigateTo('/workout/?view=exercises'));
 }
