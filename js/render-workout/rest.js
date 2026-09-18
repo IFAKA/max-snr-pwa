@@ -8,7 +8,7 @@ import {
   bindExercisePicker,
 } from './shared.js';
 import { continueRest, findNext, exerciseSelectionLocked } from '../workout.js';
-import { buzz, esc, icon, listMarkup } from '../dom.js';
+import { buzz, esc } from '../dom.js';
 import { navigateTo } from '../navigation.js';
 import { bindCountdown, countdownStage } from './countdown.js';
 
@@ -32,14 +32,8 @@ export function renderRest() {
     active.tasks.find((task, index) => index > active.pos && !task.skipped) ||
     active.tasks[active.pos + 1];
   const canChange = active.phase === 'rest' && !exerciseSelectionLocked(active);
-  const changeLink = canChange
-    ? listMarkup(
-        [
-          `<li><a class="list-link stage-link" href="/workout/?view=exercises"><span>Change exercise</span>${icon('chevron', 'Change exercise')}</a></li>`,
-        ],
-        '',
-        'Workout options',
-      )
+  const changeButton = canChange
+    ? '<button class="secondary" id="change-exercises" type="button">Change exercises</button>'
     : '';
   const setCount = next ? `<p class="set-count">Set ${esc(next.set)} of ${esc(next.sets)}</p>` : '';
   mount(
@@ -52,12 +46,15 @@ export function renderRest() {
         label: 'Rest remaining',
         variant: 'rest',
       },
-      actions: `${changeLink}${primaryAction('continue', 'End rest')}`,
+      actions: `${primaryAction('continue', 'Continue')}${changeButton}`,
     }),
   );
   document
     .querySelector('#continue')
     ?.addEventListener('click', (event) => advance(event.currentTarget));
+  document
+    .querySelector('#change-exercises')
+    ?.addEventListener('click', () => navigateTo('/workout/?view=exercises'));
   bindCountdown({
     element: document.querySelector('#timer'),
     getEndAt: () => state()?.restEndsAt,

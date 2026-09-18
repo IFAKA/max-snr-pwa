@@ -689,6 +689,9 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   flex: 0 0 auto;
   gap: 8px;
 }
+.countdown-actions .secondary {
+  margin-top: 0;
+}
 .workout-stage h1 {
   margin: 0 0 6px;
   font-size: clamp(28px, 9vw, 46px);

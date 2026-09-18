@@ -42,6 +42,19 @@ test('countdown stage titles remain escaped', () => {
   assert.doesNotMatch(markup, /<h1[^>]*><Rest>/);
 });
 
+test('countdown actions support primary continuation and secondary exercise changes', () => {
+  const markup = countdownStage({
+    title: 'Squat',
+    actions:
+      '<button class="primary" id="continue" type="button">Continue</button><button class="secondary" id="change-exercises" type="button">Change exercises</button>',
+  });
+
+  assert.match(
+    markup,
+    /class="countdown-actions"><button class="primary" id="continue" type="button">Continue<\/button><button class="secondary" id="change-exercises" type="button">Change exercises<\/button>/,
+  );
+});
+
 test('timed activity definitions provide countdown durations', () => {
   assert.equal(activityDefinition('walk').durationMs, 30 * 60 * 1000);
   assert.equal(activityDefinition('move').durationMs, 3 * 60 * 1000);
