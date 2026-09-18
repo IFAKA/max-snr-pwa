@@ -56,36 +56,27 @@ main {
 #app {
   height: 100%;
   min-height: 0;
-  view-transition-name: app;
 }
-::view-transition-old(app),
-::view-transition-new(app) {
-  animation: none;
-}
-:root:active-view-transition-type(route-forward),
-:root:active-view-transition-type(route-back) {
-  view-transition-name: none;
-}
-:root:active-view-transition-type(route-forward)::view-transition-old(app),
-:root:active-view-transition-type(route-back)::view-transition-old(app) {
+:root:active-view-transition-type(route-forward)::view-transition-old(root),
+:root:active-view-transition-type(route-back)::view-transition-old(root) {
   animation-duration: 250ms;
   animation-timing-function: var(--ease-out);
 }
-:root:active-view-transition-type(route-forward)::view-transition-new(app),
-:root:active-view-transition-type(route-back)::view-transition-new(app) {
+:root:active-view-transition-type(route-forward)::view-transition-new(root),
+:root:active-view-transition-type(route-back)::view-transition-new(root) {
   animation-duration: 250ms;
   animation-timing-function: var(--ease-out);
 }
-:root:active-view-transition-type(route-forward)::view-transition-old(app) {
+:root:active-view-transition-type(route-forward)::view-transition-old(root) {
   animation-name: route-exit-forward;
 }
-:root:active-view-transition-type(route-forward)::view-transition-new(app) {
+:root:active-view-transition-type(route-forward)::view-transition-new(root) {
   animation-name: route-enter-forward;
 }
-:root:active-view-transition-type(route-back)::view-transition-old(app) {
+:root:active-view-transition-type(route-back)::view-transition-old(root) {
   animation-name: route-exit-back;
 }
-:root:active-view-transition-type(route-back)::view-transition-new(app) {
+:root:active-view-transition-type(route-back)::view-transition-new(root) {
   animation-name: route-enter-back;
 }
 @keyframes route-exit-forward {
@@ -1101,8 +1092,8 @@ main > section:has(> .app-list) > .app-list .list-link::before {
     transition: none !important;
     animation: none !important;
   }
-  ::view-transition-old(app),
-  ::view-transition-new(app) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
     animation: none !important;
   }
 }
