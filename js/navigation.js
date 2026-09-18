@@ -1,6 +1,5 @@
 import { app } from './dom.js';
 
-const ROUTES = new Set(['/', '/routine/', '/history/', '/workout/']);
 const FORWARD_TRANSITION = 'route-forward';
 const BACK_TRANSITION = 'route-back';
 let activeViewTransition = null;
@@ -72,18 +71,6 @@ export function renderWithTransition(render, { focus = true, direction = 'forwar
     }
   }
   return updateView(render, focus);
-}
-
-export function routeForPath(pathname) {
-  if (pathname === '/') return 'today';
-  if (pathname.startsWith('/routine/')) return 'routine';
-  if (pathname.startsWith('/history/')) return 'history';
-  if (pathname.startsWith('/workout/')) return 'workout';
-  return null;
-}
-
-export function isAppUrl(url) {
-  return url.origin === location.origin && [...ROUTES].some((route) => url.pathname === route);
 }
 
 export function navigateTo(url, { replace = false } = {}) {

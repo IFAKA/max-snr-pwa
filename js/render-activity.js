@@ -2,7 +2,7 @@ import { app, bindViewInteractions, esc, titleMarkup } from './dom.js';
 import { getState } from './state.js';
 import { persist } from './storage.js';
 import { navigateTo } from './navigation.js';
-import { ACTIVITY_DEFINITIONS, activityDefinition } from './activity-data.js';
+import { activityDefinition } from './activity-data.js';
 import { bindCountdown, countdownStage } from './render-workout/countdown.js';
 
 const activityStorageKey = (type) => `maxsnr-activity-started:${type}`;
@@ -91,5 +91,4 @@ export function renderActivity(type) {
   return definition;
 }
 
-export const supportedActivities = () => Object.keys(ACTIVITY_DEFINITIONS);
 export { activityDefinition };

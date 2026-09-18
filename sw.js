@@ -39,7 +39,6 @@ const PRECACHE_URLS = [
   '/js/render-workout/select.js',
   '/js/render-workout/shared.js',
   '/js/render-workout/stretch.js',
-  '/js/render-workout/warmup.js',
   '/packages/magnetic-picker/src/magnetic-picker.js',
   '/packages/magnetic-picker/src/magnetic-picker.css',
 ];

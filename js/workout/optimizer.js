@@ -34,13 +34,6 @@ export const HEURISTIC_RANGES = {
   priorityMultiplier: [0.5, 0.75, 1, 1.25, 1.5],
 };
 
-export const PRIORITY_WEIGHT_RANGES = Object.fromEntries(
-  Object.entries(PRIORITIES).map(([muscle, weight]) => [
-    muscle,
-    [weight * 0.5, weight, weight * 1.5],
-  ]),
-);
-
 const exercise = (definition) => ({ type: 'exercise', ...definition });
 
 export const EXERCISES = {
