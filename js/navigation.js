@@ -20,8 +20,6 @@ function transitionTypes(type) {
 }
 
 export function initializeRouteTransitions() {
-  if (typeof window === 'undefined' || (!('onpageswap' in window) && !('onpagereveal' in window)))
-    return;
   const applyRouteTransition = (event) => {
     const type = routeTransitionType();
     if (type) event.viewTransition?.types?.add(type);
