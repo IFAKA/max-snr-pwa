@@ -1,7 +1,33 @@
 import { app } from './dom.js';
 
 const ROUTES = new Set(['/', '/routine/', '/history/', '/workout/']);
+const FORWARD_TRANSITION = 'route-forward';
+const BACK_TRANSITION = 'route-back';
 let activeViewTransition = null;
+
+function routeTransitionType() {
+  const activation = globalThis.navigation?.activation;
+  const currentIndex = activation?.entry?.index;
+  const previousIndex = activation?.from?.index;
+  if (!Number.isInteger(currentIndex) || !Number.isInteger(previousIndex)) return null;
+  if (currentIndex > previousIndex) return FORWARD_TRANSITION;
+  if (currentIndex < previousIndex) return BACK_TRANSITION;
+  return null;
+}
+
+function transitionTypes(type) {
+  return type ? [type] : [];
+}
+
+export function initializeRouteTransitions() {
+  if (typeof window === 'undefined' || !('onpageswap' in window)) return;
+  const applyRouteTransition = (event) => {
+    const type = routeTransitionType();
+    if (type) event.viewTransition?.types.add(type);
+  };
+  window.addEventListener('pageswap', applyRouteTransition);
+  window.addEventListener('pagereveal', applyRouteTransition);
+}
 
 function prefersReducedMotion() {
   return globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
@@ -21,28 +47,35 @@ function updateView(render, focus) {
   return result;
 }
 
-export function renderWithTransition(render, { focus = true } = {}) {
+export function renderWithTransition(render, { focus = true, direction = 'forward' } = {}) {
   if (prefersReducedMotion()) return updateView(render, focus);
   if (typeof document.startViewTransition === 'function') {
     if (activeViewTransition) return updateView(render, focus);
     try {
-      activeViewTransition = document.startViewTransition(() => updateView(render, focus));
+      const type = direction === 'back' ? BACK_TRANSITION : FORWARD_TRANSITION;
+      activeViewTransition = document.startViewTransition({
+        update: () => updateView(render, focus),
+        types: transitionTypes(type),
+      });
       activeViewTransition.finished.finally(() => {
         activeViewTransition = null;
       });
       return activeViewTransition;
     } catch {
       activeViewTransition = null;
-      return updateView(render, focus);
+      try {
+        activeViewTransition = document.startViewTransition(() => updateView(render, focus));
+        activeViewTransition.finished.finally(() => {
+          activeViewTransition = null;
+        });
+        return activeViewTransition;
+      } catch {
+        activeViewTransition = null;
+        return updateView(render, focus);
+      }
     }
   }
-  app?.classList.add('is-view-transitioning');
-  const result = updateView(render, focus);
-  (globalThis.requestAnimationFrame || globalThis.setTimeout)(
-    () => app?.classList.remove('is-view-transitioning'),
-    0,
-  );
-  return result;
+  return updateView(render, focus);
 }
 
 export function routeForPath(pathname) {

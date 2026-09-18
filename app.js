@@ -7,6 +7,7 @@ import { renderWorkout } from './js/render-workout.js';
 import { renderAnalytics } from './js/render-analytics.js';
 import { keepAwake, releaseWakeLock } from './js/dom.js';
 import { setServiceWorkerRegistration } from './js/update-app.js';
+import { initializeRouteTransitions } from './js/navigation.js';
 
 const renderers = {
   today: renderToday,
@@ -70,6 +71,8 @@ async function boot() {
     }
   }
 }
+
+initializeRouteTransitions();
 
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   void navigator.serviceWorker

@@ -20,6 +20,9 @@
   color: var(--text);
   font-size: 16px;
 }
+@view-transition {
+  navigation: auto;
+}
 * {
   box-sizing: border-box;
 }
@@ -55,34 +58,54 @@ main {
   min-height: 0;
   view-transition-name: app;
 }
-#app.is-view-transitioning {
-  opacity: 0;
-  transform: translateY(6px);
-  transition:
-    opacity 160ms ease-out,
-    transform 160ms var(--ease-out);
-}
 ::view-transition-old(app),
 ::view-transition-new(app) {
-  animation-duration: 160ms;
-  animation-timing-function: ease-out;
+  animation: none;
 }
-::view-transition-old(app) {
-  animation-name: view-fade-out;
+:root:active-view-transition-type(route-forward)::view-transition-old(app),
+:root:active-view-transition-type(route-back)::view-transition-old(app) {
+  animation-duration: 250ms;
+  animation-timing-function: var(--ease-out);
 }
-::view-transition-new(app) {
-  animation-name: view-fade-in;
+:root:active-view-transition-type(route-forward)::view-transition-new(app),
+:root:active-view-transition-type(route-back)::view-transition-new(app) {
+  animation-duration: 250ms;
+  animation-timing-function: var(--ease-out);
 }
-@keyframes view-fade-out {
+:root:active-view-transition-type(route-forward)::view-transition-old(app) {
+  animation-name: route-exit-forward;
+}
+:root:active-view-transition-type(route-forward)::view-transition-new(app) {
+  animation-name: route-enter-forward;
+}
+:root:active-view-transition-type(route-back)::view-transition-old(app) {
+  animation-name: route-exit-back;
+}
+:root:active-view-transition-type(route-back)::view-transition-new(app) {
+  animation-name: route-enter-back;
+}
+@keyframes route-exit-forward {
   to {
     opacity: 0;
-    transform: translateY(-4px);
+    transform: translateX(-18%);
   }
 }
-@keyframes view-fade-in {
+@keyframes route-enter-forward {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateX(18%);
+  }
+}
+@keyframes route-exit-back {
+  to {
+    opacity: 0;
+    transform: translateX(18%);
+  }
+}
+@keyframes route-enter-back {
+  from {
+    opacity: 0;
+    transform: translateX(-18%);
   }
 }
 h1,
@@ -1072,6 +1095,10 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   *::after {
     scroll-behavior: auto !important;
     transition: none !important;
+    animation: none !important;
+  }
+  ::view-transition-old(app),
+  ::view-transition-new(app) {
     animation: none !important;
   }
 }
