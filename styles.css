@@ -62,9 +62,9 @@ main {
 ::view-transition-new(app) {
   animation: none;
 }
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
+:root:active-view-transition-type(route-forward),
+:root:active-view-transition-type(route-back) {
+  view-transition-name: none;
 }
 :root:active-view-transition-type(route-forward)::view-transition-old(app),
 :root:active-view-transition-type(route-back)::view-transition-old(app) {
