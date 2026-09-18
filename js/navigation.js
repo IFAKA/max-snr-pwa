@@ -20,10 +20,11 @@ function transitionTypes(type) {
 }
 
 export function initializeRouteTransitions() {
-  if (typeof window === 'undefined' || !('onpageswap' in window)) return;
+  if (typeof window === 'undefined' || (!('onpageswap' in window) && !('onpagereveal' in window)))
+    return;
   const applyRouteTransition = (event) => {
     const type = routeTransitionType();
-    if (type) event.viewTransition?.types.add(type);
+    if (type) event.viewTransition?.types?.add(type);
   };
   window.addEventListener('pageswap', applyRouteTransition);
   window.addEventListener('pagereveal', applyRouteTransition);
