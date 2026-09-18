@@ -3,7 +3,7 @@ import { getState } from './state.js';
 import { persist } from './storage.js';
 import { navigateTo } from './navigation.js';
 import { ACTIVITY_DEFINITIONS, activityDefinition } from './activity-data.js';
-import { bindCountdown, countdownMarkup } from './render-workout/countdown.js';
+import { bindCountdown, countdownStage } from './render-workout/countdown.js';
 
 const activityStorageKey = (type) => `maxsnr-activity-started:${type}`;
 function activityStart(type, durationMs) {
@@ -63,8 +63,19 @@ export function renderActivity(type) {
   };
   const body = isMeasurement
     ? '<form id="activity-form" class="activity-form"><label class="analytics-field"><span>Waist (cm)</span><input name="waist" type="number" min="1" step="0.1" inputmode="decimal" required /></label><button class="primary" type="submit">Save</button></form>'
-    : `${isTimed ? countdownMarkup({ remainingMs: startedAtMs + definition.durationMs - Date.now(), label: `${definition.title} remaining`, variant: 'activity' }) : `<p class="workout-metric" aria-label="Activity metric">${esc(definition.metric)}</p>`}<button class="primary" id="finish-activity" type="button">${type === 'rest' ? 'Continue' : 'Finish'}</button>`;
-  app.innerHTML = `<section class="workout-stage activity-stage${isTimed ? ' countdown-stage' : ''}" aria-labelledby="activity-title"><div class="stage-info">${titleMarkup(definition.title, 'activity-title', 'h1', 'workout-title', true)}</div><div class="thumb-zone">${body}</div></section>`;
+    : `<p class="workout-metric" aria-label="Activity metric">${esc(definition.metric)}</p><button class="primary" id="finish-activity" type="button">${type === 'rest' ? 'Continue' : 'Finish'}</button>`;
+  app.innerHTML = isTimed
+    ? countdownStage({
+        className: 'activity-stage',
+        title: definition.title,
+        countdown: {
+          remainingMs: startedAtMs + definition.durationMs - Date.now(),
+          label: `${definition.title} remaining`,
+          variant: 'activity',
+        },
+        actions: '<button class="primary" id="finish-activity" type="button">Finish</button>',
+      })
+    : `<section class="workout-stage activity-stage" aria-labelledby="activity-title"><div class="stage-info">${titleMarkup(definition.title, 'activity-title', 'h1', 'workout-title', true)}</div><div class="thumb-zone">${body}</div></section>`;
   if (isTimed)
     bindCountdown({
       element: document.querySelector('#timer'),

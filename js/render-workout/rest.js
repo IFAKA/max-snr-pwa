@@ -3,7 +3,6 @@ import {
   state,
   runAction,
   showError,
-  workoutStage,
   primaryAction,
   exercisePicker,
   bindExercisePicker,
@@ -11,7 +10,7 @@ import {
 import { continueRest, findNext, exerciseSelectionLocked } from '../workout.js';
 import { buzz, esc, icon, listMarkup } from '../dom.js';
 import { navigateTo } from '../navigation.js';
-import { bindCountdown, countdownMarkup } from './countdown.js';
+import { bindCountdown, countdownStage } from './countdown.js';
 
 const advance = (button) => runAction(button, continueRest);
 
@@ -44,10 +43,15 @@ export function renderRest() {
     : '';
   const setCount = next ? `<p class="set-count">Set ${esc(next.set)} of ${esc(next.sets)}</p>` : '';
   mount(
-    workoutStage({
-      className: 'rest-stage countdown-stage',
-      title: next ? esc(next.performedName) : 'Rest',
-      body: `${setCount}${countdownMarkup({ remainingMs: active.restEndsAt - Date.now(), label: 'Rest remaining', variant: 'rest' })}`,
+    countdownStage({
+      className: 'rest-stage',
+      title: next ? next.performedName : 'Rest',
+      metadata: setCount,
+      countdown: {
+        remainingMs: active.restEndsAt - Date.now(),
+        label: 'Rest remaining',
+        variant: 'rest',
+      },
       actions: `${changeLink}${primaryAction('continue', 'End rest')}`,
     }),
   );

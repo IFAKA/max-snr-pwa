@@ -1,8 +1,8 @@
-import { mount, state, runAction, showError, workoutStage, primaryAction } from './shared.js';
+import { mount, state, runAction, showError, primaryAction } from './shared.js';
 import { skipPlank, beginLifting } from '../workout.js';
 import { buzz } from '../dom.js';
 import { navigateTo } from '../navigation.js';
-import { bindCountdown, countdownMarkup } from './countdown.js';
+import { bindCountdown, countdownStage } from './countdown.js';
 
 export function renderPlank() {
   const active = state(),
@@ -12,14 +12,13 @@ export function renderPlank() {
     return;
   }
   mount(
-    workoutStage({
-      className: 'countdown-stage',
+    countdownStage({
       title: 'Plank',
-      body: countdownMarkup({
+      countdown: {
         remainingMs: active.timerEndsAt - Date.now(),
         label: 'Plank remaining',
         variant: 'plank',
-      }),
+      },
       actions: primaryAction('skip-plank', 'Finish'),
     }),
   );

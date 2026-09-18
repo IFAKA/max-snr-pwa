@@ -1,22 +1,22 @@
-import { mount, state, runAction, showError, workoutStage, primaryAction } from './shared.js';
+import { mount, state, runAction, showError, primaryAction } from './shared.js';
 import { completeStretch, finishWorkout, setTimer } from '../workout.js';
 import { STRETCH_MS } from '../constants.js';
 import { buzz } from '../dom.js';
 import { navigateTo, renderWithTransition } from '../navigation.js';
-import { bindCountdown, countdownMarkup } from './countdown.js';
+import { bindCountdown, countdownStage } from './countdown.js';
 
 export function renderStretch() {
   const active = state();
   if (!active.timerEndsAt) {
     mount(
-      workoutStage({
-        className: 'stretch-stage countdown-stage',
+      countdownStage({
+        className: 'stretch-stage',
         title: 'Stretch',
-        body: countdownMarkup({
+        countdown: {
           remainingMs: STRETCH_MS,
           label: 'Stretch timer, 30 seconds',
           variant: 'stretch',
-        }),
+        },
         actions: `<div class="controls">${primaryAction('start-stretch', 'Start')}<button class="secondary" id="finish-stretch" type="button">Finish</button></div>`,
       }),
     );
@@ -43,14 +43,14 @@ export function renderStretch() {
     return;
   }
   mount(
-    workoutStage({
-      className: 'stretch-stage countdown-stage',
+    countdownStage({
+      className: 'stretch-stage',
       title: 'Stretch',
-      body: countdownMarkup({
+      countdown: {
         remainingMs: active.timerEndsAt - Date.now(),
         label: 'Stretch remaining',
         variant: 'stretch',
-      }),
+      },
       actions: '<button class="secondary" id="cancel-stretch" type="button">Cancel</button>',
     }),
   );

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { countdownMarkup } from '../js/render-workout/countdown.js';
+import { countdownMarkup, countdownStage } from '../js/render-workout/countdown.js';
 import { activityDefinition } from '../js/activity-data.js';
 
 test('countdown markup keeps one semantic timer contract across variants', () => {
@@ -16,6 +16,30 @@ test('countdown markup keeps one semantic timer contract across variants', () =>
   assert.match(markup, /role="timer"/);
   assert.match(markup, /aria-label="Walk remaining"/);
   assert.match(markup, />30</);
+});
+
+test('countdown stages share the title, timer, and bottom action structure', () => {
+  for (const variant of ['rest', 'plank', 'stretch', 'activity']) {
+    const markup = countdownStage({
+      title: variant,
+      metadata: '<p class="set-count">Set 1 of 2</p>',
+      countdown: { remainingMs: 30000, label: `${variant} remaining`, variant },
+      actions: `<button type="button">${variant}</button>`,
+    });
+
+    assert.match(markup, /<div class="stage-info">[\s\S]*<\/div><div class="thumb-zone">/);
+    assert.match(markup, /<div class="thumb-zone">[\s\S]*class="big-timer countdown/);
+    assert.match(markup, /<div class="countdown-actions"><button type="button">/);
+    assert.equal((markup.match(/class="stage-info"/g) || []).length, 1);
+    assert.equal((markup.match(/class="thumb-zone"/g) || []).length, 1);
+  }
+});
+
+test('countdown stage titles remain escaped', () => {
+  const markup = countdownStage({ title: '<Rest>' });
+
+  assert.match(markup, />&lt;Rest&gt;</);
+  assert.doesNotMatch(markup, /<h1[^>]*><Rest>/);
 });
 
 test('timed activity definitions provide countdown durations', () => {
