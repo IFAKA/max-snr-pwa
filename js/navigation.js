@@ -5,8 +5,7 @@ const FORWARD_TRANSITION = 'route-forward';
 const BACK_TRANSITION = 'route-back';
 let activeViewTransition = null;
 
-function routeTransitionType() {
-  const activation = globalThis.navigation?.activation;
+function routeTransitionType(activation = globalThis.navigation?.activation) {
   const currentIndex = activation?.entry?.index;
   const previousIndex = activation?.from?.index;
   if (!Number.isInteger(currentIndex) || !Number.isInteger(previousIndex)) return null;
@@ -20,12 +19,10 @@ function transitionTypes(type) {
 }
 
 export function initializeRouteTransitions() {
-  const applyRouteTransition = (event) => {
-    const type = routeTransitionType();
+  window.addEventListener('pagereveal', (event) => {
+    const type = routeTransitionType(event.activation);
     if (type) event.viewTransition?.types?.add(type);
-  };
-  window.addEventListener('pageswap', applyRouteTransition);
-  window.addEventListener('pagereveal', applyRouteTransition);
+  });
 }
 
 function prefersReducedMotion() {
