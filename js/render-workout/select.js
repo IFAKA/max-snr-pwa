@@ -1,22 +1,31 @@
-import { mount, state, workoutStage, exercisePicker, bindExercisePicker } from './shared.js';
+import {
+  mount,
+  state,
+  workoutStage,
+  exercisePicker,
+  bindExercisePicker,
+  primaryAction,
+} from './shared.js';
 import { activeTask } from '../workout.js';
-import { esc, icon, listMarkup } from '../dom.js';
+import { navigateTo } from '../navigation.js';
 
 export function renderExerciseSelection() {
   const task = activeTask();
   if (!task) return;
-  const rows = [
-    `<li><a class="list-link" href="/workout/?view=exercise"><span>Continue</span>${icon('chevron', 'Continue workout')}</a></li>`,
-    `<li><a class="list-link" href="/workout/?view=exercises&return=select"><span>Change exercise</span>${icon('chevron', 'Change exercise')}</a></li>`,
-  ];
   mount(
     workoutStage({
       className: 'exercise-selection-stage',
-      title: esc(task.performedName),
+      title: task.performedName,
       body: '<p class="muted">Choose your first exercise.</p>',
-      actions: listMarkup(rows, '', 'Workout options'),
+      actions: `${primaryAction('continue-selection', 'Continue')}<button class="secondary" id="change-exercise" type="button">Change exercise</button>`,
     }),
   );
+  document
+    .querySelector('#continue-selection')
+    ?.addEventListener('click', () => navigateTo('/workout/?view=exercise'));
+  document
+    .querySelector('#change-exercise')
+    ?.addEventListener('click', () => navigateTo('/workout/?view=exercises&return=select'));
 }
 
 export function renderExercisePicker(onSelected) {
