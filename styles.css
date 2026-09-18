@@ -715,9 +715,6 @@ main > section:has(> .app-list) > .app-list .list-link::before {
 .stretch-stage .controls {
   grid-template-columns: 1fr;
 }
-.stage-link {
-  margin: 0;
-}
 .set-count {
   margin: 0;
   color: var(--muted);
