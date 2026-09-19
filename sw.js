@@ -1,4 +1,5 @@
 // Touch the worker when precached app modules change so installed clients refresh them.
+// Superset progress is included in the current workout navigation modules.
 const CACHE_NAME = 'maxsnr-v2';
 const PRECACHE_URLS = [
   '/',
