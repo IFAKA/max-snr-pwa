@@ -22,6 +22,7 @@ const PRECACHE_URLS = [
   '/js/render-routine.js',
   '/js/render-today.js',
   '/js/render-workout.js',
+  '/js/routine-view.js',
   '/js/routine-data.js',
   '/js/state.js',
   '/js/storage.js',
