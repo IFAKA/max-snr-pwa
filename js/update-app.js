@@ -158,12 +158,8 @@ async function refreshUpdateAvailability(button) {
       if (!waiting) announce('The app is current');
     } catch {
       await loading.finish();
-      setUpdateState(button, 'error');
       announce('Updates are unavailable right now');
-      setTimeout(() => {
-        if (!button.disabled) return;
-        setUpdateState(button, 'current');
-      }, 4000);
+      restoreButton(button);
     }
   })().finally(() => {
     availabilityCheck = null;
