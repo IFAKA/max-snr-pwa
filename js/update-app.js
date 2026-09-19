@@ -3,8 +3,8 @@ import { iconPaths } from './icons.js';
 let registration = null;
 let updateInProgress = false;
 let reloadAfterActivation = false;
-const LOADING_SHOW_DELAY_MS = 200;
-const LOADING_MIN_VISIBLE_MS = 350;
+const LOADING_MIN_VISIBLE_MS = 500;
+const SUCCESS_VISIBLE_MS = 1400;
 
 const UPDATE_ICONS = {
   checking: iconPaths('loader'),
@@ -18,7 +18,7 @@ const UPDATE_LABELS = {
   checking: 'Checking for app updates',
   current: 'Check for updates',
   available: 'Install app update',
-  success: 'App updated',
+  success: 'Up to date',
   error: 'App update failed',
 };
 
@@ -51,21 +51,17 @@ function startLoadingState(button, message) {
   delete button.dataset.loadingStartedAt;
   button.disabled = true;
   button.setAttribute('aria-busy', 'true');
+  if (label) label.textContent = `${originalLabel}…`;
+  button.setAttribute('aria-label', `${originalLabel}…`);
+  setUpdateState(button, 'checking');
+  button.dataset.loadingStartedAt = String(performance.now());
   announce(message);
-  const showTimer = setTimeout(() => {
-    if (!button.disabled) return;
-    if (label) label.textContent = `${originalLabel}…`;
-    button.setAttribute('aria-label', `${originalLabel}…`);
-    setUpdateState(button, 'checking');
-    button.dataset.loadingStartedAt = String(performance.now());
-  }, LOADING_SHOW_DELAY_MS);
   return {
     finish: () => {
-      clearTimeout(showTimer);
       const loadingStartedAt = Number(button.dataset.loadingStartedAt);
       const visibleFor = Number.isFinite(loadingStartedAt)
         ? performance.now() - loadingStartedAt
-        : LOADING_MIN_VISIBLE_MS;
+        : 0;
       return new Promise((resolve) =>
         setTimeout(resolve, Math.max(0, LOADING_MIN_VISIBLE_MS - visibleFor)),
       );
@@ -122,9 +118,14 @@ async function checkForUpdate(button) {
     const waiting = await waitForWaitingWorker(registration);
     await loading.finish();
     if (!waiting) {
-      setUpdateAvailable(button, false);
-      announce("You're up to date.");
+      button.disabled = true;
+      button.removeAttribute('aria-busy');
+      setUpdateState(button, 'success', "You're up to date.");
       updateInProgress = false;
+      setTimeout(() => {
+        if (button.dataset.updateState !== 'success') return;
+        setUpdateAvailable(button, false);
+      }, SUCCESS_VISIBLE_MS);
       return;
     }
     reloadAfterActivation = true;
