@@ -5,6 +5,10 @@ import { dayNow, buzz } from '../dom.js';
 import { flatten } from './task-factory.js';
 import { beginLifting, clearTimer, continueRest as advanceRest, startRest } from './timers.js';
 import { evaluateAndPersist } from './coordinator.js';
+import { SESSION_CAP_MS, SESSION_TARGET_MS } from '../constants.js';
+import { timeBudgetCutOrder } from './budget.js';
+
+export { sessionBudgetState, sessionElapsedMs, timeBudgetCutOrder } from './budget.js';
 
 const taskGroup = (task) => task?.groupId || task?.exerciseId || task?.id;
 const supersetLead = (active, groupId) =>
@@ -92,6 +96,8 @@ export async function start(day = dayNow()) {
     draft: {},
     restEndsAt: null,
     timerEndsAt: null,
+    sessionTargetMs: SESSION_TARGET_MS,
+    sessionCapMs: SESSION_CAP_MS,
   };
   await save();
   return true;
@@ -249,6 +255,7 @@ export async function completeSet() {
   };
   if (hasWeight) {
     task.completed.weight = weight;
+    task.load = weight;
     task.completed.unit = state.settings?.unit || 'kg';
   }
   if (draft.rir !== undefined) task.completed.rir = draft.rir;
@@ -345,13 +352,36 @@ export async function finishEarly() {
   const active = getState().active;
   if (!active) return false;
   active.tasks.forEach((task) => {
-    if (!task.completed && !task.skipped) task.skipped = true;
+    if (!task.completed && !task.skipped) {
+      task.skipped = true;
+      task.skipReason = 'user';
+    }
   });
   active.draft = {};
   active.restEndsAt = null;
   active.timerEndsAt = null;
   active.completedAt = new Date().toISOString();
   await finishWorkout();
+  return true;
+}
+
+export async function finishAtBudget() {
+  const active = getState().active;
+  if (!active) return false;
+  const cutIds = timeBudgetCutOrder(active);
+  active.tasks.forEach((task) => {
+    if (!task.completed && !task.skipped && cutIds.includes(task.exerciseId)) {
+      task.skipped = true;
+      task.skipReason = 'time-budget';
+    }
+  });
+  active.draft = {};
+  active.restEndsAt = null;
+  active.timerEndsAt = null;
+  const next = findNext(active.pos, true);
+  if (next >= 0) active.pos = next;
+  else await finishLifts();
+  await save();
   return true;
 }
 

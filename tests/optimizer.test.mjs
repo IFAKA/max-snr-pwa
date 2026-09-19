@@ -50,7 +50,7 @@ test('routine is generated from allocation and preserves metadata through flatte
   const tasks = output.routine.flatMap(flatten);
   assert.ok(tasks.length > 0);
   assert.equal(tasks.filter((task) => task.exerciseId === 'cable-crunch').length, 4);
-  assert.equal(tasks.find((task) => task.exerciseId === 'cable-crunch').reps, '10–15');
+  assert.equal(tasks.find((task) => task.exerciseId === 'cable-crunch').reps, '8–15');
   assert.equal(tasks.find((task) => task.exerciseId === 'cable-crunch').restMs, 60000);
 });
 

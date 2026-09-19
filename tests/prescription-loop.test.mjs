@@ -20,7 +20,19 @@ test('migration adds the current two-day prescription without changing history',
   assert.equal(state.prescription.daysPerWeek, 2);
   assert.deepEqual(state.prescription.days, ['Monday', 'Thursday']);
   assert.equal(state.history[0], history[0]);
-  assert.equal(state.prescription.weeklySetAllocation['cable-crunch'], 4);
+  assert.equal(state.prescription.programId, 'fixed-hypertrophy-2-day-v1');
+  assert.equal(state.prescription.weeklySetAllocation['cable-crunch'], 2);
+});
+
+test('migration replaces an old prescription but leaves historical records untouched', () => {
+  const history = [{ day: 'Monday', tasks: [{ exerciseId: 'old-press', completed: { reps: 8 } }] }];
+  const state = migrate({
+    version: 2,
+    history,
+    prescription: { version: 1, daysPerWeek: 2, routine: [], names: [] },
+  });
+  assert.equal(state.prescription.programId, 'fixed-hypertrophy-2-day-v1');
+  assert.deepEqual(state.history, history);
 });
 
 test('real generator supports 2, 3, and 4 days while preserving exercise IDs', () => {
@@ -42,6 +54,7 @@ test('real generator supports 2, 3, and 4 days while preserving exercise IDs', (
 test('six overloaded personal sessions can justify 2 to 3, but one anomaly cannot', () => {
   const current = createPrescription(2, {
     lastEvaluatedAt: Date.now() - FREQUENCY_COOLDOWN_MS - 1,
+    programId: 'adaptive-routine',
   });
   const noisy = { prescription: current, history: [workout(180, 21)] };
   assert.equal(evaluatePrescription(noisy).action, 'KEEP');

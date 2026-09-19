@@ -249,6 +249,20 @@ a:focus-visible {
   color: var(--muted);
   font-size: 0.9rem;
 }
+
+.target-prescription,
+.next-exercise,
+.session-budget,
+.progression-note {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.session-budget.is-at-cap {
+  color: var(--danger, #b42318);
+  font-weight: 700;
+}
 .rir-label {
   display: grid;
   gap: 6px;

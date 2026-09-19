@@ -48,6 +48,8 @@ function adaptVolume(prescription, recommendations) {
 export function evaluatePrescription(state = getState(), now = Date.now()) {
   const current = state.prescription;
   if (!current) return { action: 'KEEP', reason: 'No prescription loaded.' };
+  if (current.programId === 'fixed-hypertrophy-2-day-v1')
+    return { action: 'KEEP', reason: 'The fixed Monday/Thursday program is canonical.' };
   const evidence = evidenceSince(state);
   if (evidence.length < MIN_NEW_SESSIONS)
     return {

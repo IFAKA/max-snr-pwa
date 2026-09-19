@@ -12,6 +12,8 @@ import {
   findNext,
   exerciseSelectionLocked,
   exerciseChangeAvailable,
+  sessionBudgetState,
+  formatDuration,
 } from '../workout.js';
 import { buzz, esc } from '../dom.js';
 import { navigateTo } from '../navigation.js';
@@ -35,13 +37,14 @@ export function renderRest() {
     active.phase === 'rest' && !exerciseSelectionLocked(active) && exerciseChangeAvailable(active);
   const changeButton = `<button class="secondary" id="change-exercises" type="button"${canChange ? '' : ' disabled'}>Change exercises</button>`;
   const setCount = next
-    ? `${supersetMetadataMarkup(active, next)}<p class="set-count">Set ${esc(next.set)} of ${esc(next.sets)}</p>`
+    ? `${supersetMetadataMarkup(active, next)}<p class="set-count">Set ${esc(next.set)} of ${esc(next.sets)}</p><p class="target-prescription">Target: ${esc(next.targetRepRange || next.reps)} reps · ${esc(next.targetRir || next.rir)} RIR</p>`
     : '';
+  const budget = sessionBudgetState(active);
   mount(
     countdownStage({
       className: 'rest-stage',
       title: next ? next.performedName : 'Rest',
-      metadata: setCount,
+      metadata: `${setCount}<p class="session-budget${budget.capReached ? ' is-at-cap' : ''}">Session <time id="rest-session-elapsed">${formatDuration(budget.elapsedMs)}</time>${budget.capReached ? ' · 60:00 reached' : ''}</p>`,
       countdown: {
         remainingMs: active.restEndsAt - Date.now(),
         label: 'Rest remaining',
@@ -62,4 +65,13 @@ export function renderRest() {
     shouldRun: () => state()?.phase === 'rest' && Boolean(state()?.restEndsAt),
     onEnd: () => buzz([35, 65, 35]),
   });
+  const elapsed = document.querySelector('#rest-session-elapsed');
+  const clock = setInterval(() => {
+    if (!elapsed || !document.body.contains(elapsed) || !state()) return clearInterval(clock);
+    const currentBudget = sessionBudgetState(state());
+    elapsed.textContent = formatDuration(currentBudget.elapsedMs);
+    document
+      .querySelector('.session-budget')
+      ?.classList.toggle('is-at-cap', currentBudget.capReached);
+  }, 1000);
 }

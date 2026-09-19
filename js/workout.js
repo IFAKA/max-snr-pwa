@@ -1,5 +1,13 @@
 export { task, flatten } from './workout/task-factory.js';
-export { lastActivePerformance, lastPerformance } from './workout/progression.js';
+export {
+  lastActivePerformance,
+  lastExercisePerformances,
+  lastPerformance,
+  nextDoubleProgression,
+  recommendDoubleProgression,
+  parseRepRange,
+  parseRirRange,
+} from './workout/progression.js';
 export { completedWorkoutsThisWeek, weeklyGoalSummary, phaseProgress } from './workout/metrics.js';
 export {
   healthCoverage,
@@ -8,7 +16,6 @@ export {
   sessionTimingComparison,
   weeklyGymAnalytics,
 } from './workout/metrics.js';
-export { nextDoubleProgression, parseRepRange } from './workout/progression.js';
 export { adaptiveRecommendations, rollingExerciseTrend } from './workout/adaptation.js';
 export { evaluatePrescription, evaluateAndPersist } from './workout/coordinator.js';
 export { bodyHealthSummary, selectRecommendation } from './workout/health-optimizer.js';
@@ -49,6 +56,7 @@ export {
   undoLastSet,
   completeStretch,
   finishEarly,
+  finishAtBudget,
   finishWorkout,
   cancelWorkout,
 } from './workout/session.js';
@@ -60,3 +68,4 @@ export {
   formatDuration,
   countdown,
 } from './workout/timers.js';
+export { sessionBudgetState, sessionElapsedMs, timeBudgetCutOrder } from './workout/budget.js';

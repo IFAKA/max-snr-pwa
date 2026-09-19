@@ -42,9 +42,9 @@ export const EXERCISES = {
     name: 'Incline Machine Press',
     sets: 3,
     reps: '6–10',
-    rir: '1–2',
+    rir: '2 → 1',
     station: 'press-machine',
-    restMs: 120000,
+    restMs: 150000,
     primary: { upperChest: 1 },
     secondary: { chest: 0.25, sideDelts: 0.25, triceps: 0.2 },
     setupSeconds: 90,
@@ -76,7 +76,7 @@ export const EXERCISES = {
     reps: '8–12',
     rir: '1–2',
     station: 'row-machine',
-    restMs: 90000,
+    restMs: 120000,
     primary: { upperBack: 1 },
     secondary: { lats: 0.45, biceps: 0.3, rearDelts: 0.15 },
     setupSeconds: 60,
@@ -122,7 +122,7 @@ export const EXERCISES = {
     name: 'Cable Lateral Raise',
     sets: 3,
     reps: '10–20',
-    rir: '1–2',
+    rir: '1 → 0',
     station: 'cable',
     restMs: 60000,
     primary: { sideDelts: 1 },
@@ -138,7 +138,7 @@ export const EXERCISES = {
     name: 'Cable Curl',
     sets: 2,
     reps: '8–15',
-    rir: '1–2',
+    rir: '1 → 0',
     station: 'cable',
     restMs: 60000,
     primary: { biceps: 1 },
@@ -150,11 +150,11 @@ export const EXERCISES = {
     health: ['arms'],
   }),
   pushdown: exercise({
-    id: 'cable-tricep-pushdown',
-    name: 'Cable Tricep Pushdown',
+    id: 'overhead-cable-triceps-extension',
+    name: 'Overhead Cable Triceps Extension',
     sets: 2,
     reps: '8–15',
-    rir: '1–2',
+    rir: '1 → 0',
     station: 'cable',
     restMs: 60000,
     primary: { triceps: 1 },
@@ -168,9 +168,9 @@ export const EXERCISES = {
   calfRaise: exercise({
     id: 'standing-calf-raise',
     name: 'Standing Calf Raise',
-    sets: 2,
+    sets: 1,
     reps: '8–15',
-    rir: '1–2',
+    rir: '0–1',
     station: 'calf-raise',
     restMs: 60000,
     primary: { calves: 1 },
@@ -184,9 +184,9 @@ export const EXERCISES = {
   crunch: exercise({
     id: 'cable-crunch',
     name: 'Cable Crunch',
-    sets: 2,
-    reps: '10–15',
-    rir: '1–2',
+    sets: 1,
+    reps: '8–15',
+    rir: '0–1',
     station: 'cable',
     restMs: 60000,
     primary: { abs: 1 },
@@ -202,7 +202,7 @@ export const EXERCISES = {
     name: 'Wrist Extension',
     sets: 1,
     reps: '12–20',
-    rir: '1–2',
+    rir: '0–1',
     station: 'dumbbells',
     restMs: 60000,
     primary: { forearms: 1 },
@@ -212,6 +212,54 @@ export const EXERCISES = {
     fatigue: 1,
     supersetSafe: true,
     health: ['arms'],
+  }),
+  shrug: exercise({
+    id: 'chest-supported-shrug',
+    name: 'Chest-Supported Shrug',
+    sets: 1,
+    reps: '10–15',
+    rir: '0–1',
+    station: 'row-machine',
+    restMs: 75000,
+    primary: { upperBack: 1 },
+    secondary: {},
+    setupSeconds: 30,
+    executionSeconds: 30,
+    fatigue: 1,
+    supersetSafe: true,
+    health: ['pull'],
+  }),
+  neckFlexion: exercise({
+    id: 'neck-flexion',
+    name: 'Neck Flexion',
+    sets: 1,
+    reps: '12–20',
+    rir: '1',
+    station: 'neck',
+    restMs: 60000,
+    primary: { neck: 1 },
+    secondary: {},
+    setupSeconds: 15,
+    executionSeconds: 25,
+    fatigue: 1,
+    supersetSafe: true,
+    health: ['trunk'],
+  }),
+  neckExtension: exercise({
+    id: 'neck-extension',
+    name: 'Neck Extension',
+    sets: 1,
+    reps: '12–20',
+    rir: '1',
+    station: 'neck',
+    restMs: 60000,
+    primary: { neck: 1 },
+    secondary: {},
+    setupSeconds: 15,
+    executionSeconds: 25,
+    fatigue: 1,
+    supersetSafe: true,
+    health: ['trunk'],
   }),
 };
 
@@ -491,17 +539,89 @@ export function optimizeRoutine({
   };
 }
 
-export const OPTIMIZER_OUTPUT = optimizeRoutine();
+const fixed = (key, sets, cutPriority = null, overrides = {}) => ({
+  ...copy(EXERCISES[key], sets),
+  ...overrides,
+  ...(cutPriority ? { cutPriority } : {}),
+});
+
+const fixedSuperset = (id, label, members) => ({
+  type: 'superset',
+  id,
+  label,
+  members,
+});
+
+export const CANONICAL_ROUTINE = {
+  Monday: [
+    fixed('lateralRaise', 3),
+    fixed('inclinePress', 3),
+    fixed('pulldown', 2),
+    fixed('row', 2),
+    fixed('legPress', 2),
+    fixed('legCurl', 2, null, { rir: '1' }),
+    fixedSuperset('arms-monday', 'Antagonist arms', [fixed('curl', 2), fixed('pushdown', 2)]),
+    fixed('shrug', 1),
+    fixed('wristExtension', 1, 3),
+    fixed('calfRaise', 1, 1),
+    fixed('crunch', 1, 2),
+    fixedSuperset('neck-monday', 'Neck', [
+      fixed('neckFlexion', 1, 4),
+      fixed('neckExtension', 1, 4),
+    ]),
+  ],
+  Thursday: [
+    fixed('lateralRaise', 4),
+    fixed('inclinePress', 2, null, { rir: '1–2' }),
+    fixed('pulldown', 3),
+    fixed('row', 2),
+    fixed('legPress', 2),
+    fixed('legCurl', 2, null, { rir: '1' }),
+    fixedSuperset('arms-thursday', 'Antagonist arms', [fixed('curl', 2), fixed('pushdown', 2)]),
+    fixed('wristExtension', 1, 3),
+    fixed('calfRaise', 1, 1),
+    fixed('crunch', 1, 2),
+    fixedSuperset('neck-thursday', 'Neck', [
+      fixed('neckFlexion', 1, 4),
+      fixed('neckExtension', 1, 4),
+    ]),
+  ],
+};
+
+const canonicalOutput = () => ({
+  days: ['Monday', 'Thursday'],
+  names: ['Upper-chest bias', 'Delt/lat bias'],
+  routine: [CANONICAL_ROUTINE.Monday, CANONICAL_ROUTINE.Thursday],
+  comparison: [],
+  allocation: Object.fromEntries(
+    [CANONICAL_ROUTINE.Monday, CANONICAL_ROUTINE.Thursday]
+      .flatMap((day) => day.flatMap((item) => (item.type === 'superset' ? item.members : [item])))
+      .reduce((entries, item) => {
+        entries.set(item.id, (entries.get(item.id) || 0) + item.sets);
+        return entries;
+      }, new Map()),
+  ),
+});
+
+export const OPTIMIZER_OUTPUT = canonicalOutput();
 
 export const DEFAULT_PRESCRIPTION_VERSION = 1;
 export function createPrescription(daysPerWeek = 2, metadata = {}) {
   const allocationEntriesForPrescription = metadata.allocation || ALLOCATION;
-  const output = optimizeRoutine({ daysPerWeek, allocation: allocationEntriesForPrescription });
-  const allocation = Object.fromEntries(
-    allocationEntriesForPrescription.map(([key, sets]) => [EXERCISES[key].id, sets]),
-  );
+  const output =
+    daysPerWeek === 2
+      ? canonicalOutput()
+      : optimizeRoutine({ daysPerWeek, allocation: allocationEntriesForPrescription });
+  const allocation =
+    daysPerWeek === 2
+      ? output.allocation
+      : Object.fromEntries(
+          allocationEntriesForPrescription.map(([key, sets]) => [EXERCISES[key].id, sets]),
+        );
   return {
     version: DEFAULT_PRESCRIPTION_VERSION,
+    programId:
+      metadata.programId || (daysPerWeek === 2 ? 'fixed-hypertrophy-2-day-v1' : 'adaptive-routine'),
     daysPerWeek,
     days: output.days,
     exercises: Object.values(EXERCISES).map(({ id, name }) => ({ id, name })),

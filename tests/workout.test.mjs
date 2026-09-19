@@ -23,16 +23,16 @@ test('ordinary exercises finish all sets before the next exercise', () => {
   assert.deepEqual(
     tasks.slice(0, 3).map((task) => [task.performedName, task.set]),
     [
-      ['Incline Machine Press', 1],
-      ['Incline Machine Press', 2],
-      ['Incline Machine Press', 3],
+      ['Cable Lateral Raise', 1],
+      ['Cable Lateral Raise', 2],
+      ['Cable Lateral Raise', 3],
     ],
   );
 });
 
 test('superset members alternate within each round', () => {
   const tasks = flatten(ROUTINE.Monday).filter(
-    (task) => task.groupType === 'superset' && task.groupId === 'priority-pair-0',
+    (task) => task.groupType === 'superset' && task.groupId === 'arms-monday',
   );
   assert.deepEqual(
     tasks.map((task) => [task.memberIndex, task.set]),
@@ -43,6 +43,69 @@ test('superset members alternate within each round', () => {
       [1, 2],
     ],
   );
+});
+
+test('canonical Monday and Thursday prescriptions match the fixed program', () => {
+  const expected = {
+    Monday: [
+      ['cable-lateral-raise', 3, '10–20', '1 → 0', 60000],
+      ['incline-machine-press', 3, '6–10', '2 → 1', 150000],
+      ['neutral-grip-pulldown', 2, '6–10', '1–2', 120000],
+      ['chest-supported-row', 2, '8–12', '1–2', 120000],
+      ['leg-press', 2, '8–12', '1–2', 120000],
+      ['seated-leg-curl', 2, '8–12', '1', 90000],
+      ['cable-curl', 2, '8–15', '1 → 0', 60000],
+      ['overhead-cable-triceps-extension', 2, '8–15', '1 → 0', 60000],
+      ['chest-supported-shrug', 1, '10–15', '0–1', 75000],
+      ['wrist-extension', 1, '12–20', '0–1', 60000],
+      ['standing-calf-raise', 1, '8–15', '0–1', 60000],
+      ['cable-crunch', 1, '8–15', '0–1', 60000],
+      ['neck-flexion', 1, '12–20', '1', 60000],
+      ['neck-extension', 1, '12–20', '1', 60000],
+    ],
+    Thursday: [
+      ['cable-lateral-raise', 4, '10–20', '1 → 0', 60000],
+      ['incline-machine-press', 2, '6–10', '1–2', 150000],
+      ['neutral-grip-pulldown', 3, '6–10', '1–2', 120000],
+      ['chest-supported-row', 2, '8–12', '1–2', 120000],
+      ['leg-press', 2, '8–12', '1–2', 120000],
+      ['seated-leg-curl', 2, '8–12', '1', 90000],
+      ['cable-curl', 2, '8–15', '1 → 0', 60000],
+      ['overhead-cable-triceps-extension', 2, '8–15', '1 → 0', 60000],
+      ['wrist-extension', 1, '12–20', '0–1', 60000],
+      ['standing-calf-raise', 1, '8–15', '0–1', 60000],
+      ['cable-crunch', 1, '8–15', '0–1', 60000],
+      ['neck-flexion', 1, '12–20', '1', 60000],
+      ['neck-extension', 1, '12–20', '1', 60000],
+    ],
+  };
+  for (const [day, rows] of Object.entries(expected)) {
+    const items = flatten(ROUTINE[day]);
+    const expectedIds = [];
+    for (const item of ROUTINE[day]) {
+      const members = item.type === 'superset' ? item.members : [item];
+      const rounds =
+        item.type === 'superset' ? Math.max(...members.map((member) => member.sets)) : 1;
+      for (let set = 1; set <= (item.type === 'superset' ? rounds : members[0].sets); set++)
+        members.forEach((member) => {
+          if (item.type !== 'superset' || set <= member.sets) expectedIds.push(member.id);
+        });
+    }
+    assert.deepEqual(
+      items.map((item) => item.exerciseId),
+      expectedIds,
+    );
+    rows.forEach(([id, sets, reps, rir, rest]) => {
+      const exerciseTasks = items.filter((item) => item.exerciseId === id);
+      assert.equal(new Set(exerciseTasks.map((item) => item.set)).size, sets);
+      assert.ok(
+        exerciseTasks.every(
+          (item) => item.targetRepRange === reps && item.targetRir === rir && item.restMs === rest,
+        ),
+        `${day} ${id}: ${JSON.stringify(exerciseTasks[0])}`,
+      );
+    });
+  }
 });
 
 test('routine helpers safely reflect configured days and missing names', () => {

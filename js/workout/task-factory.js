@@ -22,6 +22,7 @@ export function task(item, set, groupId = null, groupType = 'exercise', memberIn
     station: item.station,
     alternatives: item.alternatives,
     restMs,
+    cutPriority: item.cutPriority || null,
     groupId,
     groupType,
     memberIndex,

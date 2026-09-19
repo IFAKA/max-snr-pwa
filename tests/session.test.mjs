@@ -31,7 +31,10 @@ const {
   selectExercise,
   exerciseSelectionLocked,
   finishEarly,
+  finishAtBudget,
   supersetProgress,
+  sessionBudgetState,
+  timeBudgetCutOrder,
 } = await import('../js/workout/session.js');
 const { isCurrentDayComplete } = await import('../js/render-today.js');
 const { ROUTINE, NAMES } = await import('../js/routine-data.js');
@@ -376,6 +379,7 @@ test('selecting the second superset member makes it the lead for each round', as
 
   state.active.draft = { reps: '8' };
   await completeSet();
+  assert.equal(state.active.phase, 'lifting');
   assert.equal(state.active.tasks[state.active.pos].exerciseId, 'curl');
   assert.equal(state.active.tasks[state.active.pos].set, 1);
 
@@ -385,6 +389,31 @@ test('selecting the second superset member makes it the lead for each round', as
   assert.equal(state.active.tasks[state.active.nextPos].exerciseId, 'extension');
   assert.equal(state.active.tasks[state.active.nextPos].set, 2);
   assert.equal(state.active.supersetLeads.arms, 1);
+});
+
+test('session budget reaches the cap without ending the active workout and cuts only optional work', async () => {
+  const state = emptyState();
+  state.active = {
+    startedAt: Date.now() - 60 * 60 * 1000,
+    phase: 'lifting',
+    pos: 0,
+    deferredGroups: [],
+    tasks: [
+      { ...task('press'), completed: { reps: 8 } },
+      { ...task('calf'), cutPriority: 1 },
+      { ...task('crunch'), cutPriority: 2 },
+      { ...task('row') },
+    ],
+    draft: {},
+  };
+  setState(state);
+  assert.equal(sessionBudgetState(state.active).capReached, true);
+  assert.deepEqual(timeBudgetCutOrder(state.active), ['calf', 'crunch']);
+  await finishAtBudget();
+  assert.equal(state.active.tasks[1].skipReason, 'time-budget');
+  assert.equal(state.active.tasks[2].skipReason, 'time-budget');
+  assert.equal(Boolean(state.active.tasks[3].skipped), false);
+  assert.equal(state.active.phase, 'lifting');
 });
 
 test('switching exercises is locked after the first superset member starts', async () => {

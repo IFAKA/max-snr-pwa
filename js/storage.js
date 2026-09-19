@@ -1,4 +1,11 @@
-import { DB_NAME, DB_VERSION, STORAGE_KEY, REST_MS } from './constants.js';
+import {
+  DB_NAME,
+  DB_VERSION,
+  STORAGE_KEY,
+  REST_MS,
+  SESSION_TARGET_MS,
+  SESSION_CAP_MS,
+} from './constants.js';
 import { emptyState, getState, normalizeWeeklyGoal, setState } from './state.js';
 import { validateBackup } from './backup.js';
 import { createPrescription } from './workout/optimizer.js';
@@ -43,11 +50,13 @@ export function migrate(raw) {
     version: 2,
   };
   next.history = Array.isArray(next.history) ? next.history : [];
-  if (!next.prescription) {
+  if (!next.prescription || next.prescription.programId !== 'fixed-hypertrophy-2-day-v1') {
     next.prescription = createPrescription(2, {
       createdAt: Date.now(),
       lastEvaluatedAt: Date.now(),
-      lastChangeReason: 'Migrated existing two-day routine',
+      lastChangeReason: next.prescription
+        ? 'Migrated to the fixed Monday/Thursday program'
+        : 'Migrated existing two-day routine',
       evidence: { migrated: true, historicalSessionsIgnored: next.history.length },
     });
   }
@@ -116,6 +125,8 @@ export function migrate(raw) {
       deferredGroups: next.active.deferredGroups || [],
       supersetLeads: next.active.supersetLeads || {},
       draft: next.active.draft || {},
+      sessionTargetMs: next.active.sessionTargetMs || SESSION_TARGET_MS,
+      sessionCapMs: next.active.sessionCapMs || SESSION_CAP_MS,
     };
   if (next.active?.phase === 'plank') {
     next.active.phase = 'lifting';
