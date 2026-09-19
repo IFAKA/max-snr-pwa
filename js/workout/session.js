@@ -50,6 +50,24 @@ const nextSupersetRoundIndex = (active, task) => {
   );
 };
 
+export function supersetProgress(active, task = active?.tasks?.[active?.pos]) {
+  if (task?.groupType !== 'superset' || !task.groupId) return null;
+  const round = (active?.tasks || [])
+    .filter(
+      (candidate) => sameSupersetRound(candidate, task) && Number.isInteger(candidate.memberIndex),
+    )
+    .sort((a, b) => a.memberIndex - b.memberIndex);
+  const currentIndex = round.findIndex((candidate) => candidate === task);
+  if (currentIndex < 0) return null;
+  return {
+    currentMember: currentIndex + 1,
+    totalMembers: round.length,
+    remaining: round
+      .slice(currentIndex + 1)
+      .filter((candidate) => !candidate.completed && !candidate.skipped).length,
+  };
+}
+
 export async function start(day = dayNow()) {
   const state = getState();
   if (!isWorkoutDay(day)) return false;

@@ -31,6 +31,7 @@ const {
   selectExercise,
   exerciseSelectionLocked,
   finishEarly,
+  supersetProgress,
 } = await import('../js/workout/session.js');
 const { isCurrentDayComplete } = await import('../js/render-today.js');
 const { ROUTINE, NAMES } = await import('../js/routine-data.js');
@@ -64,6 +65,48 @@ test('next-task traversal ignores skipped sets', () => {
   };
   setState(state);
   assert.equal(findNext(), 2);
+});
+
+test('superset progress describes the current round and unfinished members', () => {
+  const first = supersetTask('curl', 0);
+  const second = supersetTask('extension', 1);
+  const active = { tasks: [first, second], pos: 0 };
+  assert.deepEqual(supersetProgress(active, first), {
+    currentMember: 1,
+    totalMembers: 2,
+    remaining: 1,
+  });
+  assert.deepEqual(supersetProgress(active, second), {
+    currentMember: 2,
+    totalMembers: 2,
+    remaining: 0,
+  });
+});
+
+test('superset progress ignores completed or skipped members after the current task', () => {
+  const current = supersetTask('curl', 0);
+  const completed = supersetTask('extension', 1);
+  completed.completed = { reps: 8 };
+  const skipped = supersetTask('pressdown', 2);
+  skipped.skipped = true;
+  const active = { tasks: [current, completed, skipped], pos: 0 };
+  assert.deepEqual(supersetProgress(active), {
+    currentMember: 1,
+    totalMembers: 3,
+    remaining: 0,
+  });
+});
+
+test('superset progress handles an uneven later round', () => {
+  const firstRound = supersetTask('curl', 0, 1);
+  const laterRound = supersetTask('extension', 1, 2);
+  const active = { tasks: [firstRound, laterRound], pos: 1 };
+  assert.deepEqual(supersetProgress(active), {
+    currentMember: 1,
+    totalMembers: 1,
+    remaining: 0,
+  });
+  assert.equal(supersetProgress(active, task('press')), null);
 });
 
 test('new workouts begin at exercise selection', async () => {

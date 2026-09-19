@@ -619,6 +619,36 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   /* Keep text-only heading rows above the shared hover/selection layer. */
   z-index: 1;
 }
+.routine-group-header .list-title {
+  gap: 4px;
+  align-items: baseline;
+}
+.routine-group-header .list-title small {
+  color: var(--muted);
+  font-size: 0.72em;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+}
+.routine-superset-header .list-title {
+  border-inline-start: 3px solid var(--accent);
+  padding-inline-start: 9px;
+}
+.routine-superset-member {
+  position: relative;
+}
+.routine-superset-member::before {
+  position: absolute;
+  z-index: 1;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 3px;
+  background: var(--accent);
+  content: '';
+  pointer-events: none;
+}
+.routine-superset-member .list-link {
+  background: color-mix(in srgb, var(--accent-soft) 38%, transparent);
+}
 .app-list > li:has(> .list-title) {
   height: auto;
   min-height: 64px;
@@ -719,6 +749,19 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   margin: 0;
   color: var(--muted);
   font-size: 15px;
+}
+.superset-progress {
+  display: grid;
+  gap: 2px;
+  margin: 0 0 2px;
+  color: var(--accent);
+  font-size: 15px;
+  font-weight: 800;
+}
+.superset-progress span {
+  color: var(--muted);
+  font-size: 0.9em;
+  font-weight: 500;
 }
 .workout-picker {
   display: flex;
@@ -1050,6 +1093,9 @@ main > section:has(> .app-list) > .app-list .list-link::before {
     font-size: 18px;
   }
   .set-count {
+    font-size: 17px;
+  }
+  .superset-progress {
     font-size: 17px;
   }
 }

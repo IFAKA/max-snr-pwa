@@ -40,6 +40,7 @@ export {
   completedSets,
   skippedSets,
   groupDeferred,
+  supersetProgress,
   findNext,
   skipPlank,
   beginLifting,
