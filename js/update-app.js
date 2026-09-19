@@ -53,8 +53,8 @@ function startLoadingState(button, message) {
   delete button.dataset.loadingStartedAt;
   button.disabled = true;
   button.setAttribute('aria-busy', 'true');
-  if (label) label.textContent = `${originalLabel}…`;
-  button.setAttribute('aria-label', `${originalLabel}…`);
+  if (label) label.textContent = originalLabel;
+  button.setAttribute('aria-label', originalLabel);
   setUpdateState(button, 'checking');
   button.dataset.loadingStartedAt = String(performance.now());
   announce(message);
