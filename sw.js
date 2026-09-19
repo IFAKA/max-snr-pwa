@@ -82,21 +82,33 @@ self.addEventListener('fetch', (event) => {
   const request = event.request;
   const url = new URL(request.url);
   if (request.method !== 'GET' || url.origin !== self.location.origin) return;
+  const networkFirst =
+    request.mode === 'navigate' || ['script', 'style', 'manifest'].includes(request.destination);
   const shell =
     request.mode === 'navigate'
       ? ['/routine/', '/history/', '/workout/'].find((path) => url.pathname.startsWith(path)) || '/'
       : null;
+  const fetchAndCache = () =>
+    fetch(request, { cache: 'no-store' }).then((response) => {
+      if (!response || response.status !== 200 || response.type !== 'basic') return response;
+      const copy = response.clone();
+      void caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+      return response;
+    });
+  if (networkFirst) {
+    event.respondWith(
+      fetchAndCache().catch(() =>
+        caches
+          .match(request)
+          .then((cached) => cached || (shell ? caches.match(shell) : Response.error())),
+      ),
+    );
+    return;
+  }
   event.respondWith(
     caches.match(request).then((cached) => {
       if (cached) return cached;
-      return fetch(request)
-        .then((response) => {
-          if (!response || response.status !== 200 || response.type !== 'basic') return response;
-          const copy = response.clone();
-          void caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-          return response;
-        })
-        .catch(() => (shell ? caches.match(shell) : Response.error()));
+      return fetchAndCache().catch(() => (shell ? caches.match(shell) : Response.error()));
     }),
   );
 });
