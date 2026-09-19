@@ -1,11 +1,5 @@
+import { esc } from '../dom.js';
 import { formatDuration, remaining } from '../workout/timers.js';
-
-const esc = (value) =>
-  String(value ?? '').replace(
-    /[&<>"']/g,
-    (character) =>
-      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character],
-  );
 
 const variantClass = (variant) => (variant ? ` countdown--${esc(variant)}` : '');
 const stageTitleMarkup = (title) =>

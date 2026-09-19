@@ -90,5 +90,3 @@ export function renderActivity(type) {
   bindViewInteractions();
   return definition;
 }
-
-export { activityDefinition };

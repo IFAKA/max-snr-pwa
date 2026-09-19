@@ -10,8 +10,7 @@ import { renderRest } from './render-workout/rest.js';
 import { renderStretch } from './render-workout/stretch.js';
 import { renderCompletion } from './render-workout/completion.js';
 import { renderExerciseSelection, renderExercisePicker } from './render-workout/select.js';
-import { bindViewInteractions, keepAwake } from './dom.js';
-import { app, listMarkup, titleMarkup } from './dom.js';
+import { app, bindViewInteractions, keepAwake, listMarkup, titleMarkup } from './dom.js';
 import { isWorkoutDay, configuredDays, workoutName } from './routine-data.js';
 import { navigateTo } from './navigation.js';
 import { renderActivity } from './render-activity.js';
@@ -28,7 +27,7 @@ export function renderWorkout() {
   const params = new URLSearchParams(location.search);
   const activity = params.get('activity');
   if (activity && !a) return renderActivity(activity);
-  const requestedDay = new URLSearchParams(location.search).get('day');
+  const requestedDay = params.get('day');
   if (!a && requestedDay && configuredDays().includes(requestedDay))
     return renderStart(requestedDay);
   if (!a) return navigateTo('/');

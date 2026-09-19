@@ -1,4 +1,4 @@
-export const app = document.querySelector('#app');
+export const app = globalThis.document?.querySelector('#app');
 export const esc = (value) =>
   String(value ?? '').replace(
     /[&<>"']/g,
@@ -140,7 +140,7 @@ export async function releaseWakeLock() {
     void error;
   }
 }
-document.addEventListener?.('visibilitychange', () => {
+globalThis.document?.addEventListener?.('visibilitychange', () => {
   if (document.visibilityState === 'visible' && document.body?.dataset.route === 'workout')
     void keepAwake();
 });
