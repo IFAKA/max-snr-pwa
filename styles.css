@@ -516,6 +516,9 @@ html.is-touch-pointer .list-link:is(a, button, label):hover::before {
 .app-update-button[data-update-state='success'] .icon {
   color: var(--success);
 }
+.app-update-button[data-update-state='updated'] .icon {
+  color: var(--success);
+}
 .app-update-button[data-update-state='error'] .icon {
   color: var(--danger);
 }

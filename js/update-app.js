@@ -11,6 +11,7 @@ const UPDATE_ICONS = {
   current: iconPaths('refresh'),
   available: iconPaths('download'),
   success: iconPaths('check'),
+  updated: iconPaths('check'),
   error: iconPaths('x'),
 };
 
@@ -19,6 +20,7 @@ const UPDATE_LABELS = {
   current: 'Check for updates',
   available: 'Install app update',
   success: 'Up to date',
+  updated: 'Updated',
   error: 'App update failed',
 };
 
@@ -164,7 +166,7 @@ if (globalThis.navigator?.serviceWorker) {
     if (!reloadAfterActivation) return;
     reloadAfterActivation = false;
     const button = document.querySelector('#update-app');
-    setUpdateState(button, 'success', 'App updated successfully');
+    setUpdateState(button, 'updated', 'App updated successfully');
     setTimeout(() => location.reload(), 1200);
   });
 }
