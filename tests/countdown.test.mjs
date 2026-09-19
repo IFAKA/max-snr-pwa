@@ -3,6 +3,9 @@ import assert from 'node:assert/strict';
 import { countdownMarkup, countdownStage } from '../js/render-workout/countdown.js';
 import { activityDefinition } from '../js/activity-data.js';
 
+globalThis.document = { querySelector: () => null, addEventListener: () => {} };
+const { exercisePicker, supersetMetadataMarkup } = await import('../js/render-workout/shared.js');
+
 test('countdown markup keeps one semantic timer contract across variants', () => {
   const markup = countdownMarkup({
     id: 'timer',
@@ -53,6 +56,38 @@ test('countdown actions support primary continuation and secondary exercise chan
     markup,
     /class="countdown-actions"><button class="primary" id="continue" type="button">Continue<\/button><button class="secondary" id="change-exercises" type="button">Change exercises<\/button>/,
   );
+});
+
+test('superset metadata is shared by exercise choice rows and rest-facing markup', () => {
+  const first = {
+    exerciseId: 'press',
+    performedName: 'Press',
+    groupId: 'pair',
+    groupType: 'superset',
+    memberIndex: 0,
+    set: 1,
+    sets: 2,
+    completed: null,
+    skipped: false,
+  };
+  const second = {
+    exerciseId: 'row',
+    performedName: 'Row',
+    groupId: 'pair',
+    groupType: 'superset',
+    memberIndex: 1,
+    set: 1,
+    sets: 2,
+    completed: null,
+    skipped: false,
+  };
+  const active = { tasks: [first, second], pos: 0 };
+  const metadata = supersetMetadataMarkup(active, first);
+  const picker = exercisePicker(active);
+  assert.match(metadata, /Superset · Exercise 1 of 2/);
+  assert.match(metadata, /1 exercise before rest/);
+  assert.match(picker, /Superset · Exercise 1 of 2/);
+  assert.match(picker, /Superset · Exercise 2 of 2/);
 });
 
 test('timed activity definitions provide countdown durations', () => {

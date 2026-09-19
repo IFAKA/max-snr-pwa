@@ -7,17 +7,12 @@ import {
   primaryAction,
   stepperMarkup,
   bindHoldSteppers,
+  supersetMetadataMarkup,
 } from './shared.js';
 import { save } from '../storage.js';
 import { esc } from '../dom.js';
 import { getState } from '../state.js';
-import {
-  activeTask,
-  completeSet,
-  lastPerformance,
-  exerciseChangeAvailable,
-  supersetProgress,
-} from '../workout.js';
+import { activeTask, completeSet, lastPerformance, exerciseChangeAvailable } from '../workout.js';
 import { navigateTo } from '../navigation.js';
 
 const rirValue = (value) => {
@@ -46,10 +41,7 @@ export function renderLifting() {
   const previous = lastPerformance(task.performedName, unit, task.exerciseId);
   const weightValue = draft.weight ?? previous?.weight ?? '';
   const currentRir = rirValue(draft.rir ?? previous?.rir ?? '0');
-  const roundProgress = supersetProgress(active, task);
-  const supersetMetadata = roundProgress
-    ? `<p class="superset-progress" aria-label="Superset exercise ${roundProgress.currentMember} of ${roundProgress.totalMembers}">Superset · Exercise ${roundProgress.currentMember} of ${roundProgress.totalMembers}<span>${roundProgress.remaining} ${roundProgress.remaining === 1 ? 'exercise' : 'exercises'} before rest</span></p>`
-    : '';
+  const supersetMetadata = supersetMetadataMarkup(active, task);
   const stage = workoutStage({
     className: 'lifting-stage',
     title: esc(task.performedName),

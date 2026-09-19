@@ -5,6 +5,7 @@ import {
   primaryAction,
   exercisePicker,
   bindExercisePicker,
+  supersetMetadataMarkup,
 } from './shared.js';
 import {
   continueRest,
@@ -33,7 +34,9 @@ export function renderRest() {
   const canChange =
     active.phase === 'rest' && !exerciseSelectionLocked(active) && exerciseChangeAvailable(active);
   const changeButton = `<button class="secondary" id="change-exercises" type="button"${canChange ? '' : ' disabled'}>Change exercises</button>`;
-  const setCount = next ? `<p class="set-count">Set ${esc(next.set)} of ${esc(next.sets)}</p>` : '';
+  const setCount = next
+    ? `${supersetMetadataMarkup(active, next)}<p class="set-count">Set ${esc(next.set)} of ${esc(next.sets)}</p>`
+    : '';
   mount(
     countdownStage({
       className: 'rest-stage',

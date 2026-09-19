@@ -763,6 +763,16 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   font-size: 0.9em;
   font-weight: 500;
 }
+.list-link .superset-progress {
+  margin-top: 1px;
+  font-size: 12px;
+  font-weight: 750;
+}
+.list-link .superset-progress span {
+  display: inline;
+  margin-inline-start: 4px;
+  font-size: inherit;
+}
 .workout-picker {
   display: flex;
   height: 100%;

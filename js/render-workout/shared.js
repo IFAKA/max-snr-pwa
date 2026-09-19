@@ -1,7 +1,13 @@
 import { app, bindViewInteractions, esc, icon, listMarkup, titleMarkup } from '../dom.js';
 import { save } from '../storage.js';
 import { getState } from '../state.js';
-import { selectExercise, exerciseSelectionLocked, start, cancelWorkout } from '../workout.js';
+import {
+  selectExercise,
+  exerciseSelectionLocked,
+  start,
+  cancelWorkout,
+  supersetProgress,
+} from '../workout.js';
 import { navigateTo } from '../navigation.js';
 
 const MAIN_PHASES = new Set(['warmup', 'lifting', 'rest', 'stretch', 'complete']);
@@ -176,6 +182,11 @@ export function configureWorkoutNavigation(render) {
 }
 
 export const state = () => getState().active;
+export const supersetMetadataMarkup = (active, task) => {
+  const progress = supersetProgress(active, task);
+  if (!progress) return '';
+  return `<small class="superset-progress" aria-label="Superset exercise ${progress.currentMember} of ${progress.totalMembers}">Superset · Exercise ${progress.currentMember} of ${progress.totalMembers}<span>${progress.remaining} ${progress.remaining === 1 ? 'exercise' : 'exercises'} before rest</span></small>`;
+};
 export function workoutStage({ className = '', title, body = '', actions = '' }) {
   return `<section class="workout-stage ${className}" aria-labelledby="workout-title"><div class="stage-info">${titleMarkup(title, 'workout-title', 'h1', 'workout-title', true)}${body}</div><div class="thumb-zone">${actions}</div></section>`;
 }
@@ -234,8 +245,8 @@ export function exercisePicker(active) {
   }, []);
   const rows = items.map(({ task, complete }) =>
     complete
-      ? `<li class="complete-row" data-picker-skip><div class="list-link" role="status"><span data-hold-scroll><span class="hold-scroll-text">${esc(task.performedName)}</span></span>${icon('check', 'Done')}</div></li>`
-      : `<li><button class="list-link" type="button" data-exercise-id="${esc(task.exerciseId)}"><span data-hold-scroll><span class="hold-scroll-text">${esc(task.performedName)}</span></span>${icon('chevron', 'Select exercise')}</button></li>`,
+      ? `<li class="complete-row" data-picker-skip><div class="list-link" role="status"><span data-hold-scroll><span class="hold-scroll-text">${esc(task.performedName)}</span>${supersetMetadataMarkup(active, task)}</span>${icon('check', 'Done')}</div></li>`
+      : `<li><button class="list-link" type="button" data-exercise-id="${esc(task.exerciseId)}"><span data-hold-scroll><span class="hold-scroll-text">${esc(task.performedName)}</span>${supersetMetadataMarkup(active, task)}</span>${icon('chevron', 'Select exercise')}</button></li>`,
   );
   return `<section class="workout-picker" aria-labelledby="exercise-picker-title">${titleMarkup('Exercise', 'exercise-picker-title')}${listMarkup(rows, '', 'Available exercises')}</section>`;
 }
