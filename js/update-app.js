@@ -4,6 +4,8 @@ let registration = null;
 let updateInProgress = false;
 let reloadAfterActivation = false;
 let availabilityCheck = null;
+const LOADING_SHOW_DELAY_MS = 200;
+const LOADING_MIN_VISIBLE_MS = 350;
 
 const UPDATE_ICONS = {
   checking: iconPaths('loader'),
@@ -31,10 +33,45 @@ function setUpdateState(button, state, message = '') {
   const svg = button.querySelector('svg');
   const label = button.querySelector('.app-update-label');
   if (svg) svg.innerHTML = UPDATE_ICONS[state] || UPDATE_ICONS.current;
-  if (label) label.textContent = UPDATE_LABELS[state] || UPDATE_LABELS.current;
-  button.setAttribute('aria-label', UPDATE_LABELS[state] || UPDATE_LABELS.current);
+  if (state !== 'checking') {
+    if (label) label.textContent = UPDATE_LABELS[state] || UPDATE_LABELS.current;
+    button.setAttribute('aria-label', UPDATE_LABELS[state] || UPDATE_LABELS.current);
+  }
   button.dataset.updateState = state;
   if (message) announce(message);
+}
+
+function startLoadingState(button, message) {
+  const label = button.querySelector('.app-update-label');
+  const currentLabel = label?.textContent || UPDATE_LABELS.current;
+  const originalLabel =
+    button.dataset.updateState === 'checking'
+      ? button.dataset.loadingLabel || currentLabel
+      : currentLabel;
+  button.dataset.loadingLabel = originalLabel;
+  delete button.dataset.loadingStartedAt;
+  button.disabled = true;
+  button.setAttribute('aria-busy', 'true');
+  announce(message);
+  const showTimer = setTimeout(() => {
+    if (!button.disabled) return;
+    if (label) label.textContent = `${originalLabel}…`;
+    button.setAttribute('aria-label', `${originalLabel}…`);
+    setUpdateState(button, 'checking');
+    button.dataset.loadingStartedAt = String(performance.now());
+  }, LOADING_SHOW_DELAY_MS);
+  return {
+    finish: () => {
+      clearTimeout(showTimer);
+      const loadingStartedAt = Number(button.dataset.loadingStartedAt);
+      const visibleFor = Number.isFinite(loadingStartedAt)
+        ? performance.now() - loadingStartedAt
+        : LOADING_MIN_VISIBLE_MS;
+      return new Promise((resolve) =>
+        setTimeout(resolve, Math.max(0, LOADING_MIN_VISIBLE_MS - visibleFor)),
+      );
+    },
+  };
 }
 
 function restoreButton(button) {
@@ -74,17 +111,17 @@ function waitForWaitingWorker(currentRegistration) {
 async function checkForUpdate(button) {
   if (updateInProgress) return;
   updateInProgress = true;
-  button.disabled = true;
-  button.setAttribute('aria-busy', 'true');
-  setUpdateState(button, 'checking', 'Checking for updates');
+  const loading = startLoadingState(button, 'Checking for updates…');
   if (!registration) {
     announce('Updates are unavailable in this browser');
+    await loading.finish();
     restoreButton(button);
     return;
   }
   try {
     await registration.update();
     const waiting = await waitForWaitingWorker(registration);
+    await loading.finish();
     if (!waiting) {
       setUpdateAvailable(button, false);
       announce('The app is current');
@@ -92,7 +129,7 @@ async function checkForUpdate(button) {
       return;
     }
     reloadAfterActivation = true;
-    setUpdateState(button, 'checking', 'Installing update');
+    startLoadingState(button, 'Installing update…');
     waiting.postMessage({ type: 'SKIP_WAITING' });
     setTimeout(() => {
       if (reloadAfterActivation) {
@@ -102,6 +139,7 @@ async function checkForUpdate(button) {
       }
     }, 10000);
   } catch {
+    await loading.finish();
     announce('Update failed. Check your connection and try again.');
     restoreButton(button);
   }
@@ -112,12 +150,14 @@ async function refreshUpdateAvailability(button) {
   setUpdateAvailable(button, false);
   availabilityCheck = (async () => {
     if (!registration) return;
+    const loading = startLoadingState(button, 'Checking for updates…');
     try {
-      setUpdateState(button, 'checking', 'Checking for updates');
       const waiting = await registration.update().then(() => waitForWaitingWorker(registration));
+      await loading.finish();
       setUpdateAvailable(button, Boolean(waiting));
       if (!waiting) announce('The app is current');
     } catch {
+      await loading.finish();
       setUpdateState(button, 'error');
       announce('Updates are unavailable right now');
       setTimeout(() => {
