@@ -3,7 +3,6 @@ import { iconPaths } from './icons.js';
 let registration = null;
 let updateInProgress = false;
 let reloadAfterActivation = false;
-let availabilityCheck = null;
 const LOADING_SHOW_DELAY_MS = 200;
 const LOADING_MIN_VISIBLE_MS = 350;
 
@@ -145,32 +144,9 @@ async function checkForUpdate(button) {
   }
 }
 
-async function refreshUpdateAvailability(button) {
-  if (!button || availabilityCheck) return availabilityCheck;
-  setUpdateAvailable(button, false);
-  availabilityCheck = (async () => {
-    if (!registration) return;
-    const loading = startLoadingState(button, 'Checking for updates…');
-    try {
-      const waiting = await registration.update().then(() => waitForWaitingWorker(registration));
-      await loading.finish();
-      setUpdateAvailable(button, Boolean(waiting));
-      if (!waiting) announce('The app is current');
-    } catch {
-      await loading.finish();
-      announce('Updates are unavailable right now');
-      restoreButton(button);
-    }
-  })().finally(() => {
-    availabilityCheck = null;
-  });
-  return availabilityCheck;
-}
-
 export function setServiceWorkerRegistration(value) {
   registration = value;
   bindUpdateButton();
-  void refreshUpdateAvailability(document.querySelector('#update-app'));
 }
 
 export function bindUpdateButton(root = document) {
@@ -180,7 +156,6 @@ export function bindUpdateButton(root = document) {
   if (button.dataset.updateBound) return;
   button.dataset.updateBound = 'true';
   button.addEventListener('click', () => void checkForUpdate(button));
-  void refreshUpdateAvailability(button);
 }
 
 if (globalThis.navigator?.serviceWorker) {
