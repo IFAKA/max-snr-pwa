@@ -123,7 +123,7 @@ async function checkForUpdate(button) {
     await loading.finish();
     if (!waiting) {
       setUpdateAvailable(button, false);
-      announce('The app is current');
+      announce("You're up to date.");
       updateInProgress = false;
       return;
     }
