@@ -188,9 +188,3 @@ export function selectRecommendation(state, { day = '', now = new Date() } = {})
   }
   return { ...selected, stable: false };
 }
-
-export const HEALTH_GUIDELINES = {
-  weeklyAerobicMinutes: WEEKLY_AEROBIC_MINUTES,
-  highSedentaryHours: HIGH_SEDENTARY_HOURS,
-  measurementIntervalDays: MEASUREMENT_INTERVAL_DAYS,
-};
