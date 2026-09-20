@@ -1,4 +1,4 @@
-# Max-SNR body-health evidence and assumptions
+# Workout body-health evidence and assumptions
 
 Updated 2026-09-13. This is a programming record, not a claim that a formula can predict an individual's exact hypertrophy.
 

@@ -16,8 +16,8 @@ Dependency-free browser ES module that adds long-press, virtual-joystick selecti
 ```
 
 ```js
-import { createMagneticPicker } from '@maxsnr/magnetic-picker';
-import '@maxsnr/magnetic-picker/styles.css';
+import { createMagneticPicker } from '@workout/magnetic-picker';
+import '@workout/magnetic-picker/styles.css';
 
 const list = document.querySelector('[data-magnetic-picker]');
 const picker = createMagneticPicker(list, {
@@ -37,8 +37,8 @@ Keep the list markup semantic and create/destroy the picker in an effect. The re
 
 ```jsx
 import { useEffect, useRef } from 'react';
-import { createMagneticPicker } from '@maxsnr/magnetic-picker';
-import '@maxsnr/magnetic-picker/styles.css';
+import { createMagneticPicker } from '@workout/magnetic-picker';
+import '@workout/magnetic-picker/styles.css';
 
 export function ExerciseList({ exercises, onSelect }) {
   const listRef = useRef(null);
@@ -69,8 +69,8 @@ export function ExerciseList({ exercises, onSelect }) {
 ```vue
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from 'vue';
-import { createMagneticPicker } from '@maxsnr/magnetic-picker';
-import '@maxsnr/magnetic-picker/styles.css';
+import { createMagneticPicker } from '@workout/magnetic-picker';
+import '@workout/magnetic-picker/styles.css';
 
 const list = ref(null);
 let picker;

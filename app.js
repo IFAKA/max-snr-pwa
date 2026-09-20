@@ -61,12 +61,12 @@ async function boot() {
   } catch (error) {
     const target = document.querySelector('#app');
     if (target) {
-      target.innerHTML = '<h1>MaxSNR could not start</h1><p></p>';
+      target.innerHTML = '<h1>Workout could not start</h1><p></p>';
       const message = target.querySelector('p');
       if (message) message.textContent = error?.message || 'Reload the app and try again.';
     } else {
       document.body?.append(
-        `MaxSNR could not start: ${error?.message || 'Reload the app and try again.'}`,
+        `Workout could not start: ${error?.message || 'Reload the app and try again.'}`,
       );
     }
   }

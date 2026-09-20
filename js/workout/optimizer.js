@@ -532,7 +532,7 @@ export function optimizeRoutine({
   const generated = buildRoutine(daysPerWeek, allocation);
   return {
     days: generated.days,
-    names: generated.days.map((_, index) => `MAX-SNR ${String.fromCharCode(65 + index)}`),
+    names: generated.days.map((_, index) => `WORKOUT ${String.fromCharCode(65 + index)}`),
     routine: generated.routine,
     comparison: compareFrequencies(),
     allocation: weeklyAllocation(),

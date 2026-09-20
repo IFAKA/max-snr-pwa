@@ -1,5 +1,5 @@
 {
-  "name": "@maxsnr/magnetic-picker",
+  "name": "@workout/magnetic-picker",
   "version": "0.1.0",
   "description": "Dependency-free, accessible magnetic picker for browser lists",
   "type": "module",

@@ -1,10 +1,10 @@
-# MaxSNR Visual Identity
+# Workout Visual Identity
 
-Reusable visual and interaction direction for MaxSNR-style products. This document describes the identity visible in the current app, so it can be recreated in another web, mobile, or native product without copying the implementation.
+Reusable visual and interaction direction for Workout-style products. This document describes the identity visible in the current app, so it can be recreated in another web, mobile, or native product without copying the implementation.
 
 ## 1. Identity in one sentence
 
-MaxSNR is **quietly technical, physically grounded, and action-first**: a calm training tool that puts the next useful decision in reach, uses space and typography to make effort legible, and avoids decorative fitness-app energy.
+Workout is **quietly technical, physically grounded, and action-first**: a calm training tool that puts the next useful decision in reach, uses space and typography to make effort legible, and avoids decorative fitness-app energy.
 
 ## 2. Brand character
 
