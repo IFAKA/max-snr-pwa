@@ -85,20 +85,18 @@ export function renderLifting() {
       : '';
   const budgetNote = `<p class="session-budget${budget.capReached ? ' is-at-cap' : ''}"><span>Session <time id="session-elapsed">${formatDuration(budget.elapsedMs)}</time></span>${budget.capReached ? ' · 60:00 reached' : ''}</p>`;
   const supersetMetadata = supersetMetadataMarkup(active, task);
-  const stage = workoutStage({
-    className: 'lifting-stage',
-    title: esc(task.performedName),
-    body: `${supersetMetadata}<p class="set-count">Set ${esc(task.set)} of ${esc(task.sets)}</p><p class="target-prescription">Target: ${esc(task.targetRepRange || task.reps)} reps · ${esc(task.targetRir || task.rir)} RIR</p><p class="previous-performance">Previous: ${previous ? `${esc(previous.weight ?? 'bodyweight')} ${esc(previous.unit || unit)} × ${esc(previous.reps)} @ ${esc(previous.rir ?? '—')} RIR` : 'No logged set'}</p>${progressionNote}${next ? `<p class="next-exercise">Next: ${esc(next.performedName)} · set ${esc(next.set)} of ${esc(next.sets)}</p>` : '<p class="next-exercise">Last planned set</p>'}${budgetNote}`,
-    actions: budgetAction,
-  });
   const changeExercise =
     task.set === 1
       ? `<button class="secondary" id="change-exercise" type="button"${exerciseChangeAvailable(active) ? '' : ' disabled'}>Change exercise</button>`
       : '';
   const formMarkup = `<form id="set-form">${step === 'load' ? `${stepperMarkup('weight', `Load · ${unit}`, weightValue, -2.5, 2.5)}${stepperMarkup('rir', 'RIR', formatRir(currentRir), -1, 1)}` : stepperMarkup('reps', 'Reps', repsValue, -1, 1)}<input id="rir" type="hidden" value="${formatRir(currentRir)}"><input id="reps" type="hidden" value="${esc(repsValue)}"><input id="weight" type="hidden" value="${esc(weightValue)}">${primaryAction('next-step', step === 'load' ? 'Log set' : 'Next', step === 'load' ? 'submit' : 'button')}${budgetAction}${changeExercise}</form>`;
-  mount(
-    stage.replace('<div class="thumb-zone"></div>', `<div class="thumb-zone">${formMarkup}</div>`),
-  );
+  const stage = workoutStage({
+    className: 'lifting-stage',
+    title: esc(task.performedName),
+    body: `${supersetMetadata}<p class="set-count">Set ${esc(task.set)} of ${esc(task.sets)}</p><p class="target-prescription">Target: ${esc(task.targetRepRange || task.reps)} reps · ${esc(task.targetRir || task.rir)} RIR</p><p class="previous-performance">Previous: ${previous ? `${esc(previous.weight ?? 'bodyweight')} ${esc(previous.unit || unit)} × ${esc(previous.reps)} @ ${esc(previous.rir ?? '—')} RIR` : 'No logged set'}</p>${progressionNote}${next ? `<p class="next-exercise">Next: ${esc(next.performedName)} · set ${esc(next.set)} of ${esc(next.sets)}</p>` : '<p class="next-exercise">Last planned set</p>'}${budgetNote}`,
+    actions: formMarkup,
+  });
+  mount(stage);
   const elapsed = document.querySelector('#session-elapsed');
   const tick = () => {
     if (!elapsed || !document.body.contains(elapsed) || !state()) return;
