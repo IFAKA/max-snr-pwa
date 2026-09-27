@@ -14,6 +14,7 @@ import {
   exerciseChangeAvailable,
   sessionBudgetState,
   formatDuration,
+  undoLastSet,
 } from '../workout.js';
 import { buzz, esc } from '../dom.js';
 import { navigateTo } from '../navigation.js';
@@ -36,6 +37,8 @@ export function renderRest() {
   const canChange =
     active.phase === 'rest' && !exerciseSelectionLocked(active) && exerciseChangeAvailable(active);
   const changeButton = `<button class="secondary" id="change-exercises" type="button"${canChange ? '' : ' disabled'}>Change exercises</button>`;
+  const hasCompletedSet = active.tasks.some((task) => task.completed);
+  const undoButton = `<button class="secondary" id="undo-set" type="button"${hasCompletedSet ? '' : ' disabled'}>Undo last set</button>`;
   const setCount = next
     ? `${supersetMetadataMarkup(active, next)}<p class="set-count">Set ${esc(next.set)} of ${esc(next.sets)}</p><p class="target-prescription">Target: ${esc(next.targetRepRange || next.reps)} reps · ${esc(next.targetRir || next.rir)} RIR</p>`
     : '';
@@ -50,7 +53,7 @@ export function renderRest() {
         label: 'Rest remaining',
         variant: 'rest',
       },
-      actions: `${primaryAction('continue', 'Continue')}${changeButton}`,
+      actions: `${primaryAction('continue', 'Continue')}${changeButton}${undoButton}`,
     }),
   );
   document
@@ -59,6 +62,9 @@ export function renderRest() {
   document
     .querySelector('#change-exercises')
     ?.addEventListener('click', () => navigateTo('/workout/?view=exercises'));
+  document
+    .querySelector('#undo-set')
+    ?.addEventListener('click', (event) => runAction(event.currentTarget, undoLastSet));
   bindCountdown({
     element: document.querySelector('#timer'),
     getEndAt: () => state()?.restEndsAt,

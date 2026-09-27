@@ -26,16 +26,14 @@ const {
   undoLastSet,
   completeSet,
   continueRest,
-  completeStretch,
-  finishWorkout,
   selectExercise,
   exerciseSelectionLocked,
-  finishEarly,
-  finishAtBudget,
   supersetProgress,
   sessionBudgetState,
   timeBudgetCutOrder,
 } = await import('../js/workout/session.js');
+const { completeStretch, finishWorkout, finishEarly, finishAtBudget } =
+  await import('../js/workout/finish.js');
 const { isCurrentDayComplete } = await import('../js/render-today.js');
 const { ROUTINE, NAMES } = await import('../js/routine-data.js');
 

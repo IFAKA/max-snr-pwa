@@ -2,6 +2,7 @@ import { app, bindViewInteractions, esc, icon, listMarkup, titleMarkup } from '.
 import { getState, setState } from './state.js';
 import { migrate, persist } from './storage.js';
 import { validateBackup } from './backup.js';
+import { bindUpdateButton } from './update-app.js';
 
 const unitFor = (performance) => performance?.unit || 'kg';
 function download(value, filename) {
@@ -87,6 +88,9 @@ const dataRows = () => [
   '<li><label class="list-link" for="import"><span>Import</span>' +
     icon('upload', 'Import backup') +
     '<input id="import" type="file" accept="application/json,.json"></label></li>',
+  '<li><button class="list-link app-update-button" id="update-app" type="button"><span class="app-update-label">Check for updates</span>' +
+    icon('refresh', 'Check for app updates') +
+    '</button></li>',
 ];
 export function renderHistory() {
   const state = getState();
@@ -125,7 +129,8 @@ function renderWorkoutDetail(state, index) {
   bindViewInteractions();
 }
 function renderData(state) {
-  app.innerHTML = `<section aria-labelledby="data-title">${titleMarkup('Data', 'data-title')}${listMarkup(dataRows(), '', 'Data actions')}<output id="data-status" class="notice error" role="status" aria-live="polite" aria-atomic="true" hidden></output></section>`;
+  app.innerHTML = `<section aria-labelledby="data-title">${titleMarkup('Data', 'data-title')}${listMarkup(dataRows(), '', 'Data actions')}<output id="data-status" class="notice error" role="status" aria-live="polite" aria-atomic="true" hidden></output><p id="app-update-status" class="app-update-status sr-only" role="status" aria-live="polite" aria-atomic="true"></p></section>`;
   bindDataActions(state);
   bindViewInteractions();
+  bindUpdateButton();
 }

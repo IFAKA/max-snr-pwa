@@ -3,6 +3,7 @@ import { getState } from './state.js';
 import { persist } from './storage.js';
 import { navigateTo } from './navigation.js';
 import { activityDefinition } from './activity-data.js';
+import { recordMeasurement } from './health-data.js';
 import { bindCountdown, countdownStage } from './render-workout/countdown.js';
 
 const activityStorageKey = (type) => `maxsnr-activity-started:${type}`;
@@ -45,7 +46,7 @@ function recordActivity(type, form, startedAtMs) {
   const state = getState();
   state.health.activities.push(activity);
   if (type === 'measurement' && activity.measurements)
-    state.health.measurements.push({ date: activity.completedAt, ...activity.measurements });
+    recordMeasurement(state, activity.measurements);
 }
 
 export function renderActivity(type) {

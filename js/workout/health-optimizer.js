@@ -90,6 +90,18 @@ export function bodyHealthSummary(state, now = new Date()) {
   };
 }
 
+function describeDeficits(activity, aerobicDeficit, movementDeficit, sedentaryHigh) {
+  const reasons = [];
+  if (activity.dimensions.includes('aerobic') && aerobicDeficit > 0) reasons.push('cardio');
+  if (activity.dimensions.includes('movement') && movementDeficit > 0)
+    reasons.push('daily movement');
+  if (activity.dimensions.includes('sedentary') && sedentaryHigh) reasons.push('sitting time');
+  if (!reasons.length) return `${activity.title} keeps you moving today.`;
+  const list =
+    reasons.length > 1 ? `${reasons.slice(0, -1).join(', ')} and ${reasons.at(-1)}` : reasons[0];
+  return `Your ${list} need${reasons.length > 1 ? '' : 's'} attention this week.`;
+}
+
 function candidates(summary, { resistanceDue = false, measurementDue = false, state } = {}) {
   const result = [];
   if (resistanceDue)
@@ -99,7 +111,7 @@ function candidates(summary, { resistanceDue = false, measurementDue = false, st
       metric: 'Full body',
       durationMinutes: null,
       score: 100,
-      reason: 'The planned resistance session is due.',
+      reason: 'Your resistance session is scheduled for today.',
     });
   const aerobicDeficit = Math.max(0, WEEKLY_AEROBIC_MINUTES - summary.aerobicEquivalent);
   const movementDeficit = Math.max(0, MOVEMENT_TARGET_MINUTES - summary.movementMinutes);
@@ -135,7 +147,7 @@ function candidates(summary, { resistanceDue = false, measurementDue = false, st
         ...activity,
         metric: activity.metric,
         score,
-        reason: `Heuristic marginal value combines deficient ${activity.dimensions.join(', ')} dimensions and subtracts time cost.`,
+        reason: describeDeficits(activity, aerobicDeficit, movementDeficit, summary.sedentaryHigh),
       });
   });
   if (measurementDue)
@@ -145,7 +157,7 @@ function candidates(summary, { resistanceDue = false, measurementDue = false, st
       metric: 'Waist',
       durationMinutes: null,
       score: 20,
-      reason: 'A trend measurement is due; a single reading is not treated as a diagnosis.',
+      reason: "It's been a couple of weeks since your last check-in.",
     });
   if (!result.length)
     result.push({
@@ -154,7 +166,7 @@ function candidates(summary, { resistanceDue = false, measurementDue = false, st
       metric: 'No action needed',
       durationMinutes: null,
       score: 0,
-      reason: 'No meaningful marginal intervention is currently justified.',
+      reason: "You're on track — nothing else needed today.",
     });
   return result.sort((a, b) => b.score - a.score);
 }

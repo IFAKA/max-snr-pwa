@@ -54,12 +54,15 @@ export {
   deferCurrent,
   substituteCurrent,
   undoLastSet,
+} from './workout/session.js';
+export {
   completeStretch,
   finishEarly,
   finishAtBudget,
+  completeWorkout,
   finishWorkout,
   cancelWorkout,
-} from './workout/session.js';
+} from './workout/finish.js';
 export {
   startPlank,
   setTimer,

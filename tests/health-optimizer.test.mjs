@@ -33,7 +33,7 @@ test('one walk overlaps aerobic and sedentary deficits', () => {
   assert.equal(result.type, 'walk');
   assert.equal(result.durationMinutes, 30);
   assert.equal(result.metric, '30m');
-  assert.match(result.reason, /aerobic.*sedentary/i);
+  assert.match(result.reason, /cardio.*sitting/i);
 });
 
 test('adequate dimensions allow doing nothing', () => {
@@ -102,7 +102,7 @@ test('overlap value falls when aerobic is already covered', () => {
   });
   const result = selectRecommendation(state, { day: '', now });
   assert.equal(result.type, 'walk');
-  assert.match(result.reason, /movement.*sedentary/);
+  assert.match(result.reason, /movement.*sitting/i);
 });
 
 test('small changes retain an existing recommendation', () => {

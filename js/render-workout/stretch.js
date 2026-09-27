@@ -1,19 +1,19 @@
 import { mount, state, runAction, showError, primaryAction } from './shared.js';
-import { completeStretch, finishWorkout, setTimer } from '../workout.js';
+import { completeStretch, completeWorkout, setTimer } from '../workout.js';
 import { STRETCH_MS } from '../constants.js';
 import { buzz } from '../dom.js';
-import { navigateTo, renderWithTransition } from '../navigation.js';
+import { renderWithTransition } from '../navigation.js';
 import { bindCountdown, countdownStage } from './countdown.js';
 
-export function renderStretch() {
-  const active = state();
-  const running = Boolean(active.timerEndsAt && active.timerEndsAt > Date.now());
-  const finish = () =>
-    runAction(null, finishWorkout, () =>
-      navigateTo(`/?completed=1&day=${encodeURIComponent(active.day)}`),
-    );
+const finish = () => runAction(null, completeWorkout);
 
-  if (active.timerEndsAt && !running) {
+export async function renderStretch() {
+  const active = state();
+  if (!active.timerEndsAt) await setTimer(STRETCH_MS);
+  const current = state();
+  const running = Boolean(current.timerEndsAt && current.timerEndsAt > Date.now());
+
+  if (current.timerEndsAt && !running) {
     void finish().catch(showError);
     return;
   }
@@ -23,27 +23,16 @@ export function renderStretch() {
       className: 'stretch-stage',
       title: 'Stretch',
       countdown: {
-        remainingMs: running ? active.timerEndsAt - Date.now() : STRETCH_MS,
-        label: running ? 'Stretch remaining' : 'Stretch timer, 30 seconds',
+        remainingMs: current.timerEndsAt - Date.now(),
+        label: 'Stretch remaining',
         variant: 'stretch',
       },
-      actions: `<div class="controls">${running ? '<button class="secondary" id="cancel-stretch" type="button">Cancel</button>' : primaryAction('start-stretch', 'Start')}<button class="secondary" id="finish-stretch" type="button">Finish</button></div>`,
+      actions: `<div class="controls"><button class="secondary" id="cancel-stretch" type="button">Restart</button>${primaryAction('finish-stretch', 'Finish')}</div>`,
     }),
-  );
-  document.querySelector('#start-stretch')?.addEventListener('click', (event) =>
-    runAction(
-      event.currentTarget,
-      () => setTimer(STRETCH_MS),
-      () => renderWithTransition(() => renderStretch()),
-    ),
   );
   document
     .querySelector('#finish-stretch')
-    ?.addEventListener('click', (event) =>
-      runAction(event.currentTarget, finishWorkout, () =>
-        navigateTo(`/?completed=1&day=${encodeURIComponent(active.day)}`),
-      ),
-    );
+    ?.addEventListener('click', (event) => runAction(event.currentTarget, completeWorkout));
   document
     .querySelector('#cancel-stretch')
     ?.addEventListener('click', (event) =>

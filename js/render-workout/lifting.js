@@ -22,7 +22,6 @@ import {
   exerciseChangeAvailable,
   parseRirRange,
   sessionBudgetState,
-  formatDuration,
 } from '../workout.js';
 import { navigateTo } from '../navigation.js';
 
@@ -36,10 +35,6 @@ const defaultRir = (target, set, sets) => {
   const range = parseRirRange(target);
   return set === sets ? (range.lower ?? 1) : (range.upper ?? 1);
 };
-const nextTask = (active) =>
-  active.tasks.find(
-    (candidate, index) => index > active.pos && !candidate.completed && !candidate.skipped,
-  ) || active.tasks.find((candidate) => !candidate.completed && !candidate.skipped);
 
 export function renderLifting() {
   const active = state(),
@@ -55,10 +50,15 @@ export function renderLifting() {
     step = 'reps';
     history.replaceState(history.state, '', '/workout/?step=reps');
   }
-  const repsValue = draft.reps ?? String(String(task.reps).split('–')[0]);
   const unit = getState().settings?.unit || 'kg';
   const previous = lastPerformance(task.performedName, unit, task.exerciseId);
   const previousSets = lastExercisePerformances(task.exerciseId, unit);
+  const previousSetReps = previousSets[task.set - 1]?.reps;
+  const repsValue =
+    draft.reps ??
+    (previousSetReps !== undefined
+      ? String(previousSetReps)
+      : String(String(task.reps).split('–')[0]));
   const recommendation = recommendDoubleProgression({
     load: previous?.weight,
     performances: previousSets,
@@ -76,14 +76,12 @@ export function renderLifting() {
   const currentRir = rirValue(
     draft.rir ?? previous?.rir ?? defaultRir(task.targetRir || task.rir, task.set, task.sets),
   );
-  const next = nextTask(active);
   const budget = sessionBudgetState(active);
   const budgetAction =
     budget.capReached &&
     active.tasks.some((item) => item.cutPriority && !item.completed && !item.skipped)
       ? primaryAction('cut-optional', 'Cut optional accessories')
       : '';
-  const budgetNote = `<p class="session-budget${budget.capReached ? ' is-at-cap' : ''}"><span>Session <time id="session-elapsed">${formatDuration(budget.elapsedMs)}</time></span>${budget.capReached ? ' · 60:00 reached' : ''}</p>`;
   const supersetMetadata = supersetMetadataMarkup(active, task);
   const changeExercise =
     task.set === 1
@@ -93,20 +91,10 @@ export function renderLifting() {
   const stage = workoutStage({
     className: 'lifting-stage',
     title: esc(task.performedName),
-    body: `${supersetMetadata}<p class="set-count">Set ${esc(task.set)} of ${esc(task.sets)}</p><p class="target-prescription">Target: ${esc(task.targetRepRange || task.reps)} reps · ${esc(task.targetRir || task.rir)} RIR</p><p class="previous-performance">Previous: ${previous ? `${esc(previous.weight ?? 'bodyweight')} ${esc(previous.unit || unit)} × ${esc(previous.reps)} @ ${esc(previous.rir ?? '—')} RIR` : 'No logged set'}</p>${progressionNote}${next ? `<p class="next-exercise">Next: ${esc(next.performedName)} · set ${esc(next.set)} of ${esc(next.sets)}</p>` : '<p class="next-exercise">Last planned set</p>'}${budgetNote}`,
+    body: `${supersetMetadata}<p class="set-count">Set ${esc(task.set)} of ${esc(task.sets)}</p><p class="target-prescription">Target: ${esc(task.targetRepRange || task.reps)} reps · ${esc(task.targetRir || task.rir)} RIR</p><p class="previous-performance">Previous: ${previous ? `${esc(previous.weight ?? 'bodyweight')} ${esc(previous.unit || unit)} × ${esc(previous.reps)} @ ${esc(previous.rir ?? '—')} RIR` : 'No logged set'}</p>${progressionNote}`,
     actions: formMarkup,
   });
   mount(stage);
-  const elapsed = document.querySelector('#session-elapsed');
-  const tick = () => {
-    if (!elapsed || !document.body.contains(elapsed) || !state()) return;
-    const currentBudget = sessionBudgetState(state());
-    elapsed.textContent = formatDuration(currentBudget.elapsedMs);
-    const note = document.querySelector('.session-budget');
-    if (note) note.classList.toggle('is-at-cap', currentBudget.capReached);
-  };
-  const clock = setInterval(tick, 1000);
-  setTimeout(() => clearInterval(clock), 2 * 60 * 60 * 1000);
   const weight = document.querySelector('#weight'),
     reps = document.querySelector('#reps'),
     form = document.querySelector('#set-form');

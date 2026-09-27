@@ -1,11 +1,11 @@
-import { app, bindViewInteractions, dayNow, icon, listMarkup, titleMarkup } from './dom.js';
+import { app, bindViewInteractions, dayNow, esc, icon, listMarkup, titleMarkup } from './dom.js';
 import { getState } from './state.js';
 import { isWorkoutDay, workoutName } from './routine-data.js';
 import { startRow, bindDirectStart } from './render-workout/shared.js';
 import { persist } from './storage.js';
 import { selectRecommendation } from './workout/health-optimizer.js';
+import { completedWorkoutsThisWeek, selectedFrequency } from './workout.js';
 import confetti from './vendor/canvas-confetti.js';
-import { bindUpdateButton } from './update-app.js';
 
 function localDateKey(value) {
   const date = value instanceof Date ? value : new Date(value);
@@ -57,11 +57,11 @@ export function renderToday() {
         : recommendation.type === 'rest'
           ? `<li><div class="list-link" role="status"><span>${recommendation.metric}</span>${icon('check', 'On track')}</div></li>`
           : `<li><a class="list-link" href="/workout/?activity=${encodeURIComponent(recommendation.type)}"><span>Start · ${recommendation.metric}</span>${icon('chevron', 'Start activity')}</a></li>`;
-  const updateItem = `<li><button class="list-link app-update-button" id="update-app" type="button"><span class="app-update-label">Check for updates</span>${icon('refresh', 'Check for app updates')}</button></li>`;
-  app.innerHTML = `<section class="today-screen" aria-labelledby="today-title">${titleMarkup(title, 'today-title')}${listMarkup([startItem, `<li><a class="list-link" href="/routine/"><span>Routine</span>${icon('chevron', 'Open routine')}</a></li>`, `<li><a class="list-link" href="/history/"><span>History</span>${icon('chevron', 'Open history')}</a></li>`, updateItem], '', 'Home navigation')}<p id="app-update-status" class="app-update-status sr-only" role="status" aria-live="polite" aria-atomic="true"></p></section>`;
+  const weeklyGoalDays = selectedFrequency().days;
+  const completedThisWeek = completedWorkoutsThisWeek(state.history);
+  app.innerHTML = `<section class="today-screen" aria-labelledby="today-title">${titleMarkup(title, 'today-title')}<p class="routine-summary">${esc(recommendation.reason)}</p><p class="routine-summary">${esc(completedThisWeek)} of ${esc(weeklyGoalDays)} this week</p>${listMarkup([startItem, `<li><a class="list-link" href="/routine/"><span>Routine</span>${icon('chevron', 'Open routine')}</a></li>`, `<li><a class="list-link" href="/history/"><span>History</span>${icon('chevron', 'Open history')}</a></li>`], '', 'Home navigation')}</section>`;
   bindViewInteractions();
   bindDirectStart();
-  bindUpdateButton();
   if (params.get('completed') === '1') {
     history.replaceState(history.state, '', `${location.pathname}${location.hash}`);
     showCompletionConfetti();

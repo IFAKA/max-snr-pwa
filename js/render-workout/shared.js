@@ -6,6 +6,9 @@ import {
   exerciseSelectionLocked,
   start,
   cancelWorkout,
+  deferCurrent,
+  substituteCurrent,
+  finishEarly,
   supersetProgress,
 } from '../workout.js';
 import { navigateTo } from '../navigation.js';
@@ -102,7 +105,7 @@ function bindCancelDialog() {
   dialog.className = 'confirm-dialog bottom-sheet';
   dialog.setAttribute('aria-labelledby', 'cancel-workout-title');
   dialog.innerHTML =
-    '<div class="sheet-handle" aria-hidden="true"></div><form method="dialog"><h2 id="cancel-workout-title">Cancel workout?</h2><p>Your completed sets will stay in history.</p><div class="dialog-actions"><button class="primary" value="default">Cancel workout</button><button value="cancel">Keep working out</button></div></form>';
+    '<div class="sheet-handle" aria-hidden="true"></div><form method="dialog"><h2 id="cancel-workout-title">Cancel workout?</h2><p id="cancel-workout-body">Your completed sets will stay in history.</p><div class="dialog-actions"><button class="primary" value="default">Cancel workout</button><button value="finish-early">Finish early</button><button value="cancel">Keep working out</button></div></form>';
   document.body.append(dialog);
   openCancelSheet = bindBottomSheet(dialog);
   dialog.addEventListener('close', async () => {
@@ -111,6 +114,16 @@ function bindCancelDialog() {
       if (button) button.disabled = true;
       try {
         if (await cancelWorkout()) navigateTo('/');
+      } catch (error) {
+        if (button) button.disabled = false;
+        showError(error);
+      }
+    } else if (dialog.returnValue === 'finish-early') {
+      const button = dialog.querySelector('[value="finish-early"]');
+      const day = state()?.day;
+      if (button) button.disabled = true;
+      try {
+        if (await finishEarly()) navigateTo(`/?completed=1&day=${encodeURIComponent(day)}`);
       } catch (error) {
         if (button) button.disabled = false;
         showError(error);
@@ -126,6 +139,22 @@ function bindCancelDialog() {
 function openCancelDialog() {
   const dialog = bindCancelDialog();
   if (dialog.open || !isMainPhase(state())) return;
+  const active = state();
+  const isComplete = active?.phase === 'complete';
+  dialog.querySelector('#cancel-workout-title').textContent = isComplete
+    ? 'Discard this workout?'
+    : 'Cancel workout?';
+  dialog.querySelector('#cancel-workout-body').textContent = isComplete
+    ? 'Nothing has been saved yet — your sets will be lost.'
+    : 'Your completed sets will stay in history.';
+  dialog.querySelector('[value="default"]').textContent = isComplete
+    ? 'Discard workout'
+    : 'Cancel workout';
+  const finishEarlyButton = dialog.querySelector('[value="finish-early"]');
+  const nothingLeftToFinish =
+    !active || active.tasks.every((task) => task.completed || task.skipped);
+  finishEarlyButton.hidden = nothingLeftToFinish;
+  finishEarlyButton.disabled = nothingLeftToFinish;
   openCancelSheet();
 }
 
@@ -243,11 +272,22 @@ export function exercisePicker(active) {
     });
     return list;
   }, []);
-  const rows = items.map(({ task, complete }) =>
-    complete
-      ? `<li class="complete-row" data-picker-skip><div class="list-link" role="status"><span data-hold-scroll><span class="hold-scroll-text">${esc(task.performedName)}</span>${supersetMetadataMarkup(active, task)}</span>${icon('check', 'Done')}</div></li>`
-      : `<li><button class="list-link" type="button" data-exercise-id="${esc(task.exerciseId)}"><span data-hold-scroll><span class="hold-scroll-text">${esc(task.performedName)}</span>${supersetMetadataMarkup(active, task)}</span>${icon('chevron', 'Select exercise')}</button></li>`,
-  );
+  const currentExerciseId =
+    active.phase === 'lifting' ? active.tasks[active.pos]?.exerciseId : null;
+  const rows = items.flatMap(({ task, complete }) => {
+    if (complete)
+      return [
+        `<li class="complete-row" data-picker-skip><div class="list-link" role="status"><span data-hold-scroll><span class="hold-scroll-text">${esc(task.performedName)}</span>${supersetMetadataMarkup(active, task)}</span>${icon('check', 'Done')}</div></li>`,
+      ];
+    const mainRow = `<li><button class="list-link" type="button" data-exercise-id="${esc(task.exerciseId)}"><span data-hold-scroll><span class="hold-scroll-text">${esc(task.performedName)}</span>${supersetMetadataMarkup(active, task)}</span>${icon('chevron', 'Select exercise')}</button></li>`;
+    if (task.exerciseId !== currentExerciseId) return [mainRow];
+    const deferRow = `<li><button class="list-link" type="button" data-defer-id="${esc(task.exerciseId)}"><span>Skip for now</span>${icon('dash', 'Move to the end of the workout')}</button></li>`;
+    const substituteRows = (task.alternatives || []).map(
+      (name) =>
+        `<li><button class="list-link" type="button" data-substitute="${esc(name)}"><span>Switch to ${esc(name)}</span>${icon('chevron', 'Switch exercise')}</button></li>`,
+    );
+    return [mainRow, deferRow, ...substituteRows];
+  });
   return `<section class="workout-picker" aria-labelledby="exercise-picker-title">${titleMarkup('Exercise', 'exercise-picker-title')}${listMarkup(rows, '', 'Available exercises')}</section>`;
 }
 export function bindExercisePicker(active, onSelected = () => navigateTo('/workout/')) {
@@ -256,6 +296,18 @@ export function bindExercisePicker(active, onSelected = () => navigateTo('/worko
     .forEach((button) =>
       button.addEventListener('click', () =>
         runAction(button, () => selectExercise(button.dataset.exerciseId), onSelected),
+      ),
+    );
+  document
+    .querySelectorAll('[data-defer-id]')
+    .forEach((button) =>
+      button.addEventListener('click', () => runAction(button, deferCurrent, onSelected)),
+    );
+  document
+    .querySelectorAll('[data-substitute]')
+    .forEach((button) =>
+      button.addEventListener('click', () =>
+        runAction(button, () => substituteCurrent(button.dataset.substitute), onSelected),
       ),
     );
   if (exerciseSelectionLocked(active))

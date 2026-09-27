@@ -15,18 +15,9 @@ import {
   marginalSetReport,
   sensitivityAnalysis,
 } from './workout/optimizer-analysis.js';
+import { measurementFields, recordMeasurement } from './health-data.js';
 
 const today = () => new Date().toISOString();
-const measurementFields = [
-  'weight',
-  'waist',
-  'shoulders',
-  'chest',
-  'arms',
-  'forearms',
-  'thighs',
-  'calves',
-];
 const input = (id, label, step = '0.1') =>
   `<label class="analytics-field"><span>${label}</span><input id="${id}" name="${id}" type="number" min="0" step="${step}" inputmode="decimal" /></label>`;
 const raw = (value) =>
@@ -56,8 +47,12 @@ function measurementRows(measurements) {
     return '<li><div class="list-link empty-state">Log two measurements to see rolling trends.</div></li>';
   return measurementFields
     .map((key) => {
-      const delta = Number(recent[1][key] || 0) - Number(recent[0][key] || 0);
-      return `<li><div class="list-link"><span>${esc(key)}</span><strong>${raw(Number(recent[1][key] || 0))} (${delta >= 0 ? '+' : ''}${raw(delta)})</strong></div></li>`;
+      const previousValue = recent[0][key];
+      const latestValue = recent[1][key];
+      if (previousValue === undefined || latestValue === undefined)
+        return `<li><div class="list-link"><span>${esc(key)}</span><strong>—</strong></div></li>`;
+      const delta = Number(latestValue) - Number(previousValue);
+      return `<li><div class="list-link"><span>${esc(key)}</span><strong>${raw(Number(latestValue))} (${delta >= 0 ? '+' : ''}${raw(delta)})</strong></div></li>`;
     })
     .join('');
 }
@@ -67,19 +62,19 @@ function bindAnalytics() {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     const state = getState();
-    state.health.movementMinutes.push({
-      date: today(),
-      minutes: Number(form.get('movement') || 0),
-    });
-    state.health.cardioMinutes.push({
-      date: today(),
-      minutes: Number(form.get('cardio') || 0),
-      intensity: form.get('intensity') || 'moderate',
-    });
-    state.health.measurements.push({
-      date: today(),
-      ...Object.fromEntries(measurementFields.map((key) => [key, Number(form.get(key) || 0)])),
-    });
+    const movement = form.get('movement');
+    if (movement) state.health.movementMinutes.push({ date: today(), minutes: Number(movement) });
+    const cardio = form.get('cardio');
+    if (cardio)
+      state.health.cardioMinutes.push({
+        date: today(),
+        minutes: Number(cardio),
+        intensity: form.get('intensity') || 'moderate',
+      });
+    recordMeasurement(
+      state,
+      Object.fromEntries(measurementFields.map((key) => [key, form.get(key)])),
+    );
     state.health.sedentary.logs.push({
       date: today(),
       hours: Number(form.get('sedentaryHours') || state.health.sedentary.profileHoursPerDay),
