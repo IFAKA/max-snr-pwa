@@ -7,7 +7,11 @@ import { renderWorkout } from './js/render-workout.js';
 import { renderAnalytics } from './js/render-analytics.js';
 import { keepAwake, releaseWakeLock } from './js/dom.js';
 import { setServiceWorkerRegistration } from './js/update-app.js';
-import { initializeRouteTransitions } from './js/navigation.js';
+import {
+  initializeRouteTransitions,
+  parentRouteUrl,
+  referrerIsParentEntry,
+} from './js/navigation.js';
 
 const renderers = {
   today: renderToday,
@@ -22,29 +26,10 @@ async function boot() {
     const route = document.body.dataset.route;
     const referrer = document.referrer ? new URL(document.referrer) : null;
     const params = new URLSearchParams(location.search);
-    const hasParentEntry =
-      referrer?.origin === location.origin &&
-      ((route === 'routine' &&
-        (params.has('day') ? referrer.pathname === '/routine/' : referrer.pathname === '/')) ||
-        (route === 'workout' && params.has('day') && referrer.pathname === '/routine/') ||
-        (route === 'workout' &&
-          params.get('view') === 'exercises' &&
-          referrer.pathname === '/workout/') ||
-        (route !== 'routine' && route !== 'workout' && referrer.pathname === '/'));
+    const currentUrl = `${location.pathname}${location.search}${location.hash}`;
+    const parentUrl = parentRouteUrl(route, params, Boolean(getState()?.active));
+    const hasParentEntry = referrerIsParentEntry(route, params, referrer, parentUrl);
     if (route !== 'today' && !history.state?.route && !hasParentEntry) {
-      const currentUrl = `${location.pathname}${location.search}${location.hash}`;
-      const parentUrl =
-        route === 'routine' && params.has('day')
-          ? '/routine/'
-          : route === 'history' && params.get('view') === 'workout'
-            ? '/history/?view=workouts'
-            : route === 'history' && params.get('view')
-              ? '/history/'
-              : route === 'workout' && params.has('day') && !getState()?.active
-                ? `/routine/?day=${encodeURIComponent(params.get('day'))}`
-                : route === 'workout' && params.get('view') === 'exercises'
-                  ? '/workout/'
-                  : '/';
       history.replaceState(
         { route: parentUrl === '/' ? 'today' : route, path: parentUrl },
         '',

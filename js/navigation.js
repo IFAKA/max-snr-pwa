@@ -79,3 +79,30 @@ export function navigateTo(url, { replace = false } = {}) {
   if (replace) location.replace(path);
   else location.assign(path);
 }
+
+export function parentRouteUrl(route, params, hasActiveWorkout) {
+  if (route === 'routine' && params.has('day')) return '/routine/';
+  if (route === 'history' && params.get('view') === 'workout') return '/history/?view=workouts';
+  if (route === 'history' && params.get('view')) return '/history/';
+  if (route === 'workout' && params.has('day') && !hasActiveWorkout)
+    return `/routine/?day=${encodeURIComponent(params.get('day'))}`;
+  if (route === 'workout' && params.get('view') === 'exercises') return '/workout/';
+  return '/';
+}
+
+export function referrerIsParentEntry(route, params, referrer, parentUrl) {
+  if (referrer?.origin !== location.origin) return false;
+  const parent = new URL(parentUrl, location.origin);
+  if (
+    referrer.pathname === parent.pathname &&
+    (!parent.search || referrer.search === parent.search)
+  )
+    return true;
+  if (route === 'routine') return referrer.pathname === (params.has('day') ? '/routine/' : '/');
+  if (route === 'workout')
+    return (
+      referrer.pathname === (params.has('day') ? '/routine/' : '/workout/') &&
+      (params.has('day') || params.get('view') === 'exercises')
+    );
+  return referrer.pathname === '/';
+}

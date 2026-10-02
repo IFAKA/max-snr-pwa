@@ -1,4 +1,4 @@
-import { app, bindViewInteractions, esc, listMarkup, titleMarkup } from './dom.js';
+import { app, bindViewInteractions, esc, titleMarkup } from './dom.js';
 import { getState } from './state.js';
 import { persist } from './storage.js';
 import { adaptiveRecommendations, rollingMuscleTrends } from './workout/adaptation.js';
@@ -185,6 +185,43 @@ export function renderAnalytics() {
     )
     .join('');
   const logForm = `<details class="analytics-details"><summary>Log health data</summary><form id="activity-form" class="analytics-form">${input('movement', 'Light/general movement minutes')} ${input('cardio', 'Cardio minutes')}<label class="analytics-field"><span>Cardio intensity</span><select id="intensity" name="intensity"><option value="moderate">Moderate</option><option value="vigorous">Vigorous</option></select></label>${input('sedentaryHours', 'Approximate sitting hours/day')} ${input('longestSit', 'Longest uninterrupted sitting period (optional)', '1')} ${input('interruptions', 'Movement interruptions today', '1')}${measurementFields.map((key) => input(key, key)).join('')}<label class="analytics-field"><span><input name="reminders" type="checkbox" /> Enable movement reminder</span></label>${input('reminderInterval', 'Reminder interval (behavioral choice, not a proven threshold)', '1')}<button class="primary" type="submit">Save log</button></form></details>`;
-  app.innerHTML = `<section aria-labelledby="analytics-title">${titleMarkup('Workout analytics', 'analytics-title')}${listMarkup(summary, '', 'Weekly health dimensions')}<h2>Sedentary behavior</h2><p class="routine-summary">${esc(sedentary.recommendation)} Reminders replace sitting with brief movement; their interval is configurable and is not presented as a safety cutoff.</p><h2>Measurement trend</h2><ul class="app-list">${measurementRows(state.health.measurements)}</ul><h2>Direct sets by muscle</h2><ul class="app-list">${valueRows(metrics.directSets) || '<li><div class="list-link empty-state">Complete a workout to populate this.</div></li>'}</ul><h2>Fractional indirect sets by muscle</h2><ul class="app-list">${valueRows(metrics.fractionalSets) || '<li><div class="list-link empty-state">Complete a workout to populate this.</div></li>'}</ul><h2>Effective sets by muscle</h2><ul class="app-list">${valueRows(metrics.effectiveSets) || '<li><div class="list-link empty-state">Complete a workout to populate this.</div></li>'}</ul><h2>Optimizer recommendations</h2><ul class="app-list">${recommendationsMarkup}</ul><details class="analytics-details"><summary>Marginal utility per individual set</summary><p class="routine-summary">Raw model units per modeled minute. Values are ordinal heuristics, not biological measurements.</p><ul class="app-list">${marginalRows}</ul><h3>Allocation decisions</h3><ul class="app-list">${decisionRows}</ul><h3>Next-set candidates</h3><ul class="app-list">${candidateRows}</ul></details><details class="analytics-details"><summary>Frequency sensitivity</summary><p class="routine-summary">The current model winner is ${selected.days} days. Three days wins ${threeWins} of ${sensitivity.twoVsThree.length} configured 2-vs-3 scenarios. At default time and visit costs, three days needs relief greater than ${raw(sensitivity.threeDayReliefThreshold(0.08, 2))} model units to beat two days.</p><ul class="app-list">${frequencyRows}</ul></details>${logForm}</section>`;
+  const heading = (text) =>
+    `<li data-picker-skip class="list-block"><h2 class="list-link list-title">${esc(text)}</h2></li>`;
+  const note = (text) =>
+    `<li data-picker-skip class="list-block"><div class="list-link empty-state"><span>${text}</span></div></li>`;
+  const empty = (text) => note(text);
+  const rows = (markup, fallback) => markup || empty(fallback);
+  const block = (markup) => markup.replaceAll('<li><div', '<li class="list-block"><div');
+  const details = (title, body) =>
+    `<li data-picker-skip class="list-block"><details class="analytics-details"><summary>${title}</summary>${body}</details></li>`;
+  const detailList = (markup) => `<ul class="analytics-rows">${block(markup)}</ul>`;
+  const frequencyNote = `The current model winner is ${selected.days} days. Three days wins ${threeWins} of ${sensitivity.twoVsThree.length} configured 2-vs-3 scenarios. At default time and visit costs, three days needs relief greater than ${raw(sensitivity.threeDayReliefThreshold(0.08, 2))} model units to beat two days.`;
+  const items = [
+    block(summary),
+    heading('Sedentary behavior'),
+    note(
+      `${esc(sedentary.recommendation)} Reminders replace sitting with brief movement; their interval is configurable and is not presented as a safety cutoff.`,
+    ),
+    heading('Measurement trend'),
+    block(measurementRows(state.health.measurements)),
+    heading('Direct sets by muscle'),
+    block(rows(valueRows(metrics.directSets), 'Complete a workout to populate this.')),
+    heading('Fractional indirect sets by muscle'),
+    block(rows(valueRows(metrics.fractionalSets), 'Complete a workout to populate this.')),
+    heading('Effective sets by muscle'),
+    block(rows(valueRows(metrics.effectiveSets), 'Complete a workout to populate this.')),
+    heading('Optimizer recommendations'),
+    block(recommendationsMarkup),
+    details(
+      'Marginal utility per individual set',
+      `<p class="routine-summary">Raw model units per modeled minute. Values are ordinal heuristics, not biological measurements.</p>${detailList(marginalRows)}<h3>Allocation decisions</h3>${detailList(decisionRows)}<h3>Next-set candidates</h3>${detailList(candidateRows)}`,
+    ),
+    details(
+      'Frequency sensitivity',
+      `<p class="routine-summary">${frequencyNote}</p>${detailList(frequencyRows)}`,
+    ),
+    `<li data-picker-skip class="list-block">${logForm}</li>`,
+  ].join('');
+  app.innerHTML = `<section aria-labelledby="analytics-title">${titleMarkup('Workout analytics', 'analytics-title')}<ul class="app-list" aria-label="Workout analytics">${items}</ul></section>`;
   bindAnalytics();
 }

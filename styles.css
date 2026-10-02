@@ -521,8 +521,8 @@ html.is-touch-pointer .list-link:is(a, button, label):hover::before {
 .list-link small {
   font-size: 16px;
 }
-.app-update-button {
-  font-weight: 400;
+.list-link:is(button, label) {
+  font-weight: 700;
 }
 .app-update-button[data-update-state='checking'] .icon {
   animation: app-update-spin 900ms linear infinite;
@@ -675,6 +675,35 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.app-list > li.list-block {
+  height: auto;
+  min-height: var(--list-row-height);
+  overflow: visible;
+  white-space: normal;
+}
+.list-block > .list-link {
+  height: auto;
+  min-height: var(--list-row-height);
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+.list-block > .list-link > span:first-child {
+  white-space: normal;
+}
+.list-block > .analytics-details {
+  width: 100%;
+  margin-top: 0;
+  border-top: 0;
+}
+.analytics-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.analytics-rows > li {
+  display: flex;
+  border-bottom: 1px solid var(--line);
 }
 .history-detail {
   max-height: calc(100svh - 82px);
