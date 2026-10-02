@@ -36,9 +36,9 @@ export function renderRest() {
     active.tasks[active.pos + 1];
   const canChange =
     active.phase === 'rest' && !exerciseSelectionLocked(active) && exerciseChangeAvailable(active);
-  const changeButton = `<button class="secondary" id="change-exercises" type="button"${canChange ? '' : ' disabled'}>Change exercises</button>`;
+  const changeButton = `<button class="secondary" id="change-exercises" type="button"${canChange ? '' : ' disabled'}>Change Exercises</button>`;
   const hasCompletedSet = active.tasks.some((task) => task.completed);
-  const undoButton = `<button class="secondary" id="undo-set" type="button"${hasCompletedSet ? '' : ' disabled'}>Undo last set</button>`;
+  const undoButton = `<button class="secondary" id="undo-set" type="button"${hasCompletedSet ? '' : ' disabled'}>Undo Last Set</button>`;
   const setCount = next
     ? `${supersetMetadataMarkup(active, next)}<p class="set-count">Set ${esc(next.set)} of ${esc(next.sets)}</p><p class="target-prescription">Target: ${esc(next.targetRepRange || next.reps)} reps · ${esc(next.targetRir || next.rir)} RIR</p>`
     : '';

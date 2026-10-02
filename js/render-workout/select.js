@@ -17,7 +17,7 @@ export function renderExerciseSelection() {
       className: 'exercise-selection-stage',
       title: task.performedName,
       body: '<p class="muted">Choose your first exercise.</p>',
-      actions: `${primaryAction('continue-selection', 'Continue')}<button class="secondary" id="change-exercise" type="button">Change exercise</button>`,
+      actions: `${primaryAction('continue-selection', 'Continue')}<button class="secondary" id="change-exercise" type="button">Change Exercise</button>`,
     }),
   );
   document

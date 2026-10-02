@@ -105,7 +105,7 @@ function bindCancelDialog() {
   dialog.className = 'confirm-dialog bottom-sheet';
   dialog.setAttribute('aria-labelledby', 'cancel-workout-title');
   dialog.innerHTML =
-    '<div class="sheet-handle" aria-hidden="true"></div><form method="dialog"><h2 id="cancel-workout-title">Cancel workout?</h2><p id="cancel-workout-body">Your completed sets will stay in history.</p><div class="dialog-actions"><button class="primary" value="default">Cancel workout</button><button value="finish-early">Finish early</button><button value="cancel">Keep working out</button></div></form>';
+    '<div class="sheet-handle" aria-hidden="true"></div><form method="dialog"><h2 id="cancel-workout-title">Cancel Workout?</h2><p id="cancel-workout-body">Your completed sets will stay in history.</p><div class="dialog-actions"><button class="primary" value="default">Cancel workout</button><button value="finish-early">Finish early</button><button value="cancel">Keep working out</button></div></form>';
   document.body.append(dialog);
   openCancelSheet = bindBottomSheet(dialog);
   dialog.addEventListener('close', async () => {
@@ -148,8 +148,8 @@ function openCancelDialog() {
     ? 'Nothing has been saved yet — your sets will be lost.'
     : 'Your completed sets will stay in history.';
   dialog.querySelector('[value="default"]').textContent = isComplete
-    ? 'Discard workout'
-    : 'Cancel workout';
+    ? 'Discard Workout'
+    : 'Cancel Workout';
   const finishEarlyButton = dialog.querySelector('[value="finish-early"]');
   const nothingLeftToFinish =
     !active || active.tasks.every((task) => task.completed || task.skipped);
@@ -281,7 +281,7 @@ export function exercisePicker(active) {
       ];
     const mainRow = `<li><button class="list-link" type="button" data-exercise-id="${esc(task.exerciseId)}"><span data-hold-scroll><span class="hold-scroll-text">${esc(task.performedName)}</span>${supersetMetadataMarkup(active, task)}</span>${icon('chevron', 'Select exercise')}</button></li>`;
     if (task.exerciseId !== currentExerciseId) return [mainRow];
-    const deferRow = `<li><button class="list-link" type="button" data-defer-id="${esc(task.exerciseId)}"><span>Skip for now</span>${icon('dash', 'Move to the end of the workout')}</button></li>`;
+    const deferRow = `<li><button class="list-link" type="button" data-defer-id="${esc(task.exerciseId)}"><span>Skip for Now</span>${icon('dash', 'Move to the end of the workout')}</button></li>`;
     const substituteRows = (task.alternatives || []).map(
       (name) =>
         `<li><button class="list-link" type="button" data-substitute="${esc(name)}"><span>Switch to ${esc(name)}</span>${icon('chevron', 'Switch exercise')}</button></li>`,

@@ -27,7 +27,7 @@ function setLine(task, index) {
   const p = performanceFor(task);
   if (!p)
     return '<li><div class="list-link"><span class="history-set-label">Not completed</span></div></li>';
-  const load = p.weight === undefined ? '' : ` · ${esc(p.weight)} ${esc(unitFor(p))}`;
+  const load = p.weight === undefined ? '' : ` · ${esc(p.weight)}&nbsp;${esc(unitFor(p))}`;
   return `<li><div class="list-link"><span class="history-set-label">Set ${esc(task.set || index + 1)} · ${esc(p.reps)} reps${load}</span></div></li>`;
 }
 function workoutDetails(workout) {
@@ -88,7 +88,7 @@ const dataRows = () => [
   '<li><label class="list-link" for="import"><span>Import</span>' +
     icon('upload', 'Import backup') +
     '<input id="import" type="file" accept="application/json,.json"></label></li>',
-  '<li><button class="list-link app-update-button" id="update-app" type="button"><span class="app-update-label">Check for updates</span>' +
+  '<li><button class="list-link app-update-button" id="update-app" type="button"><span class="app-update-label">Check for Updates</span>' +
     icon('refresh', 'Check for app updates') +
     '</button></li>',
 ];

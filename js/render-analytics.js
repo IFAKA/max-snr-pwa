@@ -127,19 +127,22 @@ export function renderAnalytics() {
     ['Strength', `${health.resistanceDays}/2 days`],
     [
       'Aerobic MVPA',
-      `${raw(metrics.cardioEquivalent + metrics.activityCardioEquivalent)}/150 moderate-equivalent min`,
+      `${raw(metrics.cardioEquivalent + metrics.activityCardioEquivalent)}/150 moderate-equivalent&nbsp;min`,
     ],
     [
       'Sedentary exposure',
-      `${raw(sedentary.profileHoursPerDay)} h/day · ${sedentary.exposureClass}`,
+      `${raw(sedentary.profileHoursPerDay)}&nbsp;h/day · ${sedentary.exposureClass}`,
     ],
     ['Sitting interruptions', sedentary.interruptions],
-    ['Longest sitting logged', `${raw(sedentary.longestUninterruptedMinutes)} min`],
-    ['Daily movement', `${raw(metrics.movementMinutes + metrics.activityMinutes)} min logged`],
+    ['Longest sitting logged', `${raw(sedentary.longestUninterruptedMinutes)}&nbsp;min`],
+    [
+      'Daily movement',
+      `${raw(metrics.movementMinutes + metrics.activityMinutes)}&nbsp;min&nbsp;logged`,
+    ],
     [
       'Gym timing',
       timing.observedCount
-        ? `${raw(timing.mean)} min observed vs ${raw(timing.estimate)} min model`
+        ? `${raw(timing.mean)}&nbsp;min observed vs ${raw(timing.estimate)}&nbsp;min model`
         : 'Awaiting session timestamps',
     ],
   ]
@@ -181,10 +184,10 @@ export function renderAnalytics() {
   const frequencyRows = compareFrequencies({ state, allocation: prescriptionEntries })
     .map(
       (candidate) =>
-        `<li><div class="list-link"><span>${candidate.days} days · ${candidate.minutes} min/week</span><strong>${raw(candidate.utility)}</strong></div></li>`,
+        `<li><div class="list-link"><span>${candidate.days} days · ${candidate.minutes}&nbsp;min/week</span><strong>${raw(candidate.utility)}</strong></div></li>`,
     )
     .join('');
-  const logForm = `<details class="analytics-details"><summary>Log health data</summary><form id="activity-form" class="analytics-form">${input('movement', 'Light/general movement minutes')} ${input('cardio', 'Cardio minutes')}<label class="analytics-field"><span>Cardio intensity</span><select id="intensity" name="intensity"><option value="moderate">Moderate</option><option value="vigorous">Vigorous</option></select></label>${input('sedentaryHours', 'Approximate sitting hours/day')} ${input('longestSit', 'Longest uninterrupted sitting period (optional)', '1')} ${input('interruptions', 'Movement interruptions today', '1')}${measurementFields.map((key) => input(key, key)).join('')}<label class="analytics-field"><span><input name="reminders" type="checkbox" /> Enable movement reminder</span></label>${input('reminderInterval', 'Reminder interval (behavioral choice, not a proven threshold)', '1')}<button class="primary" type="submit">Save log</button></form></details>`;
+  const logForm = `<details class="analytics-details"><summary>Log Health Data</summary><form id="activity-form" class="analytics-form">${input('movement', 'Light/general movement minutes')} ${input('cardio', 'Cardio minutes')}<label class="analytics-field"><span>Cardio intensity</span><select id="intensity" name="intensity"><option value="moderate">Moderate</option><option value="vigorous">Vigorous</option></select></label>${input('sedentaryHours', 'Approximate sitting hours/day')} ${input('longestSit', 'Longest uninterrupted sitting period (optional)', '1')} ${input('interruptions', 'Movement interruptions today', '1')}${measurementFields.map((key) => input(key, key)).join('')}<label class="analytics-field"><span><input name="reminders" type="checkbox" /> Enable movement reminder</span></label>${input('reminderInterval', 'Reminder interval (behavioral choice, not a proven threshold)', '1')}<button class="primary" type="submit">Save log</button></form></details>`;
   const heading = (text) =>
     `<li data-picker-skip class="list-block"><h2 class="list-link list-title">${esc(text)}</h2></li>`;
   const note = (text) =>
@@ -198,26 +201,26 @@ export function renderAnalytics() {
   const frequencyNote = `The current model winner is ${selected.days} days. Three days wins ${threeWins} of ${sensitivity.twoVsThree.length} configured 2-vs-3 scenarios. At default time and visit costs, three days needs relief greater than ${raw(sensitivity.threeDayReliefThreshold(0.08, 2))} model units to beat two days.`;
   const items = [
     block(summary),
-    heading('Sedentary behavior'),
+    heading('Sedentary Behavior'),
     note(
       `${esc(sedentary.recommendation)} Reminders replace sitting with brief movement; their interval is configurable and is not presented as a safety cutoff.`,
     ),
-    heading('Measurement trend'),
+    heading('Measurement Trend'),
     block(measurementRows(state.health.measurements)),
-    heading('Direct sets by muscle'),
+    heading('Direct Sets by Muscle'),
     block(rows(valueRows(metrics.directSets), 'Complete a workout to populate this.')),
-    heading('Fractional indirect sets by muscle'),
+    heading('Fractional Indirect Sets by Muscle'),
     block(rows(valueRows(metrics.fractionalSets), 'Complete a workout to populate this.')),
-    heading('Effective sets by muscle'),
+    heading('Effective Sets by Muscle'),
     block(rows(valueRows(metrics.effectiveSets), 'Complete a workout to populate this.')),
-    heading('Optimizer recommendations'),
+    heading('Optimizer Recommendations'),
     block(recommendationsMarkup),
     details(
-      'Marginal utility per individual set',
-      `<p class="routine-summary">Raw model units per modeled minute. Values are ordinal heuristics, not biological measurements.</p>${detailList(marginalRows)}<h3>Allocation decisions</h3>${detailList(decisionRows)}<h3>Next-set candidates</h3>${detailList(candidateRows)}`,
+      'Marginal Utility per Individual Set',
+      `<p class="routine-summary">Raw model units per modeled minute. Values are ordinal heuristics, not biological measurements.</p>${detailList(marginalRows)}<h3>Allocation Decisions</h3>${detailList(decisionRows)}<h3>Next-Set Candidates</h3>${detailList(candidateRows)}`,
     ),
     details(
-      'Frequency sensitivity',
+      'Frequency Sensitivity',
       `<p class="routine-summary">${frequencyNote}</p>${detailList(frequencyRows)}`,
     ),
     `<li data-picker-skip class="list-block">${logForm}</li>`,

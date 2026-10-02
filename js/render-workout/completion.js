@@ -40,7 +40,7 @@ export function renderCompletion() {
       ? listMarkup(
           callouts.map((line) => `<li><div class="list-link"><span>${esc(line)}</span></div></li>`),
           '',
-          'Improvements since last session',
+          'Improvements Since Last Session',
         )
       : '',
   ].join('');
@@ -48,7 +48,7 @@ export function renderCompletion() {
     workoutStage({
       title: active.name,
       body,
-      actions: primaryAction('finish', 'Save workout'),
+      actions: primaryAction('finish', 'Save Workout'),
     }),
   );
   document

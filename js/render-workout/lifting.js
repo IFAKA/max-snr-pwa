@@ -80,12 +80,12 @@ export function renderLifting() {
   const budgetAction =
     budget.capReached &&
     active.tasks.some((item) => item.cutPriority && !item.completed && !item.skipped)
-      ? primaryAction('cut-optional', 'Cut optional accessories')
+      ? primaryAction('cut-optional', 'Cut Optional Accessories')
       : '';
   const supersetMetadata = supersetMetadataMarkup(active, task);
   const changeExercise =
     task.set === 1
-      ? `<button class="secondary" id="change-exercise" type="button"${exerciseChangeAvailable(active) ? '' : ' disabled'}>Change exercise</button>`
+      ? `<button class="secondary" id="change-exercise" type="button"${exerciseChangeAvailable(active) ? '' : ' disabled'}>Change Exercise</button>`
       : '';
   const formMarkup = `<form id="set-form">${step === 'load' ? `${stepperMarkup('weight', `Load · ${unit}`, weightValue, -2.5, 2.5)}${stepperMarkup('rir', 'RIR', formatRir(currentRir), -1, 1)}` : stepperMarkup('reps', 'Reps', repsValue, -1, 1)}<input id="rir" type="hidden" value="${formatRir(currentRir)}"><input id="reps" type="hidden" value="${esc(repsValue)}"><input id="weight" type="hidden" value="${esc(weightValue)}">${primaryAction('next-step', step === 'load' ? 'Log set' : 'Next', step === 'load' ? 'submit' : 'button')}${budgetAction}${changeExercise}</form>`;
   const stage = workoutStage({

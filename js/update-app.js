@@ -17,11 +17,11 @@ const UPDATE_ICONS = {
 
 const UPDATE_LABELS = {
   checking: 'Checking for app updates',
-  current: 'Check for updates',
-  available: 'Install app update',
-  success: 'Up to date',
+  current: 'Check for Updates',
+  available: 'Install App Update',
+  success: 'Up to Date',
   updated: 'Updated',
-  error: 'App update failed',
+  error: 'App Update Failed',
 };
 
 function announce(message) {
