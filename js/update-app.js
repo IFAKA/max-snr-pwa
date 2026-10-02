@@ -3,7 +3,7 @@ import { iconPaths } from './icons.js';
 let registration = null;
 let updateInProgress = false;
 let reloadAfterActivation = false;
-const LOADING_MIN_VISIBLE_MS = 1200;
+const LOADING_MIN_VISIBLE_MS = 500;
 const SUCCESS_VISIBLE_MS = 1400;
 
 const UPDATE_ICONS = {

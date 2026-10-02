@@ -525,7 +525,11 @@ html.is-touch-pointer .list-link:is(a, button, label):hover::before {
   font-weight: 700;
 }
 .app-update-button[data-update-state='checking'] .icon {
-  animation: app-update-spin 900ms linear infinite;
+  animation: app-update-spin 600ms linear infinite;
+}
+.app-update-button[aria-busy='true']:disabled {
+  cursor: progress;
+  opacity: 1;
 }
 .app-update-button[data-update-state='success'] .icon {
   color: var(--success);
@@ -909,17 +913,7 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   text-align: center;
 }
 .countdown {
-  color: #fff;
-}
-.countdown--rest {
-  color: #fff;
-}
-.countdown--plank {
-  color: #fff;
-}
-.countdown--stretch,
-.countdown--activity {
-  color: #fff;
+  color: var(--text);
 }
 .confirm-dialog {
   box-sizing: border-box;
@@ -1169,7 +1163,7 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   }
   /* Progress feedback is essential, so the update spinner keeps rotating. */
   .app-update-button[data-update-state='checking'] .icon {
-    animation: app-update-spin 900ms linear infinite !important;
+    animation: app-update-spin 600ms linear infinite !important;
   }
 }
 @media (prefers-color-scheme: dark) {
