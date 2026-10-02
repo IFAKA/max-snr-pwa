@@ -268,6 +268,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
   let joystickDeltaY = 0;
   let joystickPosition = 0;
   let joystickVelocity = 0;
+  let scrollRemainder = 0;
   let joystickMode = JOYSTICK_MODES.MAGNETIC;
   let joystickFrame = null;
   let joystickFrameTime = null;
@@ -347,6 +348,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     joystickFrame = null;
     joystickFrameTime = null;
     joystickVelocity = 0;
+    scrollRemainder = 0;
     joystickMode = JOYSTICK_MODES.MAGNETIC;
   };
   const setJoystickMode = (nextMode, clientY) => {
@@ -419,8 +421,15 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     joystickVelocity = magneticJoystickVelocity(joystickVelocity, speed, elapsed);
     if (Math.abs(joystickVelocity) > 0.001) {
       const scrollTarget = getScrollTarget();
-      if (joystickMode !== JOYSTICK_MODES.MAGNETIC && 'scrollTop' in scrollTarget)
-        scrollTarget.scrollTop += joystickVelocity * elapsed * options.detentDistance;
+      if (joystickMode !== JOYSTICK_MODES.MAGNETIC && 'scrollTop' in scrollTarget) {
+        // Browsers round fractional scrollTop writes, which swallows small downward steps.
+        scrollRemainder += joystickVelocity * elapsed * options.detentDistance;
+        const wholePixels = Math.trunc(scrollRemainder);
+        if (wholePixels) {
+          scrollTarget.scrollTop += wholePixels;
+          scrollRemainder -= wholePixels;
+        }
+      }
       joystickPosition = magneticPickerIndex(
         joystickPosition + joystickVelocity * elapsed,
         rows.length,
