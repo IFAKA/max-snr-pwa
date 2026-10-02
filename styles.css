@@ -1167,6 +1167,10 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   ::view-transition-new(root) {
     animation: none !important;
   }
+  /* Progress feedback is essential, so the update spinner keeps rotating. */
+  .app-update-button[data-update-state='checking'] .icon {
+    animation: app-update-spin 900ms linear infinite !important;
+  }
 }
 @media (prefers-color-scheme: dark) {
   :root {
