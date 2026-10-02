@@ -1,11 +1,9 @@
-import { mount, state, runAction, showError, primaryAction } from './shared.js';
+import { mount, state, runAction, primaryAction } from './shared.js';
 import { completeStretch, completeWorkout, setTimer } from '../workout.js';
 import { STRETCH_MS } from '../constants.js';
 import { buzz } from '../dom.js';
 import { renderWithTransition } from '../navigation.js';
 import { bindCountdown, countdownStage } from './countdown.js';
-
-const finish = () => runAction(null, completeWorkout);
 
 export async function renderStretch() {
   const active = state();
@@ -13,17 +11,12 @@ export async function renderStretch() {
   const current = state();
   const running = Boolean(current.timerEndsAt && current.timerEndsAt > Date.now());
 
-  if (current.timerEndsAt && !running) {
-    void finish().catch(showError);
-    return;
-  }
-
   mount(
     countdownStage({
       className: 'stretch-stage',
       title: 'Stretch',
       countdown: {
-        remainingMs: current.timerEndsAt - Date.now(),
+        remainingMs: Math.max(0, current.timerEndsAt - Date.now()),
         label: 'Stretch remaining',
         variant: 'stretch',
       },
@@ -44,13 +37,8 @@ export async function renderStretch() {
     element: document.querySelector('#timer'),
     getEndAt: () => state()?.timerEndsAt,
     shouldRun: () => state()?.phase === 'stretch' && Boolean(state()?.timerEndsAt),
-    onEnd: async () => {
-      try {
-        buzz([35, 70]);
-        await finish();
-      } catch (error) {
-        showError(error);
-      }
+    onEnd: () => {
+      if (running) buzz([35, 70]);
     },
   });
 }
