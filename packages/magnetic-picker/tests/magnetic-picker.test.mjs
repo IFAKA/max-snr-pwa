@@ -236,7 +236,12 @@ test('mouse pointer downs stay available for native link and button clicks', () 
   globalThis.document = dom.document;
   try {
     const picker = createMagneticPicker(dom.list, { cancel: false });
-    dom.listeners.get('list:pointerdown')({ pointerId: 1, pointerType: 'mouse', button: 0, clientY: 20 });
+    dom.listeners.get('list:pointerdown')({
+      pointerId: 1,
+      pointerType: 'mouse',
+      button: 0,
+      clientY: 20,
+    });
     assert.deepEqual(dom.capturedPointerIds, []);
     assert.equal(dom.classes.has('is-picker-active'), false);
     picker.destroy();
@@ -506,9 +511,7 @@ test('joystick advances the scroll surface continuously between row changes', as
     );
     assert.ok(dom.list.scrollTop > 0);
     assert.ok(dom.scrollIntoViewCalls > 1);
-    assert.ok(
-      dom.scrollIntoViewOptions.every((options) => options?.behavior === 'auto'),
-    );
+    assert.ok(dom.scrollIntoViewOptions.every((options) => options?.behavior === 'auto'));
     picker.destroy();
   } finally {
     globalThis.document = originalDocument;
@@ -559,9 +562,7 @@ test('joystick stays still inside the well and starts only at the limit', async 
       preventDefault: () => {},
     });
     for (let time = 1016; time <= 2000; time += 100) frame(time);
-    assert.ok(
-      dom.rowList.findIndex((row) => row.classList.contains('is-picker-target')) > 0,
-    );
+    assert.ok(dom.rowList.findIndex((row) => row.classList.contains('is-picker-target')) > 0);
     assert.ok(dom.scrollIntoViewCalls > 1);
     picker.destroy();
   } finally {
@@ -657,12 +658,8 @@ test('upper edge scrolling preserves the highlighted middle row handoff', async 
     });
     frame(0);
     for (let time = 100; time <= 1000; time += 100) frame(time);
-    const edgeTarget = dom.rowList.findIndex((row) =>
-      row.classList.contains('is-picker-target'),
-    );
-    assert.ok(
-      edgeTarget < initialTarget,
-    );
+    const edgeTarget = dom.rowList.findIndex((row) => row.classList.contains('is-picker-target'));
+    assert.ok(edgeTarget < initialTarget);
     assert.ok(dom.scrollIntoViewCalls > initialScrollCalls);
     assert.ok(dom.scrollIntoViewOptions.every((options) => options?.block === 'nearest'));
     const edgeScrollCalls = dom.scrollIntoViewCalls;
@@ -924,9 +921,7 @@ test('holding the joystick at the upper limit scrolls upward', async () => {
     });
     frame(0);
     frame(16);
-    assert.ok(
-      dom.rowList.findIndex((row) => row.classList.contains('is-picker-target')) < 6,
-    );
+    assert.ok(dom.rowList.findIndex((row) => row.classList.contains('is-picker-target')) < 6);
     picker.destroy();
   } finally {
     globalThis.document = originalDocument;
@@ -1034,6 +1029,27 @@ test('captures the pointer immediately for stable picker dragging', async () => 
     });
     dom.listeners.get('document:pointerup')({ pointerId: 7 });
     assert.equal(selection[0], 'exercise-1');
+    picker.destroy();
+  } finally {
+    globalThis.document = originalDocument;
+  }
+});
+
+test('native scrolling is blocked only while the picker is active', async () => {
+  const dom = makePickerDom({ rows: 3 });
+  const originalDocument = globalThis.document;
+  globalThis.document = dom.document;
+  try {
+    const picker = createMagneticPicker(dom.list, { cancel: false, holdMs: 0 });
+    dom.listeners.get('list:pointerdown')({ pointerId: 1, pointerType: 'touch', clientY: 20 });
+    assert.equal(dom.listeners.has('document:touchmove'), false);
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    let prevented = false;
+    dom.listeners.get('document:touchmove')({
+      cancelable: true,
+      preventDefault: () => (prevented = true),
+    });
+    assert.equal(prevented, true);
     picker.destroy();
   } finally {
     globalThis.document = originalDocument;

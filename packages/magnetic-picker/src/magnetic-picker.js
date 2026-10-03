@@ -262,7 +262,6 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
   let pointerId = null;
   let startX = 0;
   let startY = 0;
-  let lastY = 0;
   let joystickY = 0;
   let joystickDeltaX = 0;
   let joystickDeltaY = 0;
@@ -331,7 +330,11 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
       cancelHideTimer = null;
     }, CANCEL_FADE_MS);
   };
+  const blockTouchScroll = (event) => {
+    if (event.cancelable) event.preventDefault();
+  };
   const stopDocumentTracking = () => {
+    document.removeEventListener?.('touchmove', blockTouchScroll);
     [
       ['pointermove', onPointerMove],
       ['pointerup', onPointerUp],
@@ -565,6 +568,8 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     document.documentElement?.classList.add(options.activeDocumentClass);
     status.classList.add(options.statusVisibleClass);
     list.style.setProperty('touch-action', 'none');
+    // touch-action is read at touch start, so block native panning for this held touch directly.
+    document.addEventListener?.('touchmove', blockTouchScroll, { passive: false });
     list.setPointerCapture?.(pointerId);
     setActive(startIndex, HOLD_VIBRATION);
     showJoystickOverlay();
@@ -578,10 +583,8 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
         clearTimer();
         setHolding(false);
         movedBeforePicker = true;
-        event.preventDefault();
-        getScrollTarget().scrollTop -= event.clientY - lastY;
+        // Native pan-y scrolling owns this gesture; the browser sends pointercancel.
       }
-      lastY = event.clientY;
       return;
     }
     event.preventDefault();
@@ -638,9 +641,7 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     pointerId = event.pointerId;
     startX = Number.isFinite(event.clientX) ? event.clientX : 0;
     startY = event.clientY;
-    lastY = event.clientY;
     list.setPointerCapture?.(pointerId);
-    document.documentElement?.classList.add(options.activeDocumentClass);
     startIndex = magneticEntryIndex(nearestRow(rows, startY), selectableIndices, rows.length);
     clearTimer();
     document.addEventListener?.('pointermove', onPointerMove, { passive: false });
