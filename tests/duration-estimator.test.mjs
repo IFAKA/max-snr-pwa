@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   activityDurationEstimate,
+  minutesPerSetEstimate,
   robustDurationEstimate,
   routineDurationEstimate,
 } from '../js/workout/duration-estimator.js';
@@ -38,4 +39,27 @@ test('learned routine time reaches the frequency optimizer', () => {
   assert.ok(routineDurationEstimate(state) > 51);
   assert.equal(compareFrequencies({ state })[0].sessionMinutes, routineDurationEstimate(state));
   assert.ok(compareFrequencies({ state })[0].minutes > 102);
+});
+
+test('minutes per set start from the prior and move toward the observed pace', () => {
+  assert.equal(minutesPerSetEstimate({ history: [] }), 51 / 24);
+  const sets = (count) => Array.from({ length: count }, () => ({ completed: { reps: 8 } }));
+  const slow = {
+    history: Array.from({ length: 3 }, () => ({
+      completed: true,
+      durationMs: 72 * 60000,
+      tasks: sets(24),
+    })),
+  };
+  assert.ok(minutesPerSetEstimate(slow) > 51 / 24);
+  assert.ok(minutesPerSetEstimate(slow) < 3);
+});
+
+test('skipped sets do not shrink the observed time per set', () => {
+  const tasks = [
+    ...Array.from({ length: 10 }, () => ({ completed: { reps: 8 } })),
+    ...Array.from({ length: 14 }, () => ({ completed: null, skipped: true })),
+  ];
+  const state = { history: [{ completed: true, durationMs: 30 * 60000, tasks }] };
+  assert.ok(minutesPerSetEstimate(state) > 51 / 24);
 });

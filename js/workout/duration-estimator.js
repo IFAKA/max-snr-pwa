@@ -44,3 +44,15 @@ export function routineDurationEstimate(state, priorMinutes = 51) {
     .filter((value) => value !== null);
   return robustDurationEstimate(priorMinutes, observations);
 }
+
+export function minutesPerSetEstimate(state, priorMinutesPerSet = 51 / 24) {
+  const observations = (state?.history || [])
+    .filter((workout) => workout.completed !== false)
+    .map((workout) => {
+      const minutes = durationFromRecord(workout);
+      const sets = (workout.tasks || []).filter((task) => task.completed && !task.skipped).length;
+      return minutes !== null && sets ? minutes / sets : null;
+    })
+    .filter((value) => value !== null);
+  return robustDurationEstimate(priorMinutesPerSet, observations);
+}

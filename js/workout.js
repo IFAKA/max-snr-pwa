@@ -17,6 +17,7 @@ export {
   weeklyGymAnalytics,
 } from './workout/metrics.js';
 export { adaptiveRecommendations, rollingExerciseTrend } from './workout/adaptation.js';
+export { minutesPerSetEstimate } from './workout/duration-estimator.js';
 export { evaluatePrescription, evaluateAndPersist } from './workout/coordinator.js';
 export { bodyHealthSummary, selectRecommendation } from './workout/health-optimizer.js';
 export {

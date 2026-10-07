@@ -111,7 +111,7 @@ export function renderAnalytics() {
   const decisions = allocationDecisionReport();
   const recommendations = adaptiveRecommendations({
     allocation,
-    adherence: metrics.sessions / 2,
+    adherence: metrics.sessions / (state.prescription?.daysPerWeek || 2),
     trends: rollingMuscleTrends(state.history),
     actualTimeCost: Object.fromEntries(
       Object.entries(metrics.effectiveSets).map(([muscle, sets]) => [

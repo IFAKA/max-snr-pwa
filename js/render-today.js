@@ -57,7 +57,7 @@ export function renderToday() {
         : recommendation.type === 'rest'
           ? `<li><div class="list-link" role="status"><span>${recommendation.metric}</span>${icon('check', 'On track')}</div></li>`
           : `<li><a class="list-link" href="/workout/?activity=${encodeURIComponent(recommendation.type)}"><span>Start · ${recommendation.metric}</span>${icon('chevron', 'Start activity')}</a></li>`;
-  const weeklyGoalDays = selectedFrequency().days;
+  const weeklyGoalDays = state.prescription?.daysPerWeek || selectedFrequency().days;
   const completedThisWeek = completedWorkoutsThisWeek(state.history);
   app.innerHTML = `<section class="today-screen" aria-labelledby="today-title">${titleMarkup(title, 'today-title')}<p class="routine-summary">${esc(recommendation.reason)}</p><p class="routine-summary">${esc(completedThisWeek)} of ${esc(weeklyGoalDays)} this week</p>${listMarkup([startItem, `<li><a class="list-link" href="/routine/"><span>Routine</span>${icon('chevron', 'Open routine')}</a></li>`, `<li><a class="list-link" href="/history/"><span>History</span>${icon('chevron', 'Open history')}</a></li>`], '', 'Home navigation')}</section>`;
   bindViewInteractions();

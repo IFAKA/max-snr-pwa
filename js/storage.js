@@ -8,7 +8,7 @@ import {
 } from './constants.js';
 import { emptyState, getState, normalizeWeeklyGoal, setState } from './state.js';
 import { validateBackup } from './backup.js';
-import { createPrescription } from './workout/optimizer.js';
+import { createDefaultPrescription, FIXED_PROGRAM_IDS } from './workout/optimizer.js';
 
 let dbPromise;
 function openDb() {
@@ -50,13 +50,13 @@ export function migrate(raw) {
     version: 2,
   };
   next.history = Array.isArray(next.history) ? next.history : [];
-  if (!next.prescription || next.prescription.programId !== 'fixed-hypertrophy-2-day-v1') {
-    next.prescription = createPrescription(2, {
+  if (next.prescription?.programId !== FIXED_PROGRAM_IDS[3]) {
+    next.prescription = createDefaultPrescription({
       createdAt: Date.now(),
       lastEvaluatedAt: Date.now(),
       lastChangeReason: next.prescription
-        ? 'Migrated to the fixed Monday/Thursday program'
-        : 'Migrated existing two-day routine',
+        ? 'Migrated to the fixed Monday/Wednesday/Friday program'
+        : 'Created the fixed Monday/Wednesday/Friday program',
       evidence: { migrated: true, historicalSessionsIgnored: next.history.length },
     });
   }
@@ -179,13 +179,13 @@ export async function loadState() {
   });
   if (!candidates.length) {
     const next = emptyState();
-    next.prescription = createPrescription(2);
+    next.prescription = createDefaultPrescription();
     return setState(next);
   }
   const latest = candidates.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))[0];
   const migrated = migrate(latest);
   setState(migrated);
-  if (!latest.prescription) await persist();
+  if (latest.prescription?.programId !== migrated.prescription.programId) await persist();
   return migrated;
 }
 export async function persist() {

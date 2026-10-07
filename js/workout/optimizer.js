@@ -213,6 +213,22 @@ export const EXERCISES = {
     supersetSafe: true,
     health: ['arms'],
   }),
+  reverseFly: exercise({
+    id: 'reverse-cable-fly',
+    name: 'Reverse Cable Fly',
+    sets: 2,
+    reps: '12–20',
+    rir: '1 → 0',
+    station: 'cable',
+    restMs: 60000,
+    primary: { rearDelts: 1 },
+    secondary: {},
+    setupSeconds: 20,
+    executionSeconds: 30,
+    fatigue: 1,
+    supersetSafe: true,
+    health: ['shoulder'],
+  }),
   shrug: exercise({
     id: 'chest-supported-shrug',
     name: 'Chest-Supported Shrug',
@@ -588,13 +604,59 @@ export const CANONICAL_ROUTINE = {
   ],
 };
 
-const canonicalOutput = () => ({
-  days: ['Monday', 'Thursday'],
-  names: ['Upper-chest bias', 'Delt/lat bias'],
-  routine: [CANONICAL_ROUTINE.Monday, CANONICAL_ROUTINE.Thursday],
+const armsPair = (day) =>
+  fixedSuperset(`arms-${day}`, 'Antagonist arms', [fixed('curl', 2), fixed('pushdown', 2)]);
+
+const neckPair = (day) =>
+  fixedSuperset(`neck-${day}`, 'Neck', [fixed('neckFlexion', 1, 4), fixed('neckExtension', 1, 4)]);
+
+// Weekly sets: laterals 11, incline 7, pulldown 6, row 4, curl 6, triceps 6, reverse fly 3,
+// leg press 4, leg curl 4, calves 2, crunch 2, neck 2 + 2, shrug 1. Legs sit on days 1 and 3,
+// which keeps day 2 shorter; every priority muscle is trained at least twice a week.
+export const CANONICAL_ROUTINE_3_DAY = {
+  Monday: [
+    fixed('lateralRaise', 4),
+    fixed('inclinePress', 3),
+    fixed('pulldown', 2),
+    fixed('row', 2),
+    fixed('legPress', 2),
+    fixed('legCurl', 2, null, { rir: '1' }),
+    armsPair('monday'),
+    fixed('reverseFly', 1),
+    fixed('shrug', 1),
+    fixed('calfRaise', 1, 1),
+  ],
+  Wednesday: [
+    fixed('lateralRaise', 4),
+    fixed('inclinePress', 2, null, { rir: '1–2' }),
+    fixed('pulldown', 2),
+    fixed('row', 2),
+    armsPair('wednesday'),
+    fixed('reverseFly', 1),
+    fixed('crunch', 1, 2),
+    neckPair('wednesday'),
+  ],
+  Friday: [
+    fixed('lateralRaise', 3),
+    fixed('inclinePress', 2, null, { rir: '1–2' }),
+    fixed('pulldown', 2),
+    fixed('legPress', 2),
+    fixed('legCurl', 2, null, { rir: '1' }),
+    armsPair('friday'),
+    fixed('reverseFly', 1),
+    fixed('calfRaise', 1, 1),
+    fixed('crunch', 1, 2),
+    neckPair('friday'),
+  ],
+};
+
+const fixedOutput = (days, names, routine) => ({
+  days,
+  names,
+  routine,
   comparison: [],
   allocation: Object.fromEntries(
-    [CANONICAL_ROUTINE.Monday, CANONICAL_ROUTINE.Thursday]
+    routine
       .flatMap((day) => day.flatMap((item) => (item.type === 'superset' ? item.members : [item])))
       .reduce((entries, item) => {
         entries.set(item.id, (entries.get(item.id) || 0) + item.sets);
@@ -603,25 +665,58 @@ const canonicalOutput = () => ({
   ),
 });
 
+const canonicalOutput = () =>
+  fixedOutput(
+    ['Monday', 'Thursday'],
+    ['Upper-chest bias', 'Delt/lat bias'],
+    [CANONICAL_ROUTINE.Monday, CANONICAL_ROUTINE.Thursday],
+  );
+
+const canonicalThreeDayOutput = () =>
+  fixedOutput(
+    TRAINING_DAYS[3],
+    ['Full body A', 'Upper body B', 'Full body C'],
+    [
+      CANONICAL_ROUTINE_3_DAY.Monday,
+      CANONICAL_ROUTINE_3_DAY.Wednesday,
+      CANONICAL_ROUTINE_3_DAY.Friday,
+    ],
+  );
+
 export const OPTIMIZER_OUTPUT = canonicalOutput();
+
+export const FIXED_PROGRAM_IDS = {
+  2: 'fixed-hypertrophy-2-day-v1',
+  3: 'fixed-hypertrophy-3-day-v1',
+};
+export const isFixedProgram = (programId) => Object.values(FIXED_PROGRAM_IDS).includes(programId);
+
+export const prescriptionAllocationEntries = (prescription) =>
+  Object.entries(prescription?.weeklySetAllocation || {})
+    .map(([id, sets]) => [Object.keys(EXERCISES).find((key) => EXERCISES[key].id === id), sets])
+    .filter(([key]) => key);
+
+function fixedProgramOutput(daysPerWeek, programId) {
+  if (daysPerWeek === 2) return canonicalOutput();
+  if (daysPerWeek === 3 && programId === FIXED_PROGRAM_IDS[3]) return canonicalThreeDayOutput();
+  return null;
+}
 
 export const DEFAULT_PRESCRIPTION_VERSION = 1;
 export function createPrescription(daysPerWeek = 2, metadata = {}) {
   const allocationEntriesForPrescription = metadata.allocation || ALLOCATION;
+  const fixedProgram = fixedProgramOutput(daysPerWeek, metadata.programId);
   const output =
-    daysPerWeek === 2
-      ? canonicalOutput()
-      : optimizeRoutine({ daysPerWeek, allocation: allocationEntriesForPrescription });
-  const allocation =
-    daysPerWeek === 2
-      ? output.allocation
-      : Object.fromEntries(
-          allocationEntriesForPrescription.map(([key, sets]) => [EXERCISES[key].id, sets]),
-        );
+    fixedProgram || optimizeRoutine({ daysPerWeek, allocation: allocationEntriesForPrescription });
+  const allocation = fixedProgram
+    ? output.allocation
+    : Object.fromEntries(
+        allocationEntriesForPrescription.map(([key, sets]) => [EXERCISES[key].id, sets]),
+      );
   return {
     version: DEFAULT_PRESCRIPTION_VERSION,
     programId:
-      metadata.programId || (daysPerWeek === 2 ? 'fixed-hypertrophy-2-day-v1' : 'adaptive-routine'),
+      metadata.programId || (daysPerWeek === 2 ? FIXED_PROGRAM_IDS[2] : 'adaptive-routine'),
     daysPerWeek,
     days: output.days,
     exercises: Object.values(EXERCISES).map(({ id, name }) => ({ id, name })),
@@ -646,3 +741,6 @@ export function createPrescription(daysPerWeek = 2, metadata = {}) {
     evidence: metadata.evidence || [],
   };
 }
+
+export const createDefaultPrescription = (metadata = {}) =>
+  createPrescription(3, { ...metadata, programId: FIXED_PROGRAM_IDS[3] });
