@@ -6,6 +6,22 @@ import { minutesPerSetEstimate, selectedFrequency } from './workout.js';
 import { getState } from './state.js';
 import { isCurrentDayComplete } from './render-today.js';
 
+const MEASURE_LABELS = { shoulders: 'side delts', chest: 'chest', arm: 'arms', calves: 'calves' };
+
+function measurementNote(prescription) {
+  const changes = new Map();
+  (prescription.personalization?.adjustments || [])
+    .filter(({ delta }) => delta)
+    .forEach(({ measure, delta }) => changes.set(measure, delta));
+  if (!changes.size) return '';
+  const text = [...changes]
+    .map(
+      ([measure, delta]) => `${MEASURE_LABELS[measure]} ${delta > 0 ? '+' : '−'}${Math.abs(delta)}`,
+    )
+    .join(', ');
+  return ` Sets adjusted to your measurements (per week): ${text}.`;
+}
+
 function weeklySummary(state) {
   const prescription = state.prescription;
   if (!prescription) {
@@ -17,7 +33,7 @@ function weeklySummary(state) {
     0,
   );
   const minutes = Math.round(weeklySets * minutesPerSetEstimate(state));
-  return `${prescription.daysPerWeek} gym days · about ${minutes} min/week. Each major muscle group is trained at least twice a week.`;
+  return `${prescription.daysPerWeek} gym days · about ${minutes} min/week. Each major muscle group is trained at least twice a week.${measurementNote(prescription)}`;
 }
 
 export function renderRoutine() {

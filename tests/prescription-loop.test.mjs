@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { loadState, migrate } from '../js/storage.js';
+import { emptyState } from '../js/state.js';
 import {
   createDefaultPrescription,
   createPrescription,
@@ -51,8 +52,9 @@ test('migration upgrades the legacy two-day program and keeps every completed se
 });
 
 test('migration leaves the current three-day program untouched', () => {
-  const current = createDefaultPrescription({ lastEvaluatedAt: 123 });
-  const state = migrate({ version: 2, history: [], prescription: current });
+  const profile = emptyState().settings.profile;
+  const current = createDefaultPrescription({ lastEvaluatedAt: 123, profile });
+  const state = migrate({ version: 2, history: [], prescription: current, settings: { profile } });
   assert.equal(state.prescription, current);
   assert.equal(state.prescription.lastEvaluatedAt, 123);
 });

@@ -9,6 +9,7 @@ import {
 import { emptyState, getState, normalizeWeeklyGoal, setState } from './state.js';
 import { validateBackup } from './backup.js';
 import { createDefaultPrescription, FIXED_PROGRAM_IDS } from './workout/optimizer.js';
+import { personalizationKey } from './workout/personalization.js';
 
 let dbPromise;
 function openDb() {
@@ -40,6 +41,25 @@ function legacyTask(item, set) {
     completed: null,
   };
 }
+function currentPrescription(state) {
+  const { prescription, history, settings } = state;
+  const profile = settings.profile;
+  const isCurrent = prescription?.programId === FIXED_PROGRAM_IDS[3];
+  if (isCurrent && (prescription.personalization?.key ?? null) === personalizationKey(profile))
+    return prescription;
+  const now = Date.now();
+  return createDefaultPrescription({
+    profile,
+    createdAt: isCurrent ? prescription.createdAt : now,
+    lastEvaluatedAt: isCurrent ? prescription.lastEvaluatedAt : now,
+    lastChangeReason: isCurrent
+      ? 'Re-personalized from updated body measurements'
+      : prescription
+        ? 'Migrated to the fixed Monday/Wednesday/Friday program'
+        : 'Created the fixed Monday/Wednesday/Friday program',
+    evidence: { migrated: true, historicalSessionsIgnored: history.length },
+  });
+}
 export function migrate(raw) {
   if (!raw?.history) return emptyState();
   const next = {
@@ -50,16 +70,6 @@ export function migrate(raw) {
     version: 2,
   };
   next.history = Array.isArray(next.history) ? next.history : [];
-  if (next.prescription?.programId !== FIXED_PROGRAM_IDS[3]) {
-    next.prescription = createDefaultPrescription({
-      createdAt: Date.now(),
-      lastEvaluatedAt: Date.now(),
-      lastChangeReason: next.prescription
-        ? 'Migrated to the fixed Monday/Wednesday/Friday program'
-        : 'Created the fixed Monday/Wednesday/Friday program',
-      evidence: { migrated: true, historicalSessionsIgnored: next.history.length },
-    });
-  }
   next.history.forEach((workout) => {
     delete workout.note;
   });
@@ -76,6 +86,7 @@ export function migrate(raw) {
         ? next.settings.profile
         : emptyState().settings.profile,
   };
+  next.prescription = currentPrescription(next);
   next.health = {
     activities: Array.isArray(next.health.activities) ? next.health.activities : [],
     movementMinutes: Array.isArray(next.health.movementMinutes) ? next.health.movementMinutes : [],
@@ -179,13 +190,13 @@ export async function loadState() {
   });
   if (!candidates.length) {
     const next = emptyState();
-    next.prescription = createDefaultPrescription();
+    next.prescription = createDefaultPrescription({ profile: next.settings.profile });
     return setState(next);
   }
   const latest = candidates.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))[0];
   const migrated = migrate(latest);
   setState(migrated);
-  if (latest.prescription?.programId !== migrated.prescription.programId) await persist();
+  if (latest.prescription !== migrated.prescription) await persist();
   return migrated;
 }
 export async function persist() {

@@ -16,6 +16,7 @@ const PRIORITIES = {
   calves: 0.7,
 };
 import { routineDurationEstimate } from './duration-estimator.js';
+import { personalizationPlan, personalizeRoutine } from './personalization.js';
 
 export const HEURISTICS = {
   healthCoverageValue: 12,
@@ -672,16 +673,22 @@ const canonicalOutput = () =>
     [CANONICAL_ROUTINE.Monday, CANONICAL_ROUTINE.Thursday],
   );
 
-const canonicalThreeDayOutput = () =>
-  fixedOutput(
-    TRAINING_DAYS[3],
-    ['Full body A', 'Upper body B', 'Full body C'],
-    [
-      CANONICAL_ROUTINE_3_DAY.Monday,
-      CANONICAL_ROUTINE_3_DAY.Wednesday,
-      CANONICAL_ROUTINE_3_DAY.Friday,
-    ],
-  );
+const canonicalThreeDayOutput = (profile) => {
+  const base = [
+    CANONICAL_ROUTINE_3_DAY.Monday,
+    CANONICAL_ROUTINE_3_DAY.Wednesday,
+    CANONICAL_ROUTINE_3_DAY.Friday,
+  ];
+  const plan = personalizationPlan(profile, base);
+  return {
+    ...fixedOutput(
+      TRAINING_DAYS[3],
+      ['Full body A', 'Upper body B', 'Full body C'],
+      plan.key ? personalizeRoutine(base, plan) : base,
+    ),
+    personalization: plan,
+  };
+};
 
 export const OPTIMIZER_OUTPUT = canonicalOutput();
 
@@ -696,16 +703,17 @@ export const prescriptionAllocationEntries = (prescription) =>
     .map(([id, sets]) => [Object.keys(EXERCISES).find((key) => EXERCISES[key].id === id), sets])
     .filter(([key]) => key);
 
-function fixedProgramOutput(daysPerWeek, programId) {
+function fixedProgramOutput(daysPerWeek, programId, profile) {
   if (daysPerWeek === 2) return canonicalOutput();
-  if (daysPerWeek === 3 && programId === FIXED_PROGRAM_IDS[3]) return canonicalThreeDayOutput();
+  if (daysPerWeek === 3 && programId === FIXED_PROGRAM_IDS[3])
+    return canonicalThreeDayOutput(profile);
   return null;
 }
 
 export const DEFAULT_PRESCRIPTION_VERSION = 1;
 export function createPrescription(daysPerWeek = 2, metadata = {}) {
   const allocationEntriesForPrescription = metadata.allocation || ALLOCATION;
-  const fixedProgram = fixedProgramOutput(daysPerWeek, metadata.programId);
+  const fixedProgram = fixedProgramOutput(daysPerWeek, metadata.programId, metadata.profile);
   const output =
     fixedProgram || optimizeRoutine({ daysPerWeek, allocation: allocationEntriesForPrescription });
   const allocation = fixedProgram
@@ -735,6 +743,7 @@ export function createPrescription(daysPerWeek = 2, metadata = {}) {
     ),
     routine: output.routine,
     names: output.names,
+    personalization: output.personalization || { key: null, adjustments: [] },
     createdAt: metadata.createdAt || Date.now(),
     lastEvaluatedAt: metadata.lastEvaluatedAt || 0,
     lastChangeReason: metadata.lastChangeReason || 'Initial prescription',

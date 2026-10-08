@@ -40,6 +40,14 @@ Reverse cable fly replaces wrist extension. In the model, rear delts receive onl
 
 The coordinator never auto-switches a fixed program (`KEEP`, "The fixed program is canonical."). Existing installs on the old two-day program are upgraded once on load; history is kept and the new exercise starts without history. Falsifiers: flat rolling performance on priority lifts, session time above the time cap, or poor adherence. Any of these should lead to revising the program, not to silent adaptation.
 
+## Personalization from body measurements
+
+The fixed program is adjusted from the user's stored tape measurements (`js/workout/personalization.js`). Rule: `deficit = (target − measured) / target`; every 0.1 of deficit adds one weekly set (max +3) to the exercises that drive that measurement (shoulders → lateral raise, chest → incline press, biceps → curl and triceps extension, calves → calf raise). A measurement within 2% of its target trims 2 sets from that exercise when at least 6 sets remain. Added sets go to the shortest session containing the exercise (cap 24 sets); removed sets come from the session with the most.
+
+Targets are ASSUMPTIONS expressed as fractions of height (waist 0.43, shoulders 1.5 × waist, chest 0.58, arm 0.215, calves 0.215). They set the direction of the adjustment, not a proven optimum. Tape error is about ±1–2 cm and arm measurement conditions are not recorded. The program is recomputed whenever the profile measurements change; history is untouched. Waist is not trained directly: it is a fat-loss outcome, so it is not part of the set rule.
+
+For the 172 cm / 111 shoulders / 92 chest / 28.5 arm / 36 calves profile this gives lateral raise 9 (−2), incline press 8 (+1), curl 8 (+2), triceps 8 (+2), calves unchanged; 63 sets, sessions 21/21/21. Falsifier: if re-measurement after 4–6 weeks shows the arms or chest not moving while other measures do, revise the volume rather than trusting the target.
+
 ## What would change it
 
 When enough recent observations exist, evaluate rolling performance, adherence, session time, recovery/pain notes, and current dose periodically. KEEP is the default. ADD one weekly set only for a priority muscle with adequate adherence and a flat rolling trend; REMOVE one when recovery or time cost is poor; REALLOCATE when another muscle has a better marginal-return case. Exercise replacement is not automatic, and a single noisy measurement never triggers a change. The evaluation cadence is a product heuristic, not a mandatory 4–8-week evidence claim.
