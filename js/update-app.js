@@ -149,13 +149,20 @@ async function checkForUpdate(button) {
 
 export function setServiceWorkerRegistration(value) {
   registration = value;
+  registration.addEventListener('updatefound', () => {
+    const installing = registration.installing;
+    installing?.addEventListener('statechange', () => {
+      if (installing.state === 'installed' && registration.waiting) bindUpdateButton();
+    });
+  });
   bindUpdateButton();
 }
 
 export function bindUpdateButton(root = document) {
   const button = root.querySelector?.('#update-app');
   if (!button) return;
-  if (!registration) setUpdateAvailable(button, false);
+  if (!updateInProgress && (!registration || registration.waiting))
+    setUpdateAvailable(button, Boolean(registration?.waiting));
   if (button.dataset.updateBound) return;
   button.dataset.updateBound = 'true';
   button.addEventListener('click', () => void checkForUpdate(button));

@@ -2,4 +2,6 @@
 
 set -eu
 
+npm run sw
+git add sw.js
 npm run check

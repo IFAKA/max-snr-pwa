@@ -8,8 +8,10 @@
     "format": "prettier --write app.js js scripts sw.js tests styles.css *.html */index.html *.webmanifest package.json",
     "format:check": "prettier --check app.js js scripts sw.js tests styles.css *.html */index.html *.webmanifest package.json",
     "architecture": "node scripts/check-architecture.mjs",
+    "sw": "node scripts/build-sw.mjs",
+    "sw:check": "node scripts/build-sw.mjs --check",
     "syntax": "node --check app.js && find js -type f -name '*.js' -not -path 'js/vendor/*' -print0 | xargs -0 -n1 node --check && node --check sw.js",
-    "check": "npm run lint && npm run architecture && npm run format:check && npm run syntax && npm test"
+    "check": "npm run lint && npm run architecture && npm run sw:check && npm run format:check && npm run syntax && npm test"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
