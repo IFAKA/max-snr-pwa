@@ -100,9 +100,10 @@ export function renderHistory() {
   if (view === 'activities') return renderActivities(state);
   if (view === 'data') return renderData(state);
   if (view === 'workout') return renderWorkoutDetail(state, Number(params.get('id')));
-  app.innerHTML = `<section aria-labelledby="history-title">${titleMarkup('History', 'history-title')}${listMarkup([`<li><a class="list-link" href="/history/?view=workouts"><span>Workouts</span>${icon('chevron', 'Open workouts')}</a></li>`, `<li><a class="list-link" href="/history/?view=activities"><span>Activities</span>${icon('chevron', 'Open activities')}</a></li>`, `<li><a class="list-link" href="/history/?view=analytics"><span>Analytics</span>${icon('chevron', 'Open analytics')}</a></li>`, ...dataRows()], '', 'History options')}</section>`;
+  app.innerHTML = `<section aria-labelledby="history-title">${titleMarkup('History', 'history-title')}${listMarkup([`<li><a class="list-link" href="/history/?view=workouts"><span>Workouts</span>${icon('chevron', 'Open workouts')}</a></li>`, `<li><a class="list-link" href="/history/?view=activities"><span>Activities</span>${icon('chevron', 'Open activities')}</a></li>`, `<li><a class="list-link" href="/history/?view=analytics"><span>Analytics</span>${icon('chevron', 'Open analytics')}</a></li>`, ...dataRows()], '', 'History options')}<p id="app-update-status" class="app-update-status sr-only" role="status" aria-live="polite" aria-atomic="true"></p></section>`;
   bindDataActions(state);
   bindViewInteractions();
+  bindUpdateButton();
 }
 function renderWorkouts(state) {
   const rows = state.history.length
