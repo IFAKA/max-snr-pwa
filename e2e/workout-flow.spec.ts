@@ -10,9 +10,6 @@ test('start from a routine day, log a set, rest survives a refresh', async ({ pa
   await dialog.getByRole('button', { name: 'Start' }).click();
 
   await expect(page).toHaveURL(/\/workout\/$/);
-  await expect(page.getByText('Choose your first exercise.')).toBeVisible();
-  await page.getByRole('button', { name: 'Continue' }).focus();
-  await page.getByRole('button', { name: 'Continue' }).click();
   await expect(page.locator('#reps-value')).toBeVisible();
   await page.locator('#weight-pick').click();
   await expect(page).toHaveURL(/pick=weight/);
@@ -158,8 +155,6 @@ test('holding a value and dragging up turns it like a wheel, without opening the
   await page.goto('/routine/?day=Monday');
   await page.getByRole('button', { name: /^Start/ }).click();
   await page.locator('dialog[open]').getByRole('button', { name: 'Start' }).click();
-  await page.getByRole('button', { name: 'Continue' }).focus();
-  await page.getByRole('button', { name: 'Continue' }).click();
   await expect(page.locator('#weight-value')).toHaveText('0');
 
   await page.locator('#weight-pick').scrollIntoViewIfNeeded();
@@ -186,8 +181,6 @@ test('pushing a held value far keeps it turning, so long lists stay a thumb swee
   await page.goto('/routine/?day=Monday');
   await page.getByRole('button', { name: /^Start/ }).click();
   await page.locator('dialog[open]').getByRole('button', { name: 'Start' }).click();
-  await page.getByRole('button', { name: 'Continue' }).focus();
-  await page.getByRole('button', { name: 'Continue' }).click();
 
   await page.locator('#weight-pick').scrollIntoViewIfNeeded();
   const box = (await page.locator('#weight-pick').boundingBox())!;

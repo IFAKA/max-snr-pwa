@@ -31,7 +31,11 @@
 >
   <div class="stage-info">
     {#if titleHref}
-      <a class="stage-title-link" href={titleHref} aria-label="{title}, change exercise"
+      <a
+        class="stage-title-link"
+        href={titleHref}
+        draggable="false"
+        aria-label="{title}, change exercise"
         ><Title text={title} id="workout-title" className="workout-title" marquee /></a
       >
     {:else}

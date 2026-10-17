@@ -11,7 +11,6 @@ export type WorkoutView =
   | { kind: 'home' }
   | { kind: 'redirect'; to: string }
   | { kind: 'picker'; active: ActiveWorkout; returnTo: string }
-  | { kind: 'select'; active: ActiveWorkout; task: Task }
   | { kind: 'lifting'; active: ActiveWorkout; task: Task }
   | { kind: 'pick'; active: ActiveWorkout; task: Task; field: SetField }
   | { kind: 'plank' | 'rest' | 'stretch'; active: ActiveWorkout }
@@ -30,21 +29,12 @@ export function workoutView(state: AppState, params: URLSearchParams): WorkoutVi
   const day = params.get('day');
   if (!active && day && configuredDays().includes(day)) return { kind: 'start', day };
   if (!active) return { kind: 'home' };
-  const started = active.tasks.some((task) => task.completed);
   const task = active.tasks[active.pos];
   if (view === 'exercises') {
-    const firstNotStarted = active.phase === 'lifting' && !started;
-    return {
-      kind: 'picker',
-      active,
-      returnTo:
-        params.get('return') === 'select' || firstNotStarted
-          ? '/workout/?view=exercise'
-          : '/workout/',
-    };
+    return { kind: 'picker', active, returnTo: '/workout/' };
   }
-  if (view === 'select' && (active.phase !== 'lifting' || started))
-    return { kind: 'redirect', to: '/workout/?view=exercise' };
+  // The old "choose your first exercise" step is gone: the first set is the lifting screen.
+  if (view === 'select') return { kind: 'redirect', to: '/workout/' };
   if (active.phase === 'complete') return { kind: 'save-legacy', active };
   if (!task) return { kind: 'stretch', active };
   // The old two-step set logging (?step=reps / ?step=load) is now one screen.
@@ -53,12 +43,11 @@ export function workoutView(state: AppState, params: URLSearchParams): WorkoutVi
   if (field && SET_FIELDS.includes(field) && active.phase === 'lifting')
     return { kind: 'pick', active, task, field };
   if (view === 'exercise') return { kind: 'lifting', active, task };
-  if (view === 'select' || active.phase === 'warmup' || (active.phase === 'lifting' && !started))
-    return { kind: 'select', active, task };
-  if (active.phase === 'lifting') return { kind: 'lifting', active, task };
+  if (active.phase === 'warmup' || active.phase === 'lifting')
+    return { kind: 'lifting', active, task };
   if (active.phase === 'plank' || active.phase === 'rest' || active.phase === 'stretch')
     return { kind: active.phase, active };
-  return { kind: 'select', active, task };
+  return { kind: 'lifting', active, task };
 }
 
 /** Main steps are where an accidental back gesture must not leave the workout. */

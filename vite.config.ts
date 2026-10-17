@@ -1,8 +1,23 @@
+import { execSync } from 'node:child_process';
 import { defineConfig } from 'vitest/config';
 import adapter from '@sveltejs/adapter-static';
 import { sveltekit } from '@sveltejs/kit/vite';
 
+// The commit this build was made from, shown in History so an installed app can be checked.
+function buildId() {
+  const vercel = process.env.VERCEL_GIT_COMMIT_SHA;
+  if (vercel) return vercel.slice(0, 7);
+  try {
+    return execSync('git rev-parse --short=7 HEAD', { stdio: ['ignore', 'pipe', 'ignore'] })
+      .toString()
+      .trim();
+  } catch {
+    return 'dev';
+  }
+}
+
 export default defineConfig({
+  define: { __BUILD_ID__: JSON.stringify(buildId()) },
   plugins: [
     sveltekit({
       compilerOptions: {

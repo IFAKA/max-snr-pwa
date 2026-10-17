@@ -8,6 +8,7 @@ const CUES = {
   restDone: { sound: 'go', vibrate: [35, 65, 35] },
   setLogged: { sound: 'log', vibrate: [25, 45, 25] },
   betterSet: { sound: 'best', vibrate: [25, 45, 25, 45, 60] },
+  armed: { sound: 'tick', vibrate: [30] },
   undo: { sound: 'undo', vibrate: [20] },
   finished: { sound: 'finish', vibrate: [30, 50, 30, 50, 90] },
 } satisfies Record<string, { sound: Sound; vibrate: number[] }>;

@@ -9,7 +9,6 @@
   import ActivityScreen from './ActivityScreen.svelte';
   import Completion from './Completion.svelte';
   import ExercisePicker from './ExercisePicker.svelte';
-  import ExerciseSelection from './ExerciseSelection.svelte';
   import Lifting from './Lifting.svelte';
   import Plank from './Plank.svelte';
   import Rest from './Rest.svelte';
@@ -63,8 +62,6 @@
   {:else if view.kind === 'picker'}
     {@const returnTo = view.returnTo}
     <ExercisePicker active={view.active} onselected={() => goto(returnTo)} />
-  {:else if view.kind === 'select'}
-    <ExerciseSelection task={view.task} />
   {:else if view.kind === 'lifting'}
     <Lifting active={view.active} task={view.task} />
   {:else if view.kind === 'pick'}

@@ -16,7 +16,7 @@
     if (busy) return;
     busy = true;
     await act(action);
-    await goto('/workout/?view=select', { replace: true });
+    await goto('/workout/', { replace: true });
   }
 
   $effect(() => {
@@ -24,7 +24,7 @@
   });
 </script>
 
-<SwipeCard confirmLabel="Finish" onconfirm={() => toLifting(skipPlank)} disabled={busy}>
+<SwipeCard onconfirm={() => toLifting(skipPlank)} disabled={busy}>
   <WorkoutStage title="Plank" countdown>
     {#snippet actions()}
       <Countdown

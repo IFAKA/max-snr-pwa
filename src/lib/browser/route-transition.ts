@@ -10,6 +10,10 @@ let active: ViewTransition | null = null;
 export function routeTransition(navigation: OnNavigate) {
   if (!document.startViewTransition || prefersReducedMotion() || active) return;
   const back = navigation.type === 'popstate' && (navigation.delta ?? 0) < 0;
+  const isList = (url?: URL) => url?.searchParams.get('view') === 'exercises';
+  const up = isList(navigation.to?.url) && !isList(navigation.from?.url);
+  const down = isList(navigation.from?.url) && !isList(navigation.to?.url);
+  const type = up ? 'route-up' : down ? 'route-down' : back ? 'route-back' : 'route-forward';
   return new Promise<void>((resolve) => {
     const update = async () => {
       resolve();
@@ -18,7 +22,7 @@ export function routeTransition(navigation: OnNavigate) {
     try {
       active = document.startViewTransition({
         update,
-        types: [back ? 'route-back' : 'route-forward'],
+        types: [type],
       });
     } catch {
       active = document.startViewTransition(update);

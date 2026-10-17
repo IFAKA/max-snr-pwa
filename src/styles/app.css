@@ -71,6 +71,47 @@ main {
 :root:active-view-transition-type(route-back)::view-transition-new(root) {
   animation: route-enter-back 250ms var(--ease-out) both;
 }
+/* The exercise list slides up over the workout and back down, like a drawer without being one. */
+:root:active-view-transition-type(route-up)::view-transition-group(root),
+:root:active-view-transition-type(route-down)::view-transition-group(root) {
+  animation: none;
+}
+:root:active-view-transition-type(route-up)::view-transition-new(root) {
+  z-index: 2;
+  animation: route-enter-up 260ms var(--ease-out) both;
+}
+:root:active-view-transition-type(route-up)::view-transition-old(root) {
+  animation: route-exit-up 260ms var(--ease-out) both;
+}
+:root:active-view-transition-type(route-down)::view-transition-old(root) {
+  z-index: 2;
+  animation: route-exit-down 240ms var(--ease-out) both;
+}
+:root:active-view-transition-type(route-down)::view-transition-new(root) {
+  animation: route-enter-down 240ms var(--ease-out) both;
+}
+@keyframes route-enter-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes route-exit-up {
+  to {
+    opacity: 0.5;
+    transform: translateY(-4%);
+  }
+}
+@keyframes route-exit-down {
+  to {
+    transform: translateY(100%);
+  }
+}
+@keyframes route-enter-down {
+  from {
+    opacity: 0.5;
+    transform: translateY(-4%);
+  }
+}
 @keyframes route-exit-forward {
   to {
     opacity: 0;
@@ -986,6 +1027,11 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   overflow-x: clip;
   touch-action: pan-y;
 }
+.swipe-card[data-vertical='true'],
+/* The stage is the nearest scroll container, so it needs the same value to stop native panning. */
+.swipe-card[data-vertical='true'] .workout-stage {
+  touch-action: none;
+}
 .swipe-card .workout-stage {
   transform: translate(calc(var(--swipe, 0) * 36%), calc(var(--swipe-y, 0) * -14%));
   opacity: calc(1 - var(--swipe-abs, 0) * 0.35);
@@ -1001,27 +1047,59 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   opacity: 0;
   transition-duration: 200ms;
 }
-.swipe-badge {
+.swipe-ring {
   position: absolute;
   top: 50%;
-  left: 0;
-  right: 0;
-  padding: 10px 16px;
-  margin-inline: 12px;
-  border-radius: 14px;
+  left: 50%;
+  width: 96px;
+  height: 96px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: 0 6px 24px rgb(0 0 0 / 0.22);
+  color: var(--accent);
+  pointer-events: none;
+  opacity: min(1, calc(var(--ring, 0) * 2.5));
+  transform: translate(-50%, -50%) scale(calc(0.6 + var(--ring, 0) * 0.4));
+}
+.swipe-ring-progress {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke-width: 5;
+  transform: rotate(-90deg);
+}
+.swipe-ring-track {
+  stroke: var(--line);
+}
+.swipe-ring-bar {
+  stroke: var(--accent);
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - var(--ring, 0));
+}
+.swipe-ring-icon {
+  width: 40px;
+  height: 40px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* Past the threshold the circle fills and pops, the cue to let go. */
+.swipe-card[data-armed='true'] .swipe-ring {
   background: var(--accent);
   color: #fff;
-  font-weight: 800;
-  text-align: center;
-  pointer-events: none;
-  opacity: var(--swipe-abs, 0);
-  transform: translateY(-50%) scale(calc(0.8 + var(--swipe-abs, 0) * 0.2));
+  transform: translate(-50%, -50%) scale(1.14);
+  transition: transform 120ms var(--ease-out);
 }
-.swipe-card[data-dragging='true'] .swipe-badge {
-  transition: none;
-}
-.swipe-card[data-armed='true'] .swipe-badge {
-  box-shadow: 0 0 0 3px var(--accent-soft);
+.swipe-card[data-armed='true'] .swipe-ring-track,
+.swipe-card[data-armed='true'] .swipe-ring-bar {
+  stroke: #fff;
 }
 .log-arrow {
   display: inline-block;
@@ -1061,6 +1139,8 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   margin-top: 0;
 }
 .stage-title-link {
+  -webkit-user-drag: none;
+  user-select: none;
   display: flex;
   min-height: 44px;
   align-items: center;
@@ -1069,6 +1149,12 @@ main > section:has(> .app-list) > .app-list .list-link::before {
 }
 .stage-title-link .workout-title {
   margin: 0;
+}
+.build-label {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
 }
 .swipe-hint {
   margin: 0;
@@ -1459,8 +1545,12 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   }
 }
 @media (prefers-color-scheme: dark) {
-  .swipe-badge {
+  .swipe-card[data-armed='true'] .swipe-ring {
     color: #102116;
+  }
+  .swipe-card[data-armed='true'] .swipe-ring-track,
+  .swipe-card[data-armed='true'] .swipe-ring-bar {
+    stroke: #102116;
   }
   :root {
     --bg: #0d1210;

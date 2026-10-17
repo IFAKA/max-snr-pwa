@@ -47,4 +47,7 @@
   >
     {appUpdate.message}
   </p>
+  {#if !data}
+    <p class="build-label">Version {__BUILD_ID__}</p>
+  {/if}
 </section>

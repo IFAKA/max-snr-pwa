@@ -62,11 +62,8 @@
 </script>
 
 <SwipeCard
-  confirmLabel="Skip rest"
   onconfirm={() => run(continueRest)}
-  upLabel="Change exercise"
   onup={canChange ? () => goto('/workout/?view=exercises') : undefined}
-  undoLabel="Undo last set"
   onundo={hasCompletedSet ? undo : undefined}
   disabled={busy}
 >

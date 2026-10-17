@@ -44,6 +44,13 @@ Real-phone feedback: a tall phone showed the second page's buttons without scrol
 
 Dragging the card up past 25% of its height (or flicking) opens the exercise list on the exercise-selection, lifting (set 1) and rest screens, with the badge "↑ Change exercise". It navigates to the existing full-screen list rather than opening a drawer (no bottom sheets per `AGENTS.md`). The card only claims vertical drags (`touch-action: none`) when its stage fits the screen; otherwise the stage keeps native scrolling. Tapping the name still works.
 
+### Ring cue, no first-exercise step, build label (shipped)
+
+- Swipes show an icon-only circle (check to confirm, undo arrow, list for change exercise) in the middle of the screen with a progress ring that fills toward the threshold; past it the circle turns solid, pops and vibrates (`cue('armed')`), like Tinder's stamp.
+- The "Choose your first exercise" screen is gone: a new workout opens the lifting screen, and swiping up (or tapping the name) opens the exercise list, which slides up and back down with a view transition (no drawer component).
+- A swipe that starts on a set value works unless the finger is held for 300 ms, which hands the touch to the value wheel; the title link is `draggable="false"` so a vertical drag on it is not a native link drag.
+- History shows `Version <commit>` (from `vite.config.ts`, `__BUILD_ID__`) so an installed app can be checked against the deployed commit.
+
 ### Cleaner Lifting screen (shipped)
 
 The main view is the title, `3/3` (read as "Set 3 of 3" by screen readers), three large plain values (still tap or hold-and-drag) and a `← swipe to log` hint. The `Log set` button, target, previous set, progression note and Change Exercise sit on the second page; the button stays a real submit control (`form="set-form"`) for keyboard and screen readers. At 192×192 the hint sits one scroll below the values.

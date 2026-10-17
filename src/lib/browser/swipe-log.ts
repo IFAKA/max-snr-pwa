@@ -1,9 +1,12 @@
 const LOCK_PX = 10;
 const EDGE_PX = 24;
-const ARM_RATIO = 0.4;
-const ARM_RATIO_UP = 0.25;
+/** Share of the card's width (sideways) or height (up) that arms a swipe. */
+export const ARM_RATIO = 0.4;
+export const ARM_RATIO_UP = 0.25;
 const FLICK_MIN_PX = 48;
 const FLICK_PX_PER_MS = 0.6;
+/** A touch on a value that is held longer than this belongs to its wheel, not to a swipe. */
+const HOLD_GUARD_MS = 300;
 const LEARNED_KEY = 'maxsnr-swipe-learned';
 
 /** How far along a rightward drag is, from 0 to 1 of the screen's width. */
@@ -68,6 +71,7 @@ export function swipeToConfirm(node: HTMLElement, options: SwipeOptions) {
   let axis: 'x' | 'y' = 'x';
   let armed = false;
   let swallowClick = false;
+  let ownDrag: Element | null = null;
 
   const reset = () => {
     if (swiping) opts.onProgress(0, false, false, axis);
@@ -80,8 +84,8 @@ export function swipeToConfirm(node: HTMLElement, options: SwipeOptions) {
     if (pointerId !== -1 || opts.disabled()) return;
     if (event.pointerType === 'mouse' && event.button !== 0) return;
     if (startsAtEdge(event.clientX, globalThis.innerWidth)) return;
-    // Controls with their own drag (the value wheel) keep their gesture.
-    if ((event.target as Element | null)?.closest?.('[data-no-swipe]')) return;
+    // Controls with their own hold-and-drag (the value wheel) win once the touch is held.
+    ownDrag = (event.target as Element | null)?.closest?.('[data-no-swipe]') ?? null;
     pointerId = event.pointerId;
     startX = event.clientX;
     startY = event.clientY;
@@ -93,6 +97,10 @@ export function swipeToConfirm(node: HTMLElement, options: SwipeOptions) {
     const dx = event.clientX - startX;
     const dy = event.clientY - startY;
     if (!swiping) {
+      if (ownDrag && event.timeStamp - startTime > HOLD_GUARD_MS) {
+        pointerId = -1;
+        return;
+      }
       if (Math.abs(dy) > LOCK_PX && Math.abs(dy) >= Math.abs(dx)) {
         if (dy > 0 || !opts.allowUp()) {
           pointerId = -1;
@@ -107,6 +115,7 @@ export function swipeToConfirm(node: HTMLElement, options: SwipeOptions) {
         axis = 'x';
       }
       swiping = true;
+      ownDrag?.dispatchEvent(new Event('swipeclaim'));
       node.setPointerCapture?.(pointerId);
     }
     const box = node.getBoundingClientRect();

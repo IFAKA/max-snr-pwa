@@ -1,7 +1,12 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
   import { cue } from '../browser/feedback.ts';
-  import { markSwipeLearned, swipeToConfirm } from '../browser/swipe-log.ts';
+  import {
+    ARM_RATIO,
+    ARM_RATIO_UP,
+    markSwipeLearned,
+    swipeToConfirm,
+  } from '../browser/swipe-log.ts';
 
   // A workout screen as a card: drag left to confirm its main action, right to undo, so the right
   // thumb sweeps toward its palm. The card
@@ -9,52 +14,27 @@
   // so taps, the keyboard and screen readers never need the gesture.
   let {
     children,
-    confirmLabel,
     onconfirm,
-    undoLabel = '',
     onundo,
-    upLabel = '',
     onup,
     disabled = false,
   }: {
     children: Snippet;
-    confirmLabel: string;
     onconfirm: () => void;
-    undoLabel?: string;
     onundo?: () => void;
-    upLabel?: string;
     onup?: () => void;
     disabled?: boolean;
   } = $props();
 
   let swipe = $state({ progress: 0, armed: false, dragging: false, axis: 'x' as 'x' | 'y' });
-  let card: HTMLElement;
-  let overflowing = $state(false);
-  // Taking over vertical drags would stop a stage that is taller than the screen from scrolling.
-  const canSwipeUp = $derived(Boolean(onup) && !overflowing);
-
-  $effect(() => {
-    const stage = card.querySelector('.workout-stage');
-    if (!stage) return;
-    const measure = () => (overflowing = stage.scrollHeight > stage.clientHeight + 1);
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(stage);
-    return () => observer.disconnect();
-  });
   let leaving = $state(false);
-  const label = $derived(
-    swipe.axis === 'y' ? upLabel : swipe.progress < 0 ? confirmLabel : undoLabel,
+  // Up opens the exercise list, so the card owns vertical touch drags when it offers that.
+  const canSwipeUp = $derived(Boolean(onup));
+  // The ring fills as the drag nears the threshold and is full when releasing will commit.
+  const ring = $derived(
+    Math.min(1, Math.abs(swipe.progress) / (swipe.axis === 'y' ? ARM_RATIO_UP : ARM_RATIO)),
   );
-  const badge = $derived(
-    swipe.armed
-      ? `✓ Release to ${label.toLowerCase()}`
-      : swipe.axis === 'y'
-        ? `↑ ${upLabel}`
-        : swipe.progress < 0
-          ? `← ${confirmLabel}`
-          : `${undoLabel} →`,
-  );
+  const icon = $derived(swipe.axis === 'y' ? 'list' : swipe.progress < 0 ? 'confirm' : 'undo');
 
   const options = {
     disabled: () => disabled,
@@ -62,7 +42,7 @@
     allowUp: () => canSwipeUp,
     onProgress: (progress: number, armed: boolean, dragging: boolean, axis: 'x' | 'y') =>
       (swipe = { progress, armed, dragging, axis }),
-    onArm: () => cue('pick'),
+    onArm: () => cue('armed'),
     onCommit: (direction: 1 | -1 | 'up') => {
       markSwipeLearned();
       if (direction === 'up') return onup?.();
@@ -80,13 +60,27 @@
   data-armed={swipe.armed}
   data-dragging={swipe.dragging}
   data-leaving={leaving}
-  bind:this={card}
-  style:touch-action={canSwipeUp ? 'none' : 'pan-y'}
+  data-vertical={canSwipeUp}
   style:--swipe={swipe.axis === 'x' ? swipe.progress : 0}
   style:--swipe-y={swipe.axis === 'y' ? swipe.progress : 0}
   style:--swipe-abs={Math.abs(swipe.progress)}
+  style:--ring={ring}
   use:swipeToConfirm={options}
 >
   {@render children()}
-  <div class="swipe-badge" aria-hidden="true">{badge}</div>
+  <div class="swipe-ring" aria-hidden="true">
+    <svg class="swipe-ring-progress" viewBox="0 0 80 80">
+      <circle class="swipe-ring-track" cx="40" cy="40" r="36" />
+      <circle class="swipe-ring-bar" cx="40" cy="40" r="36" pathLength="1" />
+    </svg>
+    <svg class="swipe-ring-icon" viewBox="0 0 24 24">
+      {#if icon === 'confirm'}
+        <path d="M5 12.5l4.5 4.5L19 7" />
+      {:else if icon === 'undo'}
+        <path d="M9 6L4 11l5 5M4 11h10a5 5 0 010 10h-2" />
+      {:else}
+        <path d="M5 7h14M5 12h14M5 17h14" />
+      {/if}
+    </svg>
+  </div>
 </div>

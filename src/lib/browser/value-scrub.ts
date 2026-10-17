@@ -127,6 +127,9 @@ export function scrubValue(node: HTMLElement, options: ScrubOptions) {
   node.addEventListener('click', click, true);
   node.addEventListener('contextmenu', menu);
   node.addEventListener('keydown', key);
+  // A quick swipe that the screen's card took over must not start the wheel afterwards.
+  const claimed = () => finish(false);
+  node.addEventListener('swipeclaim', claimed);
   return {
     update(next: ScrubOptions) {
       opts = next;
@@ -141,6 +144,7 @@ export function scrubValue(node: HTMLElement, options: ScrubOptions) {
       node.removeEventListener('click', click, true);
       node.removeEventListener('contextmenu', menu);
       node.removeEventListener('keydown', key);
+      node.removeEventListener('swipeclaim', claimed);
     },
   };
 }

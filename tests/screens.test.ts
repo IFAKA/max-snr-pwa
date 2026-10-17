@@ -26,9 +26,10 @@ describe('workout routing', () => {
     expect(workoutView(getState(), params()).kind).toBe('home');
   });
 
-  test('a new workout opens exercise selection, then set logging', async () => {
+  test('a new workout opens set logging, and the old select step redirects there', async () => {
     await start('Monday');
-    expect(workoutView(getState(), params()).kind).toBe('select');
+    expect(workoutView(getState(), params()).kind).toBe('lifting');
+    expect(workoutView(getState(), params('view=select')).kind).toBe('redirect');
     expect(workoutView(getState(), params('view=exercise')).kind).toBe('lifting');
     expect(workoutView(getState(), params('view=exercises')).kind).toBe('picker');
   });

@@ -88,9 +88,7 @@
 </script>
 
 <SwipeCard
-  confirmLabel="Log set"
   onconfirm={submit}
-  upLabel="Change exercise"
   onup={task.set === 1 && model.canChangeExercise
     ? () => goto('/workout/?view=exercises')
     : undefined}

@@ -23,7 +23,7 @@ test('dragging the screen most of the way left logs the set', async ({ page }) =
   await openLifting(page);
   const release = await drag(page, 0.85, 0.1);
   await expect(page.locator('.swipe-card')).toHaveAttribute('data-armed', 'true');
-  await expect(page.locator('.swipe-badge')).toContainText('Release to log');
+  await expect(page.locator('.swipe-ring')).toBeVisible();
   await release();
   await expect(page.getByRole('timer', { name: /remaining/ })).toBeVisible();
   const data = await stored(page);
@@ -81,22 +81,23 @@ test('on rest, swiping left moves to the next set', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Log set' })).toBeVisible();
 });
 
-test('on the first exercise screen, swiping up opens the exercise list', async ({ page }) => {
+test('on the first set, swiping up opens the exercise list', async ({ page }) => {
   await seed(page, appState({ history: [] }));
   await page.goto('/routine/?day=Monday');
   await page.getByRole('button', { name: /^Start/ }).click();
   await page.locator('dialog[open]').getByRole('button', { name: 'Start' }).click();
-  await expect(page.getByText('Choose your first exercise.')).toBeVisible();
+  await expect(page.locator('#reps-value')).toBeVisible();
   await expect(page.locator('dialog[open]')).toHaveCount(0);
   // The route's view transition covers the page for a moment.
   await page.waitForTimeout(800);
   const box = (await page.locator('.swipe-card').boundingBox())!;
   const x = box.x + box.width / 2;
-  await page.mouse.move(x, box.y + box.height * 0.8);
+  const startY = Math.min(box.y + box.height * 0.8, page.viewportSize()!.height - 20);
+  await page.mouse.move(x, startY);
   await page.mouse.down();
-  await page.mouse.move(x, box.y + box.height * 0.5, { steps: 5 });
-  await expect(page.locator('.swipe-badge')).toContainText('Release to change exercise');
-  await page.mouse.move(x, box.y + box.height * 0.3, { steps: 5 });
+  await page.mouse.move(x, startY - box.height * 0.3, { steps: 5 });
+  await expect(page.locator('.swipe-card')).toHaveAttribute('data-armed', 'true');
+  await page.mouse.move(x, startY - box.height * 0.4, { steps: 5 });
   await page.mouse.up();
   await expect(page).toHaveURL(/view=exercises/);
 });
