@@ -56,3 +56,11 @@ export function isMainStep(state: AppState, params: URLSearchParams) {
   if (!active || !MAIN_PHASES.has(active.phase)) return false;
   return !params.has('view') && !params.has('pick');
 }
+
+/** The screen under the exercise-list drawer: the same URL without the drawer's parameters. */
+export function drawerBase(state: AppState, params: URLSearchParams): WorkoutView {
+  const base = new URLSearchParams(params);
+  base.delete('view');
+  base.delete('return');
+  return workoutView(state, base);
+}

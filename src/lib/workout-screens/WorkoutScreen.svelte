@@ -5,9 +5,10 @@
   import { getState } from '../state.ts';
   import { finishWorkout } from '../workout/index.ts';
   import { completionUrl } from '../browser/routes.ts';
-  import { isMainStep, workoutView } from './workout-view.ts';
+  import { drawerBase, isMainStep, workoutView } from './workout-view.ts';
   import ActivityScreen from './ActivityScreen.svelte';
   import Completion from './Completion.svelte';
+  import Drawer from '../components/Drawer.svelte';
   import ExercisePicker from './ExercisePicker.svelte';
   import Lifting from './Lifting.svelte';
   import Plank from './Plank.svelte';
@@ -22,13 +23,18 @@
     void appVersion.value;
     return workoutView(getState(), params);
   });
+  // The exercise list is a drawer over the screen it was opened from, which stays mounted.
+  const shown = $derived.by(() => {
+    void appVersion.value;
+    return view.kind === 'picker' ? drawerBase(getState(), params) : view;
+  });
   const main = $derived.by(() => {
     void appVersion.value;
     return isMainStep(getState(), params);
   });
   // Each state change re-mounts the step, like a fresh render of the persisted state.
   const key = $derived.by(() => {
-    const current = view;
+    const current = shown;
     const taskId = 'task' in current ? current.task.id : '';
     return `${current.kind}:${taskId}:${appVersion.value}`;
   });
@@ -53,29 +59,32 @@
 <WorkoutGuard {main} />
 
 {#key key}
-  {#if view.kind === 'activity'}
-    <ActivityScreen type={view.type} />
-  {:else if view.kind === 'start'}
-    <StartScreen day={view.day} />
-  {:else if view.kind === 'summary'}
-    <Completion workout={view.workout} />
-  {:else if view.kind === 'picker'}
-    {@const returnTo = view.returnTo}
-    <ExercisePicker active={view.active} onselected={() => goto(returnTo)} />
-  {:else if view.kind === 'lifting'}
-    <Lifting active={view.active} task={view.task} />
-  {:else if view.kind === 'pick'}
+  {#if shown.kind === 'activity'}
+    <ActivityScreen type={shown.type} />
+  {:else if shown.kind === 'start'}
+    <StartScreen day={shown.day} />
+  {:else if shown.kind === 'summary'}
+    <Completion workout={shown.workout} />
+  {:else if shown.kind === 'lifting'}
+    <Lifting active={shown.active} task={shown.task} />
+  {:else if shown.kind === 'pick'}
     <ValuePicker
-      active={view.active}
-      task={view.task}
-      field={view.field}
+      active={shown.active}
+      task={shown.task}
+      field={shown.field}
       onpicked={() => history.back()}
     />
-  {:else if view.kind === 'plank'}
-    <Plank active={view.active} />
-  {:else if view.kind === 'rest'}
-    <Rest active={view.active} />
-  {:else if view.kind === 'stretch'}
-    <Stretch active={view.active} />
+  {:else if shown.kind === 'plank'}
+    <Plank active={shown.active} />
+  {:else if shown.kind === 'rest'}
+    <Rest active={shown.active} />
+  {:else if shown.kind === 'stretch'}
+    <Stretch active={shown.active} />
   {/if}
 {/key}
+{#if view.kind === 'picker'}
+  {@const returnTo = view.returnTo}
+  <Drawer label="exercises" onclose={() => history.back()}>
+    <ExercisePicker active={view.active} onselected={() => goto(returnTo)} />
+  </Drawer>
+{/if}

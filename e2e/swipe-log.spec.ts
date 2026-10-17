@@ -100,4 +100,28 @@ test('on the first set, swiping up opens the exercise list', async ({ page }) =>
   await page.mouse.move(x, startY - box.height * 0.4, { steps: 5 });
   await page.mouse.up();
   await expect(page).toHaveURL(/view=exercises/);
+  await expect(page.locator('dialog.drawer[open]')).toBeVisible();
+  await expect(page.locator('.drawer .workout-picker')).toBeVisible();
+
+  // Dragging the handle down closes it, back on the workout screen.
+  await page.waitForTimeout(500);
+  const handle = (await page.locator('.drawer-handle').boundingBox())!;
+  const hx = handle.x + handle.width / 2;
+  await page.mouse.move(hx, handle.y + 10);
+  await page.mouse.down();
+  await page.mouse.move(hx, handle.y + 200, { steps: 6 });
+  await page.mouse.up();
+  await expect(page.locator('dialog.drawer')).toHaveCount(0);
+  await expect(page).not.toHaveURL(/view=exercises/);
+  await expect(page.locator('#reps-value')).toBeVisible();
+});
+
+test('the exercise drawer also closes with Escape', async ({ page }) => {
+  const workout = activeWorkout({ phase: 'lifting', open: 2 });
+  await seed(page, appState({ active: workout }));
+  await page.goto('/workout/');
+  await page.goto('/workout/?view=exercises');
+  await expect(page.locator('dialog.drawer[open]')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('dialog.drawer')).toHaveCount(0);
 });

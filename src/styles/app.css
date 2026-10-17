@@ -71,47 +71,6 @@ main {
 :root:active-view-transition-type(route-back)::view-transition-new(root) {
   animation: route-enter-back 250ms var(--ease-out) both;
 }
-/* The exercise list slides up over the workout and back down, like a drawer without being one. */
-:root:active-view-transition-type(route-up)::view-transition-group(root),
-:root:active-view-transition-type(route-down)::view-transition-group(root) {
-  animation: none;
-}
-:root:active-view-transition-type(route-up)::view-transition-new(root) {
-  z-index: 2;
-  animation: route-enter-up 260ms var(--ease-out) both;
-}
-:root:active-view-transition-type(route-up)::view-transition-old(root) {
-  animation: route-exit-up 260ms var(--ease-out) both;
-}
-:root:active-view-transition-type(route-down)::view-transition-old(root) {
-  z-index: 2;
-  animation: route-exit-down 240ms var(--ease-out) both;
-}
-:root:active-view-transition-type(route-down)::view-transition-new(root) {
-  animation: route-enter-down 240ms var(--ease-out) both;
-}
-@keyframes route-enter-up {
-  from {
-    transform: translateY(100%);
-  }
-}
-@keyframes route-exit-up {
-  to {
-    opacity: 0.5;
-    transform: translateY(-4%);
-  }
-}
-@keyframes route-exit-down {
-  to {
-    transform: translateY(100%);
-  }
-}
-@keyframes route-enter-down {
-  from {
-    opacity: 0.5;
-    transform: translateY(-4%);
-  }
-}
 @keyframes route-exit-forward {
   to {
     opacity: 0;
@@ -1578,5 +1537,66 @@ main > section:has(> .app-list) > .app-list .list-link::before {
     color: HighlightText;
     background: Highlight;
     border-color: HighlightText;
+  }
+}
+
+/* Drawer: a native modal dialog docked to the bottom that slides up and follows a handle drag. */
+.drawer {
+  position: fixed;
+  inset: auto 0 0;
+  width: 100%;
+  max-width: 100%;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+}
+.drawer::backdrop {
+  background: rgb(0 0 0 / 0.45);
+}
+.drawer-sheet {
+  display: flex;
+  max-height: 88svh;
+  flex-direction: column;
+  border-radius: 22px 22px 0 0;
+  background: var(--bg);
+  padding-bottom: env(safe-area-inset-bottom);
+  transform: translateY(var(--drag, 0));
+  transition: transform 180ms var(--ease-out);
+  animation: drawer-in 260ms var(--ease-out);
+}
+.drawer-sheet:focus {
+  outline: none;
+}
+.drawer[data-dragging='true'] .drawer-sheet {
+  transition: none;
+}
+.drawer-handle {
+  display: grid;
+  width: 100%;
+  min-height: 44px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  border-radius: 22px 22px 0 0;
+  background: transparent;
+  touch-action: none;
+}
+.drawer-handle span {
+  width: 44px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--muted);
+  opacity: 0.6;
+}
+.drawer-body {
+  overflow-y: auto;
+  padding: 0 12px 12px;
+}
+@keyframes drawer-in {
+  from {
+    transform: translateY(100%);
   }
 }

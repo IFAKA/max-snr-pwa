@@ -54,7 +54,7 @@
 {/snippet}
 
 <section class="workout-picker" aria-labelledby="exercise-picker-title">
-  <Title text="Exercise" id="exercise-picker-title" />
+  <Title text="Exercise" id="exercise-picker-title" level="h2" />
   <AppList label="Available exercises" rows={`${active.pos}-${items.length}-${locked}`}>
     {#each items as { task, complete } (task.exerciseId)}
       {#if complete}

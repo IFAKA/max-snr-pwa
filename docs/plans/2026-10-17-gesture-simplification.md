@@ -51,6 +51,10 @@ Dragging the card up past 25% of its height (or flicking) opens the exercise lis
 - A swipe that starts on a set value works unless the finger is held for 300 ms, which hands the touch to the value wheel; the title link is `draggable="false"` so a vertical drag on it is not a native link drag.
 - History shows `Version <commit>` (from `vite.config.ts`, `__BUILD_ID__`) so an installed app can be checked against the deployed commit.
 
+### Exercise drawer (shipped)
+
+The exercise list is now a real bottom drawer (`Drawer.svelte`, native `<dialog>`), opened by swiping the workout screen up or tapping the name. The screen under it stays mounted, so unsaved value changes survive. The earlier slide-up route transition was removed. Close with Escape, the backdrop, the handle (button or downward drag), or back.
+
 ### Cleaner Lifting screen (shipped)
 
 The main view is the title, `3/3` (read as "Set 3 of 3" by screen readers), three large plain values (still tap or hold-and-drag) and a `← swipe to log` hint. The `Log set` button, target, previous set, progression note and Change Exercise sit on the second page; the button stays a real submit control (`form="set-form"`) for keyboard and screen readers. At 192×192 the hint sits one scroll below the values.
