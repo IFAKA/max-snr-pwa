@@ -30,7 +30,8 @@ body {
   min-width: 0;
   min-height: 100%;
   margin: 0;
-  overflow: hidden;
+  /* Not hidden: pull-to-refresh needs a root that can overscroll; main fills it exactly. */
+  overflow: visible;
   background: var(--bg);
   color: var(--text);
 }
