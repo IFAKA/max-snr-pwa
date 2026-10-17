@@ -20,6 +20,7 @@ test('start from a routine day, log a set, rest survives a refresh', async ({ pa
   await page.getByRole('button', { name: '2.5 kg', exact: true }).click();
   await expect(page).not.toHaveURL(/pick=/);
   await expect(page.locator('#weight-value')).toHaveText('2.5');
+  await page.getByRole('button', { name: 'Log set' }).focus();
   await page.getByRole('button', { name: 'Log set' }).click();
 
   const timer = page.getByRole('timer', { name: 'Rest remaining' });
@@ -42,6 +43,7 @@ test('rest moves on to the next set by itself, and one tap logs it', async ({ pa
   const log = page.getByRole('button', { name: 'Log set' });
   await expect(log).toBeVisible({ timeout: 10000 });
   await expect(page.locator('#reps-value')).not.toBeEmpty();
+  await log.focus();
   await log.click();
   await expect(page.getByRole('timer', { name: 'Stretch remaining' })).toBeVisible();
   const data = await stored(page);
@@ -73,6 +75,7 @@ test('finishing the cooldown saves at once; Reopen undoes it', async ({ page }) 
   await seed(page, appState({ active: activeWorkout({ phase: 'stretch', open: 0 }) }));
   await page.goto('/workout/');
   await expect(page.getByRole('timer', { name: 'Stretch remaining' })).toBeVisible();
+  await page.getByRole('button', { name: 'Finish' }).focus();
   await page.getByRole('button', { name: 'Finish' }).click();
 
   await expect(page).toHaveURL(/view=summary/);
@@ -92,6 +95,7 @@ test('finishing the cooldown saves at once; Reopen undoes it', async ({ page }) 
 test('closing on the completion screen loses nothing', async ({ page }) => {
   await seed(page, appState({ active: activeWorkout({ phase: 'stretch', open: 0 }) }));
   await page.goto('/workout/');
+  await page.getByRole('button', { name: 'Finish' }).focus();
   await page.getByRole('button', { name: 'Finish' }).click();
   await expect(page).toHaveURL(/view=summary/);
   await page.reload();

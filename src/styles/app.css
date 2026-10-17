@@ -1031,35 +1031,48 @@ main > section:has(> .app-list) > .app-list .list-link::before {
     transform: translateX(5px);
   }
 }
-/* Page two of a step: details and secondary actions scroll up into view, snapping to the
-   title or to this page when the scroll stops near them. */
-.has-more {
-  scroll-snap-type: y proximity;
+/* The actions the swipes replace stay in the page for keyboards and screen readers, hidden until
+   focus reaches them, when they show as a bar at the bottom. */
+.stage-more:not(:focus-within) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
-.has-more .workout-title,
-.stage-more {
-  scroll-snap-align: start;
+.stage-more:focus-within {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 5;
+  display: grid;
+  max-height: 80svh;
+  gap: 8px;
+  padding: 12px;
+  overflow-y: auto;
+  background: var(--bg);
 }
-.countdown-stage.has-more .thumb-zone {
-  /* Page one fills the screen below the title, so the details start off-screen. */
-  min-height: calc(100svh - 110px);
+.stage-more .secondary {
+  margin-top: 0;
+}
+.stage-title-link {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  color: inherit;
+  text-decoration: none;
+}
+.stage-title-link .workout-title {
+  margin: 0;
 }
 .swipe-hint {
   margin: 0;
   color: var(--muted);
   font-size: 14px;
   text-align: center;
-}
-.stage-hint {
-  color: var(--muted, currentColor);
-  font-size: 18px;
-  line-height: 1;
-  text-align: center;
-}
-.stage-more {
-  display: grid;
-  gap: 8px;
-  padding-top: 8px;
 }
 .stage-more .secondary {
   margin-top: 0;
@@ -1325,9 +1338,6 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   }
   .stage-info > .workout-title {
     order: 0;
-  }
-  .stage-hint {
-    order: 1;
   }
   .lifting-stage .set-count {
     order: 0;

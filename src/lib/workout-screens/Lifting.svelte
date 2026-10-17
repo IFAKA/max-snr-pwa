@@ -88,12 +88,18 @@
 </script>
 
 <SwipeCard confirmLabel="Log set" onconfirm={submit} disabled={busy}>
-  <WorkoutStage title={task.performedName} className="lifting-stage">
+  <WorkoutStage
+    title={task.performedName}
+    className="lifting-stage"
+    titleHref={task.set === 1 && model.canChangeExercise ? '/workout/?view=exercises' : undefined}
+  >
     {#snippet info()}
       <SupersetMeta {active} {task} />
       <p class="set-count">
-        <span aria-hidden="true">{task.set}/{task.sets}</span><span class="sr-only"
-          >Set {task.set} of {task.sets}</span
+        <span aria-hidden="true"
+          >{task.set}/{task.sets} · {task.targetRepRange || task.reps} reps</span
+        ><span class="sr-only"
+          >Set {task.set} of {task.sets}, {task.targetRepRange || task.reps} reps</span
         >
       </p>
     {/snippet}
@@ -143,15 +149,6 @@
           Progression: try {model.progressionLoad}
           {unit} this exposure.
         </p>
-      {/if}
-      {#if task.set === 1}
-        <button
-          class="secondary"
-          id="change-exercise"
-          type="button"
-          disabled={!model.canChangeExercise}
-          onclick={() => goto('/workout/?view=exercises')}>Change Exercise</button
-        >
       {/if}
     {/snippet}
   </WorkoutStage>

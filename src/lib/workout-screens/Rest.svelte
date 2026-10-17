@@ -1,6 +1,5 @@
 <script lang="ts">
   import { untrack } from 'svelte';
-  import { goto } from '$app/navigation';
   import { act } from '../app-state.svelte.ts';
   import { REST_MS } from '../constants.ts';
   import { getState } from '../state.ts';
@@ -68,7 +67,12 @@
   onundo={hasCompletedSet ? undo : undefined}
   disabled={busy}
 >
-  <WorkoutStage title={next ? next.performedName : 'Rest'} className="rest-stage" countdown>
+  <WorkoutStage
+    title={next ? next.performedName : 'Rest'}
+    className="rest-stage"
+    countdown
+    titleHref={canChange ? '/workout/?view=exercises' : undefined}
+  >
     {#snippet info()}
       {#if logged}
         <p class={['set-logged', fresh && 'is-fresh']} role="status">
@@ -79,15 +83,15 @@
       {/if}
       {#if next}
         <SupersetMeta {active} task={next} />
-        <p class="set-count">Set {next.set} of {next.sets}</p>
-        <p class="target-prescription">
-          Target: {next.targetRepRange || next.reps} reps · {next.targetRir || next.rir} RIR
+        <p class="set-count">
+          <span aria-hidden="true">{next.set}/{next.sets}</span><span class="sr-only"
+            >Set {next.set} of {next.sets}</span
+          >
         </p>
       {/if}
-      <p class={['session-budget', budget.capReached && 'is-at-cap']}>
-        Session <time id="rest-session-elapsed">{formatDuration(budget.elapsedMs)}</time
-        >{#if budget.capReached}&nbsp;· 60:00 reached{/if}
-      </p>
+      {#if budget.capReached}
+        <p class="session-budget is-at-cap" aria-hidden="true">60:00 reached</p>
+      {/if}
     {/snippet}
     {#snippet actions()}
       <Countdown
@@ -114,19 +118,20 @@
         >
         <button
           class="secondary"
-          id="change-exercises"
-          type="button"
-          disabled={!canChange}
-          onclick={() => goto('/workout/?view=exercises')}>Change Exercises</button
-        >
-        <button
-          class="secondary"
           id="undo-set"
           type="button"
           disabled={!hasCompletedSet || busy}
           onclick={undo}>Undo Last Set</button
         >
       </div>
+      {#if next}
+        <p class="target-prescription">
+          Target: {next.targetRepRange || next.reps} reps · {next.targetRir || next.rir} RIR
+        </p>
+      {/if}
+      <p class="session-budget">
+        Session <time id="rest-session-elapsed">{formatDuration(budget.elapsedMs)}</time>
+      </p>
     {/snippet}
   </WorkoutStage>
 </SwipeCard>
