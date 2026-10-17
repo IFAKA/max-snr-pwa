@@ -1561,9 +1561,11 @@ main > section:has(> .app-list) > .app-list .list-link::before {
 }
 .drawer-peek .drawer-overlay {
   opacity: min(1, calc(var(--peek, 0) / 160));
+  transition: opacity var(--settle, 0ms) cubic-bezier(0.32, 0.72, 0, 1);
 }
 .drawer-peek .drawer-sheet {
   transform: translateY(max(0px, calc(100% - var(--peek, 0px))));
+  transition: transform var(--settle, 0ms) cubic-bezier(0.32, 0.72, 0, 1);
 }
 .drawer-handle[data-vaul-handle] {
   width: 100%;

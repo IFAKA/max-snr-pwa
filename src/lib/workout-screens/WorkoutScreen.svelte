@@ -45,7 +45,10 @@
 
   // The real drawer has taken over from the one that followed the finger.
   $effect(() => {
-    if (view.kind === 'picker') drawerPeek.px = 0;
+    if (view.kind === 'picker') {
+      drawerPeek.px = 0;
+      drawerPeek.settleMs = 0;
+    }
   });
 
   $effect(() => {
@@ -89,8 +92,8 @@
     <Stretch active={shown.active} />
   {/if}
 {/key}
-{#if view.kind !== 'picker' && drawerPeek.px > 0 && 'active' in shown}
-  <DrawerPeek px={drawerPeek.px}>
+{#if view.kind !== 'picker' && (drawerPeek.px > 0 || drawerPeek.settleMs > 0) && 'active' in shown}
+  <DrawerPeek px={drawerPeek.px} settleMs={drawerPeek.settleMs}>
     <ExercisePicker active={shown.active} onselected={() => {}} />
   </DrawerPeek>
 {/if}

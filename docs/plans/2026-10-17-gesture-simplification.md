@@ -75,6 +75,10 @@ Base UI is React-only, so the Svelte equivalents are used: `vaul-svelte` for the
 
 After a finger drag the real drawer no longer slides in again (`data-handoff` disables its enter animation, which vaul's `defaultOpen` did not), and closing waits the full 500 ms slide-out before leaving the route. Sampled positions confirm the handoff holds still and the close slides all the way down, for Escape and drag.
 
+### Release settle like Base UI (shipped)
+
+Letting go of the drawer no longer jumps it into place. The sheet eases to open (or back down when released early) over 160–420 ms depending on the flick speed, with vaul's `cubic-bezier(0.32, 0.72, 0, 1)` curve and the backdrop fading with it; the real drawer takes over after it lands. Sampled: 659 → 101 px over about 300 ms, then no movement at the handoff.
+
 ### Cleaner Lifting screen (shipped)
 
 The main view is the title, `3/3` (read as "Set 3 of 3" by screen readers), three large plain values (still tap or hold-and-drag) and a `← swipe to log` hint. The `Log set` button, target, previous set, progression note and Change Exercise sit on the second page; the button stays a real submit control (`form="set-form"`) for keyboard and screen readers. At 192×192 the hint sits one scroll below the values.

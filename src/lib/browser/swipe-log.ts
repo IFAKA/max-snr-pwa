@@ -54,7 +54,7 @@ export type SwipeOptions = {
   ratio: (direction: 1 | -1 | 'up') => number;
   onArm: (direction: 1 | -1 | 'up') => void;
   /** Called on release past the threshold with 1 for a right swipe and -1 for a left swipe. */
-  onCommit: (direction: 1 | -1 | 'up') => void;
+  onCommit: (direction: 1 | -1 | 'up', velocity: number) => void;
 };
 
 /**
@@ -151,13 +151,14 @@ export function swipeToConfirm(node: HTMLElement, options: SwipeOptions) {
         opts.ratio(axis === 'y' ? 'up' : direction),
       );
     const committed = axis === 'y' ? 'up' : direction;
+    const velocity = distance / Math.max(1, event.timeStamp - startTime);
     if (swiping) {
       // The click that follows a drag would log the set a second time.
       swallowClick = true;
       setTimeout(() => (swallowClick = false), 0);
     }
     reset();
-    if (commit) opts.onCommit(committed);
+    if (commit) opts.onCommit(committed, velocity);
   };
 
   const cancel = (event: PointerEvent) => {

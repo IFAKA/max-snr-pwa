@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
-  import { drawerPeek } from '../browser/drawer-peek.svelte.ts';
+  import { drawerPeek, settleDuration } from '../browser/drawer-peek.svelte.ts';
   import { cue } from '../browser/feedback.ts';
   import {
     ARM_RATIO,
@@ -42,27 +42,47 @@
   const ring = $derived(ringed ? Math.min(1, Math.abs(swipe.progress) / ARM_RATIO) : 0);
   const icon = $derived(swipe.axis === 'y' ? 'list' : swipe.progress < 0 ? 'confirm' : 'undo');
 
+  let upCommit: { velocity: number } | null = null;
+
+  // The finger let go: the drawer settles open (then the real one takes over) or drops back, over
+  // a time that follows how fast the flick was.
+  function releaseDrawer() {
+    const ms = settleDuration(upCommit?.velocity ?? 0.3);
+    drawerPeek.settleMs = ms;
+    if (!upCommit) {
+      drawerPeek.px = 0;
+      setTimeout(() => (drawerPeek.settleMs = 0), ms);
+      return;
+    }
+    upCommit = null;
+    drawerPeek.px = card?.clientHeight ?? 0;
+    drawerPeek.handoff = true;
+    setTimeout(() => onup?.(), ms);
+  }
+
   const options = {
     disabled: () => disabled,
     allow: (direction: 1 | -1) => direction < 0 || Boolean(onundo),
     allowUp: () => canSwipeUp,
     onProgress: (progress: number, armed: boolean, dragging: boolean, axis: 'x' | 'y') => {
       swipe = { progress, armed, dragging, axis };
+      if (axis === 'x') drawerPeek.px = 0;
       // Up drags the drawer into view with the finger (progress is a share of the card height).
-      drawerPeek.px = axis === 'y' && dragging ? progress * (card?.clientHeight ?? 0) : 0;
+      else if (dragging) {
+        drawerPeek.px = progress * (card?.clientHeight ?? 0);
+        drawerPeek.settleMs = 0;
+      } else queueMicrotask(releaseDrawer);
     },
     ratio: (direction: 1 | -1 | 'up') =>
       direction === -1 && !quickConfirm ? ARM_RATIO : ARM_RATIO_LIGHT,
     onArm: (direction: 1 | -1 | 'up') => {
       if (direction === -1 && !quickConfirm) cue('armed');
     },
-    onCommit: (direction: 1 | -1 | 'up') => {
+    onCommit: (direction: 1 | -1 | 'up', velocity: number) => {
       markSwipeLearned();
       if (direction === 'up') {
-        // Keep the drawer fully up until the real one takes over, so it never blinks.
-        drawerPeek.px = card?.clientHeight ?? 0;
-        drawerPeek.handoff = true;
-        return onup?.();
+        upCommit = { velocity };
+        return;
       }
       if (direction > 0) return onundo?.();
       // The card slides away; if the screen is still here a moment later, it slides back.
