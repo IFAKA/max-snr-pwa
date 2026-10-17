@@ -905,7 +905,6 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   background: color-mix(in srgb, var(--bg) 88%, transparent);
   backdrop-filter: blur(6px);
   pointer-events: none;
-  animation: scrub-fade 140ms var(--ease-out);
 }
 .scrub-wheel {
   position: relative;
@@ -917,7 +916,6 @@ main > section:has(> .app-list) > .app-list .list-link::before {
     #000 calc(50% + 26px),
     transparent
   );
-  animation: scrub-grow 160ms var(--ease-out);
 }
 .scrub-band {
   position: absolute;
@@ -946,17 +944,6 @@ main > section:has(> .app-list) > .app-list .list-link::before {
 .scrub-item.is-current {
   color: var(--text);
   font-size: 36px;
-}
-@keyframes scrub-fade {
-  from {
-    opacity: 0;
-  }
-}
-@keyframes scrub-grow {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
 }
 @keyframes value-in {
   from {

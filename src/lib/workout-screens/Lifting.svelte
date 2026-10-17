@@ -31,11 +31,13 @@
   // The dispatcher re-mounts this screen per task, so starting values are read once.
   const model = untrack(() => liftingModel(active, task, unit));
   let values = $state({ reps: model.reps, weight: model.weight, rir: model.rir });
+  // The wheel's last values stay after release so it can animate out showing them.
   let scrub = $state<{
     field: SetField;
     values: string[];
     index: number;
   } | null>(null);
+  let scrubbing = $state(false);
   const LABELS: Record<SetField, string> = { reps: 'Reps', weight: unit, rir: 'RIR' };
   const NAMES: Record<SetField, string> = { reps: 'Reps', weight: `Load in ${unit}`, rir: 'RIR' };
   let busy = $state(false);
@@ -54,8 +56,10 @@
     return {
       values: () => pickerValues(field, current()),
       current,
-      onScrub: (state: Omit<NonNullable<typeof scrub>, 'field'> | null) =>
-        (scrub = state && { field, ...state }),
+      onScrub: (state: Omit<NonNullable<typeof scrub>, 'field'> | null) => {
+        scrubbing = !!state;
+        if (state) scrub = { field, ...state };
+      },
       onHold: () => cue('hold'),
       onTick: () => cue('pick'),
       onCommit: (value: string) => (values[field] = value),
@@ -162,6 +166,6 @@
     {/snippet}
   </WorkoutStage>
 </SwipeCard>
-{#if scrub}
+{#if scrubbing && scrub}
   <ScrubWheel values={scrub.values} index={scrub.index} />
 {/if}
