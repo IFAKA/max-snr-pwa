@@ -11,6 +11,7 @@ test('start from a routine day, log a set, rest survives a refresh', async ({ pa
 
   await expect(page).toHaveURL(/\/workout\/$/);
   await expect(page.getByText('Choose your first exercise.')).toBeVisible();
+  await page.getByRole('button', { name: 'Continue' }).focus();
   await page.getByRole('button', { name: 'Continue' }).click();
   await expect(page.locator('#reps-value')).toBeVisible();
   await page.locator('#weight-pick').click();
@@ -150,13 +151,14 @@ test('deep links unwind detail → parent → Today with back', async ({ page, c
   await expect(launch).toHaveURL(/:4173\/$/);
 });
 
-test('holding a value and dragging down turns it like a wheel, without opening the picker', async ({
+test('holding a value and dragging up turns it like a wheel, without opening the picker', async ({
   page,
 }) => {
   await seed(page, appState({ history: [] }));
   await page.goto('/routine/?day=Monday');
   await page.getByRole('button', { name: /^Start/ }).click();
   await page.locator('dialog[open]').getByRole('button', { name: 'Start' }).click();
+  await page.getByRole('button', { name: 'Continue' }).focus();
   await page.getByRole('button', { name: 'Continue' }).click();
   await expect(page.locator('#weight-value')).toHaveText('0');
 
@@ -168,7 +170,7 @@ test('holding a value and dragging down turns it like a wheel, without opening t
   await page.mouse.down();
   await page.waitForTimeout(500);
   await expect(page.locator('.scrub-wheel .is-current')).toBeVisible();
-  await page.mouse.move(x, y + 56, { steps: 6 });
+  await page.mouse.move(x, y - 56, { steps: 6 });
   await expect(page.locator('.scrub-wheel .is-current')).toContainText('5');
   await page.mouse.up();
 
@@ -184,6 +186,7 @@ test('pushing a held value far keeps it turning, so long lists stay a thumb swee
   await page.goto('/routine/?day=Monday');
   await page.getByRole('button', { name: /^Start/ }).click();
   await page.locator('dialog[open]').getByRole('button', { name: 'Start' }).click();
+  await page.getByRole('button', { name: 'Continue' }).focus();
   await page.getByRole('button', { name: 'Continue' }).click();
 
   await page.locator('#weight-pick').scrollIntoViewIfNeeded();
@@ -193,10 +196,10 @@ test('pushing a held value far keeps it turning, so long lists stay a thumb swee
   await page.mouse.move(x, y);
   await page.mouse.down();
   await page.waitForTimeout(500);
-  await page.mouse.move(x, y + 40, { steps: 4 });
-  await page.mouse.move(x, y + 170, { steps: 8 });
+  await page.mouse.move(x, y - 40, { steps: 4 });
+  await page.mouse.move(x, y - 170, { steps: 8 });
   await page.waitForTimeout(1500);
-  await page.mouse.move(x, y + 100, { steps: 4 });
+  await page.mouse.move(x, y - 100, { steps: 4 });
   await page.mouse.up();
 
   await expect(page).not.toHaveURL(/pick=/);

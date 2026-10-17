@@ -19,6 +19,9 @@
   // Where the band falls inside the wheel, so it can still line up with the button after clamping.
   const bandTop = $derived(rect.top + rect.height / 2 - top - ROW / 2);
   const centre = $derived(Math.max(0, Math.min(height - ROW, bandTop)));
+  // Higher values sit above, so dragging the thumb up reaches them.
+  const shown = $derived([...values].reverse());
+  const position = $derived(values.length - 1 - index);
 </script>
 
 <div class="scrub-backdrop" aria-hidden="true">
@@ -30,9 +33,9 @@
     style:height="{height}px"
   >
     <div class="scrub-band" style:top="{centre}px" style:height="{ROW}px"></div>
-    <ol class="scrub-track" style:transform="translateY({centre - index * ROW}px)">
-      {#each values as value, position (value)}
-        <li class={['scrub-item', position === index && 'is-current']} style:height="{ROW}px">
+    <ol class="scrub-track" style:transform="translateY({centre - position * ROW}px)">
+      {#each shown as value, row (value)}
+        <li class={['scrub-item', row === position && 'is-current']} style:height="{ROW}px">
           {value}
         </li>
       {/each}

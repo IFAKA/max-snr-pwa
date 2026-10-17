@@ -93,7 +93,8 @@ export function scrubValue(node: HTMLElement, options: ScrubOptions) {
       return;
     }
     event.preventDefault();
-    deltaY = event.clientY - originY;
+    // Dragging up is positive and raises the value.
+    deltaY = originY - event.clientY;
     update();
   };
   // touch-action: pan-y lets a quick swipe scroll; after the hold, cancelling touchmove keeps the wheel.

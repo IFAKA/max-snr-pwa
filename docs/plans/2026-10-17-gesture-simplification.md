@@ -34,6 +34,12 @@ Directions are set for right-handed use: swipe LEFT confirms, swipe RIGHT undoes
 
 Real-phone feedback: a tall phone showed the second page's buttons without scrolling, and the `⌄` meant nothing. Now the actions the swipes replace (Log set, Skip Rest, Undo, Finish, Restart) stay in the DOM but are visually hidden until keyboard focus reaches them (`.stage-more`, shown as a bottom bar on focus); there is no second scroll page and no `⌄`. Changing the exercise is a tap on the exercise title (a link, 44px tall). Rest shows the title, the last set, `n/total`, the timer, the bar and the hint; the session time shows only at the 60:00 cap.
 
+### Follow-ups from the phone (shipped)
+
+- Set values use a 1 : 1.5 : 1 column split and a smaller minimum size so `142.5` fits at 192×192.
+- The value wheel is back to "drag up raises the value"; the wheel lists higher values above.
+- The pre-start exercise-selection screen is a swipe card too (left: continue); tapping the exercise name opens Change Exercise.
+
 ### Cleaner Lifting screen (shipped)
 
 The main view is the title, `3/3` (read as "Set 3 of 3" by screen readers), three large plain values (still tap or hold-and-drag) and a `← swipe to log` hint. The `Log set` button, target, previous set, progression note and Change Exercise sit on the second page; the button stays a real submit control (`form="set-form"`) for keyboard and screen readers. At 192×192 the hint sits one scroll below the values.

@@ -845,7 +845,7 @@ main > section:has(> .app-list) > .app-list .list-link::before {
 /* The set's values: three big buttons that each open their picker, equal width. */
 .set-values {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr);
   gap: 6px;
 }
 .set-value {
@@ -878,7 +878,8 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   background: transparent;
 }
 .lifting-stage .set-value output {
-  font-size: clamp(34px, 14vw, 56px);
+  font-size: clamp(20px, 10vw, 48px);
+  white-space: nowrap;
 }
 .set-value span {
   color: var(--muted);

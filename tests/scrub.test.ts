@@ -8,7 +8,7 @@ import {
 } from '../src/lib/browser/scrub-math.ts';
 
 describe('value scrub', () => {
-  it('drags down to raise and up to lower, one step per stride', () => {
+  it('a positive delta (dragging up) raises and a negative one lowers, one step per stride', () => {
     expect(scrubSteps(0)).toBe(0);
     expect(scrubSteps(SCRUB_STEP_PX)).toBe(1);
     expect(scrubSteps(-SCRUB_STEP_PX * 2)).toBe(-2);

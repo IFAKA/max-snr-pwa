@@ -8,7 +8,7 @@ const FINE_PX = FINE_STEPS * SCRUB_STEP_PX;
 const RAMP_PX = 64;
 const MAX_STEPS_PER_SECOND = 16;
 
-/** Steps for the fine zone of a vertical drag. Dragging down raises the value. */
+/** Steps for the fine zone of a drag; a positive delta (the thumb moving up) raises the value. */
 export function scrubSteps(deltaY: number) {
   const steps = Math.min(Math.abs(deltaY), FINE_PX) / SCRUB_STEP_PX;
   return Math.sign(deltaY) * Math.floor(steps) + 0;
