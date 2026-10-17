@@ -810,27 +810,54 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   font-size: 15px;
   font-weight: 800;
 }
-.superset-progress span {
-  color: var(--muted);
-  font-size: 0.9em;
-  font-weight: 500;
+/* Exercise list: a superset is one accent bar down the left edge of its rows, with no dividers
+   inside the group; the bar starts and ends inset so consecutive supersets stay apart. */
+.app-list > li.superset-member {
+  position: relative;
 }
-.list-link .superset-progress {
-  margin-top: 1px;
-  font-size: 12px;
-  font-weight: 750;
+.app-list > li.superset-member > .list-link {
+  padding-inline-start: 14px;
 }
-.list-link .superset-progress span {
-  display: inline;
-  margin-inline-start: 4px;
-  font-size: inherit;
+.app-list > li.superset-member:not(.superset-end) {
+  border-bottom-color: transparent;
+}
+.app-list > li.superset-member::before {
+  position: absolute;
+  z-index: 1;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 4px;
+  background: var(--accent);
+  content: '';
+  pointer-events: none;
+}
+.app-list > li.superset-start::before {
+  inset-block-start: 10px;
+  border-start-start-radius: 2px;
+  border-start-end-radius: 2px;
+}
+.app-list > li.superset-end::before {
+  inset-block-end: 10px;
+  border-end-start-radius: 2px;
+  border-end-end-radius: 2px;
 }
 .workout-picker {
   display: flex;
   height: 100%;
   min-height: 0;
+  flex: 1 1 auto;
   flex-direction: column;
   overflow: hidden;
+}
+/* Only the rows scroll; the screen title stays put above them. */
+.workout-picker > .app-list {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.workout-picker > :not(.app-list) {
+  flex: 0 0 auto;
 }
 .workout-stage h1.workout-title[data-title-marquee] {
   overflow: visible;
@@ -1553,7 +1580,11 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   opacity: 0.6;
 }
 .drawer-body {
-  overflow-y: auto;
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  overflow: hidden;
   padding: 0 12px 12px;
 }
 .drawer-peek {

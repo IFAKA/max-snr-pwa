@@ -7,12 +7,9 @@
 </script>
 
 {#if progress}
-  <small
-    class="superset-progress"
-    aria-label="Superset exercise {progress.currentMember} of {progress.totalMembers}"
-    >Superset · Exercise {progress.currentMember} of {progress.totalMembers}<span
-      >{progress.remaining}
-      {progress.remaining === 1 ? 'exercise' : 'exercises'} before rest</span
+  <small class="superset-progress"
+    ><span aria-hidden="true">Superset {progress.currentMember}/{progress.totalMembers}</span><span
+      class="sr-only">Superset exercise {progress.currentMember} of {progress.totalMembers}</span
     ></small
   >
 {/if}
