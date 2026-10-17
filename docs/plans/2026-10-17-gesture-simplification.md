@@ -71,6 +71,10 @@ Swiping up no longer waits for the release: the drawer rises with the finger (a 
 
 Base UI is React-only, so the Svelte equivalents are used: `vaul-svelte` for the drawer (drag to dismiss, velocity release, backdrop fade, slide-out on close; `defaultOpen` skips the slide-in after a finger drag) and `bits-ui` for the switch. The confirmation dialog stays the native `<dialog>` the acceptance criteria require. Vaul has no drag-to-open, so the finger-following sheet (`DrawerPeek`) stays custom.
 
+### Drawer handoff and slide-out fixes (shipped)
+
+After a finger drag the real drawer no longer slides in again (`data-handoff` disables its enter animation, which vaul's `defaultOpen` did not), and closing waits the full 500 ms slide-out before leaving the route. Sampled positions confirm the handoff holds still and the close slides all the way down, for Escape and drag.
+
 ### Cleaner Lifting screen (shipped)
 
 The main view is the title, `3/3` (read as "Set 3 of 3" by screen readers), three large plain values (still tap or hold-and-drag) and a `← swipe to log` hint. The `Log set` button, target, previous set, progression note and Change Exercise sit on the second page; the button stays a real submit control (`form="set-form"`) for keyboard and screen readers. At 192×192 the hint sits one scroll below the values.

@@ -13,7 +13,7 @@
   }: { label: string; onclose: () => void; children: Snippet<[(after?: () => void) => void]> } =
     $props();
 
-  const SLIDE_OUT_MS = 350;
+  const SLIDE_OUT_MS = 500;
 
   // Opened by a finger drag: it is already in place, so it must not slide in again.
   const handoff = drawerPeek.handoff;
@@ -32,7 +32,6 @@
 
 <Drawer.Root
   {open}
-  defaultOpen={handoff}
   noBodyStyles
   shouldScaleBackground={false}
   onOpenChange={(next) => {
@@ -40,8 +39,8 @@
   }}
 >
   <Drawer.Portal>
-    <Drawer.Overlay class="drawer-overlay" />
-    <Drawer.Content class="drawer-sheet" aria-label={label}>
+    <Drawer.Overlay class="drawer-overlay" data-handoff={handoff} />
+    <Drawer.Content class="drawer-sheet" aria-label={label} data-handoff={handoff}>
       <Drawer.Handle class="drawer-handle" />
       <Drawer.Title class="sr-only">{label}</Drawer.Title>
       <div class="drawer-body" data-vaul-no-drag>{@render children(dismiss)}</div>

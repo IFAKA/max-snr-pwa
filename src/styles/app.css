@@ -1572,3 +1572,8 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   border-radius: 0;
   background: transparent;
 }
+/* Opened by a finger drag: the sheet is already in place, so it must not slide in again. */
+.drawer-sheet[data-handoff='true'][data-state='open'],
+.drawer-overlay[data-handoff='true'][data-state='open'] {
+  animation: none !important;
+}
