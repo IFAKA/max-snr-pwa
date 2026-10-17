@@ -24,7 +24,7 @@
   });
 </script>
 
-<SwipeCard onconfirm={() => toLifting(skipPlank)} disabled={busy}>
+<SwipeCard onconfirm={() => toLifting(skipPlank)} confirmLabel="Finish" disabled={busy}>
   <WorkoutStage title="Plank" countdown>
     {#snippet actions()}
       <Countdown

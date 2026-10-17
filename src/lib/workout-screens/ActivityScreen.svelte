@@ -40,7 +40,7 @@
   }
 </script>
 
-<SwipeCard onconfirm={finish} disabled={type === 'measurement'}>
+<SwipeCard onconfirm={finish} confirmLabel="Finish" disabled={type === 'measurement'}>
   <WorkoutStage
     title={definition.title}
     className="activity-stage"

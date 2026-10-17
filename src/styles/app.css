@@ -982,86 +982,113 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   min-height: 56px;
   font-size: 1.1em;
 }
-/* The whole lifting screen is a card: drag it right past 40% (or flick) to log the set. A quick
-   vertical swipe still scrolls; the card follows the finger and a badge shows what release does. */
+/* Every workout step is a card: drag it left to confirm, right to undo. A quick vertical swipe
+   still scrolls; the card follows the finger and a stamp shows what release does. */
 .swipe-card {
   position: relative;
   overflow-x: clip;
   touch-action: pan-y;
+  /* A drag throws the card; it must not select its text. */
+  user-select: none;
+  -webkit-user-select: none;
+}
+.swipe-card :is(input, textarea) {
+  user-select: text;
+  -webkit-user-select: text;
 }
 .swipe-card[data-vertical='true'],
 /* The stage is the nearest scroll container, so it needs the same value to stop native panning. */
 .swipe-card[data-vertical='true'] .workout-stage {
   touch-action: none;
 }
-.swipe-card .workout-stage {
-  transform: translateX(calc(var(--swipe, 0) * 36%));
-  opacity: calc(1 - var(--swipe-abs, 0) * 0.35);
+.swipe-card .workout-stage,
+.swipe-stamps {
+  /* Pivot below the card so it swings like a held card, Tinder style. */
+  transform-origin: 50% 120%;
+  translate: calc(var(--swipe, 0) * 100%) 0;
+  rotate: calc(var(--swipe, 0) * 14deg);
+  /* Let go early and it springs back with a little overshoot. */
   transition:
-    transform 150ms ease-out,
-    opacity 150ms ease-out;
+    translate 420ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    rotate 420ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 240ms ease-out;
 }
-.swipe-card[data-dragging='true'] .workout-stage {
+.swipe-card .workout-stage {
+  opacity: calc(1 - var(--swipe-abs, 0) * 0.6);
+}
+.swipe-card[data-dragging='true'] .workout-stage,
+.swipe-card[data-dragging='true'] .swipe-stamps {
   transition: none;
 }
-.swipe-card[data-leaving='true'] .workout-stage {
-  transform: translateX(-110%);
+/* Committed: the card is thrown off the side it was dragged to, turning and fading. */
+.swipe-card[data-leaving] .workout-stage,
+.swipe-card[data-leaving] .swipe-stamps {
   opacity: 0;
-  transition-duration: 200ms;
+  transition:
+    translate 260ms ease-in,
+    rotate 260ms ease-in,
+    opacity 220ms ease-in;
 }
-.swipe-ring {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 96px;
-  height: 96px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--surface);
-  box-shadow: 0 6px 24px rgb(0 0 0 / 0.22);
-  color: var(--accent);
-  pointer-events: none;
-  opacity: min(1, calc(var(--reveal, 0) * 2.5));
-  transform: translate(-50%, -50%) scale(calc(0.6 + var(--reveal, 0) * 0.4));
+.swipe-card[data-leaving='left'] .workout-stage,
+.swipe-card[data-leaving='left'] .swipe-stamps {
+  translate: -140% 0;
+  rotate: -24deg;
 }
-.swipe-ring-progress {
+.swipe-card[data-leaving='right'] .workout-stage,
+.swipe-card[data-leaving='right'] .swipe-stamps {
+  translate: 140% 0;
+  rotate: 24deg;
+}
+.swipe-stamps {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  fill: none;
-  stroke-width: 5;
-  transform: rotate(-90deg);
+  pointer-events: none;
 }
-.swipe-ring-track {
-  stroke: var(--line);
+/* The stamp sits in the top corner the card moves away from, so it stays in view. */
+.swipe-stamp {
+  position: absolute;
+  top: max(16px, 7%);
+  max-width: 70%;
+  padding: 2px 10px;
+  border: 4px solid currentColor;
+  border-radius: 10px;
+  font-size: clamp(22px, 9vw, 40px);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  line-height: 1.15;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition:
+    scale 140ms var(--ease-out),
+    background-color 140ms var(--ease-out),
+    color 140ms var(--ease-out);
 }
-.swipe-ring-bar {
-  stroke: var(--accent);
-  stroke-linecap: round;
-  stroke-dasharray: 1;
-  stroke-dashoffset: calc(1 - var(--ring, 0));
+.swipe-stamp.is-confirm {
+  right: 14px;
+  color: var(--accent);
+  opacity: var(--confirm-reveal, 0);
+  rotate: 14deg;
+  scale: calc(0.8 + var(--confirm-reveal, 0) * 0.2);
 }
-.swipe-ring-icon {
-  width: 40px;
-  height: 40px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2.4;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.swipe-stamp.is-undo {
+  left: 14px;
+  color: var(--text);
+  opacity: var(--undo-reveal, 0);
+  rotate: -14deg;
+  scale: calc(0.8 + var(--undo-reveal, 0) * 0.2);
 }
-/* Past the threshold the circle fills and pops, the cue to let go. */
-.swipe-card[data-armed='true'] .swipe-ring {
+/* Past the threshold the stamp turns solid and pops, the cue to let go. */
+.swipe-card[data-armed='true'] .swipe-stamp {
+  border-color: transparent;
+  scale: 1.08;
+}
+.swipe-card[data-armed='true'] .swipe-stamp.is-confirm {
   background: var(--accent);
-  color: #fff;
-  transform: translate(-50%, -50%) scale(1.14);
-  transition: transform 120ms var(--ease-out);
+  color: var(--bg);
 }
-.swipe-card[data-armed='true'] .swipe-ring-track,
-.swipe-card[data-armed='true'] .swipe-ring-bar {
-  stroke: #fff;
+.swipe-card[data-armed='true'] .swipe-stamp.is-undo {
+  background: var(--text);
+  color: var(--bg);
 }
 .log-arrow {
   display: inline-block;
@@ -1489,6 +1516,13 @@ main > section:has(> .app-list) > .app-list .list-link::before {
     font-size: 17px;
   }
 }
+/* Reduced motion: the card still follows the finger, but flat, without tilting. */
+@media (prefers-reduced-motion: reduce) {
+  .swipe-card .workout-stage,
+  .swipe-stamps {
+    rotate: none !important;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1507,13 +1541,6 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   }
 }
 @media (prefers-color-scheme: dark) {
-  .swipe-card[data-armed='true'] .swipe-ring {
-    color: #102116;
-  }
-  .swipe-card[data-armed='true'] .swipe-ring-track,
-  .swipe-card[data-armed='true'] .swipe-ring-bar {
-    stroke: #102116;
-  }
   :root {
     --bg: #0d1210;
     --surface: #171e1a;

@@ -167,3 +167,33 @@ test('closing the drawer with back slides it out instead of removing it', async 
   await expect(page.locator('[data-vaul-drawer]')).toHaveCount(1);
   await expect(page.locator('[data-vaul-drawer]')).toHaveCount(0);
 });
+
+test('crossing the threshold vibrates each way, like a detent', async ({ page }) => {
+  await page.addInitScript(() => {
+    const calls: unknown[] = [];
+    (window as unknown as { vibrations: unknown[] }).vibrations = calls;
+    Object.defineProperty(navigator, 'vibrate', {
+      value: (pattern: unknown) => calls.push(pattern) > 0,
+      configurable: true,
+    });
+  });
+  await openLifting(page);
+  // Only the drag's own cues count, not the rest timer's that led here.
+  await page.evaluate(() => {
+    (window as unknown as { vibrations: unknown[] }).vibrations.length = 0;
+  });
+  const box = (await page.locator('.swipe-card').boundingBox())!;
+  const y = box.y + 20;
+  await page.mouse.move(box.x + box.width * 0.85, y);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width * 0.4, y, { steps: 6 });
+  await expect(page.locator('.swipe-card')).toHaveAttribute('data-armed', 'true');
+  await page.mouse.move(box.x + box.width * 0.8, y, { steps: 6 });
+  await expect(page.locator('.swipe-card')).toHaveAttribute('data-armed', 'false');
+  await page.mouse.up();
+  const vibrations = await page.evaluate(
+    () => (window as unknown as { vibrations: unknown[] }).vibrations,
+  );
+  expect(vibrations).toEqual([[30], [12]]);
+  await expect(page.getByRole('button', { name: 'Log set' })).toBeVisible();
+});

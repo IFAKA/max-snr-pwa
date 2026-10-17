@@ -9,44 +9,46 @@
     swipeToConfirm,
   } from '../browser/swipe-log.ts';
 
-  // A workout screen as a card: drag left to confirm its main action, right to undo, so the right
-  // thumb sweeps toward its palm. The card
-  // follows the finger and a badge names what releasing does. Every action keeps its own button,
-  // so taps, the keyboard and screen readers never need the gesture.
+  // A workout screen as a card, the way Tinder deals them: drag left to confirm its main action,
+  // right to undo, so the right thumb sweeps toward its palm. The card follows the finger, tilts and
+  // fades, a stamp names what releasing does, and each crossing of the threshold ticks like a
+  // detent. Every action keeps its own button, so taps, the keyboard and screen readers never need
+  // the gesture.
   let {
     children,
     onconfirm,
     onundo,
     onup,
     quickConfirm = false,
+    confirmLabel = 'Done',
+    undoLabel = 'Undo',
     disabled = false,
   }: {
     children: Snippet;
     onconfirm: () => void;
     onundo?: () => void;
     onup?: () => void;
-    /** The confirm action can be undone: it needs only a light swipe, with no ring. */
+    /** The confirm action can be undone: it needs only a light swipe. */
     quickConfirm?: boolean;
+    /** Short words stamped on the card while dragging toward each action. */
+    confirmLabel?: string;
+    undoLabel?: string;
     disabled?: boolean;
   } = $props();
 
   let swipe = $state({ progress: 0, armed: false, dragging: false, axis: 'x' as 'x' | 'y' });
-  let leaving = $state(false);
+  let leaving = $state<'left' | 'right' | null>(null);
   let card: HTMLElement | undefined;
   // Up opens the exercise list, so the card owns vertical touch drags when it offers that.
   const canSwipeUp = $derived(Boolean(onup));
-  // Only a confirm that cannot be undone gets the ring and the haptic at its threshold; undoable
-  // actions (log set, undo, opening the list) act on a light swipe.
-  const ringed = $derived(swipe.axis === 'x' && swipe.progress < 0 && !quickConfirm);
-  // The ring fills as the drag nears the threshold and is full when releasing will commit.
-  const ring = $derived(ringed ? Math.min(1, Math.abs(swipe.progress) / ARM_RATIO) : 0);
-  // The icon circle grows in with every sideways drag, ringed or light, so the action is named.
-  const reveal = $derived(
-    swipe.axis === 'x'
-      ? Math.min(1, Math.abs(swipe.progress) / (ringed ? ARM_RATIO : ARM_RATIO_LIGHT))
-      : 0,
-  );
-  const icon = $derived(swipe.axis === 'y' ? 'list' : swipe.progress < 0 ? 'confirm' : 'undo');
+  // Only a confirm that cannot be undone needs the long drag; undoable actions (log set, undo,
+  // opening the list) act on a light swipe.
+  const ratio = (direction: 1 | -1 | 'up') =>
+    direction === -1 && !quickConfirm ? ARM_RATIO : ARM_RATIO_LIGHT;
+  const sideways = $derived(swipe.axis === 'x' ? swipe.progress : 0);
+  // Each stamp fades in as the drag nears its threshold and is solid once releasing will act.
+  const confirmReveal = $derived(sideways < 0 ? Math.min(1, -sideways / ratio(-1)) : 0);
+  const undoReveal = $derived(sideways > 0 ? Math.min(1, sideways / ratio(1)) : 0);
 
   let upCommit: { velocity: number } | null = null;
 
@@ -79,21 +81,19 @@
         drawerPeek.settleMs = 0;
       } else queueMicrotask(releaseDrawer);
     },
-    ratio: (direction: 1 | -1 | 'up') =>
-      direction === -1 && !quickConfirm ? ARM_RATIO : ARM_RATIO_LIGHT,
-    onArm: (direction: 1 | -1 | 'up') => {
-      if (direction === -1 && !quickConfirm) cue('armed');
-    },
+    ratio,
+    onThreshold: (_direction: 1 | -1 | 'up', armed: boolean) => cue(armed ? 'armed' : 'disarmed'),
     onCommit: (direction: 1 | -1 | 'up', velocity: number) => {
       markSwipeLearned();
       if (direction === 'up') {
         upCommit = { velocity };
         return;
       }
+      // The card flies off the way it was thrown; if the screen is still here a moment later (the
+      // action failed or kept it), it springs back.
+      leaving = direction > 0 ? 'right' : 'left';
+      setTimeout(() => (leaving = null), 700);
       if (direction > 0) return onundo?.();
-      // The card slides away; if the screen is still here a moment later, it slides back.
-      leaving = true;
-      setTimeout(() => (leaving = false), 700);
       onconfirm();
     },
   };
@@ -106,28 +106,15 @@
   data-leaving={leaving}
   bind:this={card}
   data-vertical={canSwipeUp}
-  style:--swipe={swipe.axis === 'x' ? swipe.progress : 0}
-  style:--swipe-abs={swipe.axis === 'x' ? Math.abs(swipe.progress) : 0}
-  style:--ring={ring}
-  style:--reveal={reveal}
+  style:--swipe={sideways}
+  style:--swipe-abs={Math.abs(sideways)}
+  style:--confirm-reveal={confirmReveal}
+  style:--undo-reveal={undoReveal}
   use:swipeToConfirm={options}
 >
   {@render children()}
-  <div class="swipe-ring" aria-hidden="true">
-    {#if ringed}
-      <svg class="swipe-ring-progress" viewBox="0 0 80 80">
-        <circle class="swipe-ring-track" cx="40" cy="40" r="36" />
-        <circle class="swipe-ring-bar" cx="40" cy="40" r="36" pathLength="1" />
-      </svg>
-    {/if}
-    <svg class="swipe-ring-icon" viewBox="0 0 24 24">
-      {#if icon === 'confirm'}
-        <path d="M5 12.5l4.5 4.5L19 7" />
-      {:else if icon === 'undo'}
-        <path d="M9 6L4 11l5 5M4 11h10a5 5 0 010 10h-2" />
-      {:else}
-        <path d="M5 7h14M5 12h14M5 17h14" />
-      {/if}
-    </svg>
+  <div class="swipe-stamps" aria-hidden="true">
+    <span class="swipe-stamp is-confirm">{confirmLabel}</span>
+    {#if onundo}<span class="swipe-stamp is-undo">{undoLabel}</span>{/if}
   </div>
 </div>

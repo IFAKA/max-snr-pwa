@@ -29,7 +29,13 @@
   }
 </script>
 
-<SwipeCard onconfirm={finish} onundo={() => act(() => setTimer(STRETCH_MS))} disabled={busy}>
+<SwipeCard
+  onconfirm={finish}
+  onundo={() => act(() => setTimer(STRETCH_MS))}
+  confirmLabel="Finish"
+  undoLabel="Restart"
+  disabled={busy}
+>
   <WorkoutStage title="Stretch" className="stretch-stage" countdown>
     {#snippet actions()}
       <Countdown

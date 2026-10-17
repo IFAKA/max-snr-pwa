@@ -46,7 +46,7 @@ Dragging the card up past 25% of its height (or flicking) opens the exercise lis
 
 ### Ring cue, no first-exercise step, build label (shipped)
 
-- Swipes show an icon-only circle (check to confirm, undo arrow, list for change exercise) in the middle of the screen with a progress ring that fills toward the threshold; past it the circle turns solid, pops and vibrates (`cue('armed')`), like Tinder's stamp.
+- Swipes are Tinder-style: the card follows the finger 1:1, tilts around a pivot below it and fades; a stamp in the top corner the card moves away from names the action ("Log", "Skip Rest", "Finish" in the accent colour; "Undo", "Restart" in the text colour), fades in toward the threshold and turns solid and pops past it. Each crossing of the threshold, outward or back, ticks with a vibration (`cue('armed')` / `cue('disarmed')`), like a detent on an imaginary string. Committed cards are thrown off their side; early releases spring back with a slight overshoot. Reduced motion keeps the follow but drops the tilt and the animations. (This replaces the earlier icon circle and progress ring.)
 - The "Choose your first exercise" screen is gone: a new workout opens the lifting screen, and swiping up (or tapping the name) opens the exercise list, which slides up and back down with a view transition (no drawer component).
 - A swipe that starts on a set value works unless the finger is held for 300 ms, which hands the touch to the value wheel; the title link is `draggable="false"` so a vertical drag on it is not a native link drag.
 - History shows `Version <commit>` (from `vite.config.ts`, `__BUILD_ID__`) so an installed app can be checked against the deployed commit.
@@ -57,7 +57,7 @@ The exercise list is now a real bottom drawer (`Drawer.svelte`, native `<dialog>
 
 ### Ring only for irreversible actions (shipped)
 
-The ring-and-haptic confirmation (40% of the width) is reserved for actions that cannot be undone: Skip Rest, Finish (plank, stretch, activities) and Continue. Undoable actions (Log set, Undo Last Set, Restart, opening the exercise list) act on a light swipe (20%) with no ring or haptic, but sideways swipes still show the icon circle (check or undo arrow), which turns solid at the threshold; Log set is undone from Rest with a right swipe.
+The long 40% drag is reserved for actions that cannot be undone: Skip Rest, Finish (plank, stretch, activities) and Continue. Undoable actions (Log set, Undo Last Set, Restart, opening the exercise list) act on a light swipe (20%); Log set is undone from Rest with a right swipe.
 
 ### Drawer follows the finger (shipped)
 

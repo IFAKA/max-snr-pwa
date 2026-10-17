@@ -63,6 +63,7 @@
 
 <SwipeCard
   onconfirm={() => run(continueRest)}
+  confirmLabel="Skip Rest"
   onup={canChange ? () => goto('/workout/?view=exercises') : undefined}
   onundo={hasCompletedSet ? undo : undefined}
   disabled={busy}
