@@ -38,7 +38,10 @@
     "vitest": "^4.1.8"
   },
   "dependencies": {
-    "canvas-confetti": "^1.9.4"
+    "@internationalized/date": "^3.12.4",
+    "bits-ui": "^2.19.5",
+    "canvas-confetti": "^1.9.4",
+    "vaul-svelte": "^1.0.0-next.7"
   },
   "imports": {
     "#lib/*": "./src/lib/*",

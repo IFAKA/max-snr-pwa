@@ -1516,69 +1516,34 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   }
 }
 
-/* Drawer: a native modal dialog docked to the bottom that slides up and follows a handle drag. */
-.drawer {
+/* Drawer (vaul-svelte): a bottom sheet over a dimmed backdrop. The same classes style the
+   plain sheet that follows the finger while a swipe up is still in progress. */
+.drawer-overlay {
   position: fixed;
-  inset: auto 0 0;
-  width: 100%;
-  max-width: 100%;
-  max-height: none;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--text);
-}
-.drawer::backdrop {
+  inset: 0;
+  z-index: 40;
   background: rgb(0 0 0 / 0.45);
 }
 .drawer-sheet {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 41;
   display: flex;
   max-height: 88svh;
   flex-direction: column;
   border-radius: 22px 22px 0 0;
   background: var(--bg);
+  color: var(--text);
   padding-bottom: env(safe-area-inset-bottom);
-  transform: translateY(var(--drag, 0));
-  transition: transform 180ms var(--ease-out);
-  animation: drawer-in 260ms var(--ease-out);
-}
-.drawer-peek {
-  z-index: 5;
-  pointer-events: none;
-}
-.drawer-peek::before {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background: rgb(0 0 0 / 0.45);
-  content: '';
-  opacity: min(1, calc(var(--peek, 0) / 160));
-}
-.drawer-peek .drawer-sheet {
-  animation: none;
-  transform: translateY(max(0px, calc(100% - var(--peek, 0px))));
-  transition: none;
-}
-.drawer[data-handoff='true'] .drawer-sheet {
-  animation: none;
-}
-.drawer-sheet:focus {
   outline: none;
-}
-.drawer[data-dragging='true'] .drawer-sheet {
-  transition: none;
 }
 .drawer-handle {
   display: grid;
-  width: 100%;
   min-height: 44px;
   flex: 0 0 auto;
   place-items: center;
-  border: 0;
-  border-radius: 22px 22px 0 0;
-  background: transparent;
-  touch-action: none;
 }
 .drawer-handle span {
   width: 44px;
@@ -1591,8 +1556,19 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   overflow-y: auto;
   padding: 0 12px 12px;
 }
-@keyframes drawer-in {
-  from {
-    transform: translateY(100%);
-  }
+.drawer-peek {
+  pointer-events: none;
+}
+.drawer-peek .drawer-overlay {
+  opacity: min(1, calc(var(--peek, 0) / 160));
+}
+.drawer-peek .drawer-sheet {
+  transform: translateY(max(0px, calc(100% - var(--peek, 0px))));
+}
+.drawer-handle[data-vaul-handle] {
+  width: 100%;
+  height: auto;
+  margin: 0;
+  border-radius: 0;
+  background: transparent;
 }

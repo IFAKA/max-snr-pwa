@@ -1,115 +1,50 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import { Drawer } from 'vaul-svelte';
   import { drawerPeek } from '../browser/drawer-peek.svelte.ts';
 
-  // A bottom drawer on a native modal <dialog>: it slides up over the screen, and closes with
-  // Escape, a backdrop tap, the handle (a real button) or a downward drag of the handle.
-  // `peek` renders the drawer as a plain sheet that is `peek` px up the screen, for the moment a
-  // finger is still dragging it open; releasing opens the real dialog in the same place.
+  // The bottom drawer, built on vaul-svelte (drag to dismiss, velocity release, backdrop tied to
+  // the drag). It closes with a slide-out first and then calls `onclose` to leave its route.
+  // `children` receives `dismiss`, which slides it out and then runs a callback.
   let {
     label,
     onclose,
     children,
-    peek,
-  }: { label: string; onclose: () => void; children: Snippet; peek?: number } = $props();
+  }: { label: string; onclose: () => void; children: Snippet<[(after?: () => void) => void]> } =
+    $props();
 
-  const CLOSE_RATIO = 0.3;
-  const FLICK_PX_PER_MS = 0.6;
+  const SLIDE_OUT_MS = 350;
 
   // Opened by a finger drag: it is already in place, so it must not slide in again.
   const handoff = drawerPeek.handoff;
   drawerPeek.handoff = false;
 
-  let dialog: HTMLDialogElement | undefined = $state();
-  let sheet: HTMLElement | undefined = $state();
-  let offset = $state(0);
-  let dragging = $state(false);
-  let startY = 0;
-  let startTime = 0;
-  let swallowClick = false;
+  let open = $state(true);
+  let closing = false;
 
-  $effect(() => {
-    if (dialog && !dialog.open) {
-      dialog.showModal();
-      // Start on the sheet itself, not on the handle, so no focus ring covers the title.
-      sheet?.focus({ preventScroll: true });
-    }
-  });
-
-  function cancel(event: Event) {
-    event.preventDefault();
-    onclose();
-  }
-
-  function backdrop(event: MouseEvent) {
-    if (event.target === dialog) onclose();
-  }
-
-  function down(event: PointerEvent) {
-    if (event.pointerType === 'mouse' && event.button !== 0) return;
-    (event.currentTarget as HTMLElement).setPointerCapture?.(event.pointerId);
-    startY = event.clientY;
-    startTime = event.timeStamp;
-    dragging = true;
-  }
-
-  function move(event: PointerEvent) {
-    if (!dragging) return;
-    offset = Math.max(0, event.clientY - startY);
-  }
-
-  function up(event: PointerEvent) {
-    if (!dragging) return;
-    dragging = false;
-    const distance = Math.max(0, event.clientY - startY);
-    const height = sheet?.getBoundingClientRect().height || 1;
-    const flick =
-      distance > 24 && distance / Math.max(1, event.timeStamp - startTime) > FLICK_PX_PER_MS;
-    offset = 0;
-    if (distance > 6) {
-      swallowClick = true;
-      setTimeout(() => (swallowClick = false), 0);
-    }
-    if (distance / height > CLOSE_RATIO || flick) onclose();
-  }
-
-  function click() {
-    if (!swallowClick) onclose();
+  function dismiss(after: () => void = onclose) {
+    if (closing) return;
+    closing = true;
+    open = false;
+    setTimeout(after, SLIDE_OUT_MS);
   }
 </script>
 
-{#if peek !== undefined}
-  <div class="drawer drawer-peek" aria-hidden="true" style:--peek="{peek}px">
-    <div class="drawer-sheet">
-      <div class="drawer-handle"><span></span></div>
-      <div class="drawer-body">{@render children()}</div>
-    </div>
-  </div>
-{:else}
-  <dialog
-    bind:this={dialog}
-    class="drawer"
-    aria-label={label}
-    oncancel={cancel}
-    onclick={backdrop}
-    data-dragging={dragging}
-    data-handoff={handoff}
-  >
-    <div class="drawer-sheet" tabindex="-1" bind:this={sheet} style:--drag="{offset}px">
-      <button
-        class="drawer-handle"
-        type="button"
-        aria-label="Close {label}"
-        onpointerdown={down}
-        onpointermove={move}
-        onpointerup={up}
-        onpointercancel={() => {
-          dragging = false;
-          offset = 0;
-        }}
-        onclick={click}><span aria-hidden="true"></span></button
-      >
-      <div class="drawer-body">{@render children()}</div>
-    </div>
-  </dialog>
-{/if}
+<Drawer.Root
+  {open}
+  defaultOpen={handoff}
+  noBodyStyles
+  shouldScaleBackground={false}
+  onOpenChange={(next) => {
+    if (!next) dismiss();
+  }}
+>
+  <Drawer.Portal>
+    <Drawer.Overlay class="drawer-overlay" />
+    <Drawer.Content class="drawer-sheet" aria-label={label}>
+      <Drawer.Handle class="drawer-handle" />
+      <Drawer.Title class="sr-only">{label}</Drawer.Title>
+      <div class="drawer-body" data-vaul-no-drag>{@render children(dismiss)}</div>
+    </Drawer.Content>
+  </Drawer.Portal>
+</Drawer.Root>

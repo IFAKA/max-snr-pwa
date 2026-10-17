@@ -9,6 +9,7 @@
   import ActivityScreen from './ActivityScreen.svelte';
   import Completion from './Completion.svelte';
   import Drawer from '../components/Drawer.svelte';
+  import DrawerPeek from '../components/DrawerPeek.svelte';
   import { drawerPeek } from '../browser/drawer-peek.svelte.ts';
   import ExercisePicker from './ExercisePicker.svelte';
   import Lifting from './Lifting.svelte';
@@ -89,13 +90,15 @@
   {/if}
 {/key}
 {#if view.kind !== 'picker' && drawerPeek.px > 0 && 'active' in shown}
-  <Drawer label="exercises" peek={drawerPeek.px} onclose={() => {}}>
+  <DrawerPeek px={drawerPeek.px}>
     <ExercisePicker active={shown.active} onselected={() => {}} />
-  </Drawer>
+  </DrawerPeek>
 {/if}
 {#if view.kind === 'picker'}
   {@const returnTo = view.returnTo}
-  <Drawer label="exercises" onclose={() => history.back()}>
-    <ExercisePicker active={view.active} onselected={() => goto(returnTo)} />
+  <Drawer label="Exercises" onclose={() => history.back()}>
+    {#snippet children(dismiss)}
+      <ExercisePicker active={view.active} onselected={() => dismiss(() => goto(returnTo))} />
+    {/snippet}
   </Drawer>
 {/if}
