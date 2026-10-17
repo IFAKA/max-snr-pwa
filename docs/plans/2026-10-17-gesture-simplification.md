@@ -19,10 +19,10 @@ Page one is the primary stage (set values and `Log set`, or the rest timer). Pag
 
 ### Phase 2: Swipe right to log a set (shipped)
 
-`Log set` is prefilled from history, so dragging it right past 40% of its width (or flicking) logs the set. `browser/swipe-log.ts` is the action; `Lifting.svelte` wires it.
+`Log set` is prefilled from history, so dragging the whole lifting screen right like a card, past 40% of its width (or flicking), logs the set. `browser/swipe-log.ts` is the action; `Lifting.svelte` wires it.
 
-- The button is a fill that follows the finger, reads "✓ Release to log" once armed, and springs back if released early. A tick cue plays on arming; the usual `setLogged` / `betterSet` cue plays on commit.
-- Tap, Enter and screen readers still use the button's click. Vertical drags scroll natively (`touch-action: pan-y`); edge starts are ignored; the click after a drag is swallowed so a set is never logged twice.
+- The screen follows the finger and fades slightly; a badge fades in and reads "✓ Release to log" once armed. Released early, it springs back; committed, it slides off to the right. A tick cue plays on arming; the usual `setLogged` / `betterSet` cue plays on commit.
+- Tap, Enter and screen readers still use the button's click. Vertical drags scroll natively (`touch-action: pan-y`); the set values opt out (`data-no-swipe`); edge starts are ignored; the click after a drag is swallowed so a set is never logged twice.
 - A `→` nudge shows until the first successful swipe (`maxsnr-swipe-learned`).
 - Undo: Rest keeps "Undo Last Set" (now with a soft low `undo` cue).
 - Left swipe (Defer behind a confirm dialog) is deferred: try the right swipe on real workouts first.

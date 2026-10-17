@@ -967,30 +967,52 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   }
 }
 .log-set {
-  position: relative;
   min-height: 56px;
-  overflow: hidden;
   font-size: 1.1em;
-  /* A quick vertical swipe scrolls the page; a rightward drag fills the button to log the set. */
+}
+/* The whole lifting screen is a card: drag it right past 40% (or flick) to log the set. A quick
+   vertical swipe still scrolls; the card follows the finger and a badge shows what release does. */
+.swipe-card {
+  position: relative;
+  overflow-x: clip;
   touch-action: pan-y;
-  user-select: none;
 }
-.log-fill {
-  position: absolute;
-  inset: 0;
-  background: rgb(0 0 0 / 0.24);
-  transform: scaleX(var(--swipe, 0));
-  transform-origin: left;
-  transition: transform 150ms ease-out;
+.swipe-card .lifting-stage {
+  transform: translateX(calc(var(--swipe, 0) * 36%));
+  opacity: calc(1 - var(--swipe, 0) * 0.35);
+  transition:
+    transform 150ms ease-out,
+    opacity 150ms ease-out;
 }
-.log-set[data-dragging='true'] .log-fill {
+.swipe-card[data-dragging='true'] .lifting-stage {
   transition: none;
 }
-.log-set[data-armed='true'] .log-fill {
-  background: rgb(0 0 0 / 0.36);
+.swipe-card[data-leaving='true'] .lifting-stage {
+  transform: translateX(110%);
+  opacity: 0;
+  transition-duration: 200ms;
 }
-.log-label {
-  position: relative;
+.swipe-badge {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  padding: 10px 16px;
+  margin-inline: 12px;
+  border-radius: 14px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 800;
+  text-align: center;
+  pointer-events: none;
+  opacity: var(--swipe, 0);
+  transform: translateY(-50%) scale(calc(0.8 + var(--swipe, 0) * 0.2));
+}
+.swipe-card[data-dragging='true'] .swipe-badge {
+  transition: none;
+}
+.swipe-card[data-armed='true'] .swipe-badge {
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 .log-arrow {
   display: inline-block;
@@ -1404,11 +1426,8 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   }
 }
 @media (prefers-color-scheme: dark) {
-  .log-fill {
-    background: rgb(255 255 255 / 0.3);
-  }
-  .log-set[data-armed='true'] .log-fill {
-    background: rgb(255 255 255 / 0.45);
+  .swipe-badge {
+    color: #102116;
   }
   :root {
     --bg: #0d1210;

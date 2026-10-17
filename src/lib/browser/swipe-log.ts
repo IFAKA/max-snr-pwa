@@ -5,12 +5,12 @@ const FLICK_MIN_PX = 48;
 const FLICK_PX_PER_MS = 0.6;
 const LEARNED_KEY = 'maxsnr-swipe-learned';
 
-/** How far along a rightward drag is, from 0 to 1 of the button's width. */
+/** How far along a rightward drag is, from 0 to 1 of the screen's width. */
 export function swipeProgress(dx: number, width: number) {
   return width > 0 ? Math.max(0, Math.min(1, dx / width)) : 0;
 }
 
-/** A drag is armed once it covers 40% of the button; a quick flick also counts on release. */
+/** A drag is armed once it covers 40% of the screen; a quick flick also counts on release. */
 export function swipeArmed(dx: number, width: number, elapsedMs = Infinity) {
   if (swipeProgress(dx, width) >= ARM_RATIO) return true;
   return dx >= FLICK_MIN_PX && dx / Math.max(elapsedMs, 1) >= FLICK_PX_PER_MS;
@@ -47,9 +47,9 @@ export type SwipeOptions = {
 };
 
 /**
- * Svelte action: drag a button to the right to confirm it, as a shortcut for its own click.
+ * Svelte action: drag a whole screen to the right, like a card, to confirm its primary action.
  * Vertical drags stay native scrolling (`touch-action: pan-y` in CSS); taps, the keyboard and
- * assistive tech still use the button's click.
+ * assistive tech still use the primary button's own click.
  */
 export function swipeToConfirm(node: HTMLElement, options: SwipeOptions) {
   let opts = options;
@@ -72,6 +72,8 @@ export function swipeToConfirm(node: HTMLElement, options: SwipeOptions) {
     if (pointerId !== -1 || opts.disabled()) return;
     if (event.pointerType === 'mouse' && event.button !== 0) return;
     if (startsAtEdge(event.clientX, globalThis.innerWidth)) return;
+    // Controls with their own drag (the value wheel) keep their gesture.
+    if ((event.target as Element | null)?.closest?.('[data-no-swipe]')) return;
     pointerId = event.pointerId;
     startX = event.clientX;
     startY = event.clientY;

@@ -10,10 +10,8 @@ async function openLifting(page: Page) {
 }
 
 async function drag(page: Page, from: number, to: number) {
-  await page.locator('#log-set').scrollIntoViewIfNeeded();
-  const box = (await page.locator('#log-set').boundingBox())!;
-  // On the smallest watch the button's lower half sits below the fold; grab its top.
-  const y = box.y + 12;
+  const box = (await page.locator('.swipe-card').boundingBox())!;
+  const y = box.y + 20;
   await page.mouse.move(box.x + box.width * from, y);
   await page.mouse.down();
   await page.mouse.move(box.x + box.width * ((from + to) / 2), y, { steps: 4 });
@@ -21,11 +19,11 @@ async function drag(page: Page, from: number, to: number) {
   return () => page.mouse.up();
 }
 
-test('dragging the button most of the way right logs the set', async ({ page }) => {
+test('dragging the screen most of the way right logs the set', async ({ page }) => {
   await openLifting(page);
   const release = await drag(page, 0.15, 0.9);
-  await expect(page.locator('#log-set')).toHaveAttribute('data-armed', 'true');
-  await expect(page.locator('#log-set')).toContainText('Release to log');
+  await expect(page.locator('.swipe-card')).toHaveAttribute('data-armed', 'true');
+  await expect(page.locator('.swipe-badge')).toContainText('Release to log');
   await release();
   await expect(page.getByRole('timer', { name: /remaining/ })).toBeVisible();
   const data = await stored(page);
@@ -37,7 +35,7 @@ test('dragging the button most of the way right logs the set', async ({ page }) 
 test('a short drag springs back and logs nothing', async ({ page }) => {
   await openLifting(page);
   const release = await drag(page, 0.15, 0.3);
-  await expect(page.locator('#log-set')).toHaveAttribute('data-armed', 'false');
+  await expect(page.locator('.swipe-card')).toHaveAttribute('data-armed', 'false');
   await release();
   await expect(page.getByRole('button', { name: 'Log set' })).toBeVisible();
   const data = await stored(page);

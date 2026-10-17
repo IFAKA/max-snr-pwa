@@ -40,6 +40,7 @@
   const NAMES: Record<SetField, string> = { reps: 'Reps', weight: `Load in ${unit}`, rir: 'RIR' };
   let busy = $state(false);
   let swipe = $state({ progress: 0, armed: false, dragging: false });
+  let leaving = $state(false);
   const learned = swipeLearned();
 
   function pick(field: SetField) {
@@ -68,6 +69,7 @@
       (swipe = { progress, armed, dragging }),
     onArm: () => cue('pick'),
     onCommit: () => {
+      leaving = true;
       markSwipeLearned();
       document.querySelector<HTMLFormElement>('#set-form')?.requestSubmit();
     },
@@ -96,77 +98,78 @@
   }
 </script>
 
-<WorkoutStage title={task.performedName} className="lifting-stage">
-  {#snippet info()}
-    <SupersetMeta {active} {task} />
-    <p class="set-count">Set {task.set} of {task.sets}</p>
-    <p class="target-prescription">
-      Target: {task.targetRepRange || task.reps} reps · {task.targetRir || task.rir} RIR
-    </p>
-  {/snippet}
-  {#snippet actions()}
-    <form id="set-form" onsubmit={logSet}>
-      <div class="set-values" role="group" aria-label="Set values">
-        {#each SET_FIELDS as field (field)}
+<div
+  class="swipe-card"
+  data-armed={swipe.armed}
+  data-dragging={swipe.dragging}
+  data-leaving={leaving}
+  style:--swipe={swipe.progress}
+  use:swipeToConfirm={swipeOptions}
+>
+  <WorkoutStage title={task.performedName} className="lifting-stage">
+    {#snippet info()}
+      <SupersetMeta {active} {task} />
+      <p class="set-count">Set {task.set} of {task.sets}</p>
+      <p class="target-prescription">
+        Target: {task.targetRepRange || task.reps} reps · {task.targetRir || task.rir} RIR
+      </p>
+    {/snippet}
+    {#snippet actions()}
+      <form id="set-form" onsubmit={logSet}>
+        <div class="set-values" role="group" aria-label="Set values">
+          {#each SET_FIELDS as field (field)}
+            <button
+              type="button"
+              class="set-value"
+              data-no-swipe
+              id="{field}-pick"
+              aria-label="{NAMES[field]} {values[field] || '0'}, change"
+              use:scrubValue={scrubOptions(field)}
+              onclick={() => pick(field)}
+              ><output id="{field}-value">{values[field] || '0'}</output><span>{LABELS[field]}</span
+              ></button
+            >
+          {/each}
+        </div>
+        <button class="primary log-set" id="log-set" type="submit" disabled={busy}
+          >Log set{#if !learned}<span class="log-arrow" aria-hidden="true">→</span>{/if}</button
+        >
+        {#if model.canCutOptional}
           <button
+            class="primary"
+            id="cut-optional"
             type="button"
-            class="set-value"
-            id="{field}-pick"
-            aria-label="{NAMES[field]} {values[field] || '0'}, change"
-            use:scrubValue={scrubOptions(field)}
-            onclick={() => pick(field)}
-            ><output id="{field}-value">{values[field] || '0'}</output><span>{LABELS[field]}</span
-            ></button
+            disabled={busy}
+            onclick={cutOptional}>Cut Optional Accessories</button
           >
-        {/each}
-      </div>
-      <button
-        class="primary log-set"
-        id="log-set"
-        type="submit"
-        disabled={busy}
-        data-armed={swipe.armed}
-        data-dragging={swipe.dragging}
-        style:--swipe={swipe.progress}
-        use:swipeToConfirm={swipeOptions}
-        ><span class="log-fill" aria-hidden="true"></span><span class="log-label"
-          >{swipe.armed ? '✓ Release to log' : 'Log set'}{#if !learned && !swipe.dragging}<span
-              class="log-arrow"
-              aria-hidden="true">→</span
-            >{/if}</span
-        ></button
-      >
-      {#if model.canCutOptional}
+        {/if}
+      </form>
+    {/snippet}
+    {#snippet more()}
+      <p class="previous-performance">
+        Previous: {#if model.previous}{model.previous.weight ?? 'bodyweight'}
+          {model.previous.unit || unit} × {model.previous.reps} @ {model.previous.rir ?? '—'} RIR{:else}No
+          logged set{/if}
+      </p>
+      {#if model.progressionLoad !== null}
+        <p class="progression-note">
+          Progression: try {model.progressionLoad}
+          {unit} this exposure.
+        </p>
+      {/if}
+      {#if task.set === 1}
         <button
-          class="primary"
-          id="cut-optional"
+          class="secondary"
+          id="change-exercise"
           type="button"
-          disabled={busy}
-          onclick={cutOptional}>Cut Optional Accessories</button
+          disabled={!model.canChangeExercise}
+          onclick={() => goto('/workout/?view=exercises')}>Change Exercise</button
         >
       {/if}
-    </form>
-  {/snippet}
-  {#snippet more()}
-    <p class="previous-performance">
-      Previous: {#if model.previous}{model.previous.weight ?? 'bodyweight'}
-        {model.previous.unit || unit} × {model.previous.reps} @ {model.previous.rir ?? '—'} RIR{:else}No
-        logged set{/if}
-    </p>
-    {#if model.progressionLoad !== null}
-      <p class="progression-note">Progression: try {model.progressionLoad} {unit} this exposure.</p>
-    {/if}
-    {#if task.set === 1}
-      <button
-        class="secondary"
-        id="change-exercise"
-        type="button"
-        disabled={!model.canChangeExercise}
-        onclick={() => goto('/workout/?view=exercises')}>Change Exercise</button
-      >
-    {/if}
-  {/snippet}
-</WorkoutStage>
+    {/snippet}
+  </WorkoutStage>
+  <div class="swipe-badge" aria-hidden="true">{swipe.armed ? '✓ Release to log' : 'Log set →'}</div>
+</div>
 {#if scrub}
   <ScrubWheel values={scrub.values} index={scrub.index} rect={scrub.rect} />
 {/if}
