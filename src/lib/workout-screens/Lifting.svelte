@@ -91,9 +91,10 @@
   <WorkoutStage title={task.performedName} className="lifting-stage">
     {#snippet info()}
       <SupersetMeta {active} {task} />
-      <p class="set-count">Set {task.set} of {task.sets}</p>
-      <p class="target-prescription">
-        Target: {task.targetRepRange || task.reps} reps · {task.targetRir || task.rir} RIR
+      <p class="set-count">
+        <span aria-hidden="true">{task.set}/{task.sets}</span><span class="sr-only"
+          >Set {task.set} of {task.sets}</span
+        >
       </p>
     {/snippet}
     {#snippet actions()}
@@ -113,9 +114,7 @@
             >
           {/each}
         </div>
-        <button class="primary log-set" id="log-set" type="submit" disabled={busy}
-          >Log set{#if !learned}<span class="log-arrow" aria-hidden="true">→</span>{/if}</button
-        >
+        <p class="swipe-hint" aria-hidden="true">← swipe to log</p>
         {#if model.canCutOptional}
           <button
             class="primary"
@@ -128,6 +127,12 @@
       </form>
     {/snippet}
     {#snippet more()}
+      <button class="primary log-set" id="log-set" type="submit" form="set-form" disabled={busy}
+        >Log set{#if !learned}<span class="log-arrow" aria-hidden="true">→</span>{/if}</button
+      >
+      <p class="target-prescription">
+        Target: {task.targetRepRange || task.reps} reps · {task.targetRir || task.rir} RIR
+      </p>
       <p class="previous-performance">
         Previous: {#if model.previous}{model.previous.weight ?? 'bodyweight'}
           {model.previous.unit || unit} × {model.previous.reps} @ {model.previous.rir ?? '—'} RIR{:else}No

@@ -30,6 +30,10 @@ Directions are set for right-handed use: swipe LEFT confirms, swipe RIGHT undoes
 - The card is the shared `SwipeCard` and now covers Rest (left: skip rest, right: undo last set), Plank (left: finish), Stretch (left: finish, right: restart) and timed/metric activities (left: finish). Countdown steps show a `Swipe ← …` hint and keep their buttons on a second scroll page; the measurement form has no swipe.
 - Left swipe on Lifting and Defer behind a confirm dialog are not built: try the swipes on real workouts first.
 
+### Cleaner Lifting screen (shipped)
+
+The main view is the title, `3/3` (read as "Set 3 of 3" by screen readers), three large plain values (still tap or hold-and-drag) and a `← swipe to log` hint. The `Log set` button, target, previous set, progression note and Change Exercise sit on the second page; the button stays a real submit control (`form="set-form"`) for keyboard and screen readers. At 192×192 the hint sits one scroll below the values.
+
 ### Phase 3 (dropped)
 
 The earlier idea of reusing the value wheel for rest length, plank time and the weekly goal does not apply: those values have no picker in the app today. Revisit if one is added.
