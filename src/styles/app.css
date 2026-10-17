@@ -848,8 +848,8 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   gap: 6px;
 }
 .set-value {
-  /* Holding and dragging turns the value, so the browser must not scroll or select here. */
-  touch-action: none;
+  /* A quick swipe scrolls the page; once the hold starts, scrubValue blocks the scroll. */
+  touch-action: pan-y;
   user-select: none;
   -webkit-touch-callout: none;
   display: grid;

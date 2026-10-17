@@ -96,6 +96,10 @@ export function scrubValue(node: HTMLElement, options: ScrubOptions) {
     deltaY = event.clientY - originY;
     update();
   };
+  // touch-action: pan-y lets a quick swipe scroll; after the hold, cancelling touchmove keeps the wheel.
+  const touchMove = (event: TouchEvent) => {
+    if (active && event.cancelable) event.preventDefault();
+  };
   const up = (event: PointerEvent) => {
     if (event.pointerId === pointerId) finish(true);
   };
@@ -116,6 +120,7 @@ export function scrubValue(node: HTMLElement, options: ScrubOptions) {
 
   node.addEventListener('pointerdown', down);
   node.addEventListener('pointermove', move);
+  node.addEventListener('touchmove', touchMove, { passive: false });
   node.addEventListener('pointerup', up);
   node.addEventListener('pointercancel', cancel);
   node.addEventListener('click', click, true);
@@ -129,6 +134,7 @@ export function scrubValue(node: HTMLElement, options: ScrubOptions) {
       finish(false);
       node.removeEventListener('pointerdown', down);
       node.removeEventListener('pointermove', move);
+      node.removeEventListener('touchmove', touchMove);
       node.removeEventListener('pointerup', up);
       node.removeEventListener('pointercancel', cancel);
       node.removeEventListener('click', click, true);
