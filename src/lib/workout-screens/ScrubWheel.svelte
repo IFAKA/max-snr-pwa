@@ -15,7 +15,7 @@
 <div class="scrub-backdrop" aria-hidden="true">
   <ol class="scrub-wheel" style:left="{left}px" style:width="{rect.width}px">
     {#each NEIGHBOURS as offset (offset)}
-      {@const value = values[index - offset]}
+      {@const value = values[index + offset]}
       <li class={['scrub-item', offset === 0 && 'is-current']} data-offset={Math.abs(offset)}>
         {value ?? ''}
         {#if offset === 0}<small>{label}</small>{/if}
