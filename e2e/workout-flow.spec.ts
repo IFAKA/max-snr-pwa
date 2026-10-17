@@ -172,3 +172,29 @@ test('holding a value and dragging up turns it like a wheel, without opening the
   await expect(page).not.toHaveURL(/pick=/);
   await expect(page.locator('#weight-value')).toHaveText('5');
 });
+
+test('pushing a held value far keeps it turning, so long lists stay a thumb sweep away', async ({
+  page,
+}) => {
+  await seed(page, appState({ history: [] }));
+  await page.goto('/routine/?day=Monday');
+  await page.getByRole('button', { name: /^Start/ }).click();
+  await page.locator('dialog[open]').getByRole('button', { name: 'Start' }).click();
+  await page.getByRole('button', { name: 'Continue' }).click();
+
+  await page.locator('#weight-pick').scrollIntoViewIfNeeded();
+  const box = (await page.locator('#weight-pick').boundingBox())!;
+  const x = box.x + box.width / 2;
+  const y = box.y + box.height / 2;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.waitForTimeout(350);
+  await page.mouse.move(x, y - 40, { steps: 4 });
+  await page.mouse.move(x, y - 170, { steps: 8 });
+  await page.waitForTimeout(1500);
+  await page.mouse.move(x, y - 100, { steps: 4 });
+  await page.mouse.up();
+
+  await expect(page).not.toHaveURL(/pick=/);
+  expect(Number(await page.locator('#weight-value').textContent())).toBeGreaterThan(30);
+});

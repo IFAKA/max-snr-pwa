@@ -1,4 +1,4 @@
-import { scrubIndex } from './scrub-math.ts';
+import { scrubIndex, scrubRate } from './scrub-math.ts';
 
 const HOLD_MS = 250;
 const SLOP_PX = 10;
@@ -27,9 +27,35 @@ export function scrubValue(node: HTMLElement, options: ScrubOptions) {
   let values: string[] = [];
   let active = false;
   let swallowClick = false;
+  // Past the fine zone the value keeps turning while the thumb holds still.
+  let deltaY = 0;
+  let drift = 0;
+  let frame = 0;
+  let last = 0;
+
+  const update = () => {
+    const next = scrubIndex(startIndex, deltaY, drift, values.length);
+    if (next === index) return;
+    index = next;
+    opts.onTick();
+    opts.onScrub({ values, index, rect: node.getBoundingClientRect() });
+  };
+  const spin = (now: number) => {
+    if (!active) return;
+    const rate = scrubRate(deltaY);
+    if (rate) {
+      drift += (rate * (now - last)) / 1000;
+      // Stop accumulating once the list's end is reached, so easing back responds at once.
+      drift = Math.max(-values.length, Math.min(values.length, drift));
+      update();
+    }
+    last = now;
+    frame = requestAnimationFrame(spin);
+  };
 
   const finish = (commit: boolean) => {
     clearTimeout(timer);
+    cancelAnimationFrame(frame);
     if (active) {
       swallowClick = true;
       setTimeout(() => (swallowClick = false), 0);
@@ -45,6 +71,10 @@ export function scrubValue(node: HTMLElement, options: ScrubOptions) {
     const at = values.indexOf(opts.current());
     startIndex = index = at < 0 ? 0 : at;
     active = true;
+    deltaY = 0;
+    drift = 0;
+    last = performance.now();
+    frame = requestAnimationFrame(spin);
     node.setPointerCapture?.(pointerId);
     opts.onTick();
     opts.onScrub({ values, index, rect: node.getBoundingClientRect() });
@@ -63,11 +93,8 @@ export function scrubValue(node: HTMLElement, options: ScrubOptions) {
       return;
     }
     event.preventDefault();
-    const next = scrubIndex(startIndex, event.clientY - originY, values.length);
-    if (next === index) return;
-    index = next;
-    opts.onTick();
-    opts.onScrub({ values, index, rect: node.getBoundingClientRect() });
+    deltaY = event.clientY - originY;
+    update();
   };
   const up = (event: PointerEvent) => {
     if (event.pointerId === pointerId) finish(true);
