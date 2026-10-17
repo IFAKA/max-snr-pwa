@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 @AGENTS.md
 
-The rules in `AGENTS.md` (architecture, Apple Watch–first UI gate, compatibility, commit-and-push delivery) apply in full. The notes below add what it omits or states out of date.
+The rules in `AGENTS.md` (architecture, Apple Watch–first UI gate, compatibility, commit-and-push delivery) apply in full. The notes below add what it does not cover.
 
 ## Commands
 
@@ -21,7 +21,7 @@ npm run lint / npm run format / npm run architecture / npm run syntax
 npm run sw                                   # regenerate CACHE_NAME + PRECACHE_URLS in sw.js
 ```
 
-- **There is an automated suite.** `AGENTS.md` says there is none; that is outdated. `npm test` runs about 160 Node tests. Tests import browser modules directly after stubbing `globalThis.document`, `localStorage`, `confirm`, etc. at the top of each file. Follow that pattern rather than adding a DOM library.
+- Tests import browser modules directly after stubbing `globalThis.document`, `localStorage`, `confirm`, etc. at the top of each file. Follow that pattern rather than adding a DOM library.
 - The pre-commit hook (`.githooks/pre-commit`) runs `npm run sw`, stages `sw.js`, then runs `npm run check`. Any change to an app asset changes the precache hash, so `sw.js` will appear in commits.
 - Deployment is Vercel (`.vercel/project.json`), triggered by pushing; there is no deploy command.
 
@@ -29,9 +29,8 @@ npm run sw                                   # regenerate CACHE_NAME + PRECACHE_
 
 - **Routing:** each HTML shell sets `<body data-route="…">`. `app.js` loads state, repairs browser history so back unwinds detail → parent → Today (`js/navigation.js` `parentRouteUrl`/`referrerIsParentEntry`), and dispatches to a renderer. Detail views are query parameters on existing routes (e.g. `/history/?view=analytics` → `render-analytics.js`). In-app navigation goes through `navigateTo`/`renderWithTransition` rather than full page loads.
 - **Renderer ↔ domain boundary:** `scripts/check-architecture.mjs` also rejects `js/render-workout/*` importing `../workout/*`. Workout-phase renderers must go through the `js/workout.js` facade, so expose new session capabilities there. Top-level renderers (`render-today.js`, `render-analytics.js`) currently import read-only domain modules such as `optimizer.js` and `metrics.js` directly.
-- **Training "optimizer" subsystem** (`js/workout/`): `optimizer.js` holds the exercise catalogue (`EXERCISES`), heuristics, and prescription creation. `adaptation.js` derives rolling trends and recommendations from history. `coordinator.js` applies them to the persisted `state.prescription` with cooldowns. `personalization.js` adjusts set counts from body measurements (`js/health-data.js`). `health-optimizer.js` picks the day's recommendation. `budget.js` handles session time-budget cuts, and `finish.js` handles completion, early finish, and cancellation. These additions sit in the persisted state next to `history`/`active` without changing `version: 2`.
-- **Magnetic picker:** the long-press joystick list picker is a standalone package at `packages/magnetic-picker/` (its own README and tests), re-exported through `js/magnetic-picker.js`. Its `src/` is part of the SW precache. Lists use native `pan-y` scrolling and lock scrolling only while the picker is held.
-- **Updates:** `js/update-app.js` keeps the SW registration and binds History's "Check for Updates", which activates a waiting worker.
+- **Persisted training state:** the optimizer modules (see `AGENTS.md`) store `state.prescription` and `state.health.measurements` alongside `history`/`active` without changing `version: 2`.
+- **Magnetic picker:** its `src/` is part of the SW precache and has its own README and tests. Lists use native `pan-y` scrolling and lock scrolling only while the picker is held.
 - `js/vendor/` is third-party code and is excluded from lint, syntax, and architecture checks.
 
 ## Design references
