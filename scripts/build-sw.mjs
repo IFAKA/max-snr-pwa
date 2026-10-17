@@ -1,55 +1,47 @@
-// Stamps sw.js with the complete precache list and a content hash of every app asset,
-// so any app change produces a new service worker that installed clients can update to.
+// Writes build/sw.js: a classic (non-module) service worker that precaches every built file.
+// It stays at /sw.js so phones that installed earlier versions keep updating in place.
 import { createHash } from 'node:crypto';
-import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { readdir, readFile, writeFile } from 'node:fs/promises';
+import path from 'node:path';
 
-const ROOT = new URL('..', import.meta.url).pathname;
-const SW_PATH = join(ROOT, 'sw.js');
-const ROUTES = ['/', '/routine/', '/history/', '/workout/'];
-const ROOT_FILES = ['app.js', 'styles.css', 'manifest.webmanifest'];
-const ASSET_DIRS = [
-  { dir: 'icons', pattern: /\.png$/ },
-  { dir: 'js', pattern: /\.js$/ },
-  { dir: 'packages/magnetic-picker/src', pattern: /\.(js|css)$/ },
-];
+const ROOT = process.cwd();
+const BUILD = path.join(ROOT, 'build');
+const TEMPLATE = path.join(ROOT, 'scripts', 'sw-template.js');
+const SKIP = new Set(['sw.js', '.DS_Store', 'robots.txt']);
 
-function listFiles({ dir, pattern }) {
-  return readdirSync(join(ROOT, dir), { recursive: true })
-    .filter((file) => pattern.test(file))
-    .map((file) => `${dir}/${file.split('\\').join('/')}`);
-}
-
-function precacheEntries() {
-  const routes = ROUTES.map((url) => ({ url, file: `${url.slice(1)}index.html` }));
-  const files = [...ROOT_FILES, ...ASSET_DIRS.flatMap(listFiles)].sort();
-  return [...routes, ...files.map((file) => ({ url: `/${file}`, file }))];
-}
-
-function cacheName(entries) {
-  const hash = createHash('sha256');
-  for (const { url, file } of entries) {
-    hash.update(`${url}\0`);
-    hash.update(readFileSync(join(ROOT, file)));
-  }
-  return `maxsnr-${hash.digest('hex').slice(0, 12)}`;
-}
-
-const entries = precacheEntries();
-const current = readFileSync(SW_PATH, 'utf8');
-const next = current
-  .replace(/const CACHE_NAME = '[^']*';/, `const CACHE_NAME = '${cacheName(entries)}';`)
-  .replace(
-    /const PRECACHE_URLS = \[[^\]]*\];/,
-    `const PRECACHE_URLS = [\n${entries.map(({ url }) => `  '${url}',\n`).join('')}];`,
+async function files(directory) {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const nested = await Promise.all(
+    entries
+      .filter((entry) => !SKIP.has(entry.name))
+      .map((entry) => {
+        const absolute = path.join(directory, entry.name);
+        return entry.isDirectory() ? files(absolute) : [absolute];
+      }),
   );
-
-if (process.argv.includes('--check')) {
-  if (next !== current) {
-    console.error('sw.js is stale. Run `npm run sw` and commit the result.');
-    process.exit(1);
-  }
-} else if (next !== current) {
-  writeFileSync(SW_PATH, next);
-  console.log('Updated sw.js precache manifest.');
+  return nested.flat();
 }
+
+const toUrl = (file) => {
+  const url = `/${path.relative(BUILD, file).split(path.sep).join('/')}`;
+  return url.endsWith('/index.html') ? url.slice(0, -'index.html'.length) : url;
+};
+
+const built = (await files(BUILD)).sort();
+if (!built.some((file) => file.endsWith(`${path.sep}index.html`)))
+  throw new Error('build/ has no prerendered pages; run `vite build` first.');
+
+const hash = createHash('sha256');
+for (const file of built) {
+  hash.update(toUrl(file));
+  hash.update(await readFile(file));
+}
+const template = await readFile(TEMPLATE, 'utf8');
+hash.update(template);
+
+const urls = built.map(toUrl).sort();
+const worker = template
+  .replace('__CACHE_NAME__', `maxsnr-${hash.digest('hex').slice(0, 12)}`)
+  .replace('__PRECACHE_URLS__', JSON.stringify(urls, null, 2));
+await writeFile(path.join(BUILD, 'sw.js'), worker);
+console.log(`sw.js: precaching ${urls.length} files`);

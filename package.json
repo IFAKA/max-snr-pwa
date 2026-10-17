@@ -1,23 +1,47 @@
 {
   "name": "workout-pwa",
+  "private": true,
   "type": "module",
   "scripts": {
-    "prepare": "git rev-parse --is-inside-work-tree >/dev/null 2>&1 && git config core.hooksPath .githooks || true",
-    "test": "node --test",
+    "prepare": "svelte-kit sync || echo ''; git rev-parse --is-inside-work-tree >/dev/null 2>&1 && git config core.hooksPath .githooks || true",
+    "dev": "vite dev",
+    "build": "vite build && node scripts/build-sw.mjs",
+    "preview": "vite preview",
+    "typecheck": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --fail-on-warnings",
     "lint": "eslint .",
-    "format": "prettier --write app.js js scripts sw.js tests styles.css *.html */index.html *.webmanifest package.json",
-    "format:check": "prettier --check app.js js scripts sw.js tests styles.css *.html */index.html *.webmanifest package.json",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "architecture": "node scripts/check-architecture.mjs",
-    "sw": "node scripts/build-sw.mjs",
-    "sw:check": "node scripts/build-sw.mjs --check",
-    "syntax": "node --check app.js && find js -type f -name '*.js' -not -path 'js/vendor/*' -print0 | xargs -0 -n1 node --check && node --check sw.js",
-    "check": "npm run lint && npm run architecture && npm run sw:check && npm run format:check && npm run syntax && npm test"
+    "test": "vitest --run && node --test 'packages/magnetic-picker/tests/*.test.mjs'",
+    "test:e2e": "playwright test",
+    "check": "npm run lint && npm run architecture && npm run format:check && npm run typecheck && npm test && npm run build && npm run test:e2e"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "eslint": "^10.10.0",
+    "@playwright/test": "^1.60.0",
+    "@sveltejs/adapter-static": "^4.0.0",
+    "@sveltejs/kit": "^3.0.0",
+    "@sveltejs/vite-plugin-svelte": "^7.2.0",
+    "@types/canvas-confetti": "^1.9.0",
+    "@types/node": "^24",
+    "eslint": "^10.4.1",
     "eslint-config-prettier": "^10.1.8",
-    "globals": "^17.12.0",
-    "prettier": "^3.9.6"
+    "eslint-plugin-svelte": "^3.19.0",
+    "globals": "^17.6.0",
+    "prettier": "^3.8.3",
+    "prettier-plugin-svelte": "^4.1.0",
+    "svelte": "^5.57.1",
+    "svelte-check": "^4.6.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.60.1",
+    "vite": "^8.3.0",
+    "vitest": "^4.1.8"
+  },
+  "dependencies": {
+    "canvas-confetti": "^1.9.4"
+  },
+  "imports": {
+    "#lib/*": "./src/lib/*",
+    "#picker/*": "./packages/magnetic-picker/src/*"
   }
 }

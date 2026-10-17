@@ -1,5 +1,14 @@
-.vercel
 node_modules
+.vercel
 .DS_Store
 .env*
 docs/plans/*
+
+# SvelteKit / Vite
+/.svelte-kit
+/build
+vite.config.ts.timestamp-*
+
+# Playwright
+test-results
+playwright-report

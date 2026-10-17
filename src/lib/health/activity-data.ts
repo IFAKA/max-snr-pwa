@@ -1,0 +1,57 @@
+export interface ActivityDefinition {
+  title: string;
+  metric: string;
+  minutes: number;
+  durationMs: number;
+  intensity?: string;
+  dimensions: string[];
+}
+
+export const ACTIVITY_DEFINITIONS: Record<string, ActivityDefinition> = {
+  walk: {
+    title: 'Walk',
+    metric: '30m',
+    minutes: 30,
+    durationMs: 30 * 60 * 1000,
+    dimensions: ['aerobic', 'movement', 'sedentary'],
+  },
+  run: {
+    title: 'Run',
+    metric: '20m',
+    minutes: 20,
+    durationMs: 20 * 60 * 1000,
+    intensity: 'vigorous',
+    dimensions: ['aerobic', 'movement', 'sedentary'],
+  },
+  cycle: {
+    title: 'Cycle',
+    metric: '30m',
+    minutes: 30,
+    durationMs: 30 * 60 * 1000,
+    dimensions: ['aerobic', 'movement', 'sedentary'],
+  },
+  move: {
+    title: 'Move',
+    metric: '3m',
+    minutes: 3,
+    durationMs: 3 * 60 * 1000,
+    dimensions: ['movement', 'sedentary'],
+  },
+  measurement: {
+    title: 'Check-in',
+    metric: 'Waist',
+    minutes: 0,
+    durationMs: 0,
+    dimensions: ['body'],
+  },
+  rest: {
+    title: 'On track',
+    metric: 'No action needed',
+    minutes: 0,
+    durationMs: 0,
+    dimensions: [],
+  },
+};
+
+export const activityDefinition = (type: string | null | undefined) =>
+  ACTIVITY_DEFINITIONS[type || ''] || ACTIVITY_DEFINITIONS.rest;
