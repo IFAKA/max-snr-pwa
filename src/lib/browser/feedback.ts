@@ -3,6 +3,7 @@ import { playSound, type Sound } from './sound.ts';
 // Each workout moment has one cue: a sound (when Sound is on) and a vibration, so the two agree.
 const CUES = {
   pick: { sound: 'tick', vibrate: [8] },
+  hold: { sound: 'tick', vibrate: [22] },
   countdown: { sound: 'pip', vibrate: [20] },
   timerDone: { sound: 'go', vibrate: [35, 70] },
   restDone: { sound: 'go', vibrate: [35, 65, 35] },
@@ -17,6 +18,7 @@ export type Cue = keyof typeof CUES;
 
 export function cue(name: Cue) {
   const { sound, vibrate } = CUES[name];
-  playSound(sound);
+  // Vibrate first: the motor is the slower of the two to respond.
   globalThis.navigator?.vibrate?.(vibrate);
+  playSound(sound);
 }

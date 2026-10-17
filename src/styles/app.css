@@ -894,46 +894,35 @@ main > section:has(> .app-list) > .app-list .list-link::before {
     background: var(--accent-soft);
   }
 }
-/* The wheel while a value is held: it grows out of the held button and the values roll past. */
+/* The wheel while a value is held: centred on a dimmed screen, the values roll through a band
+   and fade out above and below, with no card around them. */
 .scrub-backdrop {
   position: fixed;
   inset: 0;
   z-index: 20;
-  background: color-mix(in srgb, var(--bg) 55%, transparent);
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(6px);
   pointer-events: none;
   animation: scrub-fade 140ms var(--ease-out);
 }
 .scrub-wheel {
-  position: absolute;
+  position: relative;
   overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 22px;
-  background: var(--surface);
-  box-shadow: 0 10px 30px color-mix(in srgb, #000 35%, transparent);
+  width: min(100% - 16px, 200px);
+  mask-image: linear-gradient(
+    transparent,
+    #000 calc(50% - 26px),
+    #000 calc(50% + 26px),
+    transparent
+  );
   animation: scrub-grow 160ms var(--ease-out);
-}
-/* Values fade out toward the edges, like a real wheel turning away. */
-.scrub-wheel::before,
-.scrub-wheel::after {
-  content: '';
-  position: absolute;
-  inset-inline: 0;
-  z-index: 1;
-  height: 36%;
-  pointer-events: none;
-}
-.scrub-wheel::before {
-  top: 0;
-  background: linear-gradient(var(--surface), transparent);
-}
-.scrub-wheel::after {
-  bottom: 0;
-  background: linear-gradient(transparent, var(--surface));
 }
 .scrub-band {
   position: absolute;
-  inset-inline: 4px;
-  border-radius: 15px;
+  inset-inline: 0;
+  border-radius: 999px;
   background: var(--accent-soft);
 }
 .scrub-track {
@@ -950,13 +939,13 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   display: grid;
   place-items: center;
   color: var(--muted);
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 800;
   letter-spacing: -0.03em;
 }
 .scrub-item.is-current {
   color: var(--text);
-  font-size: 30px;
+  font-size: 36px;
 }
 @keyframes scrub-fade {
   from {
@@ -966,7 +955,7 @@ main > section:has(> .app-list) > .app-list .list-link::before {
 @keyframes scrub-grow {
   from {
     opacity: 0;
-    transform: scale(0.86);
+    transform: scale(0.9);
   }
 }
 @keyframes value-in {

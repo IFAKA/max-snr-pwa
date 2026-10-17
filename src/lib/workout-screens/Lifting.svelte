@@ -35,7 +35,6 @@
     field: SetField;
     values: string[];
     index: number;
-    rect: DOMRect;
   } | null>(null);
   const LABELS: Record<SetField, string> = { reps: 'Reps', weight: unit, rir: 'RIR' };
   const NAMES: Record<SetField, string> = { reps: 'Reps', weight: `Load in ${unit}`, rir: 'RIR' };
@@ -57,6 +56,7 @@
       current,
       onScrub: (state: Omit<NonNullable<typeof scrub>, 'field'> | null) =>
         (scrub = state && { field, ...state }),
+      onHold: () => cue('hold'),
       onTick: () => cue('pick'),
       onCommit: (value: string) => (values[field] = value),
     };
@@ -163,5 +163,5 @@
   </WorkoutStage>
 </SwipeCard>
 {#if scrub}
-  <ScrubWheel values={scrub.values} index={scrub.index} rect={scrub.rect} />
+  <ScrubWheel values={scrub.values} index={scrub.index} />
 {/if}

@@ -1,6 +1,9 @@
 import { scrubIndex, scrubRate } from './scrub-math.ts';
 
 const HOLD_MS = 400;
+// Android starts a vibration a few frames after it is asked for, later than the wheel paints, so
+// the hold's pulse is fired this much earlier and lands as the wheel appears.
+const HAPTIC_LEAD_MS = 45;
 const SLOP_PX = 24;
 
 export type ScrubOptions = {
@@ -8,7 +11,9 @@ export type ScrubOptions = {
   values: () => string[];
   current: () => string;
   /** Called while holding with the highlighted index, and null when the gesture ends. */
-  onScrub: (state: { values: string[]; index: number; rect: DOMRect } | null) => void;
+  onScrub: (state: { values: string[]; index: number } | null) => void;
+  /** The pulse as the hold takes over; it slightly leads the first onScrub. */
+  onHold: () => void;
   onTick: () => void;
   onCommit: (value: string) => void;
 };
@@ -38,7 +43,7 @@ export function scrubValue(node: HTMLElement, options: ScrubOptions) {
     if (next === index) return;
     index = next;
     opts.onTick();
-    opts.onScrub({ values, index, rect: node.getBoundingClientRect() });
+    opts.onScrub({ values, index });
   };
   const spin = (now: number) => {
     if (!active) return;
@@ -76,15 +81,18 @@ export function scrubValue(node: HTMLElement, options: ScrubOptions) {
     last = performance.now();
     frame = requestAnimationFrame(spin);
     node.setPointerCapture?.(pointerId);
-    opts.onTick();
-    opts.onScrub({ values, index, rect: node.getBoundingClientRect() });
+    opts.onScrub({ values, index });
+  };
+  const arm = () => {
+    opts.onHold();
+    timer = setTimeout(begin, HAPTIC_LEAD_MS);
   };
 
   const down = (event: PointerEvent) => {
     if (event.button > 0 || pointerId !== -1) return;
     pointerId = event.pointerId;
     originY = event.clientY;
-    timer = setTimeout(begin, HOLD_MS);
+    timer = setTimeout(arm, HOLD_MS - HAPTIC_LEAD_MS);
   };
   const move = (event: PointerEvent) => {
     if (event.pointerId !== pointerId) return;
