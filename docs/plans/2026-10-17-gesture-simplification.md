@@ -79,6 +79,10 @@ After a finger drag the real drawer no longer slides in again (`data-handoff` di
 
 Letting go of the drawer no longer jumps it into place. The sheet eases to open (or back down when released early) over 160–420 ms depending on the flick speed, with vaul's `cubic-bezier(0.32, 0.72, 0, 1)` curve and the backdrop fading with it; the real drawer takes over after it lands. Sampled: 659 → 101 px over about 300 ms, then no movement at the handoff.
 
+### Back also slides the drawer out (shipped)
+
+The drawer is controlled by the route (`open` follows `?view=exercises`) and stays mounted for the 500 ms slide-out, so the back button, Android back, drag, backdrop and Escape all animate the same way instead of unmounting it.
+
 ### Cleaner Lifting screen (shipped)
 
 The main view is the title, `3/3` (read as "Set 3 of 3" by screen readers), three large plain values (still tap or hold-and-drag) and a `← swipe to log` hint. The `Log set` button, target, previous set, progression note and Change Exercise sit on the second page; the button stays a real submit control (`form="set-form"`) for keyboard and screen readers. At 192×192 the hint sits one scroll below the values.

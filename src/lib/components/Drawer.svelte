@@ -4,30 +4,24 @@
   import { drawerPeek } from '../browser/drawer-peek.svelte.ts';
 
   // The bottom drawer, built on vaul-svelte (drag to dismiss, velocity release, backdrop tied to
-  // the drag). It closes with a slide-out first and then calls `onclose` to leave its route.
-  // `children` receives `dismiss`, which slides it out and then runs a callback.
+  // the drag). `open` is driven by the route, so closing by any means (drag, backdrop, Escape,
+  // the back gesture) slides out; `onrequestclose` asks the route to leave when the user closes it.
   let {
     label,
-    onclose,
+    open,
+    onrequestclose,
     children,
-  }: { label: string; onclose: () => void; children: Snippet<[(after?: () => void) => void]> } =
-    $props();
-
-  const SLIDE_OUT_MS = 500;
+  }: { label: string; open: boolean; onrequestclose: () => void; children: Snippet } = $props();
 
   // Opened by a finger drag: it is already in place, so it must not slide in again.
   const handoff = drawerPeek.handoff;
   drawerPeek.handoff = false;
 
-  let open = $state(true);
-  let closing = false;
-
-  function dismiss(after: () => void = onclose) {
-    if (closing) return;
-    closing = true;
-    open = false;
-    setTimeout(after, SLIDE_OUT_MS);
-  }
+  // A drag-down can report the close twice; leaving the route once is enough.
+  let requested = false;
+  $effect(() => {
+    if (open) requested = false;
+  });
 </script>
 
 <Drawer.Root
@@ -35,7 +29,9 @@
   noBodyStyles
   shouldScaleBackground={false}
   onOpenChange={(next) => {
-    if (!next) dismiss();
+    if (next || !open || requested) return;
+    requested = true;
+    onrequestclose();
   }}
 >
   <Drawer.Portal>
@@ -43,7 +39,7 @@
     <Drawer.Content class="drawer-sheet" aria-label={label} data-handoff={handoff}>
       <Drawer.Handle class="drawer-handle" />
       <Drawer.Title class="sr-only">{label}</Drawer.Title>
-      <div class="drawer-body" data-vaul-no-drag>{@render children(dismiss)}</div>
+      <div class="drawer-body" data-vaul-no-drag>{@render children()}</div>
     </Drawer.Content>
   </Drawer.Portal>
 </Drawer.Root>

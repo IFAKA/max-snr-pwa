@@ -150,3 +150,20 @@ test('opening and closing the drawer does not play a page transition', async ({ 
     await page.evaluate(() => (window as unknown as { transitions: number }).transitions),
   ).toBe(0);
 });
+
+test('closing the drawer with back slides it out instead of removing it', async ({ page }) => {
+  await seed(page, appState({ history: [] }));
+  await page.goto('/routine/?day=Monday');
+  await page.getByRole('button', { name: /^Start/ }).click();
+  await page.locator('dialog[open]').getByRole('button', { name: 'Start' }).click();
+  await expect(page.locator('#reps-value')).toBeVisible();
+  await page.waitForTimeout(800);
+  await page.locator('.stage-title-link').click();
+  await expect(page.locator('[data-vaul-drawer]')).toBeVisible();
+  await page.waitForTimeout(700);
+  await page.goBack();
+  await expect(page).not.toHaveURL(/view=exercises/);
+  // Still on screen mid-slide, then gone.
+  await expect(page.locator('[data-vaul-drawer]')).toHaveCount(1);
+  await expect(page.locator('[data-vaul-drawer]')).toHaveCount(0);
+});

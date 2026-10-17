@@ -3,6 +3,7 @@
   import { page } from '$app/state';
   import { act, appVersion } from '../app-state.svelte.ts';
   import { getState } from '../state.ts';
+  import type { ActiveWorkout } from '../types.ts';
   import { finishWorkout } from '../workout/index.ts';
   import { completionUrl } from '../browser/routes.ts';
   import { drawerBase, isMainStep, workoutView } from './workout-view.ts';
@@ -42,6 +43,21 @@
   });
 
   let savingLegacy = false;
+
+  // The drawer stays mounted while it slides out, so leaving the route (back included) animates.
+  const SLIDE_OUT_MS = 500;
+  let drawer = $state<{ active: ActiveWorkout; returnTo: string } | null>(null);
+  let drawerOpen = $state(false);
+  $effect(() => {
+    if (view.kind === 'picker') {
+      drawer = { active: view.active, returnTo: view.returnTo };
+      drawerOpen = true;
+      return;
+    }
+    drawerOpen = false;
+    const gone = setTimeout(() => (drawer = null), SLIDE_OUT_MS);
+    return () => clearTimeout(gone);
+  });
 
   // The real drawer has taken over from the one that followed the finger.
   $effect(() => {
@@ -97,11 +113,9 @@
     <ExercisePicker active={shown.active} onselected={() => {}} />
   </DrawerPeek>
 {/if}
-{#if view.kind === 'picker'}
-  {@const returnTo = view.returnTo}
-  <Drawer label="Exercises" onclose={() => history.back()}>
-    {#snippet children(dismiss)}
-      <ExercisePicker active={view.active} onselected={() => dismiss(() => goto(returnTo))} />
-    {/snippet}
+{#if drawer}
+  {@const current = drawer}
+  <Drawer label="Exercises" open={drawerOpen} onrequestclose={() => history.back()}>
+    <ExercisePicker active={current.active} onselected={() => goto(current.returnTo)} />
   </Drawer>
 {/if}
