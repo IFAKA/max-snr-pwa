@@ -11,6 +11,20 @@ test('export downloads a backup of the stored data', async ({ page }) => {
   expect(download.suggestedFilename()).toBe('maxsnr-backup.json');
 });
 
+test('the Sound switch turns sound off and remembers it', async ({ page }) => {
+  await seed(page, appState());
+  await page.goto('/history/');
+  const sound = page.getByRole('switch', { name: 'Sound' });
+  await expect(sound).toHaveAttribute('aria-checked', 'true');
+  await sound.click();
+  await expect(sound).toHaveAttribute('aria-checked', 'false');
+  await page.reload();
+  await expect(page.getByRole('switch', { name: 'Sound' })).toHaveAttribute(
+    'aria-checked',
+    'false',
+  );
+});
+
 test('import validates, asks with "Keep Current Data" as the default, then replaces', async ({
   page,
 }) => {

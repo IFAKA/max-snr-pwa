@@ -475,6 +475,7 @@ html.is-touch-pointer .list-link:is(a, button, label):hover::before {
   background: transparent;
 }
 .list-link > span:not(.sr-only),
+.list-link > small,
 .list-link > svg {
   position: relative;
   z-index: 1;
@@ -1002,12 +1003,48 @@ main > section:has(> .app-list) > .app-list .list-link::before {
     transform: translateY(12px) scale(0.96);
   }
 }
+/* On/off switch: the thumb slides right and the track fills with the accent when on. */
+.switch {
+  display: inline-block;
+  width: 51px;
+  height: 31px;
+  flex: 0 0 51px;
+  padding: 2px;
+  border-radius: 16px;
+  background: var(--line);
+  transition: background-color 200ms ease;
+}
+.switch > span {
+  display: block;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  transition: transform 200ms var(--ease-out);
+}
+.switch-row[aria-checked='true'] .switch {
+  background: var(--accent);
+}
+.switch-row[aria-checked='true'] .switch > span {
+  transform: translateX(20px);
+}
+@media (forced-colors: active) {
+  .switch {
+    border: 1px solid CanvasText;
+  }
+  .switch > span {
+    background: CanvasText;
+  }
+  .switch-row[aria-checked='true'] .switch {
+    background: Highlight;
+  }
+}
 .value-picker .is-current .list-link {
   color: var(--accent);
   font-weight: 850;
 }
-.value-picker .list-link small,
-.sound-toggle small {
+.value-picker .list-link small {
   margin-inline-start: auto;
   padding-inline: 8px;
   color: var(--muted);

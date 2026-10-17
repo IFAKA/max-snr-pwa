@@ -12,6 +12,7 @@
   import Icon from '../components/Icon.svelte';
   import type { IconName } from '../components/icons.ts';
   import ListRow from '../components/ListRow.svelte';
+  import SwitchRow from '../components/SwitchRow.svelte';
 
   // Sound, export, import, and app update rows. Shared by the History index and the Data view.
   let { onerror }: { onerror: (message: string) => void } = $props();
@@ -21,10 +22,10 @@
   let confirmOpen = $state(false);
   let sound = $state(soundEnabled());
 
-  function toggleSound() {
-    sound = !sound;
-    setSoundEnabled(sound);
-    if (sound) cue('pick');
+  function toggleSound(on: boolean) {
+    sound = on;
+    setSoundEnabled(on);
+    if (on) cue('pick');
   }
 
   function exportBackup() {
@@ -63,15 +64,7 @@
   }
 </script>
 
-<li>
-  <button
-    class="list-link sound-toggle"
-    id="sound-toggle"
-    type="button"
-    aria-pressed={sound}
-    onclick={toggleSound}><span>Sound</span><small>{sound ? 'On' : 'Off'}</small></button
-  >
-</li>
+<SwitchRow label="Sound" id="sound-toggle" checked={sound} onchange={toggleSound} />
 <ListRow
   label="Export"
   id="export"
