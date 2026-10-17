@@ -5,10 +5,11 @@
   import { act, showError } from '../app-state.svelte.ts';
   import { getState } from '../state.ts';
   import type { ActiveWorkout, Task } from '../types.ts';
-  import { completeSet, finishAtBudget } from '../workout/index.ts';
+  import { completeSet, finishAtBudget, previewLog } from '../workout/index.ts';
   import { cue } from '../browser/feedback.ts';
   import SwipeCard from '../components/SwipeCard.svelte';
   import WorkoutStage from '../components/WorkoutStage.svelte';
+  import StepPeek from './StepPeek.svelte';
   import SupersetMeta from './SupersetMeta.svelte';
   import { scrubValue } from '../browser/value-scrub.ts';
   import { swipeLearned } from '../browser/swipe-log.ts';
@@ -91,10 +92,15 @@
   }
 </script>
 
+{#snippet next()}
+  <StepPeek {active} preview={previewLog(active)} {unit} logging={values} />
+{/snippet}
+
 <SwipeCard
   onconfirm={submit}
   quickConfirm
   confirmLabel="Log"
+  behindConfirm={next}
   onup={task.set === 1 && model.canChangeExercise
     ? () => goto('/workout/?view=exercises')
     : undefined}

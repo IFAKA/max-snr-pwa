@@ -11,6 +11,8 @@
     exerciseSelectionLocked,
     findNext,
     formatDuration,
+    previewSkipRest,
+    previewUndo,
     sessionBudgetState,
     undoLastSet,
   } from '../workout/index.ts';
@@ -18,6 +20,7 @@
   import Countdown from '../components/Countdown.svelte';
   import SwipeCard from '../components/SwipeCard.svelte';
   import WorkoutStage from '../components/WorkoutStage.svelte';
+  import StepPeek from './StepPeek.svelte';
   import SupersetMeta from './SupersetMeta.svelte';
   import { lastLoggedSet } from './lifting-model.ts';
 
@@ -61,9 +64,19 @@
   }
 </script>
 
+{#snippet afterRest()}
+  <StepPeek {active} preview={previewSkipRest(active)} {unit} />
+{/snippet}
+{#snippet afterUndo()}
+  {@const reopened = previewUndo(active)}
+  {#if reopened}<StepPeek {active} preview={reopened} {unit} />{/if}
+{/snippet}
+
 <SwipeCard
   onconfirm={() => run(continueRest)}
   confirmLabel="Skip Rest"
+  behindConfirm={afterRest}
+  behindUndo={afterUndo}
   onup={canChange ? () => goto('/workout/?view=exercises') : undefined}
   onundo={hasCompletedSet ? undo : undefined}
   disabled={busy}

@@ -66,6 +66,7 @@ export {
   exerciseChangeAvailable,
 } from './session.ts';
 export { completeSet, substituteCurrent, undoLastSet } from './sets.ts';
+export { previewLog, previewSkipRest, previewUndo, type StepPreview } from './next-step.ts';
 export {
   completeStretch,
   finishEarly,

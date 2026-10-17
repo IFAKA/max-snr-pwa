@@ -7,6 +7,7 @@ import { flatten } from './task-factory.ts';
 import { beginLifting, continueRest as advanceRest, startRest } from './timers.ts';
 import { setSupersetLead, taskGroup } from './superset.ts';
 import { dayNow } from './calendar.ts';
+import { openTaskAfter } from './next-step.ts';
 
 export { sessionBudgetState, sessionElapsedMs, timeBudgetCutOrder } from './budget.ts';
 export { supersetProgress } from './superset.ts';
@@ -59,14 +60,7 @@ const open = (task: Task) => !task.completed && !task.skipped;
 
 export function findNext(from = current().pos, includeDeferred = false) {
   const active = getState().active;
-  if (!active?.tasks.length) return -1;
-  const startAt = from < 0 ? 0 : (from + 1) % active.tasks.length;
-  for (let offset = 0; offset < active.tasks.length; offset++) {
-    const index = (startAt + offset) % active.tasks.length;
-    const task = active.tasks[index];
-    if (open(task) && (includeDeferred || !groupDeferred(task))) return index;
-  }
-  return -1;
+  return active ? openTaskAfter(active, from, includeDeferred) : -1;
 }
 
 export const nextPosition = () => {

@@ -22,6 +22,8 @@
     quickConfirm = false,
     confirmLabel = 'Done',
     undoLabel = 'Undo',
+    behindConfirm,
+    behindUndo,
     disabled = false,
   }: {
     children: Snippet;
@@ -33,6 +35,9 @@
     /** Short words stamped on the card while dragging toward each action. */
     confirmLabel?: string;
     undoLabel?: string;
+    /** The screen each action leads to, shown behind the card while it is dragged that way. */
+    behindConfirm?: Snippet;
+    behindUndo?: Snippet;
     disabled?: boolean;
   } = $props();
 
@@ -49,6 +54,13 @@
   // Each stamp fades in as the drag nears its threshold and is solid once releasing will act.
   const confirmReveal = $derived(sideways < 0 ? Math.min(1, -sideways / ratio(-1)) : 0);
   const undoReveal = $derived(sideways > 0 ? Math.min(1, sideways / ratio(1)) : 0);
+  // The next screen waits under the card on the side being dragged toward, and comes forward as
+  // the card leaves; it stays mounted while the card is thrown so the real screen replaces it.
+  const behindSide = $derived(leaving ?? (sideways < 0 ? 'left' : sideways > 0 ? 'right' : null));
+  const behind = $derived(
+    behindSide === 'left' ? behindConfirm : behindSide === 'right' ? behindUndo : undefined,
+  );
+  const peek = $derived(leaving ? 1 : Math.max(confirmReveal, undoReveal));
 
   let upCommit: { velocity: number } | null = null;
 
@@ -110,11 +122,18 @@
   style:--swipe-abs={Math.abs(sideways)}
   style:--confirm-reveal={confirmReveal}
   style:--undo-reveal={undoReveal}
+  style:--peek={peek}
+  data-lifted={Boolean(behindSide)}
   use:swipeToConfirm={options}
 >
-  {@render children()}
-  <div class="swipe-stamps" aria-hidden="true">
-    <span class="swipe-stamp is-confirm">{confirmLabel}</span>
-    {#if onundo}<span class="swipe-stamp is-undo">{undoLabel}</span>{/if}
+  {#if behind}
+    <div class="swipe-behind" inert aria-hidden="true">{@render behind()}</div>
+  {/if}
+  <div class="swipe-sheet">
+    {@render children()}
+    <div class="swipe-stamps" aria-hidden="true">
+      <span class="swipe-stamp is-confirm">{confirmLabel}</span>
+      {#if onundo}<span class="swipe-stamp is-undo">{undoLabel}</span>{/if}
+    </div>
   </div>
 </div>

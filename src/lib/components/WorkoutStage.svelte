@@ -14,6 +14,7 @@
     actions,
     more,
     titleHref,
+    titleId = 'workout-title',
   }: {
     title: string;
     className?: string;
@@ -22,12 +23,14 @@
     actions?: Snippet;
     more?: Snippet;
     titleHref?: string;
+    /** A second stage on the page (the next-screen peek) needs its own title id. */
+    titleId?: string;
   } = $props();
 </script>
 
 <section
   class={['workout-stage', countdown && 'countdown-stage', className]}
-  aria-labelledby="workout-title"
+  aria-labelledby={titleId}
 >
   <div class="stage-info">
     {#if titleHref}
@@ -36,10 +39,10 @@
         href={titleHref}
         draggable="false"
         aria-label="{title}, change exercise"
-        ><Title text={title} id="workout-title" className="workout-title" marquee /></a
+        ><Title text={title} id={titleId} className="workout-title" marquee /></a
       >
     {:else}
-      <Title text={title} id="workout-title" className="workout-title" marquee />
+      <Title text={title} id={titleId} className="workout-title" marquee />
     {/if}
     {#if info}{@render info()}{/if}
   </div>

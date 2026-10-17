@@ -890,6 +890,9 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   border-radius: 15px;
   background: var(--surface);
   color: var(--text);
+  /* Also drawn as a plain span in the next-screen peek; match the button's text. */
+  font-weight: 650;
+  text-align: center;
 }
 .set-value output {
   overflow: hidden;
@@ -983,9 +986,12 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   font-size: 1.1em;
 }
 /* Every workout step is a card: drag it left to confirm, right to undo. A quick vertical swipe
-   still scrolls; the card follows the finger and a stamp shows what release does. */
+   still scrolls; the card follows the finger, a stamp shows what release does, and the screen it
+   leads to waits underneath. The card spans the page's 12px padding so its rounded edge, seen
+   only while it is lifted, sits outside the content. */
 .swipe-card {
   position: relative;
+  margin: -12px;
   overflow-x: clip;
   touch-action: pan-y;
   /* A drag throws the card; it must not select its text. */
@@ -1001,8 +1007,12 @@ main > section:has(> .app-list) > .app-list .list-link::before {
 .swipe-card[data-vertical='true'] .workout-stage {
   touch-action: none;
 }
-.swipe-card .workout-stage,
-.swipe-stamps {
+.swipe-sheet {
+  position: relative;
+  z-index: 1;
+  padding: 12px;
+  border-radius: 0;
+  background: var(--bg);
   /* Pivot below the card so it swings like a held card, Tinder style. */
   transform-origin: 50% 120%;
   translate: calc(var(--swipe, 0) * 100%) 0;
@@ -1011,33 +1021,52 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   transition:
     translate 420ms cubic-bezier(0.34, 1.56, 0.64, 1),
     rotate 420ms cubic-bezier(0.34, 1.56, 0.64, 1),
-    opacity 240ms ease-out;
+    opacity 240ms ease-out,
+    border-radius 160ms ease-out,
+    box-shadow 160ms ease-out;
 }
-.swipe-card .workout-stage {
-  opacity: calc(1 - var(--swipe-abs, 0) * 0.6);
+/* Lifted: the card shows its edge and casts a shadow over the next screen. */
+.swipe-card[data-lifted='true'] .swipe-sheet {
+  border-radius: 28px;
+  box-shadow:
+    0 0 0 1px var(--line),
+    0 18px 48px rgb(0 0 0 / 0.5);
 }
-.swipe-card[data-dragging='true'] .workout-stage,
-.swipe-card[data-dragging='true'] .swipe-stamps {
-  transition: none;
+.swipe-card[data-dragging='true'] .swipe-sheet {
+  transition:
+    border-radius 160ms ease-out,
+    box-shadow 160ms ease-out;
 }
 /* Committed: the card is thrown off the side it was dragged to, turning and fading. */
-.swipe-card[data-leaving] .workout-stage,
-.swipe-card[data-leaving] .swipe-stamps {
+.swipe-card[data-leaving] .swipe-sheet {
   opacity: 0;
   transition:
     translate 260ms ease-in,
     rotate 260ms ease-in,
     opacity 220ms ease-in;
 }
-.swipe-card[data-leaving='left'] .workout-stage,
-.swipe-card[data-leaving='left'] .swipe-stamps {
+.swipe-card[data-leaving='left'] .swipe-sheet {
   translate: -140% 0;
   rotate: -24deg;
 }
-.swipe-card[data-leaving='right'] .workout-stage,
-.swipe-card[data-leaving='right'] .swipe-stamps {
+.swipe-card[data-leaving='right'] .swipe-sheet {
   translate: 140% 0;
   rotate: 24deg;
+}
+/* The next screen, under the card: it grows into place and brightens as the card leaves. */
+.swipe-behind {
+  position: absolute;
+  inset: 0;
+  padding: 12px;
+  pointer-events: none;
+  opacity: calc(0.35 + var(--peek, 0) * 0.65);
+  scale: calc(0.92 + var(--peek, 0) * 0.08);
+  transition:
+    opacity 260ms ease-out,
+    scale 260ms ease-out;
+}
+.swipe-card[data-dragging='true'] .swipe-behind {
+  transition: none;
 }
 .swipe-stamps {
   position: absolute;
@@ -1518,8 +1547,7 @@ main > section:has(> .app-list) > .app-list .list-link::before {
 }
 /* Reduced motion: the card still follows the finger, but flat, without tilting. */
 @media (prefers-reduced-motion: reduce) {
-  .swipe-card .workout-stage,
-  .swipe-stamps {
+  .swipe-sheet {
     rotate: none !important;
   }
 }
