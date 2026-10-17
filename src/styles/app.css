@@ -841,10 +841,10 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   display: inline;
   white-space: inherit;
 }
-/* The set's values: three big buttons that each open their picker. Load gets the most room. */
+/* The set's values: three big buttons that each open their picker, equal width. */
 .set-values {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.45fr) minmax(0, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
 }
 .set-value {

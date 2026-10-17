@@ -44,7 +44,8 @@ async function gateViolations(page: Page) {
         (control.id && document.querySelector(`label[for="${control.id}"]`)?.textContent?.trim());
       const name = label || control.outerHTML.slice(0, 60);
       if (!label) problems.push(`no accessible name: ${name}`);
-      if (box.height < 44 && (control as HTMLInputElement).type !== 'checkbox')
+      // Layout can land a hair under 44 (43.999996) from sub-pixel rounding.
+      if (box.height < 43.9 && (control as HTMLInputElement).type !== 'checkbox')
         problems.push(`target ${Math.round(box.height)}px tall: ${name}`);
       if (box.left < -1 || box.right > width + 1) problems.push(`clipped horizontally: ${name}`);
     });
