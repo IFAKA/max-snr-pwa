@@ -40,6 +40,12 @@
   const ringed = $derived(swipe.axis === 'x' && swipe.progress < 0 && !quickConfirm);
   // The ring fills as the drag nears the threshold and is full when releasing will commit.
   const ring = $derived(ringed ? Math.min(1, Math.abs(swipe.progress) / ARM_RATIO) : 0);
+  // The icon circle grows in with every sideways drag, ringed or light, so the action is named.
+  const reveal = $derived(
+    swipe.axis === 'x'
+      ? Math.min(1, Math.abs(swipe.progress) / (ringed ? ARM_RATIO : ARM_RATIO_LIGHT))
+      : 0,
+  );
   const icon = $derived(swipe.axis === 'y' ? 'list' : swipe.progress < 0 ? 'confirm' : 'undo');
 
   let upCommit: { velocity: number } | null = null;
@@ -103,14 +109,17 @@
   style:--swipe={swipe.axis === 'x' ? swipe.progress : 0}
   style:--swipe-abs={swipe.axis === 'x' ? Math.abs(swipe.progress) : 0}
   style:--ring={ring}
+  style:--reveal={reveal}
   use:swipeToConfirm={options}
 >
   {@render children()}
   <div class="swipe-ring" aria-hidden="true">
-    <svg class="swipe-ring-progress" viewBox="0 0 80 80">
-      <circle class="swipe-ring-track" cx="40" cy="40" r="36" />
-      <circle class="swipe-ring-bar" cx="40" cy="40" r="36" pathLength="1" />
-    </svg>
+    {#if ringed}
+      <svg class="swipe-ring-progress" viewBox="0 0 80 80">
+        <circle class="swipe-ring-track" cx="40" cy="40" r="36" />
+        <circle class="swipe-ring-bar" cx="40" cy="40" r="36" pathLength="1" />
+      </svg>
+    {/if}
     <svg class="swipe-ring-icon" viewBox="0 0 24 24">
       {#if icon === 'confirm'}
         <path d="M5 12.5l4.5 4.5L19 7" />

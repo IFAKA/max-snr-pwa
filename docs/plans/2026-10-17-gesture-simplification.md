@@ -57,7 +57,7 @@ The exercise list is now a real bottom drawer (`Drawer.svelte`, native `<dialog>
 
 ### Ring only for irreversible actions (shipped)
 
-The ring-and-haptic confirmation (40% of the width) is reserved for actions that cannot be undone: Skip Rest, Finish (plank, stretch, activities) and Continue. Undoable actions (Log set, Undo Last Set, Restart, opening the exercise list) act on a light swipe (20%) with no ring; Log set is undone from Rest with a right swipe.
+The ring-and-haptic confirmation (40% of the width) is reserved for actions that cannot be undone: Skip Rest, Finish (plank, stretch, activities) and Continue. Undoable actions (Log set, Undo Last Set, Restart, opening the exercise list) act on a light swipe (20%) with no ring or haptic, but sideways swipes still show the icon circle (check or undo arrow), which turns solid at the threshold; Log set is undone from Rest with a right swipe.
 
 ### Drawer follows the finger (shipped)
 

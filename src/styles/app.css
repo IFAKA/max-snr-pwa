@@ -1022,8 +1022,8 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   box-shadow: 0 6px 24px rgb(0 0 0 / 0.22);
   color: var(--accent);
   pointer-events: none;
-  opacity: min(1, calc(var(--ring, 0) * 2.5));
-  transform: translate(-50%, -50%) scale(calc(0.6 + var(--ring, 0) * 0.4));
+  opacity: min(1, calc(var(--reveal, 0) * 2.5));
+  transform: translate(-50%, -50%) scale(calc(0.6 + var(--reveal, 0) * 0.4));
 }
 .swipe-ring-progress {
   position: absolute;
