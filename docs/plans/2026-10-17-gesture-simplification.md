@@ -25,7 +25,8 @@ Page one is the primary stage (set values and `Log set`, or the rest timer). Pag
 - Tap, Enter and screen readers still use the button's click. Vertical drags scroll natively (`touch-action: pan-y`); the set values opt out (`data-no-swipe`); edge starts are ignored; the click after a drag is swallowed so a set is never logged twice.
 - A `→` nudge shows until the first successful swipe (`maxsnr-swipe-learned`).
 - Undo: Rest keeps "Undo Last Set" (now with a soft low `undo` cue).
-- Left swipe (Defer behind a confirm dialog) is deferred: try the right swipe on real workouts first.
+- The card is the shared `SwipeCard` and now covers Rest (right: skip rest, left: undo last set), Plank (right: finish), Stretch (right: finish, left: restart) and timed/metric activities (right: finish). Countdown steps show a `Swipe → …` hint and keep their buttons on a second scroll page; the measurement form has no swipe.
+- Left swipe on Lifting and Defer behind a confirm dialog are not built: try the swipes on real workouts first.
 
 ### Phase 3 (dropped)
 

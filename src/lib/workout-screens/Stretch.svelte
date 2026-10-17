@@ -8,6 +8,7 @@
   import { completionUrl } from '../browser/routes.ts';
   import { cue } from '../browser/feedback.ts';
   import Countdown from '../components/Countdown.svelte';
+  import SwipeCard from '../components/SwipeCard.svelte';
   import WorkoutStage from '../components/WorkoutStage.svelte';
 
   let { active }: { active: ActiveWorkout } = $props();
@@ -28,30 +29,41 @@
   }
 </script>
 
-<WorkoutStage title="Stretch" className="stretch-stage" countdown>
-  {#snippet actions()}
-    <Countdown
-      endAt={active.timerEndsAt}
-      label="Stretch remaining"
-      variant="stretch"
-      total={STRETCH_MS}
-      onend={() => {
-        if (wasRunning) cue('timerDone');
-      }}
-    />
-    <div class="countdown-actions">
-      <div class="controls">
-        <button
-          class="secondary"
-          id="cancel-stretch"
-          type="button"
-          disabled={busy}
-          onclick={() => act(() => setTimer(STRETCH_MS))}>Restart</button
-        >
-        <button class="primary" id="finish-stretch" type="button" disabled={busy} onclick={finish}
-          >Finish</button
-        >
+<SwipeCard
+  rightLabel="Finish"
+  onright={finish}
+  leftLabel="Restart"
+  onleft={() => act(() => setTimer(STRETCH_MS))}
+  disabled={busy}
+>
+  <WorkoutStage title="Stretch" className="stretch-stage" countdown>
+    {#snippet actions()}
+      <Countdown
+        endAt={active.timerEndsAt}
+        label="Stretch remaining"
+        variant="stretch"
+        total={STRETCH_MS}
+        onend={() => {
+          if (wasRunning) cue('timerDone');
+        }}
+      />
+      <p class="swipe-hint" aria-hidden="true">Swipe → finish · ← restart</p>
+    {/snippet}
+    {#snippet more()}
+      <div class="countdown-actions">
+        <div class="controls">
+          <button
+            class="secondary"
+            id="cancel-stretch"
+            type="button"
+            disabled={busy}
+            onclick={() => act(() => setTimer(STRETCH_MS))}>Restart</button
+          >
+          <button class="primary" id="finish-stretch" type="button" disabled={busy} onclick={finish}
+            >Finish</button
+          >
+        </div>
       </div>
-    </div>
-  {/snippet}
-</WorkoutStage>
+    {/snippet}
+  </WorkoutStage>
+</SwipeCard>

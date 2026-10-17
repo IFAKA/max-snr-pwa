@@ -22,7 +22,7 @@
 </script>
 
 <section
-  class={['workout-stage', countdown && 'countdown-stage', className]}
+  class={['workout-stage', countdown && 'countdown-stage', more && 'has-more', className]}
   aria-labelledby="workout-title"
 >
   <div class="stage-info">

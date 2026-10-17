@@ -6,6 +6,7 @@
   import { beginLifting, skipPlank } from '../workout/index.ts';
   import { cue } from '../browser/feedback.ts';
   import Countdown from '../components/Countdown.svelte';
+  import SwipeCard from '../components/SwipeCard.svelte';
   import WorkoutStage from '../components/WorkoutStage.svelte';
 
   let { active }: { active: ActiveWorkout } = $props();
@@ -23,26 +24,31 @@
   });
 </script>
 
-<WorkoutStage title="Plank" countdown>
-  {#snippet actions()}
-    <Countdown
-      endAt={active.timerEndsAt}
-      label="Plank remaining"
-      variant="plank"
-      total={PLANK_MS}
-      onend={() => {
-        cue('timerDone');
-        void toLifting(beginLifting);
-      }}
-    />
-    <div class="countdown-actions">
-      <button
-        class="primary"
-        id="skip-plank"
-        type="button"
-        disabled={busy}
-        onclick={() => toLifting(skipPlank)}>Finish</button
-      >
-    </div>
-  {/snippet}
-</WorkoutStage>
+<SwipeCard rightLabel="Finish" onright={() => toLifting(skipPlank)} disabled={busy}>
+  <WorkoutStage title="Plank" countdown>
+    {#snippet actions()}
+      <Countdown
+        endAt={active.timerEndsAt}
+        label="Plank remaining"
+        variant="plank"
+        total={PLANK_MS}
+        onend={() => {
+          cue('timerDone');
+          void toLifting(beginLifting);
+        }}
+      />
+      <p class="swipe-hint" aria-hidden="true">Swipe → finish</p>
+    {/snippet}
+    {#snippet more()}
+      <div class="countdown-actions">
+        <button
+          class="primary"
+          id="skip-plank"
+          type="button"
+          disabled={busy}
+          onclick={() => toLifting(skipPlank)}>Finish</button
+        >
+      </div>
+    {/snippet}
+  </WorkoutStage>
+</SwipeCard>

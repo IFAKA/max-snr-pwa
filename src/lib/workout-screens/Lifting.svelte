@@ -7,10 +7,11 @@
   import type { ActiveWorkout, Task } from '../types.ts';
   import { completeSet, finishAtBudget } from '../workout/index.ts';
   import { cue } from '../browser/feedback.ts';
+  import SwipeCard from '../components/SwipeCard.svelte';
   import WorkoutStage from '../components/WorkoutStage.svelte';
   import SupersetMeta from './SupersetMeta.svelte';
   import { scrubValue } from '../browser/value-scrub.ts';
-  import { markSwipeLearned, swipeLearned, swipeToConfirm } from '../browser/swipe-log.ts';
+  import { swipeLearned } from '../browser/swipe-log.ts';
   import ScrubWheel from './ScrubWheel.svelte';
   import {
     formatLoad,
@@ -39,8 +40,6 @@
   const LABELS: Record<SetField, string> = { reps: 'Reps', weight: unit, rir: 'RIR' };
   const NAMES: Record<SetField, string> = { reps: 'Reps', weight: `Load in ${unit}`, rir: 'RIR' };
   let busy = $state(false);
-  let swipe = $state({ progress: 0, armed: false, dragging: false });
-  let leaving = $state(false);
   const learned = swipeLearned();
 
   function pick(field: SetField) {
@@ -63,17 +62,7 @@
     };
   }
 
-  const swipeOptions = {
-    disabled: () => busy,
-    onProgress: (progress: number, armed: boolean, dragging: boolean) =>
-      (swipe = { progress, armed, dragging }),
-    onArm: () => cue('pick'),
-    onCommit: () => {
-      leaving = true;
-      markSwipeLearned();
-      document.querySelector<HTMLFormElement>('#set-form')?.requestSubmit();
-    },
-  };
+  const submit = () => document.querySelector<HTMLFormElement>('#set-form')?.requestSubmit();
 
   async function logSet(event: SubmitEvent) {
     event.preventDefault();
@@ -98,14 +87,7 @@
   }
 </script>
 
-<div
-  class="swipe-card"
-  data-armed={swipe.armed}
-  data-dragging={swipe.dragging}
-  data-leaving={leaving}
-  style:--swipe={swipe.progress}
-  use:swipeToConfirm={swipeOptions}
->
+<SwipeCard rightLabel="Log set" onright={submit} disabled={busy}>
   <WorkoutStage title={task.performedName} className="lifting-stage">
     {#snippet info()}
       <SupersetMeta {active} {task} />
@@ -168,8 +150,7 @@
       {/if}
     {/snippet}
   </WorkoutStage>
-  <div class="swipe-badge" aria-hidden="true">{swipe.armed ? '✓ Release to log' : 'Log set →'}</div>
-</div>
+</SwipeCard>
 {#if scrub}
   <ScrubWheel values={scrub.values} index={scrub.index} rect={scrub.rect} />
 {/if}

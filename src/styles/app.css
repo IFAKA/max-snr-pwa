@@ -977,17 +977,17 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   overflow-x: clip;
   touch-action: pan-y;
 }
-.swipe-card .lifting-stage {
+.swipe-card .workout-stage {
   transform: translateX(calc(var(--swipe, 0) * 36%));
-  opacity: calc(1 - var(--swipe, 0) * 0.35);
+  opacity: calc(1 - var(--swipe-abs, 0) * 0.35);
   transition:
     transform 150ms ease-out,
     opacity 150ms ease-out;
 }
-.swipe-card[data-dragging='true'] .lifting-stage {
+.swipe-card[data-dragging='true'] .workout-stage {
   transition: none;
 }
-.swipe-card[data-leaving='true'] .lifting-stage {
+.swipe-card[data-leaving='true'] .workout-stage {
   transform: translateX(110%);
   opacity: 0;
   transition-duration: 200ms;
@@ -1005,8 +1005,8 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   font-weight: 800;
   text-align: center;
   pointer-events: none;
-  opacity: var(--swipe, 0);
-  transform: translateY(-50%) scale(calc(0.8 + var(--swipe, 0) * 0.2));
+  opacity: var(--swipe-abs, 0);
+  transform: translateY(-50%) scale(calc(0.8 + var(--swipe-abs, 0) * 0.2));
 }
 .swipe-card[data-dragging='true'] .swipe-badge {
   transition: none;
@@ -1026,12 +1026,22 @@ main > section:has(> .app-list) > .app-list .list-link::before {
 }
 /* Page two of a step: details and secondary actions scroll up into view, snapping to the
    title or to this page when the scroll stops near them. */
-.lifting-stage {
+.has-more {
   scroll-snap-type: y proximity;
 }
-.lifting-stage .workout-title,
+.has-more .workout-title,
 .stage-more {
   scroll-snap-align: start;
+}
+.countdown-stage.has-more .thumb-zone {
+  /* Page one fills the screen below the title, so the details start off-screen. */
+  min-height: calc(100svh - 110px);
+}
+.swipe-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  text-align: center;
 }
 .stage-hint {
   color: var(--muted, currentColor);

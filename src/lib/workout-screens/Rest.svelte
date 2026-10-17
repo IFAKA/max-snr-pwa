@@ -16,6 +16,7 @@
   } from '../workout/index.ts';
   import { cue } from '../browser/feedback.ts';
   import Countdown from '../components/Countdown.svelte';
+  import SwipeCard from '../components/SwipeCard.svelte';
   import WorkoutStage from '../components/WorkoutStage.svelte';
   import SupersetMeta from './SupersetMeta.svelte';
   import { lastLoggedSet } from './lifting-model.ts';
@@ -47,6 +48,11 @@
   const budget = $derived(sessionBudgetState(active, now));
   let busy = $state(false);
 
+  function undo() {
+    cue('undo');
+    void run(undoLastSet);
+  }
+
   async function run(action: () => Promise<unknown>) {
     if (busy) return;
     busy = true;
@@ -55,64 +61,72 @@
   }
 </script>
 
-<WorkoutStage title={next ? next.performedName : 'Rest'} className="rest-stage" countdown>
-  {#snippet info()}
-    {#if logged}
-      <p class={['set-logged', fresh && 'is-fresh']} role="status">
-        <span aria-hidden="true">✓</span>
-        {logged.reps} × {logged.weight ?? 'bodyweight'}
-        {logged.weight != null ? logged.unit || unit : ''} · {logged.rir ?? '—'} RIR
+<SwipeCard
+  rightLabel="Skip rest"
+  onright={() => run(continueRest)}
+  leftLabel="Undo last set"
+  onleft={hasCompletedSet ? undo : undefined}
+  disabled={busy}
+>
+  <WorkoutStage title={next ? next.performedName : 'Rest'} className="rest-stage" countdown>
+    {#snippet info()}
+      {#if logged}
+        <p class={['set-logged', fresh && 'is-fresh']} role="status">
+          <span aria-hidden="true">✓</span>
+          {logged.reps} × {logged.weight ?? 'bodyweight'}
+          {logged.weight != null ? logged.unit || unit : ''} · {logged.rir ?? '—'} RIR
+        </p>
+      {/if}
+      {#if next}
+        <SupersetMeta {active} task={next} />
+        <p class="set-count">Set {next.set} of {next.sets}</p>
+        <p class="target-prescription">
+          Target: {next.targetRepRange || next.reps} reps · {next.targetRir || next.rir} RIR
+        </p>
+      {/if}
+      <p class={['session-budget', budget.capReached && 'is-at-cap']}>
+        Session <time id="rest-session-elapsed">{formatDuration(budget.elapsedMs)}</time
+        >{#if budget.capReached}&nbsp;· 60:00 reached{/if}
       </p>
-    {/if}
-    {#if next}
-      <SupersetMeta {active} task={next} />
-      <p class="set-count">Set {next.set} of {next.sets}</p>
-      <p class="target-prescription">
-        Target: {next.targetRepRange || next.reps} reps · {next.targetRir || next.rir} RIR
-      </p>
-    {/if}
-    <p class={['session-budget', budget.capReached && 'is-at-cap']}>
-      Session <time id="rest-session-elapsed">{formatDuration(budget.elapsedMs)}</time
-      >{#if budget.capReached}&nbsp;· 60:00 reached{/if}
-    </p>
-  {/snippet}
-  {#snippet actions()}
-    <Countdown
-      endAt={active.restEndsAt}
-      label="Rest remaining"
-      variant="rest"
-      total={active.tasks[active.pos]?.restMs || REST_MS}
-      onend={() => {
-        // Rest over: go straight to the next set; "Continue" only skips the rest early.
-        cue('restDone');
-        void run(continueRest);
-      }}
-    />
-    <div class="countdown-actions">
-      <button
-        class="primary"
-        id="continue"
-        type="button"
-        disabled={busy}
-        onclick={() => run(continueRest)}>Skip Rest</button
-      >
-      <button
-        class="secondary"
-        id="change-exercises"
-        type="button"
-        disabled={!canChange}
-        onclick={() => goto('/workout/?view=exercises')}>Change Exercises</button
-      >
-      <button
-        class="secondary"
-        id="undo-set"
-        type="button"
-        disabled={!hasCompletedSet || busy}
-        onclick={() => {
-          cue('undo');
-          void run(undoLastSet);
-        }}>Undo Last Set</button
-      >
-    </div>
-  {/snippet}
-</WorkoutStage>
+    {/snippet}
+    {#snippet actions()}
+      <Countdown
+        endAt={active.restEndsAt}
+        label="Rest remaining"
+        variant="rest"
+        total={active.tasks[active.pos]?.restMs || REST_MS}
+        onend={() => {
+          // Rest over: go straight to the next set; "Continue" only skips the rest early.
+          cue('restDone');
+          void run(continueRest);
+        }}
+      />
+      <p class="swipe-hint" aria-hidden="true">Swipe → skip · ← undo</p>
+    {/snippet}
+    {#snippet more()}
+      <div class="countdown-actions">
+        <button
+          class="primary"
+          id="continue"
+          type="button"
+          disabled={busy}
+          onclick={() => run(continueRest)}>Skip Rest</button
+        >
+        <button
+          class="secondary"
+          id="change-exercises"
+          type="button"
+          disabled={!canChange}
+          onclick={() => goto('/workout/?view=exercises')}>Change Exercises</button
+        >
+        <button
+          class="secondary"
+          id="undo-set"
+          type="button"
+          disabled={!hasCompletedSet || busy}
+          onclick={undo}>Undo Last Set</button
+        >
+      </div>
+    {/snippet}
+  </WorkoutStage>
+</SwipeCard>

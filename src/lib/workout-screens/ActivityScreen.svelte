@@ -7,6 +7,7 @@
   import { recordActivity } from '../health/health-data.ts';
   import { cue } from '../browser/feedback.ts';
   import Countdown from '../components/Countdown.svelte';
+  import SwipeCard from '../components/SwipeCard.svelte';
   import WorkoutStage from '../components/WorkoutStage.svelte';
 
   let { type }: { type: string } = $props();
@@ -39,53 +40,60 @@
   }
 </script>
 
-<WorkoutStage
-  title={definition.title}
-  className="activity-stage"
-  countdown={definition.durationMs > 0}
+<SwipeCard
+  rightLabel={type === 'rest' ? 'Continue' : 'Finish'}
+  onright={finish}
+  disabled={type === 'measurement'}
 >
-  {#snippet actions()}
-    {#if definition.durationMs > 0}
-      <Countdown
-        endAt={startedAtMs + definition.durationMs}
-        label={`${definition.title} remaining`}
-        variant="activity"
-        total={definition.durationMs}
-        onend={() => {
-          cue('timerDone');
-          void finish();
-        }}
-      />
-      <div class="countdown-actions">
-        <button class="primary" id="finish-activity" type="button" onclick={finish}>Finish</button>
-      </div>
-    {:else if type === 'measurement'}
-      <form
-        id="activity-form"
-        class="activity-form"
-        onsubmit={(event) => {
-          event.preventDefault();
-          void finish();
-        }}
-      >
-        <label class="analytics-field"
-          ><span>Waist (cm)</span><input
-            name="waist"
-            type="number"
-            min="1"
-            step="0.1"
-            inputmode="decimal"
-            required
-            bind:value={waist}
-          /></label
+  <WorkoutStage
+    title={definition.title}
+    className="activity-stage"
+    countdown={definition.durationMs > 0}
+  >
+    {#snippet actions()}
+      {#if definition.durationMs > 0}
+        <Countdown
+          endAt={startedAtMs + definition.durationMs}
+          label={`${definition.title} remaining`}
+          variant="activity"
+          total={definition.durationMs}
+          onend={() => {
+            cue('timerDone');
+            void finish();
+          }}
+        />
+        <div class="countdown-actions">
+          <button class="primary" id="finish-activity" type="button" onclick={finish}>Finish</button
+          >
+        </div>
+      {:else if type === 'measurement'}
+        <form
+          id="activity-form"
+          class="activity-form"
+          onsubmit={(event) => {
+            event.preventDefault();
+            void finish();
+          }}
         >
-        <button class="primary" type="submit">Save</button>
-      </form>
-    {:else}
-      <p class="workout-metric" aria-label="Activity metric">{definition.metric}</p>
-      <button class="primary" id="finish-activity" type="button" onclick={finish}
-        >{type === 'rest' ? 'Continue' : 'Finish'}</button
-      >
-    {/if}
-  {/snippet}
-</WorkoutStage>
+          <label class="analytics-field"
+            ><span>Waist (cm)</span><input
+              name="waist"
+              type="number"
+              min="1"
+              step="0.1"
+              inputmode="decimal"
+              required
+              bind:value={waist}
+            /></label
+          >
+          <button class="primary" type="submit">Save</button>
+        </form>
+      {:else}
+        <p class="workout-metric" aria-label="Activity metric">{definition.metric}</p>
+        <button class="primary" id="finish-activity" type="button" onclick={finish}
+          >{type === 'rest' ? 'Continue' : 'Finish'}</button
+        >
+      {/if}
+    {/snippet}
+  </WorkoutStage>
+</SwipeCard>
