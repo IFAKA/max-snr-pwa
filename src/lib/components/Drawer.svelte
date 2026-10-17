@@ -1,13 +1,24 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import { drawerPeek } from '../browser/drawer-peek.svelte.ts';
 
   // A bottom drawer on a native modal <dialog>: it slides up over the screen, and closes with
   // Escape, a backdrop tap, the handle (a real button) or a downward drag of the handle.
-  let { label, onclose, children }: { label: string; onclose: () => void; children: Snippet } =
-    $props();
+  // `peek` renders the drawer as a plain sheet that is `peek` px up the screen, for the moment a
+  // finger is still dragging it open; releasing opens the real dialog in the same place.
+  let {
+    label,
+    onclose,
+    children,
+    peek,
+  }: { label: string; onclose: () => void; children: Snippet; peek?: number } = $props();
 
   const CLOSE_RATIO = 0.3;
   const FLICK_PX_PER_MS = 0.6;
+
+  // Opened by a finger drag: it is already in place, so it must not slide in again.
+  const handoff = drawerPeek.handoff;
+  drawerPeek.handoff = false;
 
   let dialog: HTMLDialogElement | undefined = $state();
   let sheet: HTMLElement | undefined = $state();
@@ -67,28 +78,38 @@
   }
 </script>
 
-<dialog
-  bind:this={dialog}
-  class="drawer"
-  aria-label={label}
-  oncancel={cancel}
-  onclick={backdrop}
-  data-dragging={dragging}
->
-  <div class="drawer-sheet" tabindex="-1" bind:this={sheet} style:--drag="{offset}px">
-    <button
-      class="drawer-handle"
-      type="button"
-      aria-label="Close {label}"
-      onpointerdown={down}
-      onpointermove={move}
-      onpointerup={up}
-      onpointercancel={() => {
-        dragging = false;
-        offset = 0;
-      }}
-      onclick={click}><span aria-hidden="true"></span></button
-    >
-    <div class="drawer-body">{@render children()}</div>
+{#if peek !== undefined}
+  <div class="drawer drawer-peek" aria-hidden="true" style:--peek="{peek}px">
+    <div class="drawer-sheet">
+      <div class="drawer-handle"><span></span></div>
+      <div class="drawer-body">{@render children()}</div>
+    </div>
   </div>
-</dialog>
+{:else}
+  <dialog
+    bind:this={dialog}
+    class="drawer"
+    aria-label={label}
+    oncancel={cancel}
+    onclick={backdrop}
+    data-dragging={dragging}
+    data-handoff={handoff}
+  >
+    <div class="drawer-sheet" tabindex="-1" bind:this={sheet} style:--drag="{offset}px">
+      <button
+        class="drawer-handle"
+        type="button"
+        aria-label="Close {label}"
+        onpointerdown={down}
+        onpointermove={move}
+        onpointerup={up}
+        onpointercancel={() => {
+          dragging = false;
+          offset = 0;
+        }}
+        onclick={click}><span aria-hidden="true"></span></button
+      >
+      <div class="drawer-body">{@render children()}</div>
+    </div>
+  </dialog>
+{/if}

@@ -9,6 +9,7 @@
   import ActivityScreen from './ActivityScreen.svelte';
   import Completion from './Completion.svelte';
   import Drawer from '../components/Drawer.svelte';
+  import { drawerPeek } from '../browser/drawer-peek.svelte.ts';
   import ExercisePicker from './ExercisePicker.svelte';
   import Lifting from './Lifting.svelte';
   import Plank from './Plank.svelte';
@@ -40,6 +41,11 @@
   });
 
   let savingLegacy = false;
+
+  // The real drawer has taken over from the one that followed the finger.
+  $effect(() => {
+    if (view.kind === 'picker') drawerPeek.px = 0;
+  });
 
   $effect(() => {
     const current = view;
@@ -82,6 +88,11 @@
     <Stretch active={shown.active} />
   {/if}
 {/key}
+{#if view.kind !== 'picker' && drawerPeek.px > 0 && 'active' in shown}
+  <Drawer label="exercises" peek={drawerPeek.px} onclose={() => {}}>
+    <ExercisePicker active={shown.active} onselected={() => {}} />
+  </Drawer>
+{/if}
 {#if view.kind === 'picker'}
   {@const returnTo = view.returnTo}
   <Drawer label="exercises" onclose={() => history.back()}>

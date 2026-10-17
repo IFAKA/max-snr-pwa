@@ -981,7 +981,7 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   touch-action: none;
 }
 .swipe-card .workout-stage {
-  transform: translate(calc(var(--swipe, 0) * 36%), calc(var(--swipe-y, 0) * -14%));
+  transform: translateX(calc(var(--swipe, 0) * 36%));
   opacity: calc(1 - var(--swipe-abs, 0) * 0.35);
   transition:
     transform 150ms ease-out,
@@ -1555,6 +1555,26 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   transform: translateY(var(--drag, 0));
   transition: transform 180ms var(--ease-out);
   animation: drawer-in 260ms var(--ease-out);
+}
+.drawer-peek {
+  z-index: 5;
+  pointer-events: none;
+}
+.drawer-peek::before {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: rgb(0 0 0 / 0.45);
+  content: '';
+  opacity: min(1, calc(var(--peek, 0) / 160));
+}
+.drawer-peek .drawer-sheet {
+  animation: none;
+  transform: translateY(max(0px, calc(100% - var(--peek, 0px))));
+  transition: none;
+}
+.drawer[data-handoff='true'] .drawer-sheet {
+  animation: none;
 }
 .drawer-sheet:focus {
   outline: none;

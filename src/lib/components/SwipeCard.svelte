@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import { drawerPeek } from '../browser/drawer-peek.svelte.ts';
   import { cue } from '../browser/feedback.ts';
   import {
     ARM_RATIO,
@@ -31,6 +32,7 @@
 
   let swipe = $state({ progress: 0, armed: false, dragging: false, axis: 'x' as 'x' | 'y' });
   let leaving = $state(false);
+  let card: HTMLElement | undefined;
   // Up opens the exercise list, so the card owns vertical touch drags when it offers that.
   const canSwipeUp = $derived(Boolean(onup));
   // Only a confirm that cannot be undone gets the ring and the haptic at its threshold; undoable
@@ -44,8 +46,11 @@
     disabled: () => disabled,
     allow: (direction: 1 | -1) => direction < 0 || Boolean(onundo),
     allowUp: () => canSwipeUp,
-    onProgress: (progress: number, armed: boolean, dragging: boolean, axis: 'x' | 'y') =>
-      (swipe = { progress, armed, dragging, axis }),
+    onProgress: (progress: number, armed: boolean, dragging: boolean, axis: 'x' | 'y') => {
+      swipe = { progress, armed, dragging, axis };
+      // Up drags the drawer into view with the finger (progress is a share of the card height).
+      drawerPeek.px = axis === 'y' && dragging ? progress * (card?.clientHeight ?? 0) : 0;
+    },
     ratio: (direction: 1 | -1 | 'up') =>
       direction === -1 && !quickConfirm ? ARM_RATIO : ARM_RATIO_LIGHT,
     onArm: (direction: 1 | -1 | 'up') => {
@@ -53,7 +58,12 @@
     },
     onCommit: (direction: 1 | -1 | 'up') => {
       markSwipeLearned();
-      if (direction === 'up') return onup?.();
+      if (direction === 'up') {
+        // Keep the drawer fully up until the real one takes over, so it never blinks.
+        drawerPeek.px = card?.clientHeight ?? 0;
+        drawerPeek.handoff = true;
+        return onup?.();
+      }
       if (direction > 0) return onundo?.();
       // The card slides away; if the screen is still here a moment later, it slides back.
       leaving = true;
@@ -68,10 +78,10 @@
   data-armed={swipe.armed}
   data-dragging={swipe.dragging}
   data-leaving={leaving}
+  bind:this={card}
   data-vertical={canSwipeUp}
   style:--swipe={swipe.axis === 'x' ? swipe.progress : 0}
-  style:--swipe-y={swipe.axis === 'y' ? swipe.progress : 0}
-  style:--swipe-abs={Math.abs(swipe.progress)}
+  style:--swipe-abs={swipe.axis === 'x' ? Math.abs(swipe.progress) : 0}
   style:--ring={ring}
   use:swipeToConfirm={options}
 >

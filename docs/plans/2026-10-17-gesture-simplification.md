@@ -59,6 +59,10 @@ The exercise list is now a real bottom drawer (`Drawer.svelte`, native `<dialog>
 
 The ring-and-haptic confirmation (40% of the width) is reserved for actions that cannot be undone: Skip Rest, Finish (plank, stretch, activities) and Continue. Undoable actions (Log set, Undo Last Set, Restart, opening the exercise list) act on a light swipe (20%) with no ring; Log set is undone from Rest with a right swipe.
 
+### Drawer follows the finger (shipped)
+
+Swiping up no longer waits for the release: the drawer rises with the finger (a non-modal sheet driven by `drawerPeek.px`) with the backdrop dimming, and releasing past 20% hands over to the real dialog without a second slide-in; releasing earlier drops it back. Outside tap, handle drag down, Escape and back close it.
+
 ### Cleaner Lifting screen (shipped)
 
 The main view is the title, `3/3` (read as "Set 3 of 3" by screen readers), three large plain values (still tap or hold-and-drag) and a `← swipe to log` hint. The `Log set` button, target, previous set, progression note and Change Exercise sit on the second page; the button stays a real submit control (`form="set-form"`) for keyboard and screen readers. At 192×192 the hint sits one scroll below the values.

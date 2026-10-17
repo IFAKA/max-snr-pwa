@@ -95,7 +95,8 @@ test('on the first set, swiping up opens the exercise list', async ({ page }) =>
   await page.mouse.move(x, startY);
   await page.mouse.down();
   await page.mouse.move(x, startY - box.height * 0.3, { steps: 5 });
-  await expect(page.locator('.swipe-card')).toHaveAttribute('data-armed', 'true');
+  // The drawer is already rising under the finger before the release.
+  await expect(page.locator('.drawer-peek')).toBeAttached();
   await page.mouse.move(x, startY - box.height * 0.4, { steps: 5 });
   await page.mouse.up();
   await expect(page).toHaveURL(/view=exercises/);
