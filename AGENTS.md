@@ -23,6 +23,7 @@ Follow Apple’s primary references before changing UI: [Designing for watchOS](
 - Use large visible metrics, readable labels, and explicit native controls. Every essential touch target must be at least 44px tall; never solve overflow by making text, buttons, labels, or hit areas tiny.
 - Keep content inside the watch canvas with no horizontal overflow or clipped controls. It is acceptable—and preferred—for long lists/details to scroll vertically rather than be cramped into one screen.
 - Reuse the same semantic components and interaction contracts across Today, Routine, History, workout setup, warmup, plank, lifting, rest, stretch, completion, navigation, disclosures, steppers, timers, import/export, and error states.
+- Documented gesture exception: on the lifting screen a set value (reps, load, RIR) can also be held and dragged vertically like a Digital Crown wheel (`browser/value-scrub.ts`, `ScrubWheel`). It only shortcuts the existing tap-to-open picker, which and the keyboard path stay unchanged; the buttons use `touch-action: none`.
 - Do not add phone-only navigation, dense desktop-style layouts, bottom sheets, drawers, modal action overlays, or custom swipe gestures without documenting the exception and its HIG justification.
 - For every UI change, validate representative watch widths (225×225 and a smaller watch width), phone width, 200% text/zoom, long labels, dark mode, reduced motion, keyboard focus, screen-reader names, touch targets, vertical scrolling/paging, timer refresh/resume behavior, and offline loading.
 

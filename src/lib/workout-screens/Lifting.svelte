@@ -9,16 +9,32 @@
   import { cue } from '../browser/feedback.ts';
   import WorkoutStage from '../components/WorkoutStage.svelte';
   import SupersetMeta from './SupersetMeta.svelte';
-  import { isBetterSet, liftingModel, SET_FIELDS, type SetField } from './lifting-model.ts';
+  import { scrubValue } from '../browser/value-scrub.ts';
+  import ScrubWheel from './ScrubWheel.svelte';
+  import {
+    formatLoad,
+    isBetterSet,
+    liftingModel,
+    pickerValues,
+    SET_FIELDS,
+    type SetField,
+  } from './lifting-model.ts';
 
   // Logging a set is one tap: the values start from the draft, last time, or the progression
-  // rule, and "Log set" accepts them. Tapping a value opens its picker to change it.
+  // rule, and "Log set" accepts them. Tapping a value opens its picker to change it; holding it
+  // and dragging up or down turns it like a wheel.
   let { active, task }: { active: ActiveWorkout; task: Task } = $props();
 
   const unit = getState().settings?.unit || 'kg';
   // The dispatcher re-mounts this screen per task, so starting values are read once.
   const model = untrack(() => liftingModel(active, task, unit));
-  const values = { reps: model.reps, weight: model.weight, rir: model.rir };
+  let values = $state({ reps: model.reps, weight: model.weight, rir: model.rir });
+  let scrub = $state<{
+    field: SetField;
+    values: string[];
+    index: number;
+    rect: DOMRect;
+  } | null>(null);
   const LABELS: Record<SetField, string> = { reps: 'Reps', weight: unit, rir: 'RIR' };
   const NAMES: Record<SetField, string> = { reps: 'Reps', weight: `Load in ${unit}`, rir: 'RIR' };
   let busy = $state(false);
@@ -28,6 +44,19 @@
     const url = new URL(page.url.href);
     url.searchParams.set('pick', field);
     void goto(`${url.pathname}${url.search}`);
+  }
+
+  function scrubOptions(field: SetField) {
+    const current = () =>
+      field === 'weight' ? formatLoad(Number(values.weight || 0)) : values[field];
+    return {
+      values: () => pickerValues(field, current()),
+      current,
+      onScrub: (state: Omit<NonNullable<typeof scrub>, 'field'> | null) =>
+        (scrub = state && { field, ...state }),
+      onTick: () => cue('pick'),
+      onCommit: (value: string) => (values[field] = value),
+    };
   }
 
   async function logSet(event: SubmitEvent) {
@@ -78,6 +107,7 @@
             class="set-value"
             id="{field}-pick"
             aria-label="{NAMES[field]} {values[field] || '0'}, change"
+            use:scrubValue={scrubOptions(field)}
             onclick={() => pick(field)}
             ><output id="{field}-value">{values[field] || '0'}</output><span>{LABELS[field]}</span
             ></button
@@ -106,3 +136,11 @@
     </form>
   {/snippet}
 </WorkoutStage>
+{#if scrub}
+  <ScrubWheel
+    values={scrub.values}
+    index={scrub.index}
+    rect={scrub.rect}
+    label={LABELS[scrub.field]}
+  />
+{/if}

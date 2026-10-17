@@ -145,3 +145,30 @@ test('deep links unwind detail → parent → Today with back', async ({ page, c
   await launch.goBack();
   await expect(launch).toHaveURL(/:4173\/$/);
 });
+
+test('holding a value and dragging up turns it like a wheel, without opening the picker', async ({
+  page,
+}) => {
+  await seed(page, appState({ history: [] }));
+  await page.goto('/routine/?day=Monday');
+  await page.getByRole('button', { name: /^Start/ }).click();
+  await page.locator('dialog[open]').getByRole('button', { name: 'Start' }).click();
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await expect(page.locator('#weight-value')).toHaveText('0');
+
+  await page.locator('#weight-pick').scrollIntoViewIfNeeded();
+  const box = (await page.locator('#weight-pick').boundingBox())!;
+  const x = box.x + box.width / 2;
+  const y = box.y + box.height / 2;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.waitForTimeout(350);
+  await expect(page.locator('.scrub-wheel .is-current')).toBeVisible();
+  await page.mouse.move(x, y - 56, { steps: 6 });
+  await expect(page.locator('.scrub-wheel .is-current')).toContainText('5');
+  await page.mouse.up();
+
+  await expect(page.locator('.scrub-wheel')).toHaveCount(0);
+  await expect(page).not.toHaveURL(/pick=/);
+  await expect(page.locator('#weight-value')).toHaveText('5');
+});
