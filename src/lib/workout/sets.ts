@@ -2,12 +2,7 @@ import type { ActiveWorkout, Performance } from '../types.ts';
 import { getState } from '../state.ts';
 import { persist } from '../storage/persistence.ts';
 import { startRest } from './timers.ts';
-import {
-  nextSupersetRoundIndex,
-  setSupersetLead,
-  supersetPartnerIndex,
-  taskGroup,
-} from './superset.ts';
+import { nextSupersetRoundIndex, setSupersetLead, supersetPartnerIndex } from './superset.ts';
 import { activeTask, finishLifts, nextPosition } from './session.ts';
 
 export type SetOutcome = { render: true } | { error: string };
@@ -73,28 +68,6 @@ export async function completeSet(): Promise<SetOutcome> {
   if (following < 0) await finishLifts();
   else await startRest(following);
   return { render: true };
-}
-
-export async function deferCurrent() {
-  const active = getState().active,
-    task = activeTask();
-  if (!active || !task) return;
-  const group = taskGroup(task) as string;
-  const moved = active.tasks.filter(
-    (item) => taskGroup(item) === group && !item.completed && !item.skipped,
-  );
-  const remaining = active.tasks.filter((item) => !moved.includes(item));
-  active.tasks = [...remaining, ...moved];
-  if (!active.deferredGroups.includes(group)) active.deferredGroups.push(group);
-  active.pos = active.tasks.findIndex(
-    (item) => !item.completed && !item.skipped && taskGroup(item) !== group,
-  );
-  if (active.pos < 0) {
-    active.pos = active.tasks.findIndex((item) => !item.completed && !item.skipped);
-    active.deferredGroups = active.deferredGroups.filter((id) => id !== group);
-  }
-  active.draft = {};
-  await persist();
 }
 
 export async function substituteCurrent(name: string) {

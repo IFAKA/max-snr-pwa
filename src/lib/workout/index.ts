@@ -65,7 +65,7 @@ export {
   exerciseSelectionLocked,
   exerciseChangeAvailable,
 } from './session.ts';
-export { completeSet, deferCurrent, substituteCurrent, undoLastSet } from './sets.ts';
+export { completeSet, substituteCurrent, undoLastSet } from './sets.ts';
 export {
   completeStretch,
   finishEarly,

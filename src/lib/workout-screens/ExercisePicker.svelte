@@ -1,23 +1,17 @@
 <script lang="ts">
   import { act } from '../app-state.svelte.ts';
   import type { ActiveWorkout, Task } from '../types.ts';
-  import {
-    deferCurrent,
-    exerciseSelectionLocked,
-    selectExercise,
-    substituteCurrent,
-  } from '../workout/index.ts';
+  import { exerciseSelectionLocked, selectExercise, substituteCurrent } from '../workout/index.ts';
   import AppList from '../components/AppList.svelte';
   import ListRow from '../components/ListRow.svelte';
   import Title from '../components/Title.svelte';
   import { holdScroll } from '../browser/text-overflow.ts';
 
-  // Change the current exercise: pick another, skip this one for now, or switch to an alternative.
+  // Change the current exercise: pick another or switch to an alternative.
   let { active, onselected }: { active: ActiveWorkout; onselected: () => void } = $props();
 
   type Row =
     | { kind: 'exercise'; key: string; task: Task; complete: boolean; group: string | null }
-    | { kind: 'skip'; key: string; group: string | null }
     | { kind: 'switch'; key: string; alternative: string; group: string | null };
 
   const supersetOf = (task: Task) => (task.groupType === 'superset' && task.groupId) || null;
@@ -26,7 +20,7 @@
   );
 
   // One row per exercise, in workout order, keyed by its first set; the current exercise is followed
-  // by its Skip and Switch rows, which belong to its superset.
+  // by its Switch rows, which belong to its superset.
   const rows = $derived(
     active.tasks
       .filter(
@@ -42,7 +36,6 @@
         if (complete || task.exerciseId !== currentExerciseId) return [row];
         return [
           row,
-          { kind: 'skip', key: 'skip', group },
           ...(task.alternatives || []).map((alternative): Row => ({
             kind: 'switch',
             key: `switch-${alternative}`,
@@ -91,16 +84,7 @@
   <AppList label="Available exercises" rows={`${active.pos}-${rows.length}-${locked}`}>
     {#each rows as row, index (row.key)}
       {@const grouped = groupClass(index)}
-      {#if row.kind === 'skip'}
-        <ListRow
-          rowClass={grouped}
-          label="Skip for Now"
-          icon="dash"
-          iconLabel="Move to the end of the workout"
-          disabled={busy}
-          onclick={() => run(deferCurrent)}
-        />
-      {:else if row.kind === 'switch'}
+      {#if row.kind === 'switch'}
         <ListRow
           rowClass={grouped}
           label={`Switch to ${row.alternative}`}
@@ -112,6 +96,12 @@
       {:else if row.complete}
         <ListRow rowClass={`complete-row ${grouped}`.trim()} status icon="check" iconLabel="Done">
           {#snippet content()}{@render name(row.task)}{/snippet}
+        </ListRow>
+      {:else if row.task.exerciseId === currentExerciseId}
+        <!-- The exercise in progress: shown in place, but there is nothing to select. -->
+        <ListRow rowClass={grouped} disabled>
+          {#snippet content()}{@render name(row.task)}<span class="sr-only">, current exercise</span
+            >{/snippet}
         </ListRow>
       {:else}
         <ListRow

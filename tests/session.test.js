@@ -28,8 +28,7 @@ const {
   sessionBudgetState,
   timeBudgetCutOrder,
 } = await import('../src/lib/workout/session.ts');
-const { deferCurrent, substituteCurrent, undoLastSet, completeSet } =
-  await import('../src/lib/workout/sets.ts');
+const { substituteCurrent, undoLastSet, completeSet } = await import('../src/lib/workout/sets.ts');
 const { completeStretch, finishWorkout, finishEarly, finishAtBudget } =
   await import('../src/lib/workout/finish.ts');
 const { isCurrentDayComplete } = await import('../src/lib/workout/calendar.ts');
@@ -229,23 +228,6 @@ test('Today completion requires the same routine day and local completion date',
   assert.equal(isCurrentDayComplete(history, 'Monday', now), true);
   assert.equal(isCurrentDayComplete(history, 'Wednesday', now), false);
   assert.equal(isCurrentDayComplete(history.slice(1), 'Monday', now), false);
-});
-
-test('doing an exercise later moves all remaining sets and selects the next exercise', async () => {
-  const state = emptyState();
-  state.active = {
-    tasks: [task('press'), task('press', 2), task('row')],
-    pos: 0,
-    deferredGroups: [],
-    draft: {},
-  };
-  setState(state);
-  await deferCurrent();
-  assert.deepEqual(
-    state.active.tasks.map((item) => item.exerciseId),
-    ['row', 'press', 'press'],
-  );
-  assert.equal(state.active.tasks[state.active.pos].exerciseId, 'row');
 });
 
 test('substitution updates every remaining set of the exercise', async () => {
