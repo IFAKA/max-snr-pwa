@@ -3,7 +3,7 @@
   import { cue } from '../browser/feedback.ts';
   import {
     ARM_RATIO,
-    ARM_RATIO_UP,
+    ARM_RATIO_LIGHT,
     markSwipeLearned,
     swipeToConfirm,
   } from '../browser/swipe-log.ts';
@@ -17,12 +17,15 @@
     onconfirm,
     onundo,
     onup,
+    quickConfirm = false,
     disabled = false,
   }: {
     children: Snippet;
     onconfirm: () => void;
     onundo?: () => void;
     onup?: () => void;
+    /** The confirm action can be undone: it needs only a light swipe, with no ring. */
+    quickConfirm?: boolean;
     disabled?: boolean;
   } = $props();
 
@@ -30,10 +33,11 @@
   let leaving = $state(false);
   // Up opens the exercise list, so the card owns vertical touch drags when it offers that.
   const canSwipeUp = $derived(Boolean(onup));
+  // Only a confirm that cannot be undone gets the ring and the haptic at its threshold; undoable
+  // actions (log set, undo, opening the list) act on a light swipe.
+  const ringed = $derived(swipe.axis === 'x' && swipe.progress < 0 && !quickConfirm);
   // The ring fills as the drag nears the threshold and is full when releasing will commit.
-  const ring = $derived(
-    Math.min(1, Math.abs(swipe.progress) / (swipe.axis === 'y' ? ARM_RATIO_UP : ARM_RATIO)),
-  );
+  const ring = $derived(ringed ? Math.min(1, Math.abs(swipe.progress) / ARM_RATIO) : 0);
   const icon = $derived(swipe.axis === 'y' ? 'list' : swipe.progress < 0 ? 'confirm' : 'undo');
 
   const options = {
@@ -42,7 +46,11 @@
     allowUp: () => canSwipeUp,
     onProgress: (progress: number, armed: boolean, dragging: boolean, axis: 'x' | 'y') =>
       (swipe = { progress, armed, dragging, axis }),
-    onArm: () => cue('armed'),
+    ratio: (direction: 1 | -1 | 'up') =>
+      direction === -1 && !quickConfirm ? ARM_RATIO : ARM_RATIO_LIGHT,
+    onArm: (direction: 1 | -1 | 'up') => {
+      if (direction === -1 && !quickConfirm) cue('armed');
+    },
     onCommit: (direction: 1 | -1 | 'up') => {
       markSwipeLearned();
       if (direction === 'up') return onup?.();

@@ -89,6 +89,7 @@
 
 <SwipeCard
   onconfirm={submit}
+  quickConfirm
   onup={task.set === 1 && model.canChangeExercise
     ? () => goto('/workout/?view=exercises')
     : undefined}

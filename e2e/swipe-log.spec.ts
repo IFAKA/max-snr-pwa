@@ -23,7 +23,6 @@ test('dragging the screen most of the way left logs the set', async ({ page }) =
   await openLifting(page);
   const release = await drag(page, 0.85, 0.1);
   await expect(page.locator('.swipe-card')).toHaveAttribute('data-armed', 'true');
-  await expect(page.locator('.swipe-ring')).toBeVisible();
   await release();
   await expect(page.getByRole('timer', { name: /remaining/ })).toBeVisible();
   const data = await stored(page);

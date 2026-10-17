@@ -1,8 +1,8 @@
 const LOCK_PX = 10;
 const EDGE_PX = 24;
-/** Share of the card's width (sideways) or height (up) that arms a swipe. */
+/** Share of the card's width (sideways) or height (up) that arms a swipe, by kind. */
 export const ARM_RATIO = 0.4;
-export const ARM_RATIO_UP = 0.25;
+export const ARM_RATIO_LIGHT = 0.2;
 const FLICK_MIN_PX = 48;
 const FLICK_PX_PER_MS = 0.6;
 /** A touch on a value that is held longer than this belongs to its wheel, not to a swipe. */
@@ -50,7 +50,9 @@ export type SwipeOptions = {
   /** Called on every move with the progress (right positive; 0..1 up for 'y'), 0 when it ends. */
   onProgress: (progress: number, armed: boolean, dragging: boolean, axis: 'x' | 'y') => void;
   /** Called once when the drag first reaches the commit threshold. */
-  onArm: () => void;
+  /** How far a drag must go in this direction (a share of the card), see ARM_RATIO. */
+  ratio: (direction: 1 | -1 | 'up') => number;
+  onArm: (direction: 1 | -1 | 'up') => void;
   /** Called on release past the threshold with 1 for a right swipe and -1 for a left swipe. */
   onCommit: (direction: 1 | -1 | 'up') => void;
 };
@@ -121,8 +123,9 @@ export function swipeToConfirm(node: HTMLElement, options: SwipeOptions) {
     const box = node.getBoundingClientRect();
     const size = axis === 'y' ? box.height : box.width;
     const distance = axis === 'y' ? Math.max(0, -dy) : Math.max(0, dx * direction);
-    const nowArmed = swipeArmed(distance, size, Infinity, axis === 'y' ? ARM_RATIO_UP : ARM_RATIO);
-    if (nowArmed && !armed) opts.onArm();
+    const kind = axis === 'y' ? 'up' : direction;
+    const nowArmed = swipeArmed(distance, size, Infinity, opts.ratio(kind));
+    if (nowArmed && !armed) opts.onArm(kind);
     armed = nowArmed;
     opts.onProgress(
       (axis === 'y' ? 1 : direction) * swipeProgress(distance, size),
@@ -145,7 +148,7 @@ export function swipeToConfirm(node: HTMLElement, options: SwipeOptions) {
         distance,
         axis === 'y' ? box.height : box.width,
         event.timeStamp - startTime,
-        axis === 'y' ? ARM_RATIO_UP : ARM_RATIO,
+        opts.ratio(axis === 'y' ? 'up' : direction),
       );
     const committed = axis === 'y' ? 'up' : direction;
     if (swiping) {

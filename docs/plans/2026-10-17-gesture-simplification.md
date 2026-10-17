@@ -55,6 +55,10 @@ Dragging the card up past 25% of its height (or flicking) opens the exercise lis
 
 The exercise list is now a real bottom drawer (`Drawer.svelte`, native `<dialog>`), opened by swiping the workout screen up or tapping the name. The screen under it stays mounted, so unsaved value changes survive. The earlier slide-up route transition was removed. Close with Escape, the backdrop, the handle (button or downward drag), or back.
 
+### Ring only for irreversible actions (shipped)
+
+The ring-and-haptic confirmation (40% of the width) is reserved for actions that cannot be undone: Skip Rest, Finish (plank, stretch, activities) and Continue. Undoable actions (Log set, Undo Last Set, Restart, opening the exercise list) act on a light swipe (20%) with no ring; Log set is undone from Rest with a right swipe.
+
 ### Cleaner Lifting screen (shipped)
 
 The main view is the title, `3/3` (read as "Set 3 of 3" by screen readers), three large plain values (still tap or hold-and-drag) and a `← swipe to log` hint. The `Log set` button, target, previous set, progression note and Change Exercise sit on the second page; the button stays a real submit control (`form="set-form"`) for keyboard and screen readers. At 192×192 the hint sits one scroll below the values.
