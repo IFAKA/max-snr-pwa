@@ -162,7 +162,7 @@ test('holding a value and dragging down turns it like a wheel, without opening t
   const y = box.y + box.height / 2;
   await page.mouse.move(x, y);
   await page.mouse.down();
-  await page.waitForTimeout(350);
+  await page.waitForTimeout(500);
   await expect(page.locator('.scrub-wheel .is-current')).toBeVisible();
   await page.mouse.move(x, y + 56, { steps: 6 });
   await expect(page.locator('.scrub-wheel .is-current')).toContainText('5');
@@ -188,7 +188,7 @@ test('pushing a held value far keeps it turning, so long lists stay a thumb swee
   const y = box.y + box.height / 2;
   await page.mouse.move(x, y);
   await page.mouse.down();
-  await page.waitForTimeout(350);
+  await page.waitForTimeout(500);
   await page.mouse.move(x, y + 40, { steps: 4 });
   await page.mouse.move(x, y + 170, { steps: 8 });
   await page.waitForTimeout(1500);

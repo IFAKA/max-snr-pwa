@@ -1,7 +1,7 @@
 import { scrubIndex, scrubRate } from './scrub-math.ts';
 
-const HOLD_MS = 250;
-const SLOP_PX = 10;
+const HOLD_MS = 400;
+const SLOP_PX = 24;
 
 export type ScrubOptions = {
   /** The values, low to high. Read when the hold begins. */
