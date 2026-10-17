@@ -137,10 +137,5 @@
   {/snippet}
 </WorkoutStage>
 {#if scrub}
-  <ScrubWheel
-    values={scrub.values}
-    index={scrub.index}
-    rect={scrub.rect}
-    label={LABELS[scrub.field]}
-  />
+  <ScrubWheel values={scrub.values} index={scrub.index} rect={scrub.rect} />
 {/if}
