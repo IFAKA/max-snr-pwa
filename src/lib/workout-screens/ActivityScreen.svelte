@@ -41,8 +41,8 @@
 </script>
 
 <SwipeCard
-  rightLabel={type === 'rest' ? 'Continue' : 'Finish'}
-  onright={finish}
+  confirmLabel={type === 'rest' ? 'Continue' : 'Finish'}
+  onconfirm={finish}
   disabled={type === 'measurement'}
 >
   <WorkoutStage

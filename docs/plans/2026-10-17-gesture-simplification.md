@@ -17,15 +17,17 @@ Page one is the primary stage (set values and `Log set`, or the rest timer). Pag
 - A small `⌄` hint under the primary action shows that more sits below.
 - Files: `src/lib/components/WorkoutStage.svelte`, `src/lib/workout-screens/Lifting.svelte`, `src/styles/app.css`.
 
-### Phase 2: Swipe right to log a set (shipped)
+### Phase 2: Swipe to log a set (shipped)
 
-`Log set` is prefilled from history, so dragging the whole lifting screen right like a card, past 40% of its width (or flicking), logs the set. `browser/swipe-log.ts` is the action; `Lifting.svelte` wires it.
+Directions are set for right-handed use: swipe LEFT confirms, swipe RIGHT undoes. `SwipeCard` is the only place that decides this.
 
-- The screen follows the finger and fades slightly; a badge fades in and reads "✓ Release to log" once armed. Released early, it springs back; committed, it slides off to the right. A tick cue plays on arming; the usual `setLogged` / `betterSet` cue plays on commit.
+`Log set` is prefilled from history, so dragging the whole lifting screen left like a card, past 40% of its width (or flicking), logs the set. `browser/swipe-log.ts` is the action; `Lifting.svelte` wires it.
+
+- The screen follows the finger and fades slightly; a badge fades in and reads "✓ Release to log" once armed. Released early, it springs back; committed, it slides off to the left. A tick cue plays on arming; the usual `setLogged` / `betterSet` cue plays on commit.
 - Tap, Enter and screen readers still use the button's click. Vertical drags scroll natively (`touch-action: pan-y`); the set values opt out (`data-no-swipe`); edge starts are ignored; the click after a drag is swallowed so a set is never logged twice.
 - A `→` nudge shows until the first successful swipe (`maxsnr-swipe-learned`).
 - Undo: Rest keeps "Undo Last Set" (now with a soft low `undo` cue).
-- The card is the shared `SwipeCard` and now covers Rest (right: skip rest, left: undo last set), Plank (right: finish), Stretch (right: finish, left: restart) and timed/metric activities (right: finish). Countdown steps show a `Swipe → …` hint and keep their buttons on a second scroll page; the measurement form has no swipe.
+- The card is the shared `SwipeCard` and now covers Rest (left: skip rest, right: undo last set), Plank (left: finish), Stretch (left: finish, right: restart) and timed/metric activities (left: finish). Countdown steps show a `Swipe ← …` hint and keep their buttons on a second scroll page; the measurement form has no swipe.
 - Left swipe on Lifting and Defer behind a confirm dialog are not built: try the swipes on real workouts first.
 
 ### Phase 3 (dropped)

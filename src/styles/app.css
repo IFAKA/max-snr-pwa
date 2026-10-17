@@ -988,7 +988,7 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   transition: none;
 }
 .swipe-card[data-leaving='true'] .workout-stage {
-  transform: translateX(110%);
+  transform: translateX(-110%);
   opacity: 0;
   transition-duration: 200ms;
 }

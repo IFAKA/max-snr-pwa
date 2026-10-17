@@ -19,9 +19,9 @@ async function drag(page: Page, from: number, to: number) {
   return () => page.mouse.up();
 }
 
-test('dragging the screen most of the way right logs the set', async ({ page }) => {
+test('dragging the screen most of the way left logs the set', async ({ page }) => {
   await openLifting(page);
-  const release = await drag(page, 0.15, 0.9);
+  const release = await drag(page, 0.85, 0.1);
   await expect(page.locator('.swipe-card')).toHaveAttribute('data-armed', 'true');
   await expect(page.locator('.swipe-badge')).toContainText('Release to log');
   await release();
@@ -34,7 +34,7 @@ test('dragging the screen most of the way right logs the set', async ({ page }) 
 
 test('a short drag springs back and logs nothing', async ({ page }) => {
   await openLifting(page);
-  const release = await drag(page, 0.15, 0.3);
+  const release = await drag(page, 0.85, 0.7);
   await expect(page.locator('.swipe-card')).toHaveAttribute('data-armed', 'false');
   await release();
   await expect(page.getByRole('button', { name: 'Log set' })).toBeVisible();
@@ -58,25 +58,25 @@ async function swipe(page: Page, from: number, to: number) {
   await page.mouse.up();
 }
 
-test('on rest, swiping left undoes the last set', async ({ page }) => {
-  const workout = activeWorkout({ phase: 'rest', open: 1 });
-  workout.restEndsAt = Date.now() + 60000;
-  await seed(page, appState({ active: workout }));
-  await page.goto('/workout/');
-  await expect(page.getByRole('timer', { name: 'Rest remaining' })).toBeVisible();
-  await swipe(page, 0.85, 0.1);
-  await expect(page.getByRole('button', { name: 'Log set' })).toBeVisible();
-  expect(
-    (await stored(page)).active.tasks.filter((t: { completed: unknown }) => t.completed),
-  ).toHaveLength(1);
-});
-
-test('on rest, swiping right moves to the next set', async ({ page }) => {
+test('on rest, swiping right undoes the last set', async ({ page }) => {
   const workout = activeWorkout({ phase: 'rest', open: 1 });
   workout.restEndsAt = Date.now() + 60000;
   await seed(page, appState({ active: workout }));
   await page.goto('/workout/');
   await expect(page.getByRole('timer', { name: 'Rest remaining' })).toBeVisible();
   await swipe(page, 0.15, 0.9);
+  await expect(page.getByRole('button', { name: 'Log set' })).toBeVisible();
+  expect(
+    (await stored(page)).active.tasks.filter((t: { completed: unknown }) => t.completed),
+  ).toHaveLength(1);
+});
+
+test('on rest, swiping left moves to the next set', async ({ page }) => {
+  const workout = activeWorkout({ phase: 'rest', open: 1 });
+  workout.restEndsAt = Date.now() + 60000;
+  await seed(page, appState({ active: workout }));
+  await page.goto('/workout/');
+  await expect(page.getByRole('timer', { name: 'Rest remaining' })).toBeVisible();
+  await swipe(page, 0.85, 0.1);
   await expect(page.getByRole('button', { name: 'Log set' })).toBeVisible();
 });

@@ -24,7 +24,7 @@
   });
 </script>
 
-<SwipeCard rightLabel="Finish" onright={() => toLifting(skipPlank)} disabled={busy}>
+<SwipeCard confirmLabel="Finish" onconfirm={() => toLifting(skipPlank)} disabled={busy}>
   <WorkoutStage title="Plank" countdown>
     {#snippet actions()}
       <Countdown
@@ -37,7 +37,7 @@
           void toLifting(beginLifting);
         }}
       />
-      <p class="swipe-hint" aria-hidden="true">Swipe → finish</p>
+      <p class="swipe-hint" aria-hidden="true">Swipe ← finish</p>
     {/snippet}
     {#snippet more()}
       <div class="countdown-actions">

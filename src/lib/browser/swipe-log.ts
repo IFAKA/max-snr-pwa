@@ -39,8 +39,8 @@ export function markSwipeLearned() {
 
 export type SwipeOptions = {
   disabled: () => boolean;
-  /** Whether a drag to the left is allowed too (right always is). */
-  allowLeft: () => boolean;
+  /** Whether a drag in this direction (1 right, -1 left) is allowed. */
+  allow: (direction: 1 | -1) => boolean;
   /** Called on every move with the signed progress (right positive), and with 0 when it ends. */
   onProgress: (progress: number, armed: boolean, dragging: boolean) => void;
   /** Called once when the drag first reaches the commit threshold. */
@@ -50,7 +50,7 @@ export type SwipeOptions = {
 };
 
 /**
- * Svelte action: drag a whole screen like a card: right confirms its primary action, left (when allowed) its undo.
+ * Svelte action: drag a whole screen like a card: each allowed direction commits on its own.
  * Vertical drags stay native scrolling (`touch-action: pan-y` in CSS); taps, the keyboard and
  * assistive tech still use the primary button's own click.
  */
@@ -94,8 +94,9 @@ export function swipeToConfirm(node: HTMLElement, options: SwipeOptions) {
         return;
       }
       if (Math.abs(dx) < LOCK_PX || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-      if (dx < 0 && !opts.allowLeft()) return;
-      direction = dx < 0 ? -1 : 1;
+      const next = dx < 0 ? -1 : 1;
+      if (!opts.allow(next)) return;
+      direction = next;
       swiping = true;
       node.setPointerCapture?.(pointerId);
     }

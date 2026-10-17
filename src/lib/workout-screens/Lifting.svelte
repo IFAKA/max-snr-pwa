@@ -87,7 +87,7 @@
   }
 </script>
 
-<SwipeCard rightLabel="Log set" onright={submit} disabled={busy}>
+<SwipeCard confirmLabel="Log set" onconfirm={submit} disabled={busy}>
   <WorkoutStage title={task.performedName} className="lifting-stage">
     {#snippet info()}
       <SupersetMeta {active} {task} />

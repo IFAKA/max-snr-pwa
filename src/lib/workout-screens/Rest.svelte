@@ -62,10 +62,10 @@
 </script>
 
 <SwipeCard
-  rightLabel="Skip rest"
-  onright={() => run(continueRest)}
-  leftLabel="Undo last set"
-  onleft={hasCompletedSet ? undo : undefined}
+  confirmLabel="Skip rest"
+  onconfirm={() => run(continueRest)}
+  undoLabel="Undo last set"
+  onundo={hasCompletedSet ? undo : undefined}
   disabled={busy}
 >
   <WorkoutStage title={next ? next.performedName : 'Rest'} className="rest-stage" countdown>
@@ -101,7 +101,7 @@
           void run(continueRest);
         }}
       />
-      <p class="swipe-hint" aria-hidden="true">Swipe → skip · ← undo</p>
+      <p class="swipe-hint" aria-hidden="true">Swipe ← skip · → undo</p>
     {/snippet}
     {#snippet more()}
       <div class="countdown-actions">

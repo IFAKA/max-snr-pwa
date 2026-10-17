@@ -30,10 +30,10 @@
 </script>
 
 <SwipeCard
-  rightLabel="Finish"
-  onright={finish}
-  leftLabel="Restart"
-  onleft={() => act(() => setTimer(STRETCH_MS))}
+  confirmLabel="Finish"
+  onconfirm={finish}
+  undoLabel="Restart"
+  onundo={() => act(() => setTimer(STRETCH_MS))}
   disabled={busy}
 >
   <WorkoutStage title="Stretch" className="stretch-stage" countdown>
@@ -47,7 +47,7 @@
           if (wasRunning) cue('timerDone');
         }}
       />
-      <p class="swipe-hint" aria-hidden="true">Swipe → finish · ← restart</p>
+      <p class="swipe-hint" aria-hidden="true">Swipe ← finish · → restart</p>
     {/snippet}
     {#snippet more()}
       <div class="countdown-actions">
