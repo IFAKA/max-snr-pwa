@@ -878,7 +878,8 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   background: transparent;
 }
 .lifting-stage .set-value output {
-  font-size: clamp(20px, 10vw, 48px);
+  font-size: clamp(20px, 9vw, 42px);
+  overflow: visible;
   white-space: nowrap;
 }
 .set-value span {
@@ -986,7 +987,7 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   touch-action: pan-y;
 }
 .swipe-card .workout-stage {
-  transform: translateX(calc(var(--swipe, 0) * 36%));
+  transform: translate(calc(var(--swipe, 0) * 36%), calc(var(--swipe-y, 0) * -14%));
   opacity: calc(1 - var(--swipe-abs, 0) * 0.35);
   transition:
     transform 150ms ease-out,

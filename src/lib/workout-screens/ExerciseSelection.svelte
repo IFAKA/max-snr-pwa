@@ -7,7 +7,12 @@
   let { task }: { task: Task } = $props();
 </script>
 
-<SwipeCard confirmLabel="Continue" onconfirm={() => goto('/workout/?view=exercise')}>
+<SwipeCard
+  confirmLabel="Continue"
+  onconfirm={() => goto('/workout/?view=exercise')}
+  upLabel="Change exercise"
+  onup={() => goto('/workout/?view=exercises&return=select')}
+>
   <WorkoutStage
     title={task.performedName}
     className="exercise-selection-stage"
@@ -15,7 +20,7 @@
   >
     {#snippet info()}<p class="muted">Choose your first exercise.</p>{/snippet}
     {#snippet actions()}
-      <p class="swipe-hint" aria-hidden="true">Swipe ← continue · tap name to change</p>
+      <p class="swipe-hint" aria-hidden="true">Swipe ← continue · ↑ change exercise</p>
     {/snippet}
     {#snippet more()}
       <button

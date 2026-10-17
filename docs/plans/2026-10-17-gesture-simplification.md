@@ -40,6 +40,10 @@ Real-phone feedback: a tall phone showed the second page's buttons without scrol
 - The value wheel is back to "drag up raises the value"; the wheel lists higher values above.
 - The pre-start exercise-selection screen is a swipe card too (left: continue); tapping the exercise name opens Change Exercise.
 
+### Swipe up to change exercise (shipped)
+
+Dragging the card up past 25% of its height (or flicking) opens the exercise list on the exercise-selection, lifting (set 1) and rest screens, with the badge "↑ Change exercise". It navigates to the existing full-screen list rather than opening a drawer (no bottom sheets per `AGENTS.md`). The card only claims vertical drags (`touch-action: none`) when its stage fits the screen; otherwise the stage keeps native scrolling. Tapping the name still works.
+
 ### Cleaner Lifting screen (shipped)
 
 The main view is the title, `3/3` (read as "Set 3 of 3" by screen readers), three large plain values (still tap or hold-and-drag) and a `← swipe to log` hint. The `Log set` button, target, previous set, progression note and Change Exercise sit on the second page; the button stays a real submit control (`form="set-form"`) for keyboard and screen readers. At 192×192 the hint sits one scroll below the values.

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { untrack } from 'svelte';
+  import { goto } from '$app/navigation';
   import { act } from '../app-state.svelte.ts';
   import { REST_MS } from '../constants.ts';
   import { getState } from '../state.ts';
@@ -63,6 +64,8 @@
 <SwipeCard
   confirmLabel="Skip rest"
   onconfirm={() => run(continueRest)}
+  upLabel="Change exercise"
+  onup={canChange ? () => goto('/workout/?view=exercises') : undefined}
   undoLabel="Undo last set"
   onundo={hasCompletedSet ? undo : undefined}
   disabled={busy}
@@ -105,7 +108,9 @@
           void run(continueRest);
         }}
       />
-      <p class="swipe-hint" aria-hidden="true">Swipe ← skip · → undo</p>
+      <p class="swipe-hint" aria-hidden="true">
+        Swipe ← skip · → undo{canChange ? ' · ↑ exercise' : ''}
+      </p>
     {/snippet}
     {#snippet more()}
       <div class="countdown-actions">

@@ -13,6 +13,8 @@
     onconfirm,
     undoLabel = '',
     onundo,
+    upLabel = '',
+    onup,
     disabled = false,
   }: {
     children: Snippet;
@@ -20,28 +22,50 @@
     onconfirm: () => void;
     undoLabel?: string;
     onundo?: () => void;
+    upLabel?: string;
+    onup?: () => void;
     disabled?: boolean;
   } = $props();
 
-  let swipe = $state({ progress: 0, armed: false, dragging: false });
+  let swipe = $state({ progress: 0, armed: false, dragging: false, axis: 'x' as 'x' | 'y' });
+  let card: HTMLElement;
+  let overflowing = $state(false);
+  // Taking over vertical drags would stop a stage that is taller than the screen from scrolling.
+  const canSwipeUp = $derived(Boolean(onup) && !overflowing);
+
+  $effect(() => {
+    const stage = card.querySelector('.workout-stage');
+    if (!stage) return;
+    const measure = () => (overflowing = stage.scrollHeight > stage.clientHeight + 1);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(stage);
+    return () => observer.disconnect();
+  });
   let leaving = $state(false);
-  const label = $derived(swipe.progress < 0 ? confirmLabel : undoLabel);
+  const label = $derived(
+    swipe.axis === 'y' ? upLabel : swipe.progress < 0 ? confirmLabel : undoLabel,
+  );
   const badge = $derived(
     swipe.armed
       ? `✓ Release to ${label.toLowerCase()}`
-      : swipe.progress < 0
-        ? `← ${confirmLabel}`
-        : `${undoLabel} →`,
+      : swipe.axis === 'y'
+        ? `↑ ${upLabel}`
+        : swipe.progress < 0
+          ? `← ${confirmLabel}`
+          : `${undoLabel} →`,
   );
 
   const options = {
     disabled: () => disabled,
     allow: (direction: 1 | -1) => direction < 0 || Boolean(onundo),
-    onProgress: (progress: number, armed: boolean, dragging: boolean) =>
-      (swipe = { progress, armed, dragging }),
+    allowUp: () => canSwipeUp,
+    onProgress: (progress: number, armed: boolean, dragging: boolean, axis: 'x' | 'y') =>
+      (swipe = { progress, armed, dragging, axis }),
     onArm: () => cue('pick'),
-    onCommit: (direction: 1 | -1) => {
+    onCommit: (direction: 1 | -1 | 'up') => {
       markSwipeLearned();
+      if (direction === 'up') return onup?.();
       if (direction > 0) return onundo?.();
       // The card slides away; if the screen is still here a moment later, it slides back.
       leaving = true;
@@ -56,7 +80,10 @@
   data-armed={swipe.armed}
   data-dragging={swipe.dragging}
   data-leaving={leaving}
-  style:--swipe={swipe.progress}
+  bind:this={card}
+  style:touch-action={canSwipeUp ? 'none' : 'pan-y'}
+  style:--swipe={swipe.axis === 'x' ? swipe.progress : 0}
+  style:--swipe-y={swipe.axis === 'y' ? swipe.progress : 0}
   style:--swipe-abs={Math.abs(swipe.progress)}
   use:swipeToConfirm={options}
 >

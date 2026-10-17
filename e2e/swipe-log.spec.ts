@@ -80,3 +80,23 @@ test('on rest, swiping left moves to the next set', async ({ page }) => {
   await swipe(page, 0.85, 0.1);
   await expect(page.getByRole('button', { name: 'Log set' })).toBeVisible();
 });
+
+test('on the first exercise screen, swiping up opens the exercise list', async ({ page }) => {
+  await seed(page, appState({ history: [] }));
+  await page.goto('/routine/?day=Monday');
+  await page.getByRole('button', { name: /^Start/ }).click();
+  await page.locator('dialog[open]').getByRole('button', { name: 'Start' }).click();
+  await expect(page.getByText('Choose your first exercise.')).toBeVisible();
+  await expect(page.locator('dialog[open]')).toHaveCount(0);
+  // The route's view transition covers the page for a moment.
+  await page.waitForTimeout(800);
+  const box = (await page.locator('.swipe-card').boundingBox())!;
+  const x = box.x + box.width / 2;
+  await page.mouse.move(x, box.y + box.height * 0.8);
+  await page.mouse.down();
+  await page.mouse.move(x, box.y + box.height * 0.5, { steps: 5 });
+  await expect(page.locator('.swipe-badge')).toContainText('Release to change exercise');
+  await page.mouse.move(x, box.y + box.height * 0.3, { steps: 5 });
+  await page.mouse.up();
+  await expect(page).toHaveURL(/view=exercises/);
+});

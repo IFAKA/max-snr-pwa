@@ -87,7 +87,15 @@
   }
 </script>
 
-<SwipeCard confirmLabel="Log set" onconfirm={submit} disabled={busy}>
+<SwipeCard
+  confirmLabel="Log set"
+  onconfirm={submit}
+  upLabel="Change exercise"
+  onup={task.set === 1 && model.canChangeExercise
+    ? () => goto('/workout/?view=exercises')
+    : undefined}
+  disabled={busy}
+>
   <WorkoutStage
     title={task.performedName}
     className="lifting-stage"
@@ -120,7 +128,9 @@
             >
           {/each}
         </div>
-        <p class="swipe-hint" aria-hidden="true">← swipe to log</p>
+        <p class="swipe-hint" aria-hidden="true">
+          ← swipe to log{task.set === 1 && model.canChangeExercise ? ' · ↑ exercise' : ''}
+        </p>
         {#if model.canCutOptional}
           <button
             class="primary"

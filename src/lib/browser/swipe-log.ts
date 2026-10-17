@@ -1,6 +1,7 @@
 const LOCK_PX = 10;
 const EDGE_PX = 24;
 const ARM_RATIO = 0.4;
+const ARM_RATIO_UP = 0.25;
 const FLICK_MIN_PX = 48;
 const FLICK_PX_PER_MS = 0.6;
 const LEARNED_KEY = 'maxsnr-swipe-learned';
@@ -11,8 +12,8 @@ export function swipeProgress(dx: number, width: number) {
 }
 
 /** A drag is armed once it covers 40% of the screen; a quick flick also counts on release. */
-export function swipeArmed(dx: number, width: number, elapsedMs = Infinity) {
-  if (swipeProgress(dx, width) >= ARM_RATIO) return true;
+export function swipeArmed(dx: number, width: number, elapsedMs = Infinity, ratio = ARM_RATIO) {
+  if (swipeProgress(dx, width) >= ratio) return true;
   return dx >= FLICK_MIN_PX && dx / Math.max(elapsedMs, 1) >= FLICK_PX_PER_MS;
 }
 
@@ -41,16 +42,18 @@ export type SwipeOptions = {
   disabled: () => boolean;
   /** Whether a drag in this direction (1 right, -1 left) is allowed. */
   allow: (direction: 1 | -1) => boolean;
-  /** Called on every move with the signed progress (right positive), and with 0 when it ends. */
-  onProgress: (progress: number, armed: boolean, dragging: boolean) => void;
+  /** Whether an upward drag is allowed (it opens the exercise list). */
+  allowUp: () => boolean;
+  /** Called on every move with the progress (right positive; 0..1 up for 'y'), 0 when it ends. */
+  onProgress: (progress: number, armed: boolean, dragging: boolean, axis: 'x' | 'y') => void;
   /** Called once when the drag first reaches the commit threshold. */
   onArm: () => void;
   /** Called on release past the threshold with 1 for a right swipe and -1 for a left swipe. */
-  onCommit: (direction: 1 | -1) => void;
+  onCommit: (direction: 1 | -1 | 'up') => void;
 };
 
 /**
- * Svelte action: drag a whole screen like a card: each allowed direction commits on its own.
+ * Svelte action: drag a whole screen like a card: each allowed direction commits on its own; up (when allowed) opens the exercise list.
  * Vertical drags stay native scrolling (`touch-action: pan-y` in CSS); taps, the keyboard and
  * assistive tech still use the primary button's own click.
  */
@@ -62,11 +65,12 @@ export function swipeToConfirm(node: HTMLElement, options: SwipeOptions) {
   let startTime = 0;
   let swiping = false;
   let direction: 1 | -1 = 1;
+  let axis: 'x' | 'y' = 'x';
   let armed = false;
   let swallowClick = false;
 
   const reset = () => {
-    if (swiping) opts.onProgress(0, false, false);
+    if (swiping) opts.onProgress(0, false, false, axis);
     pointerId = -1;
     swiping = false;
     armed = false;
@@ -90,31 +94,51 @@ export function swipeToConfirm(node: HTMLElement, options: SwipeOptions) {
     const dy = event.clientY - startY;
     if (!swiping) {
       if (Math.abs(dy) > LOCK_PX && Math.abs(dy) >= Math.abs(dx)) {
-        pointerId = -1;
-        return;
+        if (dy > 0 || !opts.allowUp()) {
+          pointerId = -1;
+          return;
+        }
+        axis = 'y';
+      } else {
+        if (Math.abs(dx) < LOCK_PX || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+        const next = dx < 0 ? -1 : 1;
+        if (!opts.allow(next)) return;
+        direction = next;
+        axis = 'x';
       }
-      if (Math.abs(dx) < LOCK_PX || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-      const next = dx < 0 ? -1 : 1;
-      if (!opts.allow(next)) return;
-      direction = next;
       swiping = true;
       node.setPointerCapture?.(pointerId);
     }
-    const width = node.getBoundingClientRect().width;
-    const distance = Math.max(0, dx * direction);
-    const nowArmed = swipeArmed(distance, width);
+    const box = node.getBoundingClientRect();
+    const size = axis === 'y' ? box.height : box.width;
+    const distance = axis === 'y' ? Math.max(0, -dy) : Math.max(0, dx * direction);
+    const nowArmed = swipeArmed(distance, size, Infinity, axis === 'y' ? ARM_RATIO_UP : ARM_RATIO);
     if (nowArmed && !armed) opts.onArm();
     armed = nowArmed;
-    opts.onProgress(direction * swipeProgress(distance, width), armed, true);
+    opts.onProgress(
+      (axis === 'y' ? 1 : direction) * swipeProgress(distance, size),
+      armed,
+      true,
+      axis,
+    );
   };
 
   const up = (event: PointerEvent) => {
     if (event.pointerId !== pointerId) return;
-    const distance = Math.max(0, (event.clientX - startX) * direction);
+    const box = node.getBoundingClientRect();
+    const distance =
+      axis === 'y'
+        ? Math.max(0, startY - event.clientY)
+        : Math.max(0, (event.clientX - startX) * direction);
     const commit =
       swiping &&
-      swipeArmed(distance, node.getBoundingClientRect().width, event.timeStamp - startTime);
-    const committed = direction;
+      swipeArmed(
+        distance,
+        axis === 'y' ? box.height : box.width,
+        event.timeStamp - startTime,
+        axis === 'y' ? ARM_RATIO_UP : ARM_RATIO,
+      );
+    const committed = axis === 'y' ? 'up' : direction;
     if (swiping) {
       // The click that follows a drag would log the set a second time.
       swallowClick = true;
