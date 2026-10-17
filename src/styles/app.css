@@ -967,8 +967,63 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   }
 }
 .log-set {
+  position: relative;
   min-height: 56px;
+  overflow: hidden;
   font-size: 1.1em;
+  /* A quick vertical swipe scrolls the page; a rightward drag fills the button to log the set. */
+  touch-action: pan-y;
+  user-select: none;
+}
+.log-fill {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 0.24);
+  transform: scaleX(var(--swipe, 0));
+  transform-origin: left;
+  transition: transform 150ms ease-out;
+}
+.log-set[data-dragging='true'] .log-fill {
+  transition: none;
+}
+.log-set[data-armed='true'] .log-fill {
+  background: rgb(0 0 0 / 0.36);
+}
+.log-label {
+  position: relative;
+}
+.log-arrow {
+  display: inline-block;
+  margin-left: 0.4em;
+  animation: log-nudge 1.6s ease-in-out infinite;
+}
+@keyframes log-nudge {
+  50% {
+    transform: translateX(5px);
+  }
+}
+/* Page two of a step: details and secondary actions scroll up into view, snapping to the
+   title or to this page when the scroll stops near them. */
+.lifting-stage {
+  scroll-snap-type: y proximity;
+}
+.lifting-stage .workout-title,
+.stage-more {
+  scroll-snap-align: start;
+}
+.stage-hint {
+  color: var(--muted, currentColor);
+  font-size: 18px;
+  line-height: 1;
+  text-align: center;
+}
+.stage-more {
+  display: grid;
+  gap: 8px;
+  padding-top: 8px;
+}
+.stage-more .secondary {
+  margin-top: 0;
 }
 .lifting-stage #set-form {
   display: grid;
@@ -1232,6 +1287,12 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   .stage-info > .workout-title {
     order: 0;
   }
+  .stage-hint {
+    order: 1;
+  }
+  .stage-more {
+    order: 3;
+  }
   .workout-stage .thumb-zone {
     order: 1;
     margin-top: 0;
@@ -1343,6 +1404,12 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   }
 }
 @media (prefers-color-scheme: dark) {
+  .log-fill {
+    background: rgb(255 255 255 / 0.3);
+  }
+  .log-set[data-armed='true'] .log-fill {
+    background: rgb(255 255 255 / 0.45);
+  }
   :root {
     --bg: #0d1210;
     --surface: #171e1a;

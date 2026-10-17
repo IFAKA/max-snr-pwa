@@ -6,7 +6,7 @@
 // a gesture, so the first tap starts the context; a timer can then sound on its own later.
 const SOUND_KEY = 'maxsnr-sound';
 
-export type Sound = 'tick' | 'pip' | 'go' | 'log' | 'best' | 'finish';
+export type Sound = 'tick' | 'pip' | 'go' | 'log' | 'best' | 'finish' | 'undo';
 
 let ctx: AudioContext | null = null;
 let master: AudioNode | null = null;
@@ -133,6 +133,9 @@ const SOUNDS: Record<Sound, (voice: Voice) => void> = {
     tone(voice, { freq: 150, to: 70, dur: 0.16, gain: 0.45 });
     tone(voice, { freq: 1180, dur: 0.35, gain: 0.035 });
     tone(voice, { freq: 1730, dur: 0.25, gain: 0.025 });
+  },
+  undo: (voice) => {
+    tone(voice, { freq: 330, to: 262, dur: 0.18, type: 'triangle', gain: 0.18 });
   },
   best: (voice) => {
     SOUNDS.log(voice);

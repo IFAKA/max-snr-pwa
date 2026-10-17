@@ -108,7 +108,10 @@
         id="undo-set"
         type="button"
         disabled={!hasCompletedSet || busy}
-        onclick={() => run(undoLastSet)}>Undo Last Set</button
+        onclick={() => {
+          cue('undo');
+          void run(undoLastSet);
+        }}>Undo Last Set</button
       >
     </div>
   {/snippet}

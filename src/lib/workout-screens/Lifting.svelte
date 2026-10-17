@@ -10,6 +10,7 @@
   import WorkoutStage from '../components/WorkoutStage.svelte';
   import SupersetMeta from './SupersetMeta.svelte';
   import { scrubValue } from '../browser/value-scrub.ts';
+  import { markSwipeLearned, swipeLearned, swipeToConfirm } from '../browser/swipe-log.ts';
   import ScrubWheel from './ScrubWheel.svelte';
   import {
     formatLoad,
@@ -20,9 +21,9 @@
     type SetField,
   } from './lifting-model.ts';
 
-  // Logging a set is one tap: the values start from the draft, last time, or the progression
-  // rule, and "Log set" accepts them. Tapping a value opens its picker to change it; holding it
-  // and dragging up or down turns it like a wheel.
+  // Logging a set is one tap or one swipe right: the values start from the draft, last time, or
+  // the progression rule, and "Log set" accepts them. Tapping a value opens its picker to change
+  // it; holding it and dragging up or down turns it like a wheel. Details sit on a second page.
   let { active, task }: { active: ActiveWorkout; task: Task } = $props();
 
   const unit = getState().settings?.unit || 'kg';
@@ -38,6 +39,8 @@
   const LABELS: Record<SetField, string> = { reps: 'Reps', weight: unit, rir: 'RIR' };
   const NAMES: Record<SetField, string> = { reps: 'Reps', weight: `Load in ${unit}`, rir: 'RIR' };
   let busy = $state(false);
+  let swipe = $state({ progress: 0, armed: false, dragging: false });
+  const learned = swipeLearned();
 
   function pick(field: SetField) {
     active.draft = { ...active.draft, ...values };
@@ -58,6 +61,17 @@
       onCommit: (value: string) => (values[field] = value),
     };
   }
+
+  const swipeOptions = {
+    disabled: () => busy,
+    onProgress: (progress: number, armed: boolean, dragging: boolean) =>
+      (swipe = { progress, armed, dragging }),
+    onArm: () => cue('pick'),
+    onCommit: () => {
+      markSwipeLearned();
+      document.querySelector<HTMLFormElement>('#set-form')?.requestSubmit();
+    },
+  };
 
   async function logSet(event: SubmitEvent) {
     event.preventDefault();
@@ -89,14 +103,6 @@
     <p class="target-prescription">
       Target: {task.targetRepRange || task.reps} reps · {task.targetRir || task.rir} RIR
     </p>
-    <p class="previous-performance">
-      Previous: {#if model.previous}{model.previous.weight ?? 'bodyweight'}
-        {model.previous.unit || unit} × {model.previous.reps} @ {model.previous.rir ?? '—'} RIR{:else}No
-        logged set{/if}
-    </p>
-    {#if model.progressionLoad !== null}
-      <p class="progression-note">Progression: try {model.progressionLoad} {unit} this exposure.</p>
-    {/if}
   {/snippet}
   {#snippet actions()}
     <form id="set-form" onsubmit={logSet}>
@@ -114,7 +120,22 @@
           >
         {/each}
       </div>
-      <button class="primary log-set" id="log-set" type="submit" disabled={busy}>Log set</button>
+      <button
+        class="primary log-set"
+        id="log-set"
+        type="submit"
+        disabled={busy}
+        data-armed={swipe.armed}
+        data-dragging={swipe.dragging}
+        style:--swipe={swipe.progress}
+        use:swipeToConfirm={swipeOptions}
+        ><span class="log-fill" aria-hidden="true"></span><span class="log-label"
+          >{swipe.armed ? '✓ Release to log' : 'Log set'}{#if !learned && !swipe.dragging}<span
+              class="log-arrow"
+              aria-hidden="true">→</span
+            >{/if}</span
+        ></button
+      >
       {#if model.canCutOptional}
         <button
           class="primary"
@@ -124,16 +145,26 @@
           onclick={cutOptional}>Cut Optional Accessories</button
         >
       {/if}
-      {#if task.set === 1}
-        <button
-          class="secondary"
-          id="change-exercise"
-          type="button"
-          disabled={!model.canChangeExercise}
-          onclick={() => goto('/workout/?view=exercises')}>Change Exercise</button
-        >
-      {/if}
     </form>
+  {/snippet}
+  {#snippet more()}
+    <p class="previous-performance">
+      Previous: {#if model.previous}{model.previous.weight ?? 'bodyweight'}
+        {model.previous.unit || unit} × {model.previous.reps} @ {model.previous.rir ?? '—'} RIR{:else}No
+        logged set{/if}
+    </p>
+    {#if model.progressionLoad !== null}
+      <p class="progression-note">Progression: try {model.progressionLoad} {unit} this exposure.</p>
+    {/if}
+    {#if task.set === 1}
+      <button
+        class="secondary"
+        id="change-exercise"
+        type="button"
+        disabled={!model.canChangeExercise}
+        onclick={() => goto('/workout/?view=exercises')}>Change Exercise</button
+      >
+    {/if}
   {/snippet}
 </WorkoutStage>
 {#if scrub}
