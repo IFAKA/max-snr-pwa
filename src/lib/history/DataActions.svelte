@@ -6,17 +6,26 @@
   import { validateBackup } from '../storage/backup.ts';
   import type { AppState } from '../types.ts';
   import { appUpdate, checkForUpdate, UPDATE_ICONS } from '../browser/app-update.svelte.ts';
+  import { cue } from '../browser/feedback.ts';
+  import { setSoundEnabled, soundEnabled } from '../browser/sound.ts';
   import ConfirmDialog from '../components/ConfirmDialog.svelte';
   import Icon from '../components/Icon.svelte';
   import type { IconName } from '../components/icons.ts';
   import ListRow from '../components/ListRow.svelte';
 
-  // Export, import, and app update rows. Shared by the History index and the Data view.
+  // Sound, export, import, and app update rows. Shared by the History index and the Data view.
   let { onerror }: { onerror: (message: string) => void } = $props();
 
   let input: HTMLInputElement | undefined = $state();
   let pending: AppState | null = null;
   let confirmOpen = $state(false);
+  let sound = $state(soundEnabled());
+
+  function toggleSound() {
+    sound = !sound;
+    setSoundEnabled(sound);
+    if (sound) cue('pick');
+  }
 
   function exportBackup() {
     const link = document.createElement('a');
@@ -54,6 +63,15 @@
   }
 </script>
 
+<li>
+  <button
+    class="list-link sound-toggle"
+    id="sound-toggle"
+    type="button"
+    aria-pressed={sound}
+    onclick={toggleSound}><span>Sound</span><small>{sound ? 'On' : 'Off'}</small></button
+  >
+</li>
 <ListRow
   label="Export"
   id="export"

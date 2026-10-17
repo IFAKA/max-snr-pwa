@@ -30,8 +30,9 @@ npm run lint / npm run format / npm run typecheck / npm run architecture
 ## Architecture notes beyond AGENTS.md
 
 - **Reactivity:** domain state is a plain object (so IndexedDB can structured-clone it). Screens read it inside `$derived.by(() => { void appVersion.value; … })`; anything that changes state should go through `act()` from `app-state.svelte.ts` so views refresh. `WorkoutScreen` keys the active step on `appVersion`, so each action re-mounts the step from persisted state, like a fresh render.
-- **Routing:** `workout-view.ts` maps URL + state to a screen and is unit-tested; add workout views there first. Lifting uses `?view=exercise` and `?step=load`; main steps (no `view`, not `step=load`) ignore a single back gesture and open the cancel dialog on a quick double back or Escape.
+- **Routing:** `workout-view.ts` maps URL + state to a screen and is unit-tested; add workout views there first. Logging a set is one screen (`?view=exercise` for the first set); `?pick=reps|weight|rir` opens a value's full-screen picker, and old `?step=` URLs redirect to `/workout/`. Main steps (no `view` or `pick`) ignore a single back gesture and open the cancel dialog on a quick double back or Escape.
 - **Boot:** `+layout.ts` loads state once; `+layout.svelte` renders screens only after `deepLinkAncestors` rebuilds the back stack for a fresh launch on a detail URL.
+- **Feel:** `browser/feedback.ts` pairs each workout moment (`cue('setLogged')`, `'restDone'`, …) with a Web Audio sound from `browser/sound.ts` (synthesized, no files; the Sound row in History turns it off, stored as `maxsnr-sound`) and a vibration. `Countdown` pips the last three seconds and drains a bar when given `total`; rest moves to the next set by itself when it ends. Animations are CSS keyframes, all disabled by the reduced-motion rule.
 - **Magnetic picker:** `AppList` attaches it with the `magneticList` action and rebuilds it when its `rows` key changes, because the picker decides at creation whether a list has selectable rows.
 
 ## Design references

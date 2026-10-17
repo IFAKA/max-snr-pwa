@@ -1,11 +1,3 @@
-export const HAPTICS = {
-  setLogged: [25, 45, 25],
-  timerDone: [35, 70],
-  restDone: [35, 65, 35],
-} as const;
-
-export const buzz = (pattern: readonly number[]) => globalThis.navigator?.vibrate?.([...pattern]);
-
 export const prefersReducedMotion = () =>
   globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
 

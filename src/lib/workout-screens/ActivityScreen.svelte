@@ -5,6 +5,7 @@
   import { persist } from '../storage/persistence.ts';
   import { activityDefinition } from '../health/activity-data.ts';
   import { recordActivity } from '../health/health-data.ts';
+  import { cue } from '../browser/feedback.ts';
   import Countdown from '../components/Countdown.svelte';
   import WorkoutStage from '../components/WorkoutStage.svelte';
 
@@ -49,7 +50,11 @@
         endAt={startedAtMs + definition.durationMs}
         label={`${definition.title} remaining`}
         variant="activity"
-        onend={finish}
+        total={definition.durationMs}
+        onend={() => {
+          cue('timerDone');
+          void finish();
+        }}
       />
       <div class="countdown-actions">
         <button class="primary" id="finish-activity" type="button" onclick={finish}>Finish</button>

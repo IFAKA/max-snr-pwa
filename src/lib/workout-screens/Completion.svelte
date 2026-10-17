@@ -5,6 +5,7 @@
   import { getState } from '../state.ts';
   import type { Workout } from '../types.ts';
   import { improvementCallouts, reopenWorkout, workoutSummary } from '../workout/index.ts';
+  import { cue } from '../browser/feedback.ts';
   import AppList from '../components/AppList.svelte';
   import ListRow from '../components/ListRow.svelte';
   import WorkoutStage from '../components/WorkoutStage.svelte';
@@ -22,6 +23,7 @@
     const key = `maxsnr-celebrated:${workout.id}`;
     if (globalThis.sessionStorage?.getItem(key)) return;
     globalThis.sessionStorage?.setItem(key, '1');
+    cue('finished');
     void confetti({
       particleCount: 100,
       spread: 70,
@@ -38,7 +40,7 @@
   }
 </script>
 
-<WorkoutStage title={workout.name}>
+<WorkoutStage title={workout.name} className="completion-stage">
   {#snippet info()}
     <p class="set-count">{workoutSummary(workout)}</p>
     <p class="muted" role="status">Saved to History</p>

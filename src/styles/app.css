@@ -840,62 +840,54 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   display: inline;
   white-space: inherit;
 }
-.stepper-label {
+/* The set's values: three big buttons that each open their picker. Load gets the most room. */
+.set-values {
   display: grid;
-  gap: 4px;
-  color: var(--muted);
-  font-size: 14px;
-  font-weight: 850;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.45fr) minmax(0, 1fr);
+  gap: 6px;
 }
-.stepper {
+.set-value {
   display: grid;
-  grid-template-columns: 56px minmax(0, 1fr) 56px;
-  height: 60px;
-  align-items: center;
-  overflow: hidden;
+  min-width: 0;
+  min-height: 60px;
+  align-content: center;
+  gap: 1px;
+  padding: 6px 2px;
   border: 1px solid var(--line);
   border-radius: 15px;
   background: var(--surface);
+  color: var(--text);
 }
-.stepper button {
-  height: 100%;
-  min-width: 56px;
-  min-height: 0;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  color: var(--accent);
-  font-size: 28px;
+.set-value output {
+  overflow: hidden;
+  font-size: clamp(20px, 8vw, 30px);
   font-weight: 850;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  text-overflow: clip;
+  animation: value-in 220ms var(--ease-out);
+}
+.set-value span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 @media (hover: hover) and (pointer: fine) {
-  .stepper button:hover {
+  .set-value:hover {
     background: var(--accent-soft);
   }
 }
-.stepper button:focus-visible {
-  position: relative;
-  z-index: 1;
-  outline-offset: -5px;
+@keyframes value-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
 }
-.stepper button .icon {
-  width: 22px;
-  height: 22px;
-  margin: auto;
-  stroke: currentColor;
-  stroke-width: 2.5;
-  fill: none;
-}
-.stepper output {
-  display: grid;
-  height: 100%;
-  place-items: center;
-  min-width: 0;
-  font-size: 25px;
-  font-weight: 850;
+.log-set {
+  min-height: 56px;
+  font-size: 1.1em;
 }
 .lifting-stage #set-form {
   display: grid;
@@ -914,6 +906,111 @@ main > section:has(> .app-list) > .app-list .list-link::before {
 }
 .countdown {
   color: var(--text);
+}
+.countdown-face {
+  display: flex;
+  flex-direction: column;
+}
+.countdown-stage .countdown-face {
+  flex: 1 0 auto;
+}
+/* Drains with the time left; readable from across the room. */
+.countdown-track {
+  height: 6px;
+  margin: 0 0 10px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--line);
+}
+.countdown-track span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transform: scaleX(var(--progress));
+  transform-origin: left;
+  transition: transform 250ms linear;
+}
+.countdown-digits {
+  display: inline-block;
+}
+.countdown-digits.is-final {
+  color: var(--accent);
+  animation: countdown-beat 420ms var(--ease-out);
+}
+@keyframes countdown-beat {
+  from {
+    transform: scale(1.18);
+  }
+}
+/* The set just logged, stamped in when rest begins. */
+.set-logged {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 4px;
+  color: var(--success);
+  font-weight: 800;
+}
+.set-logged span {
+  display: inline-grid;
+  width: 1.5em;
+  height: 1.5em;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent-soft);
+}
+.set-logged.is-fresh span {
+  animation: stamp 420ms var(--ease-out);
+}
+@keyframes stamp {
+  0% {
+    opacity: 0;
+    transform: scale(2.2) rotate(-12deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.92);
+  }
+}
+/* Each workout step eases in, so moving on reads as progress. */
+.workout-stage {
+  animation: stage-in 260ms var(--ease-out);
+}
+@keyframes stage-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+/* The gains rise in one by one next to the celebration. */
+.completion-stage .app-list > li {
+  animation: gain-in 380ms var(--ease-out) both;
+}
+.completion-stage .app-list > li:nth-child(2) {
+  animation-delay: 90ms;
+}
+.completion-stage .app-list > li:nth-child(3) {
+  animation-delay: 180ms;
+}
+.completion-stage .app-list > li:nth-child(n + 4) {
+  animation-delay: 270ms;
+}
+@keyframes gain-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+}
+.value-picker .is-current .list-link {
+  color: var(--accent);
+  font-weight: 850;
+}
+.value-picker .list-link small,
+.sound-toggle small {
+  margin-inline-start: auto;
+  padding-inline: 8px;
+  color: var(--muted);
 }
 .confirm-dialog {
   box-sizing: border-box;
@@ -1007,6 +1104,21 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   }
 }
 @media (max-width: 260px) {
+  /* Watch: the title, then the step's metric and primary action; the context lines scroll
+     below them instead of pushing the action off the first screen. */
+  .stage-info {
+    display: contents;
+  }
+  .stage-info > * {
+    order: 2;
+  }
+  .stage-info > .workout-title {
+    order: 0;
+  }
+  .workout-stage .thumb-zone {
+    order: 1;
+    margin-top: 0;
+  }
   main {
     max-width: 225px;
     padding: 10px 12px;
@@ -1050,15 +1162,6 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   .lifting-stage .thumb-zone {
     gap: 10px;
   }
-  .stepper-label {
-    gap: 5px;
-  }
-  .stepper {
-    height: 60px;
-  }
-  .stepper output {
-    font-size: 23px;
-  }
   .list-link > .icon {
     width: 20px;
     height: 20px;
@@ -1089,8 +1192,8 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   h3 {
     font-size: 20px;
   }
-  .stepper-label {
-    font-size: 17px;
+  .set-value span {
+    font-size: 14px;
   }
   .list-link {
     padding-block: 8px;

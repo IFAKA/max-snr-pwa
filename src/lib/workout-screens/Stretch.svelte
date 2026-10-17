@@ -6,7 +6,7 @@
   import type { ActiveWorkout } from '../types.ts';
   import { completeWorkout, setTimer } from '../workout/index.ts';
   import { completionUrl } from '../browser/routes.ts';
-  import { buzz, HAPTICS } from '../browser/device.ts';
+  import { cue } from '../browser/feedback.ts';
   import Countdown from '../components/Countdown.svelte';
   import WorkoutStage from '../components/WorkoutStage.svelte';
 
@@ -34,8 +34,9 @@
       endAt={active.timerEndsAt}
       label="Stretch remaining"
       variant="stretch"
+      total={STRETCH_MS}
       onend={() => {
-        if (wasRunning) buzz(HAPTICS.timerDone);
+        if (wasRunning) cue('timerDone');
       }}
     />
     <div class="countdown-actions">

@@ -1,6 +1,9 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import { goto } from '$app/navigation';
   import { act } from '../app-state.svelte.ts';
+  import { REST_MS } from '../constants.ts';
+  import { getState } from '../state.ts';
   import type { ActiveWorkout } from '../types.ts';
   import {
     continueRest,
@@ -11,10 +14,11 @@
     sessionBudgetState,
     undoLastSet,
   } from '../workout/index.ts';
-  import { buzz, HAPTICS } from '../browser/device.ts';
+  import { cue } from '../browser/feedback.ts';
   import Countdown from '../components/Countdown.svelte';
   import WorkoutStage from '../components/WorkoutStage.svelte';
   import SupersetMeta from './SupersetMeta.svelte';
+  import { lastLoggedSet } from './lifting-model.ts';
 
   let { active }: { active: ActiveWorkout } = $props();
 
@@ -30,6 +34,10 @@
   });
   const canChange = $derived(!exerciseSelectionLocked(active) && exerciseChangeAvailable(active));
   const hasCompletedSet = $derived(active.tasks.some((task) => task.completed));
+  const unit = getState().settings?.unit || 'kg';
+  // The set just logged, confirmed on arrival; it is also what "Undo Last Set" would remove.
+  const logged = $derived(lastLoggedSet(active));
+  const fresh = untrack(() => Date.now() - Date.parse(logged?.completedAt || '') < 5000);
 
   let now = $state(Date.now());
   $effect(() => {
@@ -40,6 +48,7 @@
   let busy = $state(false);
 
   async function run(action: () => Promise<unknown>) {
+    if (busy) return;
     busy = true;
     await act(action);
     busy = false;
@@ -48,6 +57,13 @@
 
 <WorkoutStage title={next ? next.performedName : 'Rest'} className="rest-stage" countdown>
   {#snippet info()}
+    {#if logged}
+      <p class={['set-logged', fresh && 'is-fresh']} role="status">
+        <span aria-hidden="true">✓</span>
+        {logged.reps} × {logged.weight ?? 'bodyweight'}
+        {logged.weight != null ? logged.unit || unit : ''} · {logged.rir ?? '—'} RIR
+      </p>
+    {/if}
     {#if next}
       <SupersetMeta {active} task={next} />
       <p class="set-count">Set {next.set} of {next.sets}</p>
@@ -65,7 +81,12 @@
       endAt={active.restEndsAt}
       label="Rest remaining"
       variant="rest"
-      onend={() => buzz(HAPTICS.restDone)}
+      total={active.tasks[active.pos]?.restMs || REST_MS}
+      onend={() => {
+        // Rest over: go straight to the next set; "Continue" only skips the rest early.
+        cue('restDone');
+        void run(continueRest);
+      }}
     />
     <div class="countdown-actions">
       <button
@@ -73,7 +94,7 @@
         id="continue"
         type="button"
         disabled={busy}
-        onclick={() => run(continueRest)}>Continue</button
+        onclick={() => run(continueRest)}>Skip Rest</button
       >
       <button
         class="secondary"

@@ -3,7 +3,11 @@ import { emptyState, getState, setState } from '../src/lib/state.ts';
 import { start } from '../src/lib/workout/session.ts';
 import { finishEarly } from '../src/lib/workout/finish.ts';
 import { isMainStep, workoutView } from '../src/lib/workout-screens/workout-view.ts';
-import { stepValue } from '../src/lib/workout-screens/lifting-model.ts';
+import {
+  isBetterSet,
+  lastLoggedSet,
+  pickerValues,
+} from '../src/lib/workout-screens/lifting-model.ts';
 import { weeklyProgressLabel } from '../src/lib/today/weekly-progress.ts';
 import { parentRouteUrl, routeName } from '../src/lib/browser/routes.ts';
 import { ancestorUrls } from '../src/lib/browser/route-history.ts';
@@ -48,23 +52,36 @@ describe('workout routing', () => {
     expect(view.kind).toBe('summary');
   });
 
-  test('reopening on the load step without saved reps starts the set over', async () => {
+  test('the old two-step set URLs land on the one-step set screen', async () => {
     await start('Monday');
     active().tasks[0].completed = { reps: 10 };
     active().pos = 1;
-    expect(workoutView(getState(), params('step=load'))).toMatchObject({
-      kind: 'redirect',
-      to: '/workout/?step=reps',
+    for (const step of ['step=load', 'step=reps'])
+      expect(workoutView(getState(), params(step))).toMatchObject({
+        kind: 'redirect',
+        to: '/workout/',
+      });
+  });
+
+  test('a set value opens its picker while lifting only', async () => {
+    await start('Monday');
+    active().phase = 'lifting';
+    active().tasks[0].completed = { reps: 10 };
+    active().pos = 1;
+    expect(workoutView(getState(), params('pick=weight'))).toMatchObject({
+      kind: 'pick',
+      field: 'weight',
     });
-    active().draft = { reps: '9' };
-    expect(workoutView(getState(), params('step=load')).kind).toBe('lifting');
+    expect(workoutView(getState(), params('pick=nonsense')).kind).toBe('lifting');
+    active().phase = 'rest';
+    expect(workoutView(getState(), params('pick=reps')).kind).toBe('rest');
   });
 
   test('back is guarded on main steps only', async () => {
     await start('Monday');
     expect(isMainStep(getState(), params())).toBe(true);
     expect(isMainStep(getState(), params('view=exercises'))).toBe(false);
-    expect(isMainStep(getState(), params('step=load'))).toBe(false);
+    expect(isMainStep(getState(), params('pick=reps'))).toBe(false);
   });
 });
 
@@ -78,6 +95,10 @@ describe('route history', () => {
     );
     expect(parentRouteUrl('workout', params('day=Monday'), false)).toBe('/routine/?day=Monday');
     expect(parentRouteUrl('workout', params(), true)).toBe('/');
+    expect(parentRouteUrl('workout', params('pick=rir'), true)).toBe('/workout/');
+    expect(parentRouteUrl('workout', params('view=exercise&pick=rir'), true)).toBe(
+      '/workout/?view=exercise',
+    );
   });
 
   test('fresh launches rebuild the whole chain back to Today', () => {
@@ -98,12 +119,34 @@ describe('route history', () => {
 });
 
 describe('screen helpers', () => {
-  test('steppers stay within valid ranges', () => {
-    expect(stepValue('reps', '1', -1)).toBe('1');
-    expect(stepValue('rir', '+3', 1)).toBe('+3');
-    expect(stepValue('rir', '0', -1)).toBe('0');
-    expect(stepValue('weight', '', 2.5)).toBe('2.5');
-    expect(stepValue('weight', '2.5', -5)).toBe('0');
+  test('pickers list valid values and always include the current one', () => {
+    expect(pickerValues('rir', '2')).toEqual(['0', '1', '2', '+3']);
+    expect(pickerValues('reps', '8')).toHaveLength(30);
+    expect(pickerValues('reps', '28').at(-1)).toBe('38');
+    const loads = pickerValues('weight', '41');
+    expect(loads[0]).toBe('0');
+    expect(loads).toContain('41');
+    expect(loads).toContain('42.5');
+    expect(loads.at(-1)).toBe('100');
+    expect(pickerValues('weight', '120').at(-1)).toBe('170');
+    expect(pickerValues('weight', '')).toContain('0');
+  });
+
+  test('a better set means more load, or more reps at the same load', () => {
+    const last = { weight: 60, reps: 8 };
+    expect(isBetterSet({ weight: '62.5', reps: '6' }, last)).toBe(true);
+    expect(isBetterSet({ weight: '60', reps: '9' }, last)).toBe(true);
+    expect(isBetterSet({ weight: '60', reps: '8' }, last)).toBe(false);
+    expect(isBetterSet({ weight: '57.5', reps: '12' }, last)).toBe(false);
+    expect(isBetterSet({ weight: '60', reps: '9' }, undefined)).toBe(false);
+  });
+
+  test('the last logged set is the most recent one, including superset entries', async () => {
+    await start('Monday');
+    expect(lastLoggedSet(active())).toBeUndefined();
+    active().tasks[0].completed = { reps: 8, completedAt: '2026-10-17T10:00:00Z' };
+    active().tasks[1].completed = [{ reps: 6, completedAt: '2026-10-17T10:05:00Z' }];
+    expect(lastLoggedSet(active())?.reps).toBe(6);
   });
 
   test('weekly progress stays neutral and never frames a miss as a loss', () => {

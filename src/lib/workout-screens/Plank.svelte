@@ -1,9 +1,10 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { act } from '../app-state.svelte.ts';
+  import { PLANK_MS } from '../constants.ts';
   import type { ActiveWorkout } from '../types.ts';
   import { beginLifting, skipPlank } from '../workout/index.ts';
-  import { buzz, HAPTICS } from '../browser/device.ts';
+  import { cue } from '../browser/feedback.ts';
   import Countdown from '../components/Countdown.svelte';
   import WorkoutStage from '../components/WorkoutStage.svelte';
 
@@ -28,8 +29,9 @@
       endAt={active.timerEndsAt}
       label="Plank remaining"
       variant="plank"
+      total={PLANK_MS}
       onend={() => {
-        buzz(HAPTICS.timerDone);
+        cue('timerDone');
         void toLifting(beginLifting);
       }}
     />

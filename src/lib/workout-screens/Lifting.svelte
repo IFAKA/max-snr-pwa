@@ -1,57 +1,48 @@
 <script lang="ts">
   import { untrack } from 'svelte';
   import { goto } from '$app/navigation';
+  import { page } from '$app/state';
   import { act, showError } from '../app-state.svelte.ts';
   import { getState } from '../state.ts';
-  import { persist } from '../storage/persistence.ts';
   import type { ActiveWorkout, Task } from '../types.ts';
   import { completeSet, finishAtBudget } from '../workout/index.ts';
-  import { buzz, HAPTICS } from '../browser/device.ts';
-  import Stepper from '../components/Stepper.svelte';
+  import { cue } from '../browser/feedback.ts';
   import WorkoutStage from '../components/WorkoutStage.svelte';
   import SupersetMeta from './SupersetMeta.svelte';
-  import { LOAD_STEP, liftingModel, stepValue } from './lifting-model.ts';
+  import { isBetterSet, liftingModel, SET_FIELDS, type SetField } from './lifting-model.ts';
 
-  // Logging a set is two short steps: reps, then load and effort (RIR).
-  let { active, task, step }: { active: ActiveWorkout; task: Task; step: 'reps' | 'load' } =
-    $props();
+  // Logging a set is one tap: the values start from the draft, last time, or the progression
+  // rule, and "Log set" accepts them. Tapping a value opens its picker to change it.
+  let { active, task }: { active: ActiveWorkout; task: Task } = $props();
 
   const unit = getState().settings?.unit || 'kg';
   // The dispatcher re-mounts this screen per task, so starting values are read once.
   const model = untrack(() => liftingModel(active, task, unit));
-  let reps = $state(model.reps);
-  let weight = $state(model.weight);
-  let rir = $state(model.rir);
+  const values = { reps: model.reps, weight: model.weight, rir: model.rir };
+  const LABELS: Record<SetField, string> = { reps: 'Reps', weight: unit, rir: 'RIR' };
+  const NAMES: Record<SetField, string> = { reps: 'Reps', weight: `Load in ${unit}`, rir: 'RIR' };
   let busy = $state(false);
 
-  function saveDraft() {
-    active.draft = { ...active.draft, weight, reps, rir };
-    persist().catch(showError);
-  }
-
-  function change(field: 'reps' | 'weight' | 'rir', delta: number) {
-    if (field === 'reps') reps = stepValue('reps', reps, delta);
-    else if (field === 'weight') weight = stepValue('weight', weight, delta);
-    else rir = stepValue('rir', rir, delta);
-    saveDraft();
-  }
-
-  function next() {
-    saveDraft();
-    void goto('/workout/?step=load');
+  function pick(field: SetField) {
+    active.draft = { ...active.draft, ...values };
+    const url = new URL(page.url.href);
+    url.searchParams.set('pick', field);
+    void goto(`${url.pathname}${url.search}`);
   }
 
   async function logSet(event: SubmitEvent) {
     event.preventDefault();
-    saveDraft();
+    if (busy) return;
     busy = true;
+    active.draft = { ...active.draft, ...values };
+    const better = isBetterSet(values, model.previousSet);
     const result = await act(completeSet);
     if (!result || 'error' in result) {
       if (result) showError(new Error(result.error));
       busy = false;
       return;
     }
-    buzz(HAPTICS.setLogged);
+    cue(better ? 'betterSet' : 'setLogged');
     await goto('/workout/', { replace: true });
   }
 
@@ -80,32 +71,20 @@
   {/snippet}
   {#snippet actions()}
     <form id="set-form" onsubmit={logSet}>
-      {#if step === 'load'}
-        <Stepper
-          name="weight"
-          label={`Load · ${unit}`}
-          value={weight}
-          step={LOAD_STEP}
-          onstep={(delta) => change('weight', delta)}
-        />
-        <Stepper
-          name="rir"
-          label="RIR"
-          value={rir}
-          step={1}
-          onstep={(delta) => change('rir', delta)}
-        />
-        <button class="primary" id="next-step" type="submit" disabled={busy}>Log set</button>
-      {:else}
-        <Stepper
-          name="reps"
-          label="Reps"
-          value={reps}
-          step={1}
-          onstep={(delta) => change('reps', delta)}
-        />
-        <button class="primary" id="next-step" type="button" onclick={next}>Next</button>
-      {/if}
+      <div class="set-values" role="group" aria-label="Set values">
+        {#each SET_FIELDS as field (field)}
+          <button
+            type="button"
+            class="set-value"
+            id="{field}-pick"
+            aria-label="{NAMES[field]} {values[field] || '0'}, change"
+            onclick={() => pick(field)}
+            ><output id="{field}-value">{values[field] || '0'}</output><span>{LABELS[field]}</span
+            ></button
+          >
+        {/each}
+      </div>
+      <button class="primary log-set" id="log-set" type="submit" disabled={busy}>Log set</button>
       {#if model.canCutOptional}
         <button
           class="primary"

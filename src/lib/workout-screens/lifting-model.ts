@@ -1,4 +1,4 @@
-import type { ActiveWorkout, Task, Unit } from '../types.ts';
+import type { ActiveWorkout, Performance, Task, Unit } from '../types.ts';
 import {
   exerciseChangeAvailable,
   lastExercisePerformances,
@@ -52,6 +52,7 @@ export function liftingModel(active: ActiveWorkout, task: Task, unit: Unit) {
       ),
     ),
     previous,
+    previousSet: previousSets[task.set - 1],
     progressionLoad: increase ? recommendation.load : null,
     canCutOptional:
       budget.capReached &&
@@ -60,13 +61,40 @@ export function liftingModel(active: ActiveWorkout, task: Task, unit: Unit) {
   };
 }
 
-/** Applies one stepper press to a field value, keeping each field in its valid range. */
-export function stepValue(field: 'reps' | 'weight' | 'rir', value: string, delta: number) {
-  const minimum = field === 'reps' ? 1 : 0;
-  const maximum = field === 'rir' ? MAX_RIR : Number.POSITIVE_INFINITY;
-  const current = field === 'rir' ? rirValue(value) : Number(value || 0);
-  const next = Math.min(maximum, Math.max(minimum, current + delta));
-  if (field === 'reps') return String(Math.round(next));
-  if (field === 'rir') return formatRir(Math.round(next));
-  return formatLoad(next);
+export type SetField = 'reps' | 'weight' | 'rir';
+export const SET_FIELDS: SetField[] = ['reps', 'weight', 'rir'];
+
+/** The values a field's picker lists, low to high, always including the current one. */
+export function pickerValues(field: SetField, current: string) {
+  if (field === 'rir') return ['0', '1', '2', formatRir(MAX_RIR)];
+  const value = Number(current || 0);
+  if (field === 'reps') {
+    const top = Math.max(30, Math.round(value) + 10);
+    return Array.from({ length: top }, (_, index) => String(index + 1));
+  }
+  const top = Math.max(100, Math.ceil((value + 50) / LOAD_STEP) * LOAD_STEP);
+  const loads = Array.from({ length: top / LOAD_STEP + 1 }, (_, index) => index * LOAD_STEP);
+  if (!loads.includes(value)) loads.push(value);
+  return loads.sort((a, b) => a - b).map(formatLoad);
+}
+
+/** The most recently logged set of the workout, if any. */
+export function lastLoggedSet(active: ActiveWorkout): Performance | undefined {
+  return active.tasks
+    .flatMap((task) => task.completed || [])
+    .filter((done) => done.completedAt)
+    .sort((a, b) => Date.parse(b.completedAt || '') - Date.parse(a.completedAt || ''))[0];
+}
+
+/** A set beats the same set last time with more load, or more reps at the same load. */
+export function isBetterSet(
+  logged: { weight: string; reps: string },
+  previous: { weight?: number | null; reps?: number | string } | undefined,
+) {
+  if (!previous || previous.weight == null) return false;
+  const weight = Number(logged.weight || 0);
+  return (
+    weight > previous.weight ||
+    (weight === previous.weight && Number(logged.reps) > Number(previous.reps))
+  );
 }

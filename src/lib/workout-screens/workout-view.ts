@@ -1,5 +1,6 @@
 import type { ActiveWorkout, AppState, Task, Workout } from '../types.ts';
 import { configuredDays } from '../routine/routine-data.ts';
+import { SET_FIELDS, type SetField } from './lifting-model.ts';
 
 const MAIN_PHASES = new Set(['warmup', 'lifting', 'rest', 'stretch', 'complete']);
 
@@ -11,7 +12,8 @@ export type WorkoutView =
   | { kind: 'redirect'; to: string }
   | { kind: 'picker'; active: ActiveWorkout; returnTo: string }
   | { kind: 'select'; active: ActiveWorkout; task: Task }
-  | { kind: 'lifting'; active: ActiveWorkout; task: Task; step: 'reps' | 'load' }
+  | { kind: 'lifting'; active: ActiveWorkout; task: Task }
+  | { kind: 'pick'; active: ActiveWorkout; task: Task; field: SetField }
   | { kind: 'plank' | 'rest' | 'stretch'; active: ActiveWorkout }
   | { kind: 'save-legacy'; active: ActiveWorkout };
 
@@ -45,15 +47,15 @@ export function workoutView(state: AppState, params: URLSearchParams): WorkoutVi
     return { kind: 'redirect', to: '/workout/?view=exercise' };
   if (active.phase === 'complete') return { kind: 'save-legacy', active };
   if (!task) return { kind: 'stretch', active };
-  const step = params.get('step') === 'load' ? 'load' : 'reps';
-  // Reopened on the load step without the reps from step one: start the set over.
-  if (step === 'load' && started && !Object.keys(active.draft || {}).length)
-    return { kind: 'redirect', to: '/workout/?step=reps' };
-  if (view === 'exercise' || (params.has('step') && active.phase === 'lifting'))
-    return { kind: 'lifting', active, task, step };
+  // The old two-step set logging (?step=reps / ?step=load) is now one screen.
+  if (params.has('step')) return { kind: 'redirect', to: '/workout/' };
+  const field = params.get('pick') as SetField | null;
+  if (field && SET_FIELDS.includes(field) && active.phase === 'lifting')
+    return { kind: 'pick', active, task, field };
+  if (view === 'exercise') return { kind: 'lifting', active, task };
   if (view === 'select' || active.phase === 'warmup' || (active.phase === 'lifting' && !started))
     return { kind: 'select', active, task };
-  if (active.phase === 'lifting') return { kind: 'lifting', active, task, step };
+  if (active.phase === 'lifting') return { kind: 'lifting', active, task };
   if (active.phase === 'plank' || active.phase === 'rest' || active.phase === 'stretch')
     return { kind: active.phase, active };
   return { kind: 'select', active, task };
@@ -63,5 +65,5 @@ export function workoutView(state: AppState, params: URLSearchParams): WorkoutVi
 export function isMainStep(state: AppState, params: URLSearchParams) {
   const active = state.active;
   if (!active || !MAIN_PHASES.has(active.phase)) return false;
-  return !params.has('view') && !(active.phase === 'lifting' && params.get('step') === 'load');
+  return !params.has('view') && !params.has('pick');
 }

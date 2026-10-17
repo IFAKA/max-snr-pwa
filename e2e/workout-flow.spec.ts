@@ -13,10 +13,13 @@ test('start from a routine day, log a set, rest survives a refresh', async ({ pa
   await expect(page.getByText('Choose your first exercise.')).toBeVisible();
   await page.getByRole('button', { name: 'Continue' }).click();
   await expect(page.locator('#reps-value')).toBeVisible();
-  await page.getByRole('button', { name: 'Increase reps' }).click();
-  await page.getByRole('button', { name: 'Next' }).click();
-  await expect(page).toHaveURL(/step=load/);
-  await page.getByRole('button', { name: 'Increase load' }).click();
+  await page.locator('#weight-pick').click();
+  await expect(page).toHaveURL(/pick=weight/);
+  await expect(page.locator('main h1')).toHaveText('Load · kg');
+  await expect(page.getByRole('button', { name: '0 kg Current' })).toBeFocused();
+  await page.getByRole('button', { name: '2.5 kg', exact: true }).click();
+  await expect(page).not.toHaveURL(/pick=/);
+  await expect(page.locator('#weight-value')).toHaveText('2.5');
   await page.getByRole('button', { name: 'Log set' }).click();
 
   const timer = page.getByRole('timer', { name: 'Rest remaining' });
@@ -26,6 +29,23 @@ test('start from a routine day, log a set, rest survives a refresh', async ({ pa
   const data = await stored(page);
   expect(data.active.phase).toBe('rest');
   expect(data.active.tasks[0].completed).toMatchObject({ weight: 2.5, unit: 'kg' });
+  await expect(page.getByRole('status').filter({ hasText: '× 2.5 kg' })).toBeVisible();
+});
+
+test('rest moves on to the next set by itself, and one tap logs it', async ({ page }) => {
+  const workout = activeWorkout({ phase: 'rest', open: 1 });
+  workout.restEndsAt = Date.now() + 3000;
+  await seed(page, appState({ active: workout }));
+  await page.goto('/workout/');
+  await expect(page.getByRole('timer', { name: 'Rest remaining' })).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: '11 × 42.5 kg' })).toBeVisible();
+  const log = page.getByRole('button', { name: 'Log set' });
+  await expect(log).toBeVisible({ timeout: 10000 });
+  await expect(page.locator('#reps-value')).not.toBeEmpty();
+  await log.click();
+  await expect(page.getByRole('timer', { name: 'Stretch remaining' })).toBeVisible();
+  const data = await stored(page);
+  expect(data.active.tasks[2].completed).toMatchObject({ unit: 'kg' });
 });
 
 test('a single back gesture is ignored; Escape asks with "Keep Working Out" focused', async ({
