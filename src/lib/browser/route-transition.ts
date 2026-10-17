@@ -9,6 +9,9 @@ let active: ViewTransition | null = null;
  */
 export function routeTransition(navigation: OnNavigate) {
   if (!document.startViewTransition || prefersReducedMotion() || active) return;
+  // The exercise drawer opens and closes over its screen with its own motion, not a page slide.
+  const drawer = (url?: URL) => url?.searchParams.get('view') === 'exercises';
+  if (drawer(navigation.to?.url) || drawer(navigation.from?.url)) return;
   const back = navigation.type === 'popstate' && (navigation.delta ?? 0) < 0;
   return new Promise<void>((resolve) => {
     const update = async () => {

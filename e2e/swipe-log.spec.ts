@@ -125,3 +125,28 @@ test('the exercise drawer also closes with Escape', async ({ page }) => {
   await page.keyboard.press('Escape');
   await expect(page.locator('dialog.drawer')).toHaveCount(0);
 });
+
+test('opening and closing the drawer does not play a page transition', async ({ page }) => {
+  await seed(page, appState({ history: [] }));
+  await page.goto('/routine/?day=Monday');
+  await page.getByRole('button', { name: /^Start/ }).click();
+  await page.locator('dialog[open]').getByRole('button', { name: 'Start' }).click();
+  await expect(page.locator('#reps-value')).toBeVisible();
+  await page.waitForTimeout(800);
+  await page.evaluate(() => {
+    const counter = window as unknown as { transitions: number };
+    counter.transitions = 0;
+    const original = document.startViewTransition.bind(document);
+    document.startViewTransition = ((arg: unknown) => {
+      counter.transitions++;
+      return original(arg as never);
+    }) as typeof document.startViewTransition;
+  });
+  await page.locator('.stage-title-link').click();
+  await expect(page.locator('dialog.drawer[open]')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('dialog.drawer')).toHaveCount(0);
+  expect(
+    await page.evaluate(() => (window as unknown as { transitions: number }).transitions),
+  ).toBe(0);
+});
