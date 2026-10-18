@@ -499,6 +499,10 @@ html.is-touch-pointer .list-link:is(a, button, label):hover::before {
   overflow: hidden;
   white-space: nowrap;
 }
+.history-workout-label + small {
+  flex: none;
+  white-space: nowrap;
+}
 .history-workout-label time,
 .history-workout-label > span {
   flex: 0 0 auto;
@@ -640,36 +644,6 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   /* Keep text-only heading rows above the shared hover/selection layer. */
   z-index: 1;
 }
-.routine-group-header .list-title {
-  gap: 4px;
-  align-items: baseline;
-}
-.routine-group-header .list-title small {
-  color: var(--muted);
-  font-size: 0.72em;
-  font-weight: 650;
-  letter-spacing: 0.02em;
-}
-.routine-superset-header .list-title {
-  border-inline-start: 3px solid var(--accent);
-  padding-inline-start: 9px;
-}
-.routine-superset-member {
-  position: relative;
-}
-.routine-superset-member::before {
-  position: absolute;
-  z-index: 1;
-  inset-block: 0;
-  inset-inline-start: 0;
-  width: 3px;
-  background: var(--accent);
-  content: '';
-  pointer-events: none;
-}
-.routine-superset-member .list-link {
-  background: color-mix(in srgb, var(--accent-soft) 38%, transparent);
-}
 .app-list > li:has(> .list-title) {
   height: auto;
   min-height: 64px;
@@ -694,6 +668,14 @@ main > section:has(> .app-list) > .app-list .list-link::before {
 }
 .list-block > .list-link > span:first-child {
   white-space: normal;
+}
+/* A labelled note (plan advice, model rows) reads top to bottom instead of squeezing beside it. */
+.list-link.analytics-note {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
+  padding-block: 10px;
 }
 .list-block > .analytics-details {
   width: 100%;

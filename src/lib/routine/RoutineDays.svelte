@@ -3,7 +3,6 @@
   import { getState } from '../state.ts';
   import { configuredDays, isWorkoutDay } from './routine-data.ts';
   import { dayNow, isCurrentDayComplete } from '../workout/index.ts';
-  import { weeklySummary } from './routine-summary.ts';
   import { holdScroll } from '../browser/text-overflow.ts';
   import AppList from '../components/AppList.svelte';
   import ListRow from '../components/ListRow.svelte';
@@ -14,7 +13,6 @@
     const state = getState();
     const today = dayNow();
     return {
-      summary: weeklySummary(state),
       days: configuredDays().map((day) => ({
         day,
         today: day === today,
@@ -27,7 +25,6 @@
 
 <section aria-labelledby="routine-title">
   <Title text="Routine" id="routine-title" />
-  <p class="routine-summary">{view.summary}</p>
   <AppList
     label="Routine days"
     rows={view.days.map((item) => `${item.day}${item.complete}`).join()}

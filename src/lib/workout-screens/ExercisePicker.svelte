@@ -5,6 +5,7 @@
   import AppList from '../components/AppList.svelte';
   import ListRow from '../components/ListRow.svelte';
   import Title from '../components/Title.svelte';
+  import { supersetRowClass } from '../components/superset-group.ts';
   import { holdScroll } from '../browser/text-overflow.ts';
 
   // Change the current exercise: pick another or switch to an alternative.
@@ -46,20 +47,7 @@
       }),
   );
 
-  // Superset members share one accent bar down the left edge instead of a label on every row;
-  // `superset-start` and `superset-end` cap the bar where the group begins and ends.
-  function groupClass(index: number) {
-    const group = rows[index].group;
-    if (!group) return '';
-    return [
-      'superset-member',
-      rows[index - 1]?.group !== group && 'superset-start',
-      rows[index + 1]?.group !== group && 'superset-end',
-    ]
-      .filter(Boolean)
-      .join(' ');
-  }
-
+  const groups = $derived(rows.map((row) => row.group));
   const locked = $derived(exerciseSelectionLocked(active));
   let busy = $state(false);
 
@@ -83,7 +71,7 @@
   <Title text="Exercise" id="exercise-picker-title" level="h2" />
   <AppList label="Available exercises" rows={`${active.pos}-${rows.length}-${locked}`}>
     {#each rows as row, index (row.key)}
-      {@const grouped = groupClass(index)}
+      {@const grouped = supersetRowClass(groups, index)}
       {#if row.kind === 'switch'}
         <ListRow
           rowClass={grouped}

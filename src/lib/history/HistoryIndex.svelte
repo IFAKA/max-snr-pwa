@@ -27,10 +27,10 @@
         iconLabel="Open activities"
       />
       <ListRow
-        label="Analytics"
+        label="This Week"
         href="/history/?view=analytics"
         icon="chevron"
-        iconLabel="Open analytics"
+        iconLabel="Open this week"
       />
     {/if}
     <DataActions onerror={(message) => (importError = message)} />

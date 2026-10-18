@@ -3,9 +3,9 @@ import {
   adaptiveRecommendations,
   allocationDecisionReport,
   compareFrequencies,
+  completedWorkoutsThisWeek,
   EXERCISES,
   exerciseKeyForId,
-  healthCoverage,
   marginalCandidateReport,
   marginalSetReport,
   rollingMuscleTrends,
@@ -16,6 +16,9 @@ import {
   weeklyGymAnalytics,
 } from '../workout/index.ts';
 import { measurementFields } from '../health/health-data.ts';
+import { weeklyPlan } from '../routine/routine-summary.ts';
+import { readableKey } from './history-format.ts';
+import { weeklyProgressLabel } from './weekly-progress.ts';
 
 export type ValueRow = { label: string; value: string };
 export type NoteRow = { label: string; note: string };
@@ -28,14 +31,39 @@ export const formatNumber = (value: unknown) =>
     : String(value);
 
 const contribution = (values: Record<string, number>) =>
-  JSON.stringify(
-    Object.fromEntries(
-      Object.entries(values || {}).map(([key, value]) => [key, Number(Number(value).toFixed(1))]),
-    ),
-  );
+  Object.entries(values || {})
+    .map(([key, value]) => `${readableKey(key)} ${formatNumber(Number(value))}`)
+    .join(', ') || 'none';
 
+/** Muscle rows in plain words, most sets first, so the list reads as a ranking. */
 const valueRows = (values: Record<string, number>): ValueRow[] =>
-  Object.entries(values || {}).map(([label, value]) => ({ label, value: formatNumber(value) }));
+  Object.entries(values || {})
+    .sort(([, a], [, b]) => b - a)
+    .map(([key, value]) => ({ label: readableKey(key), value: formatNumber(value) }));
+
+const ACTION_COPY: Record<string, string> = {
+  'ADD 1 SET/WEEK': 'Add 1 set a week',
+  'REMOVE 1 SET/WEEK': 'Drop 1 set a week',
+  'REALLOCATE 1 SET/WEEK': 'Move 1 set a week',
+};
+
+/** Only changes get a row; when nothing changes the plan reads as one calm "keep" line. */
+function planChanges(recommendations: ReturnType<typeof adaptiveRecommendations>): NoteRow[] {
+  const changes = recommendations.filter((item) => item.muscle && item.action !== 'KEEP');
+  if (!changes.length)
+    return [
+      {
+        label: 'Keep the current plan',
+        note: recommendations.some((item) => !item.muscle)
+          ? 'Set changes wait until a full planned week is logged.'
+          : 'Nothing needs to change yet.',
+      },
+    ];
+  return changes.map((item) => ({
+    label: readableKey(item.muscle as string),
+    note: `${ACTION_COPY[item.action] || item.action}${item.to ? ` to ${readableKey(item.to)}` : ''}. ${item.reason}`,
+  }));
+}
 
 function measurementTrend(measurements: AppState['health']['measurements']): ValueRow[] | null {
   const recent = measurements?.slice(-2) || [];
@@ -43,10 +71,11 @@ function measurementTrend(measurements: AppState['health']['measurements']): Val
   return measurementFields.map((key) => {
     const previous = recent[0][key];
     const latest = recent[1][key];
-    if (previous === undefined || latest === undefined) return { label: key, value: '—' };
+    if (previous === undefined || latest === undefined)
+      return { label: readableKey(key), value: '—' };
     const delta = Number(latest) - Number(previous);
     return {
-      label: key,
+      label: readableKey(key),
       value: `${formatNumber(Number(latest))} (${delta >= 0 ? '+' : ''}${formatNumber(delta)})`,
     };
   });
@@ -66,9 +95,43 @@ function prescriptionMuscles(state: AppState) {
   return { entries, allocation };
 }
 
+/** What was done this week, counted neutrally; sitting details appear only once logged. */
+function weekRows(
+  state: AppState,
+  metrics: ReturnType<typeof weeklyGymAnalytics>,
+  sedentary: ReturnType<typeof sedentaryStatus>,
+): ValueRow[] {
+  const goal = state.prescription?.daysPerWeek || selectedFrequency({ state }).days;
+  const cardio = metrics.cardioEquivalent + metrics.activityCardioEquivalent;
+  const rows: ValueRow[] = [
+    {
+      label: 'Workouts',
+      value: weeklyProgressLabel(completedWorkoutsThisWeek(state.history), goal),
+    },
+    { label: 'Cardio', value: `${formatNumber(cardio)} of 150${NBSP}min` },
+    {
+      label: 'Movement',
+      value: `${formatNumber(metrics.movementMinutes + metrics.activityMinutes)}${NBSP}min`,
+    },
+  ];
+  if (sedentary.profileHoursPerDay !== null)
+    rows.push({
+      label: 'Sitting',
+      value: `${formatNumber(sedentary.profileHoursPerDay)}${NBSP}h/day`,
+    });
+  if (sedentary.latest)
+    rows.push(
+      { label: 'Sitting breaks', value: String(sedentary.interruptions) },
+      {
+        label: 'Longest sit',
+        value: `${formatNumber(sedentary.longestUninterruptedMinutes)}${NBSP}min`,
+      },
+    );
+  return rows;
+}
+
 export function analyticsModel(state: AppState) {
   const metrics = weeklyGymAnalytics(state);
-  const health = healthCoverage(state);
   const sedentary = sedentaryStatus(state);
   const { entries, allocation } = prescriptionMuscles(state);
   const selected = selectedFrequency({ state, allocation: entries });
@@ -92,44 +155,20 @@ export function analyticsModel(state: AppState) {
   });
   const threeWins = sensitivity.twoVsThree.filter((item) => item.winner === 3).length;
   return {
-    summary: [
-      { label: 'Strength', value: `${health.resistanceDays}/2 days` },
-      {
-        label: 'Aerobic MVPA',
-        value: `${formatNumber(metrics.cardioEquivalent + metrics.activityCardioEquivalent)}/150 moderate-equivalent${NBSP}min`,
-      },
-      {
-        label: 'Sedentary exposure',
-        value: `${formatNumber(sedentary.profileHoursPerDay)}${NBSP}h/day · ${sedentary.exposureClass}`,
-      },
-      { label: 'Sitting interruptions', value: String(sedentary.interruptions) },
-      {
-        label: 'Longest sitting logged',
-        value: `${formatNumber(sedentary.longestUninterruptedMinutes)}${NBSP}min`,
-      },
-      {
-        label: 'Daily movement',
-        value: `${formatNumber(metrics.movementMinutes + metrics.activityMinutes)}${NBSP}min${NBSP}logged`,
-      },
-      {
-        label: 'Gym timing',
-        value: timing.observedCount
-          ? `${formatNumber(timing.mean)}${NBSP}min observed vs ${formatNumber(timing.estimate)}${NBSP}min model`
-          : 'Awaiting session timestamps',
-      },
-    ] satisfies ValueRow[],
-    sedentaryNote: `${sedentary.recommendation} Reminders replace sitting with brief movement; their interval is configurable and is not presented as a safety cutoff.`,
+    summary: weekRows(state, metrics, sedentary),
+    sittingTip: sedentary.exposureClass === 'high',
+    plan: weeklyPlan(state),
+    planChanges: planChanges(recommendations),
+    timing: timing.observedCount
+      ? `${formatNumber(timing.mean)}${NBSP}min observed vs ${formatNumber(timing.estimate)}${NBSP}min modeled`
+      : 'Awaiting session timestamps',
     measurementTrend: measurementTrend(state.health.measurements),
     directSets: valueRows(metrics.directSets),
     fractionalSets: valueRows(metrics.fractionalSets),
     effectiveSets: valueRows(metrics.effectiveSets),
-    recommendations: recommendations.map((item) => ({
-      label: item.muscle || 'System',
-      note: item.action,
-    })) satisfies NoteRow[],
     marginal: marginalSetReport().map((set) => ({
       label: `${set.exercise} · set ${set.set}`,
-      note: `u/min ${formatNumber(set.utilityPerMinute)} · direct ${contribution(set.direct)} · fractional ${contribution(set.fractional)}`,
+      note: `${formatNumber(set.utilityPerMinute)} units/min · direct: ${contribution(set.direct)} · indirect: ${contribution(set.fractional)}`,
     })) satisfies NoteRow[],
     decisions: [
       { label: 'Calves', note: decisions.calfFourth.reason },
@@ -139,7 +178,7 @@ export function analyticsModel(state: AppState) {
     ] satisfies NoteRow[],
     candidates: marginalCandidateReport().map((set) => ({
       label: `Next: ${set.exercise} set ${set.nextSet}`,
-      note: `u/min ${formatNumber(set.utilityPerMinute)}`,
+      note: `${formatNumber(set.utilityPerMinute)} units/min`,
     })) satisfies NoteRow[],
     frequencyNote: `The current model winner is ${selected.days} days. Three days wins ${threeWins} of ${sensitivity.twoVsThree.length} configured 2-vs-3 scenarios. At default time and visit costs, three days needs relief greater than ${formatNumber(sensitivity.threeDayReliefThreshold(0.08, 2))} model units to beat two days.`,
     frequencies: compareFrequencies({ state, allocation: entries }).map((candidate) => ({

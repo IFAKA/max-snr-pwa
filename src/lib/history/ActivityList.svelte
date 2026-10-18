@@ -16,15 +16,17 @@
   <Title text="Activities" id="activities-title" />
   <AppList label="Completed activities" rows={activities.length}>
     {#each activities as activity, index (index)}
-      <li>
-        <div class="list-link">
-          <span
-            ><time>{activity.date}</time><span aria-hidden="true"> · </span><strong
+      <!-- Same one-line date · name row as Workouts, with the duration at the end. -->
+      <ListRow>
+        {#snippet content()}
+          <span class="history-workout-label"
+            ><time>{activity.date}</time><span aria-hidden="true">·</span><strong
               >{activity.label}</strong
             ></span
-          ><small>{activity.metric}</small>
-        </div>
-      </li>
+          >
+        {/snippet}
+        {#snippet trailing()}{#if activity.metric}<small>{activity.metric}</small>{/if}{/snippet}
+      </ListRow>
     {:else}
       <ListRow label="No activities yet" linkClass="empty-state" skip />
     {/each}

@@ -8,10 +8,12 @@ import {
   lastLoggedSet,
   pickerValues,
 } from '../src/lib/workout-screens/lifting-model.ts';
-import { weeklyProgressLabel } from '../src/lib/today/weekly-progress.ts';
+import { weeklyProgressLabel } from '../src/lib/history/weekly-progress.ts';
 import { parentRouteUrl, routeName } from '../src/lib/browser/routes.ts';
 import { ancestorUrls } from '../src/lib/browser/route-history.ts';
 import { activityDefinition } from '../src/lib/health/activity-data.ts';
+import { activityLine, listDate, readableKey } from '../src/lib/history/history-format.ts';
+import { supersetRowClass } from '../src/lib/components/superset-group.ts';
 import type { ActiveWorkout } from '../src/lib/types.ts';
 
 const params = (query = '') => new URLSearchParams(query);
@@ -140,9 +142,9 @@ describe('screen helpers', () => {
   });
 
   test('weekly progress stays neutral and never frames a miss as a loss', () => {
-    expect(weeklyProgressLabel(0, 3)).toBe('0 of 3 this week');
-    expect(weeklyProgressLabel(3, 3)).toBe('3 this week · goal met');
-    expect(weeklyProgressLabel(4, 3)).toBe('4 this week · goal met');
+    expect(weeklyProgressLabel(0, 3)).toBe('0 of 3');
+    expect(weeklyProgressLabel(3, 3)).toBe('3 · goal met');
+    expect(weeklyProgressLabel(4, 3)).toBe('4 · goal met');
   });
 
   test('timed activities provide countdown durations and compact metrics', () => {
@@ -150,5 +152,39 @@ describe('screen helpers', () => {
     expect(activityDefinition('move').metric).toBe('3m');
     expect(activityDefinition('measurement').durationMs).toBe(0);
     expect(activityDefinition('unknown').title).toBe('On track');
+  });
+});
+
+describe('history lists', () => {
+  test('activities read as one line: title-cased name and a plain duration', () => {
+    const row = activityLine({
+      id: 'a',
+      type: 'walk',
+      completedAt: '2026-10-17T12:00:00Z',
+      durationMinutes: 1,
+    });
+    expect(row.label).toBe('Walk');
+    expect(row.metric).toBe('1 min');
+    expect(activityLine({ id: 'b', type: 'measurement', measurements: { waist: 82 } }).metric).toBe(
+      'Waist 82',
+    );
+  });
+
+  test('list dates drop the year only within the current year', () => {
+    const now = new Date('2026-10-18T12:00:00');
+    expect(listDate('2026-10-17T12:00:00', now)).not.toMatch(/2026/);
+    expect(listDate('2025-10-17T12:00:00', now)).toMatch(/2025/);
+  });
+
+  test('data keys read as words', () => {
+    expect(readableKey('upperChest')).toBe('Upper chest');
+    expect(readableKey('lats')).toBe('Lats');
+  });
+
+  test('superset rows share one bar capped at both ends', () => {
+    const groups = [null, 'arms', 'arms', null];
+    expect(supersetRowClass(groups, 0)).toBe('');
+    expect(supersetRowClass(groups, 1)).toBe('superset-member superset-start');
+    expect(supersetRowClass(groups, 2)).toBe('superset-member superset-end');
   });
 });

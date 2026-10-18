@@ -3,6 +3,6 @@
  * Going past the goal reads as "goal met" rather than an odd "4 of 3".
  */
 export function weeklyProgressLabel(completed: number, goal: number) {
-  if (completed >= goal && goal > 0) return `${completed} this week · goal met`;
-  return `${completed} of ${goal} this week`;
+  if (completed >= goal && goal > 0) return `${completed} · goal met`;
+  return `${completed} of ${goal}`;
 }

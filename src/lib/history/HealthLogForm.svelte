@@ -3,6 +3,7 @@
   import { getState } from '../state.ts';
   import { persist } from '../storage/persistence.ts';
   import { measurementFields, recordMeasurement } from '../health/health-data.ts';
+  import { readableKey } from './history-format.ts';
 
   const now = () => new Date().toISOString();
 
@@ -76,7 +77,7 @@
       ></label
     >
     {#each SITTING_FIELDS as item (item.id)}{@render field(item.id, item.label, item.step)}{/each}
-    {#each measurementFields as key (key)}{@render field(key, key)}{/each}
+    {#each measurementFields as key (key)}{@render field(key, readableKey(key))}{/each}
     <label class="analytics-field"
       ><span><input name="reminders" type="checkbox" /> Enable movement reminder</span></label
     >

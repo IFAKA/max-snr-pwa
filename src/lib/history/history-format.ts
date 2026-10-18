@@ -1,4 +1,5 @@
 import type { Activity, Performance, Task, Workout } from '../types.ts';
+import { ACTIVITY_DEFINITIONS } from '../health/activity-data.ts';
 
 export function performanceFor(task: Task): Performance | null {
   if (task.completed && !Array.isArray(task.completed)) return task.completed;
@@ -30,14 +31,35 @@ export function exerciseGroups(workout: Workout) {
   return [...groups].map(([name, lines]) => ({ name, lines }));
 }
 
+/** A short list date ("Oct 18"), with the year only when it is not this year, so the name fits. */
+export function listDate(value: string | number, now = new Date()) {
+  const date = new Date(value);
+  return date.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    ...(date.getFullYear() === now.getFullYear() ? {} : { year: 'numeric' }),
+  });
+}
+
 export const workoutDate = (workout: Workout) =>
-  workout.date ? new Date(workout.date).toLocaleDateString() : 'Saved workout';
+  workout.date ? listDate(workout.date) : 'Saved workout';
 
 export function activityLine(activity: Activity) {
   const date = activity.completedAt || activity.startedAt || activity.date;
+  const waist = activity.measurements?.waist;
   return {
-    date: date ? new Date(date).toLocaleDateString() : 'Saved activity',
-    label: activity.type === 'measurement' ? 'Check-in' : activity.type,
-    metric: activity.durationMinutes ? ` · ${activity.durationMinutes} min` : '',
+    date: date ? listDate(date) : 'Saved activity',
+    label: ACTIVITY_DEFINITIONS[activity.type]?.title || activity.type,
+    metric: activity.durationMinutes
+      ? `${activity.durationMinutes}\u00a0min`
+      : waist
+        ? `Waist ${waist}`
+        : '',
   };
+}
+
+/** A camelCase data key as words: `upperChest` → "Upper chest". */
+export function readableKey(key: string) {
+  const words = key.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase();
+  return words.charAt(0).toUpperCase() + words.slice(1);
 }

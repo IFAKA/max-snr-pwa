@@ -19,30 +19,27 @@ function measurementNote(prescription: Prescription) {
       ([measure, delta]) => `${MEASURE_LABELS[measure]} ${delta > 0 ? '+' : '−'}${Math.abs(delta)}`,
     )
     .join(', ');
-  return ` Sets adjusted to your measurements (per week): ${text}.`;
+  return `Sets per week adjusted to your measurements: ${text}.`;
 }
 
-export function weeklySummary(state: AppState) {
+/** The weekly plan in two parts: the schedule ("3 days · about 90 min/week") and, when the
+ * prescription was personalized, which muscles' sets it changed. */
+export function weeklyPlan(state: AppState) {
   const prescription = state.prescription;
   if (!prescription) {
     const frontier = selectedFrequency({ state });
-    return `${frontier.days} gym days · about ${frontier.minutes} min/week. The optimizer favors the lowest-visit option that still trains all major muscle groups twice weekly.`;
+    return {
+      schedule: `${frontier.days} days · about ${frontier.minutes}\u00a0min/week`,
+      note: '',
+    };
   }
   const weeklySets = Object.values(prescription.weeklySetAllocation || {}).reduce(
     (sum, sets) => sum + sets,
     0,
   );
   const minutes = Math.round(weeklySets * minutesPerSetEstimate(state));
-  return `${prescription.daysPerWeek} gym days · about ${minutes} min/week. Each major muscle group is trained at least twice a week.${measurementNote(prescription)}`;
+  return {
+    schedule: `${prescription.daysPerWeek} days · about ${minutes}\u00a0min/week`,
+    note: measurementNote(prescription),
+  };
 }
-
-/** Spreadsheet-style member letters: A, B, … Z, AA, AB. */
-export const memberLabel = (index: number) => {
-  let label = '';
-  let value = index;
-  do {
-    label = String.fromCharCode(65 + (value % 26)) + label;
-    value = Math.floor(value / 26) - 1;
-  } while (value >= 0);
-  return label;
-};

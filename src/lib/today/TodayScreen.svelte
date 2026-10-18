@@ -4,18 +4,10 @@
   import { getState } from '../state.ts';
   import { persist } from '../storage/persistence.ts';
   import { isWorkoutDay, workoutName } from '../routine/routine-data.ts';
-  import {
-    completedWorkoutsThisWeek,
-    dayNow,
-    isCurrentDayComplete,
-    selectRecommendation,
-    selectedFrequency,
-    start,
-  } from '../workout/index.ts';
+  import { dayNow, isCurrentDayComplete, selectRecommendation, start } from '../workout/index.ts';
   import AppList from '../components/AppList.svelte';
   import ListRow from '../components/ListRow.svelte';
   import Title from '../components/Title.svelte';
-  import { weeklyProgressLabel } from './weekly-progress.ts';
 
   const view = $derived.by(() => {
     void appVersion.value;
@@ -35,10 +27,6 @@
       title:
         active || recommendation.type === 'resistance' ? workoutName(day) : recommendation.title,
       complete: !active && isCurrentDayComplete(state.history, day),
-      weekly: weeklyProgressLabel(
-        completedWorkoutsThisWeek(state.history),
-        state.prescription?.daysPerWeek || selectedFrequency().days,
-      ),
     };
   });
 
@@ -62,8 +50,6 @@
 
 <section class="today-screen" aria-labelledby="today-title">
   <Title text={view.title} id="today-title" />
-  <p class="routine-summary">{view.recommendation.reason}</p>
-  <p class="routine-summary">{view.weekly}</p>
   <AppList
     label="Home navigation"
     rows={`${view.complete}${view.active}${view.recommendation.type}`}
