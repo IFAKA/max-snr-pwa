@@ -17,6 +17,20 @@ const CUES = {
 
 export type Cue = keyof typeof CUES;
 
+let lastDetent = 0;
+const DETENT_GAP_MS = 40;
+
+/**
+ * The click of a turning wheel: a short pulse, without sound, and at most one per 40 ms, so a
+ * fast flick through many values stays smooth instead of queueing a buzz and a sound per row.
+ */
+export function detent() {
+  const now = performance.now();
+  if (now - lastDetent < DETENT_GAP_MS) return;
+  lastDetent = now;
+  globalThis.navigator?.vibrate?.(8);
+}
+
 export function cue(name: Cue) {
   const { sound, vibrate } = CUES[name];
   // Vibrate first: the motor is the slower of the two to respond.

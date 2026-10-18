@@ -939,8 +939,8 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   animation: wheel-in 200ms var(--ease-out);
 }
 .value-wheel::backdrop {
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
-  backdrop-filter: blur(6px);
+  /* Solid, so the still fade overlays above and below the band blend into it exactly. */
+  background: var(--bg);
   animation: wheel-fade 200ms var(--ease-out);
 }
 .value-wheel.is-closing,
@@ -948,15 +948,28 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   opacity: 0;
   transition: opacity 140ms ease-in;
 }
+/* No mask or blur here: either would take the list off the compositor's fast scrolling path and
+   make a quick flick feel heavy. The fade above and below is a still overlay instead. */
 .value-wheel-face {
   position: relative;
   width: min(100% - 16px, 220px);
-  mask-image: linear-gradient(
-    transparent,
-    #000 calc(50% - 26px),
-    #000 calc(50% + 26px),
-    transparent
-  );
+}
+.value-wheel-face::before,
+.value-wheel-face::after {
+  position: absolute;
+  z-index: 1;
+  inset-inline: 0;
+  height: calc(50% - 26px);
+  content: '';
+  pointer-events: none;
+}
+.value-wheel-face::before {
+  top: 0;
+  background: linear-gradient(var(--bg), transparent);
+}
+.value-wheel-face::after {
+  bottom: 0;
+  background: linear-gradient(transparent, var(--bg));
 }
 .value-wheel-band {
   position: absolute;
@@ -976,6 +989,7 @@ main > section:has(> .app-list) > .app-list .list-link::before {
 .value-wheel-list::-webkit-scrollbar {
   display: none;
 }
+/* The centred value is enlarged by scaling, which costs no layout as values roll through. */
 .value-wheel-item {
   width: 100%;
   min-height: 44px;
@@ -984,14 +998,18 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   border-radius: 999px;
   background: transparent;
   color: var(--muted);
-  font-size: 22px;
+  font-size: 34px;
   font-weight: 800;
   letter-spacing: -0.03em;
+  scale: 0.65;
   scroll-snap-align: center;
+  transition:
+    scale 100ms var(--ease-out),
+    color 100ms var(--ease-out);
 }
 .value-wheel-item.is-current {
   color: var(--text);
-  font-size: 34px;
+  scale: 1;
 }
 @keyframes wheel-in {
   from {

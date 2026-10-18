@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { prefersReducedMotion } from '../browser/device.ts';
-  import { cue } from '../browser/feedback.ts';
+  import { detent } from '../browser/feedback.ts';
 
   // One set value as a picker wheel, like the platform's own: a native scrolling list that snaps
   // each value into the middle band, lower values above. It opens on a tap, centred on the current
@@ -40,13 +40,19 @@
     list.querySelectorAll('button')[index]?.focus({ preventScroll: true });
   });
 
+  // The position is read once per frame at most, so a fast flick costs no more than a slow one.
+  let frame = 0;
   function scrolled() {
-    // Once closing, the value is settled; a late snap must not change it.
-    if (closing) return;
-    const next = Math.max(0, Math.min(values.length - 1, Math.round(list.scrollTop / ROW)));
-    if (next === index) return;
-    index = next;
-    cue('pick');
+    if (frame) return;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      // Once closing, the value is settled; a late snap must not change it.
+      if (closing) return;
+      const next = Math.max(0, Math.min(values.length - 1, Math.round(list.scrollTop / ROW)));
+      if (next === index) return;
+      index = next;
+      detent();
+    });
   }
 
   // Fade out, then close; the close event saves whatever sits in the band.
