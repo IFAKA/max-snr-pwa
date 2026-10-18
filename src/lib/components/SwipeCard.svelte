@@ -137,6 +137,15 @@
   {/if}
   <div class="swipe-sheet">
     {@render children()}
+    {#if onup}
+      <!-- The exercise drawer's top edge, peeking where it rises from: the visible sign that the
+           exercise can still be changed, and a tap target for it. -->
+      <button type="button" class="exercise-edge" onclick={onup}
+        ><span class="exercise-edge-sheet"
+          ><span class="exercise-edge-handle" aria-hidden="true"></span>Exercises</span
+        ></button
+      >
+    {/if}
     <div class="swipe-stamps" aria-hidden="true">
       <span class="swipe-stamp is-confirm">{confirmLabel}</span>
       {#if onundo}<span class="swipe-stamp is-undo">{undoLabel}</span>{/if}

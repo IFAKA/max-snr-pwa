@@ -1072,6 +1072,59 @@ main > section:has(> .app-list) > .app-list .list-link::before {
     border-radius 160ms ease-out,
     box-shadow 160ms ease-out;
 }
+/* When the exercise can change, the drawer's edge peeks at the bottom of the card; the stage
+   gives up that much height so nothing sits under it. */
+.swipe-card[data-vertical='true'] > .swipe-sheet {
+  padding-bottom: 34px;
+}
+.swipe-card[data-vertical='true'] > .swipe-sheet > .workout-stage {
+  height: calc(100svh - 46px);
+}
+.exercise-edge {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  min-height: 44px;
+  align-items: flex-end;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+}
+.exercise-edge-sheet {
+  display: flex;
+  width: 100%;
+  height: 34px;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding-top: 6px;
+  border-radius: 22px 22px 0 0;
+  background: var(--surface);
+  box-shadow: 0 -6px 18px rgb(0 0 0 / 0.22);
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+.exercise-edge-handle {
+  width: 36px;
+  height: 4px;
+  flex: 0 0 auto;
+  border-radius: 2px;
+  background: currentColor;
+  opacity: 0.6;
+}
+.exercise-edge:focus-visible {
+  outline: none;
+}
+.exercise-edge:focus-visible .exercise-edge-sheet {
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+}
 /* Lifted: the card shows its edge and casts a shadow over the next screen. */
 .swipe-card[data-lifted='true'] .swipe-sheet {
   border-radius: 28px;
@@ -1495,7 +1548,8 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   .stage-info > * {
     order: 2;
   }
-  .stage-info > .workout-title {
+  /* The title stays first, also when it is a link to change the exercise. */
+  .stage-info > :is(.workout-title, .stage-title-link) {
     order: 0;
   }
   .lifting-stage .set-count {

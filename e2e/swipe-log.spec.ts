@@ -246,3 +246,25 @@ test('the screen a swipe uncovers appears in place, without replaying its entry 
   await expect(page.getByRole('timer', { name: 'Rest remaining' })).toBeVisible();
   expect(await entryAnimation(page)).toBe('none');
 });
+
+test('the drawer edge shows only when the exercise can change, and opens the list', async ({
+  page,
+}) => {
+  await seed(page, appState({ history: [] }));
+  await page.goto('/routine/?day=Monday');
+  await page.getByRole('button', { name: /^Start/ }).click();
+  await page.locator('dialog[open]').getByRole('button', { name: 'Start' }).click();
+  const edge = page.getByRole('button', { name: 'Exercises' });
+  await expect(edge).toBeVisible();
+  await page.waitForTimeout(800);
+  await edge.click();
+  await expect(page.locator('[data-vaul-drawer]')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('[data-vaul-drawer]')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Log set' }).focus();
+  await page.keyboard.press('Enter');
+  await page.locator('#continue').focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('button', { name: 'Log set' })).toBeAttached();
+  await expect(page.getByRole('button', { name: 'Exercises' })).toHaveCount(0);
+});
