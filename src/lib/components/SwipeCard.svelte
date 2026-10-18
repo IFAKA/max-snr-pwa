@@ -2,7 +2,7 @@
   import type { Snippet } from 'svelte';
   import { drawerPeek, settleDuration } from '../browser/drawer-peek.svelte.ts';
   import { cue } from '../browser/feedback.ts';
-  import { swipeNavigation } from '../browser/route-transition.ts';
+  import { swipedRecently, swipeNavigation } from '../browser/route-transition.ts';
   import {
     ARM_RATIO,
     ARM_RATIO_LIGHT,
@@ -44,6 +44,9 @@
 
   let swipe = $state({ progress: 0, armed: false, dragging: false, axis: 'x' as 'x' | 'y' });
   let leaving = $state<'left' | 'right' | null>(null);
+  // A screen reached by a swipe was already seen under the card, so it appears without its
+  // entry animations, as if the card had simply uncovered it.
+  const uncovered = swipedRecently();
   let card: HTMLElement | undefined;
   // Up opens the exercise list, so the card owns vertical touch drags when it offers that.
   const canSwipeUp = $derived(Boolean(onup));
@@ -126,6 +129,7 @@
   style:--undo-reveal={undoReveal}
   style:--peek={peek}
   data-lifted={Boolean(behindSide)}
+  data-uncovered={uncovered}
   use:swipeToConfirm={options}
 >
   {#if behind}

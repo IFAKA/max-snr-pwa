@@ -1082,6 +1082,12 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   translate: 140% 0;
   rotate: 24deg;
 }
+/* The screen under the card, and the real one that replaces it after a swipe, are already in
+   place: no entry animations. */
+.swipe-behind :is(.workout-stage, .set-value output, .set-logged span),
+.swipe-card[data-uncovered='true'] :is(.workout-stage, .set-value output, .set-logged span) {
+  animation: none;
+}
 /* The next screen, under the card: it grows into place and brightens as the card leaves. */
 .swipe-behind {
   position: absolute;

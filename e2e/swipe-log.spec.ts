@@ -217,3 +217,32 @@ test('swiping to log a set does not also play a page transition', async ({ page 
     await page.evaluate(() => (window as unknown as { transitions: number }).transitions),
   ).toBe(0);
 });
+
+const entryAnimation = (page: Page) =>
+  page.evaluate(
+    () => getComputedStyle(document.querySelector('.swipe-sheet .workout-stage')!).animationName,
+  );
+
+async function openFirstSet(page: Page) {
+  await seed(page, appState({ active: activeWorkout({ phase: 'lifting', open: 3 }) }));
+  await page.goto('/workout/');
+  await expect(page.getByRole('button', { name: 'Log set' })).toBeAttached();
+  await page.waitForTimeout(1600);
+}
+
+test('a step reached by a button still eases in', async ({ page }) => {
+  await openFirstSet(page);
+  await page.getByRole('button', { name: 'Log set' }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('timer', { name: 'Rest remaining' })).toBeVisible();
+  expect(await entryAnimation(page)).toBe('stage-in');
+});
+
+test('the screen a swipe uncovers appears in place, without replaying its entry animation', async ({
+  page,
+}) => {
+  await openFirstSet(page);
+  await swipe(page, 0.85, 0.1);
+  await expect(page.getByRole('timer', { name: 'Rest remaining' })).toBeVisible();
+  expect(await entryAnimation(page)).toBe('none');
+});
