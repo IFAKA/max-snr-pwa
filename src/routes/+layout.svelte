@@ -9,7 +9,8 @@
   import { keepAwake, releaseWakeLock } from '#lib/browser/device.ts';
   import { routeTransition } from '#lib/browser/route-transition.ts';
   import { registerServiceWorker } from '#lib/browser/app-update.svelte.ts';
-  import { appError } from '#lib/app-state.svelte.ts';
+  import { nativeApp, syncNativeTimer } from '#lib/browser/native-app.ts';
+  import { appError, appVersion } from '#lib/app-state.svelte.ts';
   import ErrorNotice from '#lib/components/ErrorNotice.svelte';
 
   let { children, data }: { children: Snippet; data: { bootError: string } } = $props();
@@ -29,12 +30,19 @@
     else void releaseWakeLock();
   });
 
+  // In the Android app, keep the lock-screen countdown and end alarm in step with the workout.
+  $effect(() => {
+    void appVersion.value;
+    syncNativeTimer(getState());
+  });
+
   // Screens render only after the history fix-up for deep links, so their own redirects
   // (e.g. saving a legacy workout) cannot race it.
   let ready = $state(false);
 
   onMount(() => {
-    registerServiceWorker();
+    // The Android app ships its files in the APK; only the web app updates through /sw.js.
+    if (!nativeApp) registerServiceWorker();
     const current = `${page.url.pathname}${page.url.search}`;
     const ancestors = deepLinkAncestors(
       new URL(page.url.href),

@@ -26,6 +26,7 @@ export default defineConfig(
       'build/**',
       'test-results/**',
       'playwright-report/**',
+      'android/**',
     ],
   },
   js.configs.recommended,

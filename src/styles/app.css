@@ -1031,8 +1031,13 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   user-select: text;
   -webkit-user-select: text;
 }
+/* The stage is the nearest scroll container, and touch-action does not carry into one: without
+   its own pan-y a sideways drag is taken by the browser (pointercancel) instead of the card. */
+.swipe-card .workout-stage {
+  touch-action: pan-y;
+}
 .swipe-card[data-vertical='true'],
-/* The stage is the nearest scroll container, so it needs the same value to stop native panning. */
+/* Likewise the stage needs the card's value to stop native panning. */
 .swipe-card[data-vertical='true'] .workout-stage {
   touch-action: none;
 }

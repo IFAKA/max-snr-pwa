@@ -1,3 +1,4 @@
+import { nativeApp } from './native-app.ts';
 import { playSound, type Sound } from './sound.ts';
 
 // Each workout moment has one cue: a sound (when Sound is on) and a vibration, so the two agree.
@@ -32,6 +33,8 @@ export function detent() {
 }
 
 export function cue(name: Cue) {
+  // In the Android app a hidden screen hears the native timer alert instead, never both.
+  if (nativeApp && document.visibilityState === 'hidden') return;
   const { sound, vibrate } = CUES[name];
   // Vibrate first: the motor is the slower of the two to respond.
   globalThis.navigator?.vibrate?.(vibrate);

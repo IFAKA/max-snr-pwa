@@ -5,6 +5,7 @@ build/
 static/
 test-results/
 playwright-report/
+android/
 package-lock.json
 docs/
 *.md

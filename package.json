@@ -6,6 +6,7 @@
     "prepare": "svelte-kit sync || echo ''; git rev-parse --is-inside-work-tree >/dev/null 2>&1 && git config core.hooksPath .githooks || true",
     "dev": "vite dev",
     "build": "vite build && node scripts/build-sw.mjs",
+    "android:apk": "npm run build && cap sync android && cd android && ./gradlew assembleDebug",
     "preview": "vite preview",
     "typecheck": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --fail-on-warnings",
     "lint": "eslint .",
@@ -17,6 +18,7 @@
     "check": "npm run lint && npm run architecture && npm run format:check && npm run typecheck && npm test && npm run build && npm run test:e2e"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.5.3",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.60.0",
     "@sveltejs/adapter-static": "^4.0.0",
@@ -38,6 +40,8 @@
     "vitest": "^4.1.8"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/core": "^8.5.3",
     "@internationalized/date": "^3.12.4",
     "bits-ui": "^2.19.5",
     "canvas-confetti": "^1.9.4",

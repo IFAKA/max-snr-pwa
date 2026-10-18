@@ -7,6 +7,7 @@
   import type { AppState } from '../types.ts';
   import { appUpdate, checkForUpdate, UPDATE_ICONS } from '../browser/app-update.svelte.ts';
   import { cue } from '../browser/feedback.ts';
+  import { nativeApp, saveFile } from '../browser/native-app.ts';
   import { setSoundEnabled, soundEnabled } from '../browser/sound.ts';
   import ConfirmDialog from '../components/ConfirmDialog.svelte';
   import Icon from '../components/Icon.svelte';
@@ -29,13 +30,9 @@
   }
 
   function exportBackup() {
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(
-      new Blob([JSON.stringify(getState(), null, 2)], { type: 'application/json' }),
+    saveFile('maxsnr-backup.json', JSON.stringify(getState(), null, 2)).catch(() =>
+      onerror('Could not save the backup.'),
     );
-    link.download = 'maxsnr-backup.json';
-    link.click();
-    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
   }
 
   async function chooseFile(event: Event & { currentTarget: HTMLInputElement }) {
@@ -93,19 +90,22 @@
     onclose={handleConfirm}
   />
 </li>
-<li>
-  <button
-    class="list-link app-update-button"
-    id="update-app"
-    type="button"
-    data-update-state={appUpdate.status}
-    aria-label={appUpdate.label}
-    aria-busy={appUpdate.busy ? 'true' : undefined}
-    disabled={appUpdate.busy || appUpdate.status === 'success'}
-    onclick={() => void checkForUpdate()}
-    ><span class="app-update-label">{appUpdate.label}</span><Icon
-      name={UPDATE_ICONS[appUpdate.status] as IconName}
-      label="Check for app updates"
-    /></button
-  >
-</li>
+<!-- The Android app updates by installing a new APK; only the web app updates itself. -->
+{#if !nativeApp}
+  <li>
+    <button
+      class="list-link app-update-button"
+      id="update-app"
+      type="button"
+      data-update-state={appUpdate.status}
+      aria-label={appUpdate.label}
+      aria-busy={appUpdate.busy ? 'true' : undefined}
+      disabled={appUpdate.busy || appUpdate.status === 'success'}
+      onclick={() => void checkForUpdate()}
+      ><span class="app-update-label">{appUpdate.label}</span><Icon
+        name={UPDATE_ICONS[appUpdate.status] as IconName}
+        label="Check for app updates"
+      /></button
+    >
+  </li>
+{/if}
