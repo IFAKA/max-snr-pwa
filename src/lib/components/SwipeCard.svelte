@@ -2,6 +2,7 @@
   import type { Snippet } from 'svelte';
   import { drawerPeek, settleDuration } from '../browser/drawer-peek.svelte.ts';
   import { cue } from '../browser/feedback.ts';
+  import { swipeNavigation } from '../browser/route-transition.ts';
   import {
     ARM_RATIO,
     ARM_RATIO_LIGHT,
@@ -104,6 +105,7 @@
       // The card flies off the way it was thrown; if the screen is still here a moment later (the
       // action failed or kept it), it springs back.
       leaving = direction > 0 ? 'right' : 'left';
+      swipeNavigation();
       setTimeout(() => (leaving = null), 700);
       if (direction > 0) return onundo?.();
       onconfirm();

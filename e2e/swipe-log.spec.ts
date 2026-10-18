@@ -197,3 +197,23 @@ test('crossing the threshold vibrates each way, like a detent', async ({ page })
   expect(vibrations).toEqual([[30], [12]]);
   await expect(page.getByRole('button', { name: 'Log set' })).toBeVisible();
 });
+
+test('swiping to log a set does not also play a page transition', async ({ page }) => {
+  await openLifting(page);
+  await page.waitForTimeout(800);
+  await page.evaluate(() => {
+    const counter = window as unknown as { transitions: number };
+    counter.transitions = 0;
+    const original = document.startViewTransition.bind(document);
+    document.startViewTransition = ((arg: unknown) => {
+      counter.transitions++;
+      return original(arg as never);
+    }) as typeof document.startViewTransition;
+  });
+  await swipe(page, 0.85, 0.1);
+  await expect(page.getByRole('timer', { name: /remaining/ })).toBeVisible();
+  await page.waitForTimeout(300);
+  expect(
+    await page.evaluate(() => (window as unknown as { transitions: number }).transitions),
+  ).toBe(0);
+});
