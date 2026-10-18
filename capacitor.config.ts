@@ -11,6 +11,11 @@ const config: CapacitorConfig = {
     // No network: the files ship inside the APK and nothing is fetched at runtime.
     allowMixedContent: false,
   },
+  plugins: {
+    // MainActivity keeps the page inside the status and navigation bars itself; Capacitor's
+    // default leaves that to CSS on newer WebViews, which the watch-first layout does not do.
+    SystemBars: { insetsHandling: 'disable' },
+  },
 };
 
 export default config;
