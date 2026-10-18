@@ -186,6 +186,10 @@ a:focus-visible {
   outline: 3px solid #3d8b61;
   outline-offset: 3px;
 }
+/* Navigation focuses the new heading for screen readers; it is not a control, so no ring. */
+main :is(h1, h2)[tabindex='-1']:focus {
+  outline: none;
+}
 .primary {
   width: 100%;
   border-color: var(--accent);

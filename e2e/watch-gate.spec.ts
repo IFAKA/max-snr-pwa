@@ -80,6 +80,19 @@ test('every screen has a visible keyboard focus state', async ({ page }) => {
   expect(outline).not.toBe('none|none|none|none');
 });
 
+test('keyboard navigation moves focus to the new heading without a focus ring', async ({
+  page,
+}) => {
+  await seed(page, appState());
+  await page.goto('/routine/');
+  await page.getByRole('link', { name: 'Monday' }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(/day=Monday/);
+  const heading = page.locator('main h1');
+  await expect(heading).toBeFocused();
+  expect(await heading.evaluate((element) => getComputedStyle(element).outlineStyle)).toBe('none');
+});
+
 test('dark mode, reduced motion, and 200% zoom keep the gate', async ({ browser }, info) => {
   test.skip(info.project.name !== 'phone', 'zoom is checked from the phone canvas');
   const context = await browser.newContext({
