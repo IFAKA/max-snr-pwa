@@ -28,11 +28,10 @@ export function liftingModel(active: ActiveWorkout, task: Task, unit: Unit) {
   const draft = active.draft || {};
   const previous = lastPerformance(task.performedName, unit, task.exerciseId);
   const previousSets = lastExercisePerformances(task.exerciseId, unit);
-  const previousSetReps = previousSets[task.set - 1]?.reps;
-  const reps = String(
-    draft.reps ??
-      (previousSetReps !== undefined ? previousSetReps : String(task.reps).split('–')[0]),
-  );
+  // Each set starts from what was done on the same set last time; a set that did not exist then
+  // starts from the last one logged for the exercise.
+  const lastForSet: Performance | null = previousSets[task.set - 1] ?? previous;
+  const reps = String(draft.reps ?? lastForSet?.reps ?? String(task.reps).split('–')[0]);
   const recommendation = recommendDoubleProgression({
     load: previous?.weight,
     performances: previousSets,
@@ -41,17 +40,17 @@ export function liftingModel(active: ActiveWorkout, task: Task, unit: Unit) {
     targetRir: task.targetRir || task.rir,
   });
   const increase = recommendation.action === 'increase-load';
-  const recommendedLoad = increase ? recommendation.load : previous?.weight;
+  const recommendedLoad = increase ? recommendation.load : lastForSet?.weight;
   const budget = sessionBudgetState(active);
   return {
     reps,
     weight: String(draft.weight ?? recommendedLoad ?? ''),
     rir: formatRir(
       rirValue(
-        draft.rir ?? previous?.rir ?? defaultRir(task.targetRir || task.rir, task.set, task.sets),
+        draft.rir ?? lastForSet?.rir ?? defaultRir(task.targetRir || task.rir, task.set, task.sets),
       ),
     ),
-    previous,
+    previous: lastForSet,
     previousSet: previousSets[task.set - 1],
     progressionLoad: increase ? recommendation.load : null,
     canCutOptional:

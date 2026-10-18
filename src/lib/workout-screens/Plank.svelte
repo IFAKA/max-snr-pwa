@@ -7,6 +7,7 @@
   import { cue } from '../browser/feedback.ts';
   import Countdown from '../components/Countdown.svelte';
   import SwipeCard from '../components/SwipeCard.svelte';
+  import SwipeHint from '../components/SwipeHint.svelte';
   import WorkoutStage from '../components/WorkoutStage.svelte';
 
   let { active }: { active: ActiveWorkout } = $props();
@@ -37,7 +38,7 @@
           void toLifting(beginLifting);
         }}
       />
-      <p class="swipe-hint" aria-hidden="true">Swipe ← finish</p>
+      <SwipeHint text="Swipe ← finish" />
     {/snippet}
     {#snippet more()}
       <div class="countdown-actions">

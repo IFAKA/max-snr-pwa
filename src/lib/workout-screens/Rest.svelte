@@ -19,6 +19,7 @@
   import { cue } from '../browser/feedback.ts';
   import Countdown from '../components/Countdown.svelte';
   import SwipeCard from '../components/SwipeCard.svelte';
+  import SwipeHint from '../components/SwipeHint.svelte';
   import WorkoutStage from '../components/WorkoutStage.svelte';
   import StepPeek from './StepPeek.svelte';
   import SupersetMeta from './SupersetMeta.svelte';
@@ -119,9 +120,7 @@
           void run(continueRest);
         }}
       />
-      <p class="swipe-hint" aria-hidden="true">
-        Swipe ← skip · → undo{canChange ? ' · ↑ exercise' : ''}
-      </p>
+      <SwipeHint text={`Swipe ← skip · → undo${canChange ? ' · ↑ exercise' : ''}`} />
     {/snippet}
     {#snippet more()}
       <div class="countdown-actions">

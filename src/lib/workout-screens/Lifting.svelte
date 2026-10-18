@@ -8,6 +8,7 @@
   import { completeSet, finishAtBudget, previewLog } from '../workout/index.ts';
   import { cue } from '../browser/feedback.ts';
   import SwipeCard from '../components/SwipeCard.svelte';
+  import SwipeHint from '../components/SwipeHint.svelte';
   import WorkoutStage from '../components/WorkoutStage.svelte';
   import StepPeek from './StepPeek.svelte';
   import SupersetMeta from './SupersetMeta.svelte';
@@ -138,9 +139,9 @@
             >
           {/each}
         </div>
-        <p class="swipe-hint" aria-hidden="true">
-          ← swipe to log{task.set === 1 && model.canChangeExercise ? ' · ↑ exercise' : ''}
-        </p>
+        <SwipeHint
+          text={`← swipe to log${task.set === 1 && model.canChangeExercise ? ' · ↑ exercise' : ''}`}
+        />
         {#if model.canCutOptional}
           <button
             class="primary"
