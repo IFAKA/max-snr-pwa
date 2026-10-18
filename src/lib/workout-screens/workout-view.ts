@@ -1,6 +1,5 @@
 import type { ActiveWorkout, AppState, Task, Workout } from '../types.ts';
 import { configuredDays } from '../routine/routine-data.ts';
-import { SET_FIELDS, type SetField } from './lifting-model.ts';
 
 const MAIN_PHASES = new Set(['warmup', 'lifting', 'rest', 'stretch', 'complete']);
 
@@ -12,7 +11,6 @@ export type WorkoutView =
   | { kind: 'redirect'; to: string }
   | { kind: 'picker'; active: ActiveWorkout; returnTo: string }
   | { kind: 'lifting'; active: ActiveWorkout; task: Task }
-  | { kind: 'pick'; active: ActiveWorkout; task: Task; field: SetField }
   | { kind: 'plank' | 'rest' | 'stretch'; active: ActiveWorkout }
   | { kind: 'save-legacy'; active: ActiveWorkout };
 
@@ -37,11 +35,9 @@ export function workoutView(state: AppState, params: URLSearchParams): WorkoutVi
   if (view === 'select') return { kind: 'redirect', to: '/workout/' };
   if (active.phase === 'complete') return { kind: 'save-legacy', active };
   if (!task) return { kind: 'stretch', active };
-  // The old two-step set logging (?step=reps / ?step=load) is now one screen.
-  if (params.has('step')) return { kind: 'redirect', to: '/workout/' };
-  const field = params.get('pick') as SetField | null;
-  if (field && SET_FIELDS.includes(field) && active.phase === 'lifting')
-    return { kind: 'pick', active, task, field };
+  // The old two-step set logging (?step=reps / ?step=load) is now one screen, and the old
+  // full-screen value picker (?pick=…) is now a wheel over it.
+  if (params.has('step') || params.has('pick')) return { kind: 'redirect', to: '/workout/' };
   if (view === 'exercise') return { kind: 'lifting', active, task };
   if (active.phase === 'warmup' || active.phase === 'lifting')
     return { kind: 'lifting', active, task };
@@ -54,7 +50,7 @@ export function workoutView(state: AppState, params: URLSearchParams): WorkoutVi
 export function isMainStep(state: AppState, params: URLSearchParams) {
   const active = state.active;
   if (!active || !MAIN_PHASES.has(active.phase)) return false;
-  return !params.has('view') && !params.has('pick');
+  return !params.has('view');
 }
 
 /** The screen under the exercise-list drawer: the same URL without the drawer's parameters. */

@@ -4,7 +4,7 @@
 
 **Constraints (from `AGENTS.md`):** one focused purpose per watch screen; no horizontal swipe navigation, tab bars, bottom sheets or custom dismiss gestures; every gesture needs a tap/keyboard fallback; essential targets stay at least 44px; back stays guarded (single back ignored, double back or Escape opens the cancel dialog).
 
-**Existing gesture exception:** hold and drag a set value vertically like a Digital Crown wheel (`browser/value-scrub.ts`). A quick swipe scrolls the page (`touch-action: pan-y`); the wheel only locks scrolling once the hold starts.
+**Value wheel (replaces hold-and-drag and the `?pick=` page):** tapping a set value opens `ValueWheel`, a native modal dialog with a native scroll-snap list (lower values above, like the platform picker); tapping outside, back or Escape closes it and keeps the centred value, tapping a value picks it. There is no custom drag gesture on the values any more, so the swipe card works over them too.
 
 ---
 

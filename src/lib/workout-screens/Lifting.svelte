@@ -1,9 +1,9 @@
 <script lang="ts">
   import { untrack } from 'svelte';
   import { goto } from '$app/navigation';
-  import { page } from '$app/state';
   import { act, showError } from '../app-state.svelte.ts';
   import { getState } from '../state.ts';
+  import { persist } from '../storage/persistence.ts';
   import type { ActiveWorkout, Task } from '../types.ts';
   import { completeSet, finishAtBudget, previewLog } from '../workout/index.ts';
   import { cue } from '../browser/feedback.ts';
@@ -12,9 +12,8 @@
   import WorkoutStage from '../components/WorkoutStage.svelte';
   import StepPeek from './StepPeek.svelte';
   import SupersetMeta from './SupersetMeta.svelte';
-  import { scrubValue } from '../browser/value-scrub.ts';
   import { swipeLearned } from '../browser/swipe-log.ts';
-  import ScrubWheel from './ScrubWheel.svelte';
+  import ValueWheel from './ValueWheel.svelte';
   import {
     formatLoad,
     isBetterSet,
@@ -24,48 +23,31 @@
     type SetField,
   } from './lifting-model.ts';
 
-  // Logging a set is one tap or one swipe right: the values start from the draft, last time, or
-  // the progression rule, and "Log set" accepts them. Tapping a value opens its picker to change
-  // it; holding it and dragging up or down turns it like a wheel. Details sit on a second page.
+  // Logging a set is one tap or one swipe: the values start from the draft, last time, or the
+  // progression rule, and "Log set" accepts them. Tapping a value opens its wheel to change it.
+  // Details sit on a second page.
   let { active, task }: { active: ActiveWorkout; task: Task } = $props();
 
   const unit = getState().settings?.unit || 'kg';
   // The dispatcher re-mounts this screen per task, so starting values are read once.
   const model = untrack(() => liftingModel(active, task, unit));
   let values = $state({ reps: model.reps, weight: model.weight, rir: model.rir });
-  // The wheel's last values stay after release so it can animate out showing them.
-  let scrub = $state<{
-    field: SetField;
-    values: string[];
-    index: number;
-  } | null>(null);
-  let scrubbing = $state(false);
+  let wheel = $state<SetField | null>(null);
   const LABELS: Record<SetField, string> = { reps: 'Reps', weight: unit, rir: 'RIR' };
   const NAMES: Record<SetField, string> = { reps: 'Reps', weight: `Load in ${unit}`, rir: 'RIR' };
   let busy = $state(false);
   const learned = swipeLearned();
 
-  function pick(field: SetField) {
-    active.draft = { ...active.draft, ...values };
-    const url = new URL(page.url.href);
-    url.searchParams.set('pick', field);
-    void goto(`${url.pathname}${url.search}`);
-  }
+  const shown = (field: SetField) =>
+    field === 'weight' ? formatLoad(Number(values.weight || 0)) : values[field];
 
-  function scrubOptions(field: SetField) {
-    const current = () =>
-      field === 'weight' ? formatLoad(Number(values.weight || 0)) : values[field];
-    return {
-      values: () => pickerValues(field, current()),
-      current,
-      onScrub: (state: Omit<NonNullable<typeof scrub>, 'field'> | null) => {
-        scrubbing = !!state;
-        if (state) scrub = { field, ...state };
-      },
-      onHold: () => cue('hold'),
-      onTick: () => cue('pick'),
-      onCommit: (value: string) => (values[field] = value),
-    };
+  // The wheel closed: keep its value, and the draft too, so the set survives a re-render.
+  function picked(field: SetField, value: string) {
+    wheel = null;
+    if (value === shown(field)) return;
+    values[field] = value;
+    active.draft = { ...active.draft, ...values };
+    persist().catch(showError);
   }
 
   const submit = () => document.querySelector<HTMLFormElement>('#set-form')?.requestSubmit();
@@ -129,11 +111,10 @@
             <button
               type="button"
               class="set-value"
-              data-no-swipe
               id="{field}-pick"
               aria-label="{NAMES[field]} {values[field] || '0'}, change"
-              use:scrubValue={scrubOptions(field)}
-              onclick={() => pick(field)}
+              aria-haspopup="dialog"
+              onclick={() => (wheel = field)}
               ><output id="{field}-value">{values[field] || '0'}</output><span>{LABELS[field]}</span
               ></button
             >
@@ -174,6 +155,13 @@
     {/snippet}
   </WorkoutStage>
 </SwipeCard>
-{#if scrubbing && scrub}
-  <ScrubWheel values={scrub.values} index={scrub.index} />
+{#if wheel}
+  {@const field = wheel}
+  <ValueWheel
+    values={pickerValues(field, shown(field))}
+    current={shown(field)}
+    label={NAMES[field]}
+    format={field === 'weight' ? (value) => `${value} ${unit}` : undefined}
+    onclose={(value) => picked(field, value)}
+  />
 {/if}

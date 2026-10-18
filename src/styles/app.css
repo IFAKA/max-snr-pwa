@@ -876,8 +876,6 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   gap: 6px;
 }
 .set-value {
-  /* A quick swipe scrolls the page; once the hold starts, scrubValue blocks the scroll. */
-  touch-action: pan-y;
   user-select: none;
   -webkit-touch-callout: none;
   display: grid;
@@ -924,22 +922,35 @@ main > section:has(> .app-list) > .app-list .list-link::before {
     background: var(--accent-soft);
   }
 }
-/* The wheel while a value is held: centred on a dimmed screen, the values roll through a band
-   and fade out above and below, with no card around them. */
-.scrub-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 20;
+/* A set value's wheel: a native snapping list centred on a dimmed screen, the values rolling
+   through a band and fading out above and below, with no card around them. */
+.value-wheel {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  padding: 0;
   display: grid;
   place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  animation: wheel-in 200ms var(--ease-out);
+}
+.value-wheel::backdrop {
   background: color-mix(in srgb, var(--bg) 88%, transparent);
   backdrop-filter: blur(6px);
-  pointer-events: none;
+  animation: wheel-fade 200ms var(--ease-out);
 }
-.scrub-wheel {
+.value-wheel.is-closing,
+.value-wheel.is-closing::backdrop {
+  opacity: 0;
+  transition: opacity 140ms ease-in;
+}
+.value-wheel-face {
   position: relative;
-  overflow: hidden;
-  width: min(100% - 16px, 200px);
+  width: min(100% - 16px, 220px);
   mask-image: linear-gradient(
     transparent,
     #000 calc(50% - 26px),
@@ -947,33 +958,51 @@ main > section:has(> .app-list) > .app-list .list-link::before {
     transparent
   );
 }
-.scrub-band {
+.value-wheel-band {
   position: absolute;
   inset-inline: 0;
   border-radius: 999px;
   background: var(--accent-soft);
+  pointer-events: none;
 }
-.scrub-track {
-  position: absolute;
-  inset-inline: 0;
-  top: 0;
-  margin: 0;
+.value-wheel-list {
+  position: relative;
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+}
+.value-wheel-list::-webkit-scrollbar {
+  display: none;
+}
+.value-wheel-item {
+  width: 100%;
+  min-height: 44px;
   padding: 0;
-  list-style: none;
-  text-align: center;
-  transition: transform 90ms var(--ease-out);
-}
-.scrub-item {
-  display: grid;
-  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
   color: var(--muted);
   font-size: 22px;
   font-weight: 800;
   letter-spacing: -0.03em;
+  scroll-snap-align: center;
 }
-.scrub-item.is-current {
+.value-wheel-item.is-current {
   color: var(--text);
-  font-size: 36px;
+  font-size: 34px;
+}
+@keyframes wheel-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+}
+@keyframes wheel-fade {
+  from {
+    opacity: 0;
+  }
 }
 @keyframes value-in {
   from {

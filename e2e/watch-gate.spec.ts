@@ -18,8 +18,6 @@ const SCREENS: Array<{ path: string; active?: ReturnType<typeof activeWorkout> }
   { path: '/workout/?activity=measurement' },
   { path: '/workout/', active: activeWorkout({ phase: 'lifting', open: 3 }) },
   { path: '/workout/?view=exercise', active: activeWorkout({ phase: 'lifting', open: 2 }) },
-  { path: '/workout/?pick=reps', active: activeWorkout({ phase: 'lifting', open: 2 }) },
-  { path: '/workout/?pick=weight', active: activeWorkout({ phase: 'lifting', open: 2 }) },
   { path: '/workout/?view=exercises', active: activeWorkout({ phase: 'lifting', open: 2 }) },
   { path: '/workout/', active: activeWorkout({ phase: 'rest', open: 1 }) },
   { path: '/workout/', active: activeWorkout({ phase: 'stretch', open: 0 }) },

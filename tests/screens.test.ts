@@ -64,25 +64,18 @@ describe('workout routing', () => {
       });
   });
 
-  test('a set value opens its picker while lifting only', async () => {
+  test('old full-screen value picker links return to the workout, where values are a wheel', async () => {
     await start('Monday');
-    active().phase = 'lifting';
-    active().tasks[0].completed = { reps: 10 };
-    active().pos = 1;
     expect(workoutView(getState(), params('pick=weight'))).toMatchObject({
-      kind: 'pick',
-      field: 'weight',
+      kind: 'redirect',
+      to: '/workout/',
     });
-    expect(workoutView(getState(), params('pick=nonsense')).kind).toBe('lifting');
-    active().phase = 'rest';
-    expect(workoutView(getState(), params('pick=reps')).kind).toBe('rest');
   });
 
   test('back is guarded on main steps only', async () => {
     await start('Monday');
     expect(isMainStep(getState(), params())).toBe(true);
     expect(isMainStep(getState(), params('view=exercises'))).toBe(false);
-    expect(isMainStep(getState(), params('pick=reps'))).toBe(false);
   });
 });
 
@@ -96,10 +89,6 @@ describe('route history', () => {
     );
     expect(parentRouteUrl('workout', params('day=Monday'), false)).toBe('/routine/?day=Monday');
     expect(parentRouteUrl('workout', params(), true)).toBe('/');
-    expect(parentRouteUrl('workout', params('pick=rir'), true)).toBe('/workout/');
-    expect(parentRouteUrl('workout', params('view=exercise&pick=rir'), true)).toBe(
-      '/workout/?view=exercise',
-    );
   });
 
   test('fresh launches rebuild the whole chain back to Today', () => {

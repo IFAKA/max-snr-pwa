@@ -18,7 +18,6 @@
   import Rest from './Rest.svelte';
   import StartScreen from './StartScreen.svelte';
   import Stretch from './Stretch.svelte';
-  import ValuePicker from './ValuePicker.svelte';
   import WorkoutGuard from './WorkoutGuard.svelte';
 
   const params = $derived(new URLSearchParams(page.url.search));
@@ -93,13 +92,6 @@
     <Completion workout={shown.workout} />
   {:else if shown.kind === 'lifting'}
     <Lifting active={shown.active} task={shown.task} />
-  {:else if shown.kind === 'pick'}
-    <ValuePicker
-      active={shown.active}
-      task={shown.task}
-      field={shown.field}
-      onpicked={() => history.back()}
-    />
   {:else if shown.kind === 'plank'}
     <Plank active={shown.active} />
   {:else if shown.kind === 'rest'}

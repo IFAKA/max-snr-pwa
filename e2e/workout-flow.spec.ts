@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { activeWorkout, appState, seed, stored } from './fixtures.ts';
 
 test('start from a routine day, log a set, rest survives a refresh', async ({ page }) => {
@@ -12,11 +12,10 @@ test('start from a routine day, log a set, rest survives a refresh', async ({ pa
   await expect(page).toHaveURL(/\/workout\/$/);
   await expect(page.locator('#reps-value')).toBeVisible();
   await page.locator('#weight-pick').click();
-  await expect(page).toHaveURL(/pick=weight/);
-  await expect(page.locator('main h1')).toHaveText('Load · kg');
-  await expect(page.getByRole('button', { name: '0 kg Current' })).toBeFocused();
-  await page.getByRole('button', { name: '2.5 kg', exact: true }).click();
-  await expect(page).not.toHaveURL(/pick=/);
+  const wheel = page.getByRole('dialog', { name: 'Load in kg' });
+  await expect(wheel.getByRole('button', { name: '0 kg', exact: true })).toBeFocused();
+  await wheel.getByRole('button', { name: '2.5 kg', exact: true }).click();
+  await expect(wheel).toHaveCount(0);
   await expect(page.locator('#weight-value')).toHaveText('2.5');
   await page.getByRole('button', { name: 'Log set' }).focus();
   await page.getByRole('button', { name: 'Log set' }).click();
@@ -148,53 +147,44 @@ test('deep links unwind detail → parent → Today with back', async ({ page, c
   await expect(launch).toHaveURL(/:4173\/$/);
 });
 
-test('holding a value and dragging up turns it like a wheel, without opening the picker', async ({
-  page,
-}) => {
+async function openWeightWheel(page: Page) {
   await seed(page, appState({ history: [] }));
   await page.goto('/routine/?day=Monday');
   await page.getByRole('button', { name: /^Start/ }).click();
   await page.locator('dialog[open]').getByRole('button', { name: 'Start' }).click();
   await expect(page.locator('#weight-value')).toHaveText('0');
+  await page.locator('#weight-pick').click();
+  const wheel = page.getByRole('dialog', { name: 'Load in kg' });
+  await expect(wheel).toBeVisible();
+  return wheel;
+}
 
-  await page.locator('#weight-pick').scrollIntoViewIfNeeded();
-  const box = (await page.locator('#weight-pick').boundingBox())!;
-  const x = box.x + box.width / 2;
-  const y = box.y + box.height / 2;
-  await page.mouse.move(x, y);
-  await page.mouse.down();
-  await page.waitForTimeout(500);
-  await expect(page.locator('.scrub-wheel .is-current')).toBeVisible();
-  await page.mouse.move(x, y - 56, { steps: 6 });
-  await expect(page.locator('.scrub-wheel .is-current')).toContainText('5');
-  await page.mouse.up();
-
-  await expect(page.locator('.scrub-wheel')).toHaveCount(0);
-  await expect(page).not.toHaveURL(/pick=/);
-  await expect(page.locator('#weight-value')).toHaveText('5');
-});
-
-test('pushing a held value far keeps it turning, so long lists stay a thumb sweep away', async ({
+test('a tapped value opens a wheel that scrolls natively and keeps its value on an outside tap', async ({
   page,
 }) => {
-  await seed(page, appState({ history: [] }));
-  await page.goto('/routine/?day=Monday');
-  await page.getByRole('button', { name: /^Start/ }).click();
-  await page.locator('dialog[open]').getByRole('button', { name: 'Start' }).click();
+  const wheel = await openWeightWheel(page);
+  const list = wheel.locator('.value-wheel-list');
+  const box = (await list.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.wheel(0, 52 * 4);
+  await expect(wheel.locator('.is-current')).toHaveText('10 kg');
+  await page.mouse.click(2, 2);
+  await expect(wheel).toHaveCount(0);
+  await expect(page).toHaveURL(/\/workout\/$/);
+  await expect(page.locator('#weight-value')).toHaveText('10');
+  const data = await stored(page);
+  expect(data.active.draft.weight).toBe('10');
+});
 
-  await page.locator('#weight-pick').scrollIntoViewIfNeeded();
-  const box = (await page.locator('#weight-pick').boundingBox())!;
-  const x = box.x + box.width / 2;
-  const y = box.y + box.height / 2;
-  await page.mouse.move(x, y);
-  await page.mouse.down();
-  await page.waitForTimeout(500);
-  await page.mouse.move(x, y - 40, { steps: 4 });
-  await page.mouse.move(x, y - 170, { steps: 8 });
-  await page.waitForTimeout(1500);
-  await page.mouse.move(x, y - 100, { steps: 4 });
-  await page.mouse.up();
-
-  await expect(page).not.toHaveURL(/pick=/);
-  expect(Number(await page.locator('#weight-value').textContent())).toBeGreaterThan(30);
+test('back or Escape closes the wheel and keeps the value, without leaving the workout', async ({
+  page,
+}) => {
+  const wheel = await openWeightWheel(page);
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowDown');
+  await expect(wheel.locator('.is-current')).toHaveText('5 kg');
+  await page.keyboard.press('Escape');
+  await expect(wheel).toHaveCount(0);
+  await expect(page.locator('dialog[open]')).toHaveCount(0);
+  await expect(page.locator('#weight-value')).toHaveText('5');
 });
