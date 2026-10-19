@@ -1808,37 +1808,6 @@ main > section:has(> .app-list) > .app-list .list-link::before {
 .analytics-note strong + small {
   grid-column: 1 / -1;
 }
-.checkin-form {
-  display: flex;
-  flex-direction: column;
-}
-.field-row {
-  display: flex;
-  min-height: 56px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  border-bottom: 1px solid var(--line);
-  font-weight: 700;
-}
-.field-input {
-  display: flex;
-  width: 50%;
-  align-items: center;
-  gap: 8px;
-}
-.field-input input {
-  min-width: 0;
-  min-height: 44px;
-  flex: 1;
-  border: 2px solid var(--line);
-  border-radius: 12px;
-  padding: 8px 10px;
-  background: var(--surface);
-  color: var(--text);
-  text-align: right;
-}
-.field-input small {
-  width: 2ch;
-  color: var(--muted);
+.set-values.single {
+  grid-template-columns: minmax(0, 1fr);
 }
