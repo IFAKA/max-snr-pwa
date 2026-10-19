@@ -1,7 +1,11 @@
 import type { ActiveWorkout, AppState, Prescription, Task } from '../types.ts';
 import { REST_MS, SESSION_CAP_MS, SESSION_TARGET_MS } from '../constants.ts';
 import { emptyState, normalizeWeeklyGoal } from '../state.ts';
-import { createDefaultPrescription, FIXED_PROGRAM_IDS } from '../workout/program.ts';
+import {
+  createDefaultPrescription,
+  FIXED_PROGRAM_IDS,
+  LEGACY_FIXED_PROGRAM_IDS,
+} from '../workout/program.ts';
 import { personalizationKey } from '../workout/personalization.ts';
 
 interface LegacyQueueItem {
@@ -63,9 +67,11 @@ function currentPrescription(state: AppState): Prescription {
     lastEvaluatedAt: isCurrent ? prescription?.lastEvaluatedAt : now,
     lastChangeReason: isCurrent
       ? 'Re-personalized from updated body measurements'
-      : prescription
-        ? 'Migrated to the fixed Monday/Wednesday/Friday program'
-        : 'Created the fixed Monday/Wednesday/Friday program',
+      : prescription && LEGACY_FIXED_PROGRAM_IDS.includes(prescription.programId)
+        ? 'Updated the program: more curl and crunch volume'
+        : prescription
+          ? 'Migrated to the fixed Monday/Wednesday/Friday program'
+          : 'Created the fixed Monday/Wednesday/Friday program',
     evidence: { migrated: true, historicalSessionsIgnored: history.length },
   });
 }

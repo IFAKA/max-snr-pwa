@@ -48,16 +48,16 @@ test('the user profile shifts sets toward arms and chest and away from side delt
   const routine = personalizeRoutine(base, plan);
   assert.equal(weekly(routine, 'cable-lateral-raise'), 9);
   assert.equal(weekly(routine, 'incline-machine-press'), 8);
-  assert.equal(weekly(routine, 'cable-curl'), 8);
+  assert.equal(weekly(routine, 'cable-curl'), 11);
   assert.equal(weekly(routine, 'overhead-cable-triceps-extension'), 8);
   routine.forEach((day) =>
     assert.ok(members(day).reduce((s, i) => s + i.sets, 0) <= SESSION_SET_CAP),
   );
 });
 
-test('a bigger arm measurement removes the arm bonus', () => {
+test('a bigger arm measurement removes the arm bonus and trims curl volume', () => {
   const plan = personalizationPlan(profile({ bicepsCm: 37 }), base);
-  assert.equal(plan.adjustments.find((a) => a.exerciseId === 'cable-curl').delta, 0);
+  assert.equal(plan.adjustments.find((a) => a.exerciseId === 'cable-curl').delta, -2);
 });
 
 test('personalization never mutates the base routine', () => {
@@ -74,7 +74,7 @@ test('incomplete measurements leave the base program unchanged', () => {
 
 test('the default prescription records and applies the stored profile', () => {
   const prescription = createDefaultPrescription({ profile: emptyState().settings.profile });
-  assert.equal(prescription.weeklySetAllocation['cable-curl'], 8);
+  assert.equal(prescription.weeklySetAllocation['cable-curl'], 11);
   assert.ok(prescription.personalization.key);
   assert.equal(prescription.perSessionSetDistribution.flat().length > 0, true);
 });

@@ -1,4 +1,5 @@
 import type { ExerciseDefinition } from '../types.ts';
+import { HOME_EXERCISES } from './home-exercises.ts';
 
 export type CatalogExercise = Required<
   Pick<
@@ -288,6 +289,7 @@ export const EXERCISES = {
     supersetSafe: true,
     health: ['trunk'],
   }),
+  ...HOME_EXERCISES,
 };
 
 export type ExerciseKey = keyof typeof EXERCISES;

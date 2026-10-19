@@ -8,6 +8,7 @@ import { beginLifting, continueRest as advanceRest, startRest } from './timers.t
 import { setSupersetLead, taskGroup } from './superset.ts';
 import { dayNow } from './calendar.ts';
 import { openTaskAfter } from './next-step.ts';
+import { restartPlanForDay } from './rotation.ts';
 
 export { sessionBudgetState, sessionElapsedMs, timeBudgetCutOrder } from './budget.ts';
 export { supersetProgress } from './superset.ts';
@@ -15,11 +16,15 @@ export { beginLifting, startRest };
 
 const current = () => getState().active as ActiveWorkout;
 
-/** Starts a workout for the day, replacing any active one. Callers confirm replacement first. */
+/**
+ * Starts a workout for the day, replacing any active one. Callers confirm replacement first.
+ * A restart day ("Restart", "Restart at home") starts its fixed routine instead of a program day.
+ */
 export async function start(day = dayNow()) {
   const state = getState();
-  if (!isWorkoutDay(day)) return false;
-  const tasks = flatten(dayItems(day));
+  const restart = restartPlanForDay(day);
+  if (!restart && !isWorkoutDay(day)) return false;
+  const tasks = flatten(restart ? restart.routine : dayItems(day));
   if (!tasks.length) return false;
   // Ids identify saved workouts (summary, reopen), so they must never repeat.
   const lastId = Math.max(0, ...state.history.map((workout) => Number(workout.id) || 0));
@@ -28,7 +33,7 @@ export async function start(day = dayNow()) {
     date: new Date().toISOString(),
     startedAt: Date.now(),
     day,
-    name: workoutName(day),
+    name: restart ? restart.name : workoutName(day),
     tasks,
     pos: 0,
     phase: 'lifting',

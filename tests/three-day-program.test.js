@@ -13,11 +13,11 @@ const sessionSets = prescription.routine.map((day) =>
 );
 
 test('default program is the fixed Monday/Wednesday/Friday routine', () => {
-  assert.equal(prescription.programId, 'fixed-hypertrophy-3-day-v1');
+  assert.equal(prescription.programId, 'fixed-hypertrophy-3-day-v2');
   assert.equal(prescription.daysPerWeek, 3);
   assert.deepEqual(prescription.days, ['Monday', 'Wednesday', 'Friday']);
   assert.deepEqual(prescription.names, ['Full body A', 'Upper body B', 'Full body C']);
-  assert.deepEqual(sessionSets, [22, 18, 20]);
+  assert.deepEqual(sessionSets, [23, 21, 23]);
 });
 
 test('weekly set allocation is exact', () => {
@@ -28,12 +28,12 @@ test('weekly set allocation is exact', () => {
     'chest-supported-row': 4,
     'leg-press': 4,
     'seated-leg-curl': 4,
-    'cable-curl': 6,
+    'cable-curl': 9,
     'overhead-cable-triceps-extension': 6,
     'reverse-cable-fly': 3,
     'chest-supported-shrug': 1,
     'standing-calf-raise': 2,
-    'cable-crunch': 2,
+    'cable-crunch': 6,
     'neck-flexion': 2,
     'neck-extension': 2,
   });
@@ -96,14 +96,15 @@ test('flattened tasks carry reverse fly metadata and alternate arm supersets', (
     'overhead-cable-triceps-extension',
     'cable-curl',
     'overhead-cable-triceps-extension',
+    'cable-curl',
   ]);
 });
 
-test('time-cap cut order trims calves, then abs, then neck, never delts or fly', () => {
+test('time-cap cut order trims calves, then neck; crunch, delts and fly are never cut', () => {
   const byId = (id) =>
     prescription.routine.flatMap(members).find((item) => item.id === id)?.cutPriority;
   assert.equal(byId('standing-calf-raise'), 1);
-  assert.equal(byId('cable-crunch'), 2);
+  assert.equal(byId('cable-crunch'), undefined);
   assert.equal(byId('neck-flexion'), 4);
   assert.equal(byId('reverse-cable-fly'), undefined);
   assert.equal(byId('cable-lateral-raise'), undefined);

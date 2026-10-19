@@ -70,13 +70,13 @@ export const CANONICAL_ROUTINE: Record<'Monday' | 'Thursday', RoutineDay> = {
 };
 
 const armsPair = (day: string) =>
-  fixedSuperset(`arms-${day}`, 'Antagonist arms', [fixed('curl', 2), fixed('pushdown', 2)]);
+  fixedSuperset(`arms-${day}`, 'Antagonist arms', [fixed('curl', 3), fixed('pushdown', 2)]);
 
 const neckPair = (day: string) =>
   fixedSuperset(`neck-${day}`, 'Neck', [fixed('neckFlexion', 1, 4), fixed('neckExtension', 1, 4)]);
 
-// Weekly sets: laterals 11, incline 7, pulldown 6, row 4, curl 6, triceps 6, reverse fly 3,
-// leg press 4, leg curl 4, calves 2, crunch 2, neck 2 + 2, shrug 1. Legs sit on days 1 and 3,
+// Weekly sets: laterals 11, incline 7, pulldown 6, row 4, curl 9, triceps 6, reverse fly 3,
+// leg press 4, leg curl 4, calves 2, crunch 6, neck 2 + 2, shrug 1. Legs sit on days 1 and 3,
 // which keeps day 2 shorter; every priority muscle is trained at least twice a week.
 export const CANONICAL_ROUTINE_3_DAY: Record<'Monday' | 'Wednesday' | 'Friday', RoutineDay> = {
   Monday: [
@@ -98,7 +98,7 @@ export const CANONICAL_ROUTINE_3_DAY: Record<'Monday' | 'Wednesday' | 'Friday', 
     fixed('row', 2),
     armsPair('wednesday'),
     fixed('reverseFly', 1),
-    fixed('crunch', 1, 2),
+    fixed('crunch', 3),
     neckPair('wednesday'),
   ],
   Friday: [
@@ -110,10 +110,28 @@ export const CANONICAL_ROUTINE_3_DAY: Record<'Monday' | 'Wednesday' | 'Friday', 
     armsPair('friday'),
     fixed('reverseFly', 1),
     fixed('calfRaise', 1, 1),
-    fixed('crunch', 1, 2),
+    fixed('crunch', 3),
     neckPair('friday'),
   ],
 };
+
+// Restart workouts: no input, no setup. Finishing one sends the rotation back to A.
+// FLOOR_ROUTINE is about 30 minutes (10 sets); HOME_FLOOR_ROUTINE about 15, with no gym.
+export const FLOOR_ROUTINE: RoutineDay = [
+  fixed('lateralRaise', 2),
+  fixed('inclinePress', 2),
+  fixed('pulldown', 2),
+  fixed('curl', 2),
+  fixed('crunch', 2),
+];
+
+export const HOME_FLOOR_ROUTINE: RoutineDay = [
+  fixed('dumbbellLateralRaise', 2),
+  fixed('pushUp', 2),
+  fixed('oneArmRow', 2),
+  fixed('dumbbellCurl', 2),
+  fixed('floorCrunch', 2),
+];
 
 const flatMembers = (item: RoutineItem) =>
   item.type === 'superset' ? item.members : item.type === 'equipmentBlock' ? item.items : [item];
@@ -170,10 +188,13 @@ export const OPTIMIZER_OUTPUT = canonicalOutput();
 
 export const FIXED_PROGRAM_IDS: Record<number, string> = {
   2: 'fixed-hypertrophy-2-day-v1',
-  3: 'fixed-hypertrophy-3-day-v1',
+  3: 'fixed-hypertrophy-3-day-v2',
 };
+// Programs stored before the curl/crunch change; migrate() rebuilds them as the current program.
+export const LEGACY_FIXED_PROGRAM_IDS = ['fixed-hypertrophy-3-day-v1'];
 export const isFixedProgram = (programId?: string) =>
-  Object.values(FIXED_PROGRAM_IDS).includes(programId || '');
+  Object.values(FIXED_PROGRAM_IDS).includes(programId || '') ||
+  LEGACY_FIXED_PROGRAM_IDS.includes(programId || '');
 
 export const prescriptionAllocationEntries = (
   prescription: Prescription | null | undefined,

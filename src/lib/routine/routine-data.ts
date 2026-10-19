@@ -80,6 +80,9 @@ export const isWorkoutDay = (day: string | null | undefined) =>
     );
   });
 
+/** The days that make up the rotation, in order (A, B, C for the fixed 3-day program). */
+export const rotationDays = (): string[] => routineDays().filter(isWorkoutDay);
+
 export const workoutName = (day: string) => {
   const names = activeNames();
   const name = Array.isArray(names)

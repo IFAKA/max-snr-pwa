@@ -4,7 +4,13 @@
   import { act } from '../app-state.svelte.ts';
   import { getState } from '../state.ts';
   import type { Workout } from '../types.ts';
-  import { improvementCallouts, reopenWorkout, workoutSummary } from '../workout/index.ts';
+  import { workoutName } from '../routine/routine-data.ts';
+  import {
+    improvementCallouts,
+    nextRotationDay,
+    reopenWorkout,
+    workoutSummary,
+  } from '../workout/index.ts';
   import { cue } from '../browser/feedback.ts';
   import AppList from '../components/AppList.svelte';
   import ListRow from '../components/ListRow.svelte';
@@ -44,6 +50,9 @@
   {#snippet info()}
     <p class="set-count">{workoutSummary(workout)}</p>
     <p class="muted" role="status">Saved to History</p>
+    {#if canReopen}
+      <p class="muted">Next: {workoutName(nextRotationDay(getState().history))}</p>
+    {/if}
     {#if callouts.length}
       <AppList label="Improvements Since Last Session" rows={workout.id}>
         {#each callouts as line (line)}

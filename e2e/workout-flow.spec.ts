@@ -188,3 +188,14 @@ test('back or Escape closes the wheel and keeps the value, without leaving the w
   await expect(page.locator('dialog[open]')).toHaveCount(0);
   await expect(page.locator('#weight-value')).toHaveText('5');
 });
+
+test('Today offers the next workout and a restart that needs no setup', async ({ page }) => {
+  await seed(page, appState({ history: [] }));
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'Full body A' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Start workout' })).toBeVisible();
+  await page.getByRole('button', { name: 'Start Restart · 30 min' }).click();
+  await expect(page).toHaveURL(/\/workout\/$/);
+  await expect(page.locator('dialog[open]')).toHaveCount(0);
+  await expect(page.locator('#reps-value')).toBeVisible();
+});

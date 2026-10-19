@@ -80,3 +80,4 @@ export { startPlank, setTimer, adjustRest, remaining, formatDuration } from './t
 export { sessionBudgetState, sessionElapsedMs, timeBudgetCutOrder } from './budget.ts';
 export { improvementCallouts, workoutSummary } from './summary.ts';
 export { dayNow, isCurrentDayComplete, localDateKey } from './calendar.ts';
+export { nextRotationDay, RESTART_PLANS, restartPlanForDay, type RestartKind } from './rotation.ts';
