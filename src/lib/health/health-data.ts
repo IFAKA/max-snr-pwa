@@ -1,16 +1,19 @@
 import type { Activity, AppState } from '../types.ts';
 import { activityDefinition } from './activity-data.ts';
 
+// Ordered by what the plan acts on first; every field is optional in a check-in.
 export const measurementFields = [
-  'weight',
   'waist',
+  'arms',
   'shoulders',
   'chest',
-  'arms',
+  'weight',
   'forearms',
   'thighs',
   'calves',
 ];
+
+export const measurementUnit = (key: string) => (key === 'weight' ? 'kg' : 'cm');
 
 export function recordMeasurement(state: AppState, values: Record<string, unknown>) {
   const filled = Object.fromEntries(

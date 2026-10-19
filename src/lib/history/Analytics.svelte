@@ -1,10 +1,11 @@
 <script lang="ts">
   import { appVersion } from '../app-state.svelte.ts';
   import { getState } from '../state.ts';
-  import { analyticsModel, type ValueRow } from './analytics-model.ts';
+  import { analyticsModel, type MeasurementRow, type ValueRow } from './analytics-model.ts';
   import AppList from '../components/AppList.svelte';
   import Title from '../components/Title.svelte';
   import HealthLogForm from './HealthLogForm.svelte';
+  import MeasurementForm from './MeasurementForm.svelte';
 
   // Each view answers one question: what I did this week, how much each muscle got, how I changed.
   let { view = 'week' }: { view?: 'week' | 'muscles' | 'measurements' } = $props();
@@ -27,6 +28,16 @@
   {/each}
 {/snippet}
 
+{#snippet measured(rows: MeasurementRow[])}
+  {#each rows as row (row.label)}
+    <li class="list-block">
+      <div class="list-link analytics-note">
+        <span>{row.label}</span><strong>{row.value}</strong><small>{row.note}</small>
+      </div>
+    </li>
+  {/each}
+{/snippet}
+
 {#snippet note(text: string)}
   <li data-picker-skip class="list-block">
     <div class="list-link empty-state"><span>{text}</span></div>
@@ -46,10 +57,11 @@
       {@render values(model.effectiveSets, EMPTY_WORKOUT)}
     {:else}
       {#if model.measurementTrend}
-        {@render values(model.measurementTrend)}
+        {@render measured(model.measurementTrend)}
       {:else}
-        {@render note('Log two check-ins to see how they change.')}
+        {@render note('Measure what you like, all optional. Your changes show here.')}
       {/if}
+      <li data-picker-skip class="list-block"><MeasurementForm /></li>
       <li data-picker-skip class="list-block"><HealthLogForm /></li>
     {/if}
   </AppList>

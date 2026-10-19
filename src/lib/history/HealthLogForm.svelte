@@ -2,8 +2,6 @@
   import { act } from '../app-state.svelte.ts';
   import { getState } from '../state.ts';
   import { persist } from '../storage/persistence.ts';
-  import { measurementFields, recordMeasurement } from '../health/health-data.ts';
-  import { readableKey } from './history-format.ts';
 
   const now = () => new Date().toISOString();
 
@@ -28,10 +26,6 @@
         minutes: Number(cardio),
         intensity: String(form.get('intensity') || 'moderate'),
       });
-    recordMeasurement(
-      state,
-      Object.fromEntries(measurementFields.map((key) => [key, form.get(key)])),
-    );
     state.health.sedentary.logs.push({
       date: now(),
       hours: Number(form.get('sedentaryHours') || state.health.sedentary.profileHoursPerDay),
@@ -67,7 +61,7 @@
 {/snippet}
 
 <details class="analytics-details">
-  <summary>Log Health Data</summary>
+  <summary>Log movement and sitting (optional)</summary>
   <form id="activity-form" class="analytics-form" onsubmit={submit}>
     {#each NUMBER_FIELDS as item (item.id)}{@render field(item.id, item.label, item.step)}{/each}
     <label class="analytics-field"
@@ -77,7 +71,6 @@
       ></label
     >
     {#each SITTING_FIELDS as item (item.id)}{@render field(item.id, item.label, item.step)}{/each}
-    {#each measurementFields as key (key)}{@render field(key, readableKey(key))}{/each}
     <label class="analytics-field"
       ><span><input name="reminders" type="checkbox" /> Enable movement reminder</span></label
     >
@@ -86,6 +79,6 @@
       'Reminder interval (behavioral choice, not a proven threshold)',
       '1',
     )}
-    <button class="primary" type="submit">Save log</button>
+    <button class="primary" type="submit">Save movement log</button>
   </form>
 </details>

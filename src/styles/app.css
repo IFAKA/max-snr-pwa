@@ -1799,3 +1799,12 @@ main > section:has(> .app-list) > .app-list .list-link::before {
 .start-button:active {
   transform: scale(0.98);
 }
+.form-heading {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+}
+.analytics-note strong + small {
+  grid-column: 1 / -1;
+}

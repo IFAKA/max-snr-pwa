@@ -15,13 +15,14 @@ import {
   sessionTimingComparison,
   weeklyGymAnalytics,
 } from '../workout/index.ts';
-import { measurementFields } from '../health/health-data.ts';
+import { measurementFields, measurementUnit } from '../health/health-data.ts';
 import { weeklyPlan } from '../routine/routine-summary.ts';
-import { readableKey } from './history-format.ts';
+import { listDate, readableKey } from './history-format.ts';
 import { weeklyProgressLabel } from './weekly-progress.ts';
 
 export type ValueRow = { label: string; value: string };
 export type NoteRow = { label: string; note: string };
+export type MeasurementRow = { label: string; value: string; note: string };
 
 const NBSP = '\u00a0';
 
@@ -65,20 +66,33 @@ function planChanges(recommendations: ReturnType<typeof adaptiveRecommendations>
   }));
 }
 
-function measurementTrend(measurements: AppState['health']['measurements']): ValueRow[] | null {
-  const recent = measurements?.slice(-2) || [];
-  if (recent.length < 2) return null;
-  return measurementFields.map((key) => {
-    const previous = recent[0][key];
-    const latest = recent[1][key];
-    if (previous === undefined || latest === undefined)
-      return { label: readableKey(key), value: '—' };
-    const delta = Number(latest) - Number(previous);
-    return {
-      label: readableKey(key),
-      value: `${formatNumber(Number(latest))} (${delta >= 0 ? '+' : ''}${formatNumber(delta)})`,
-    };
+const signed = (delta: number) =>
+  `${delta > 0 ? '+' : delta < 0 ? '\u2212' : '\u00b1'}${formatNumber(Math.abs(delta))}`;
+
+/** Latest value per measurement with the change since the previous and the first check-in. */
+function measurementTrend(
+  measurements: AppState['health']['measurements'],
+): MeasurementRow[] | null {
+  const rows = measurementFields.flatMap((key): MeasurementRow[] => {
+    const points = (measurements || [])
+      .filter((entry) => Number.isFinite(Number(entry[key])) && entry[key] !== undefined)
+      .map((entry) => ({ date: String(entry.date), value: Number(entry[key]) }));
+    const latest = points.at(-1);
+    if (!latest) return [];
+    const unit = measurementUnit(key);
+    const [first, previous] = [points[0], points.at(-2)];
+    const since = (point: typeof first) =>
+      `${signed(latest.value - point.value)} since ${listDate(point.date)}`;
+    const notes = previous ? [since(previous), ...(first !== previous ? [since(first)] : [])] : [];
+    return [
+      {
+        label: readableKey(key),
+        value: `${formatNumber(latest.value)}${NBSP}${unit}`,
+        note: notes.join(' · ') || `First check-in ${listDate(latest.date)}`,
+      },
+    ];
   });
+  return rows.length ? rows : null;
 }
 
 function prescriptionMuscles(state: AppState) {
