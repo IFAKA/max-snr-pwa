@@ -41,6 +41,18 @@
       icon="chevron"
       iconLabel="Open this week"
     />
+    <ListRow
+      label="Muscles"
+      href="/history/?view=muscles"
+      icon="chevron"
+      iconLabel="Open muscles"
+    />
+    <ListRow
+      label="Measurements"
+      href="/history/?view=measurements"
+      icon="chevron"
+      iconLabel="Open measurements"
+    />
     <ListLabel text="Done" />
     {#each entries as entry, index (index)}
       <ListRow

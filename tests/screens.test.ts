@@ -87,9 +87,7 @@ describe('route history', () => {
     expect(routeName('/')).toBe('today');
     expect(parentRouteUrl('routine', params('day=Monday'), false)).toBe('/routine/');
     expect(parentRouteUrl('history', params('view=workout&id=0'), false)).toBe('/history/');
-    expect(parentRouteUrl('history', params('view=insights'), false)).toBe(
-      '/history/?view=analytics',
-    );
+    expect(parentRouteUrl('history', params('view=muscles'), false)).toBe('/history/');
     expect(parentRouteUrl('workout', params('day=Monday'), false)).toBe('/routine/?day=Monday');
     expect(parentRouteUrl('workout', params(), true)).toBe('/');
   });

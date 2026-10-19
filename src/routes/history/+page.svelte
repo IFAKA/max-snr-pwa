@@ -20,8 +20,10 @@
   <WorkoutDetail {workout} />
 {:else if view === 'analytics'}
   <Analytics />
-{:else if view === 'insights'}
-  <Analytics insights />
+{:else if view === 'muscles' || view === 'insights'}
+  <Analytics view="muscles" />
+{:else if view === 'measurements'}
+  <Analytics view="measurements" />
 {:else if view === 'data'}
   <Settings />
 {:else}
