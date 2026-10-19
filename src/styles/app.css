@@ -1792,7 +1792,6 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   margin-top: 12px;
   border: 2px solid var(--accent);
   border-radius: 15px;
-  background: var(--bg, Canvas);
   font-size: 1.1rem;
   font-weight: 800;
   text-decoration: none;
