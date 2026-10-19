@@ -16,6 +16,7 @@ export function parentRouteUrl(
   if (route === 'routine' && params.has('day')) return '/routine/';
   if (route === 'history' && params.get('view') === 'workout') return '/history/';
   if (route === 'history' && params.get('view') === 'data') return '/';
+  if (route === 'history' && params.get('view') === 'checkin') return '/history/?view=measurements';
   if (route === 'history' && params.get('view')) return '/history/';
   if (route === 'workout' && params.has('day') && !hasActiveWorkout)
     return `/routine/?day=${encodeURIComponent(params.get('day') as string)}`;

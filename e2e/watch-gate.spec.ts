@@ -13,6 +13,8 @@ const SCREENS: Array<{ path: string; active?: ReturnType<typeof activeWorkout> }
   { path: '/history/?view=data' },
   { path: '/history/?view=muscles' },
   { path: '/history/?view=measurements' },
+  { path: '/history/?view=checkin' },
+  { path: '/history/?view=daily' },
   { path: '/workout/?day=Monday' },
   { path: '/workout/?activity=walk' },
   { path: '/workout/?activity=measurement' },

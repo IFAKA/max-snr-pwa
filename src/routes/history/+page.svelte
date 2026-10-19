@@ -2,6 +2,8 @@
   import { page } from '$app/state';
   import { appVersion } from '#lib/app-state.svelte.ts';
   import { getState } from '#lib/state.ts';
+  import CheckIn from '#lib/history/CheckIn.svelte';
+  import DailyLog from '#lib/history/DailyLog.svelte';
   import Analytics from '#lib/history/Analytics.svelte';
   import HistoryIndex from '#lib/history/HistoryIndex.svelte';
   import WorkoutDetail from '#lib/history/WorkoutDetail.svelte';
@@ -24,6 +26,10 @@
   <Analytics view="muscles" />
 {:else if view === 'measurements'}
   <Analytics view="measurements" />
+{:else if view === 'checkin'}
+  <CheckIn />
+{:else if view === 'daily'}
+  <DailyLog />
 {:else if view === 'data'}
   <Settings />
 {:else}

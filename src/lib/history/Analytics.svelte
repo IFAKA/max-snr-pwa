@@ -4,8 +4,6 @@
   import { analyticsModel, type MeasurementRow, type ValueRow } from './analytics-model.ts';
   import AppList from '../components/AppList.svelte';
   import Title from '../components/Title.svelte';
-  import HealthLogForm from './HealthLogForm.svelte';
-  import MeasurementForm from './MeasurementForm.svelte';
 
   // Each view answers one question: what I did this week, how much each muscle got, how I changed.
   let { view = 'week' }: { view?: 'week' | 'muscles' | 'measurements' } = $props();
@@ -59,10 +57,11 @@
       {#if model.measurementTrend}
         {@render measured(model.measurementTrend)}
       {:else}
-        {@render note('Measure what you like, all optional. Your changes show here.')}
+        {@render note('No check-ins yet. Start with a baseline.')}
       {/if}
-      <li data-picker-skip class="list-block"><MeasurementForm /></li>
-      <li data-picker-skip class="list-block"><HealthLogForm /></li>
     {/if}
   </AppList>
+  {#if view === 'measurements'}
+    <a class="primary start-button" href="/history/?view=checkin">New check-in</a>
+  {/if}
 </section>

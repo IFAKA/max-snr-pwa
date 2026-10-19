@@ -53,6 +53,12 @@
       icon="chevron"
       iconLabel="Open measurements"
     />
+    <ListRow
+      label="Daily log"
+      href="/history/?view=daily"
+      icon="chevron"
+      iconLabel="Open daily log"
+    />
     <ListLabel text="Done" />
     {#each entries as entry, index (index)}
       <ListRow

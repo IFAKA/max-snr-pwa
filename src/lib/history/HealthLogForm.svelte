@@ -60,25 +60,21 @@
   >
 {/snippet}
 
-<details class="analytics-details">
-  <summary>Log movement and sitting (optional)</summary>
-  <form id="activity-form" class="analytics-form" onsubmit={submit}>
-    {#each NUMBER_FIELDS as item (item.id)}{@render field(item.id, item.label, item.step)}{/each}
-    <label class="analytics-field"
-      ><span>Cardio intensity</span><select id="intensity" name="intensity"
-        ><option value="moderate">Moderate</option><option value="vigorous">Vigorous</option
-        ></select
-      ></label
-    >
-    {#each SITTING_FIELDS as item (item.id)}{@render field(item.id, item.label, item.step)}{/each}
-    <label class="analytics-field"
-      ><span><input name="reminders" type="checkbox" /> Enable movement reminder</span></label
-    >
-    {@render field(
-      'reminderInterval',
-      'Reminder interval (behavioral choice, not a proven threshold)',
-      '1',
-    )}
-    <button class="primary" type="submit">Save movement log</button>
-  </form>
-</details>
+<form id="activity-form" class="analytics-form" onsubmit={submit}>
+  {#each NUMBER_FIELDS as item (item.id)}{@render field(item.id, item.label, item.step)}{/each}
+  <label class="analytics-field"
+    ><span>Cardio intensity</span><select id="intensity" name="intensity"
+      ><option value="moderate">Moderate</option><option value="vigorous">Vigorous</option></select
+    ></label
+  >
+  {#each SITTING_FIELDS as item (item.id)}{@render field(item.id, item.label, item.step)}{/each}
+  <label class="analytics-field"
+    ><span><input name="reminders" type="checkbox" /> Enable movement reminder</span></label
+  >
+  {@render field(
+    'reminderInterval',
+    'Reminder interval (behavioral choice, not a proven threshold)',
+    '1',
+  )}
+  <button class="primary" type="submit">Save log</button>
+</form>

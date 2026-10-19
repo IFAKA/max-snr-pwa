@@ -92,3 +92,14 @@ test('state persists to IndexedDB under the existing database and store names', 
   );
   expect(fromDb).toBe(1);
 });
+
+test('a check-in saves from three fields and returns to the changes', async ({ page }) => {
+  await page.goto('/history/?view=measurements');
+  await expect(page.getByText('No check-ins yet')).toBeVisible();
+  await page.getByRole('link', { name: 'New check-in' }).click();
+  await expect(page.getByLabel('Chest')).toBeHidden();
+  await page.getByLabel('Waist').fill('82');
+  await page.getByRole('button', { name: 'Save' }).click();
+  await expect(page.locator('main h1')).toHaveText('Measurements');
+  await expect(page.getByText('82 cm')).toBeVisible();
+});
