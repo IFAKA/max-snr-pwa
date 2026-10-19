@@ -13,6 +13,7 @@ const SCREENS: Array<{ path: string; active?: ReturnType<typeof activeWorkout> }
   { path: '/history/?view=activities' },
   { path: '/history/?view=analytics' },
   { path: '/history/?view=data' },
+  { path: '/history/?view=insights' },
   { path: '/workout/?day=Monday' },
   { path: '/workout/?activity=walk' },
   { path: '/workout/?activity=measurement' },
@@ -85,7 +86,7 @@ test('keyboard navigation moves focus to the new heading without a focus ring', 
 }) => {
   await seed(page, appState());
   await page.goto('/routine/');
-  await page.getByRole('link', { name: 'Monday' }).focus();
+  await page.getByRole('link', { name: /^Full body A/ }).focus();
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/day=Monday/);
   const heading = page.locator('main h1');

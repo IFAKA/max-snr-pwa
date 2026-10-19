@@ -38,7 +38,7 @@
       body="The workout in progress will be discarded."
       actions={[
         { value: 'cancel', label: 'Keep Current Workout', primary: true },
-        { value: 'start', label: 'Start Restart', destructive: true },
+        { value: 'start', label: 'Start Short Workout', destructive: true },
       ]}
       onclose={handleClose}
     />

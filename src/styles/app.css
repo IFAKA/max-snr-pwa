@@ -1763,3 +1763,37 @@ main > section:has(> .app-list) > .app-list .list-link::before {
 .drawer-overlay[data-handoff='true'][data-state='open'] {
   animation: none !important;
 }
+/* Group label: small and muted, so it reads as a caption and never as a row you can tap. */
+.app-list > li.list-label {
+  height: auto;
+  min-height: 0;
+  align-items: flex-end;
+  padding: 16px 2px 6px;
+  border-bottom: 0;
+}
+.list-label h2 {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: 0;
+  line-height: 1.2;
+}
+/* The one primary action of a screen: a full-width button above the list, not a row in it. */
+.start-button {
+  display: flex;
+  width: 100%;
+  min-height: 56px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  border: 2px solid var(--accent);
+  border-radius: 15px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+.start-button:active {
+  transform: scale(0.98);
+}

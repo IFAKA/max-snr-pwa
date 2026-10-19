@@ -138,9 +138,7 @@ test('deep links unwind detail → parent → Today with back', async ({ page, c
   // A fresh launch (new tab or installed-app start) on a routine detail.
   const launch = await context.newPage();
   await launch.goto('/routine/?day=Monday&view=exercises');
-  await expect(launch.locator('main h1')).toHaveText('Exercises');
-  await launch.goBack();
-  await expect(launch).toHaveURL(/\/routine\/\?day=Monday$/);
+  await expect(launch.locator('main h1')).toHaveText('Full body A');
   await launch.goBack();
   await expect(launch.locator('main h1')).toHaveText('Routine');
   await launch.goBack();
@@ -193,9 +191,28 @@ test('Today offers the next workout and a restart that needs no setup', async ({
   await seed(page, appState({ history: [] }));
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Full body A' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Start workout' })).toBeVisible();
-  await page.getByRole('button', { name: 'Start Restart · 30 min' }).click();
+  await expect(page.getByRole('button', { name: 'Start', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Start At the gym · 30 min' }).click();
   await expect(page).toHaveURL(/\/workout\/$/);
   await expect(page.locator('dialog[open]')).toHaveCount(0);
   await expect(page.locator('#reps-value')).toBeVisible();
+});
+
+test('menus name things the way Today does: workouts in Routine, only the past in History', async ({
+  page,
+}) => {
+  await seed(page, appState({ history: [] }));
+  await page.goto('/routine/');
+  await expect(page.getByRole('link', { name: /^Full body A.*Next/ })).toBeVisible();
+  await expect(page.getByRole('link', { name: /^Upper body B/ })).toBeVisible();
+  await expect(page.getByText('Monday')).toHaveCount(0);
+  await page.getByRole('link', { name: /^Upper body B/ }).click();
+  await expect(page.getByRole('heading', { name: 'Upper body B' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Start/ })).toBeVisible();
+  await expect(page.getByText('Cable Lateral Raise')).toBeVisible();
+
+  await page.goto('/history/');
+  await expect(page.getByRole('switch', { name: 'Sound' })).toHaveCount(0);
+  await page.getByRole('link', { name: 'Settings' }).click();
+  await expect(page.getByRole('switch', { name: 'Sound' })).toBeVisible();
 });

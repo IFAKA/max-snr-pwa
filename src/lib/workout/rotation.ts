@@ -13,8 +13,8 @@ export interface RestartPlan {
 // Restart workouts are saved under these `day` values. They are not rotation days, so the
 // rotation after one of them continues from A.
 export const RESTART_PLANS: Record<RestartKind, RestartPlan> = {
-  floor: { day: 'Restart', name: 'Restart', routine: FLOOR_ROUTINE },
-  home: { day: 'Restart at home', name: 'Restart at home', routine: HOME_FLOOR_ROUTINE },
+  floor: { day: 'Restart', name: 'Short · Gym', routine: FLOOR_ROUTINE },
+  home: { day: 'Restart at home', name: 'Short · Home', routine: HOME_FLOOR_ROUTINE },
 };
 
 export const restartPlanForDay = (day: string | null | undefined): RestartPlan | undefined =>

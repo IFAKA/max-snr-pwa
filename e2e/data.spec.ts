@@ -3,7 +3,7 @@ import { appState, savedWorkout, seed, stored } from './fixtures.ts';
 
 test('export downloads a backup of the stored data', async ({ page }) => {
   await seed(page, appState());
-  await page.goto('/history/');
+  await page.goto('/history/?view=data');
   const [download] = await Promise.all([
     page.waitForEvent('download'),
     page.getByRole('button', { name: /Export/ }).click(),
@@ -13,7 +13,7 @@ test('export downloads a backup of the stored data', async ({ page }) => {
 
 test('the Sound switch turns sound off and remembers it', async ({ page }) => {
   await seed(page, appState());
-  await page.goto('/history/');
+  await page.goto('/history/?view=data');
   const sound = page.getByRole('switch', { name: 'Sound' });
   await expect(sound).toHaveAttribute('aria-checked', 'true');
   await sound.click();
@@ -30,7 +30,7 @@ test('import validates, asks with "Keep Current Data" as the default, then repla
 }) => {
   await seed(page, appState());
   await page.goto('/history/?view=data');
-  await expect(page.locator('main h1')).toHaveText('Data');
+  await expect(page.locator('main h1')).toHaveText('Settings');
   const input = page.locator('#import');
 
   await input.setInputFiles({

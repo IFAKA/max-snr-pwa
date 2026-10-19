@@ -25,6 +25,8 @@
   <ActivityList />
 {:else if view === 'analytics'}
   <Analytics />
+{:else if view === 'insights'}
+  <Analytics insights />
 {:else if view === 'data'}
   <HistoryIndex data />
 {:else}

@@ -5,14 +5,14 @@
   import Title from '../components/Title.svelte';
   import DataActions from './DataActions.svelte';
 
-  // `data` is the dedicated Data view; the index shows the same actions below navigation.
+  // The index is only about the past; `data` is the Settings view (sound, backup, updates).
   let { data = false }: { data?: boolean } = $props();
   let importError = $state('');
 </script>
 
 <section aria-labelledby={data ? 'data-title' : 'history-title'}>
-  <Title text={data ? 'Data' : 'History'} id={data ? 'data-title' : 'history-title'} />
-  <AppList label={data ? 'Data actions' : 'History options'} rows={data}>
+  <Title text={data ? 'Settings' : 'History'} id={data ? 'data-title' : 'history-title'} />
+  <AppList label={data ? 'Settings' : 'History'} rows={data}>
     {#if !data}
       <ListRow
         label="Workouts"
@@ -32,8 +32,15 @@
         icon="chevron"
         iconLabel="Open this week"
       />
+      <ListRow
+        label="Settings"
+        href="/history/?view=data"
+        icon="chevron"
+        iconLabel="Open settings"
+      />
+    {:else}
+      <DataActions onerror={(message) => (importError = message)} />
     {/if}
-    <DataActions onerror={(message) => (importError = message)} />
   </AppList>
   <output id="data-status" class="notice error" aria-live="polite" hidden={!importError}
     >{importError}</output
@@ -47,7 +54,7 @@
   >
     {appUpdate.message}
   </p>
-  {#if !data}
+  {#if data}
     <p class="build-label">Version {__BUILD_ID__}</p>
   {/if}
 </section>

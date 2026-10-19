@@ -1,66 +1,37 @@
 <script lang="ts">
   import { appVersion } from '../app-state.svelte.ts';
   import { getState } from '../state.ts';
-  import { configuredDays, isWorkoutDay } from './routine-data.ts';
-  import { dayNow, isCurrentDayComplete } from '../workout/index.ts';
-  import { holdScroll } from '../browser/text-overflow.ts';
+  import { rotationDays, workoutName } from './routine-data.ts';
+  import { nextRotationDay } from '../workout/index.ts';
   import AppList from '../components/AppList.svelte';
   import ListRow from '../components/ListRow.svelte';
   import Title from '../components/Title.svelte';
 
+  // The workouts in rotation order, named as Today names them. "Next" marks the one Today starts;
+  // any of them can be opened and started, in any order.
   const view = $derived.by(() => {
     void appVersion.value;
-    const state = getState();
-    const today = dayNow();
+    const next = nextRotationDay(getState().history);
     return {
-      days: configuredDays().map((day) => ({
-        day,
-        today: day === today,
-        workout: isWorkoutDay(day),
-        complete: isCurrentDayComplete(state.history, day),
-      })),
+      days: rotationDays().map((day) => ({ day, name: workoutName(day), next: day === next })),
     };
   });
 </script>
 
 <section aria-labelledby="routine-title">
   <Title text="Routine" id="routine-title" />
-  <AppList
-    label="Routine days"
-    rows={view.days.map((item) => `${item.day}${item.complete}`).join()}
-  >
+  <AppList label="Workouts" rows={view.days.map((item) => `${item.day}${item.next}`).join()}>
     {#each view.days as item (item.day)}
-      {#if item.workout && !item.complete}
-        <ListRow
-          href={`/routine/?day=${encodeURIComponent(item.day)}`}
-          rowClass={item.today ? 'today' : ''}
-          icon="chevron"
-          iconLabel="Open day"
-        >
-          {#snippet content()}
-            <span class="day-label" data-hold-scroll use:holdScroll
-              ><span class="hold-scroll-text">{item.day}</span>{#if item.today}<small
-                  class="day-indicator"
-                  aria-label="Current day"
-                ></small>{/if}</span
-            >
-          {/snippet}
-        </ListRow>
-      {:else if item.workout}
-        <ListRow rowClass="complete-row" disabled icon="check" iconLabel="Workout complete">
-          {#snippet content()}<span class="day-label"><span>{item.day}</span></span>{/snippet}
-        </ListRow>
-      {:else}
-        <ListRow
-          label={`${item.day} · Rest`}
-          rowClass="rest-day"
-          linkClass="is-disabled"
-          disabled
-          scroll
-          icon="dash"
-          iconLabel="Rest day"
-        />
-      {/if}
+      <ListRow
+        href={`/routine/?day=${encodeURIComponent(item.day)}`}
+        icon="chevron"
+        iconLabel={`Open ${item.name}`}
+      >
+        {#snippet content()}
+          <span>{item.name}</span>
+        {/snippet}
+        {#snippet trailing()}{#if item.next}<small>Next</small>{/if}{/snippet}
+      </ListRow>
     {/each}
   </AppList>
 </section>
