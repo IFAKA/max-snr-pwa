@@ -128,7 +128,7 @@ test('deep links unwind detail → parent → Today with back', async ({ page, c
   await seed(page, appState());
   await page.goto('/history/?view=workout&id=0');
   await expect(page.locator('main h1')).toHaveText('Full body A');
-  for (const title of ['Workouts', 'History']) {
+  for (const title of ['History']) {
     await page.goBack();
     await expect(page.locator('main h1')).toHaveText(title);
   }
@@ -211,7 +211,7 @@ test('menus name things the way Today does: workouts in Routine, only the past i
   await expect(page.getByRole('button', { name: /^Start/ })).toBeVisible();
   await expect(page.getByText('Cable Lateral Raise')).toBeVisible();
 
-  await page.goto('/history/');
+  await page.goto('/');
   await expect(page.getByRole('switch', { name: 'Sound' })).toHaveCount(0);
   await page.getByRole('link', { name: 'Settings' }).click();
   await expect(page.getByRole('switch', { name: 'Sound' })).toBeVisible();

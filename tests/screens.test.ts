@@ -86,9 +86,7 @@ describe('route history', () => {
     expect(routeName('/routine/')).toBe('routine');
     expect(routeName('/')).toBe('today');
     expect(parentRouteUrl('routine', params('day=Monday'), false)).toBe('/routine/');
-    expect(parentRouteUrl('history', params('view=workout&id=0'), false)).toBe(
-      '/history/?view=workouts',
-    );
+    expect(parentRouteUrl('history', params('view=workout&id=0'), false)).toBe('/history/');
     expect(parentRouteUrl('history', params('view=insights'), false)).toBe(
       '/history/?view=analytics',
     );
@@ -102,11 +100,7 @@ describe('route history', () => {
       '/',
       '/routine/',
     ]);
-    expect(ancestorUrls(url('/history/?view=workout&id=0'), false)).toEqual([
-      '/',
-      '/history/',
-      '/history/?view=workouts',
-    ]);
+    expect(ancestorUrls(url('/history/?view=workout&id=0'), false)).toEqual(['/', '/history/']);
     expect(ancestorUrls(url('/workout/'), true)).toEqual(['/']);
     expect(ancestorUrls(url('/'), false)).toEqual([]);
   });

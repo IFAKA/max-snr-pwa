@@ -34,7 +34,7 @@ Follow Apple’s primary references before changing UI: [Designing for watchOS](
 ### Shared watch-and-phone flow contract
 
 - Use one shared semantic DOM and one CSS system for smartwatch and phone. Start with the watch-sized canvas; phone layouts may add space but must not introduce a second navigation model or phone-only tab bar.
-- Today is the landing view: show the current workout type as the title, followed by exactly two primary navigation actions, `Routine` and `History`.
+- Today is the landing view: show the current workout type as the title, followed by one Start action at the bottom, a restart group, and a `More` group with `Routine`, `History` and `Settings`. History is one list of everything done; Settings (sound, backup, updates) lives at `/history/?view=data` for old links but is opened from Today.
 - Routine is a list of days. Selecting a workout day opens a dedicated day view with that day’s title and an exercise list showing exercise name, sets, and reps. The `Start` action opens a native confirmation dialog before starting.
 - Keep long content in a new view or a vertically scrolling list instead of forcing it into one viewport. History and Routine have explicit titles, and browser/native Android back must unwind detail → parent → Today.
 - Prefer native links, buttons, `dialog`, and browser history for navigation and confirmation. Preserve the existing route paths and state schema while using query parameters for detail views.

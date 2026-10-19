@@ -1787,9 +1787,12 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
-  margin-bottom: 8px;
+  position: sticky;
+  bottom: 8px;
+  margin-top: 12px;
   border: 2px solid var(--accent);
   border-radius: 15px;
+  background: var(--bg, Canvas);
   font-size: 1.1rem;
   font-weight: 800;
   text-decoration: none;

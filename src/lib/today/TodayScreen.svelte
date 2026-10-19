@@ -47,13 +47,6 @@
 
 <section class="today-screen" aria-labelledby="today-title">
   <Title text={view.title} id="today-title" />
-  {#if view.active}
-    <a class="primary start-button" href="/workout/">Continue</a>
-  {:else}
-    <button class="primary start-button" type="button" disabled={starting} onclick={startNext}
-      >Start</button
-    >
-  {/if}
   <AppList label="Home navigation" rows={`${view.active}${view.day}${view.suggested}`}>
     <ListLabel text="Short on time?" />
     <RestartRow kind="floor" label="At the gym · 30 min" />
@@ -70,5 +63,13 @@
     <ListLabel text="More" />
     <ListRow label="Routine" href="/routine/" icon="chevron" iconLabel="Open routine" />
     <ListRow label="History" href="/history/" icon="chevron" iconLabel="Open history" />
+    <ListRow label="Settings" href="/history/?view=data" icon="chevron" iconLabel="Open settings" />
   </AppList>
+  {#if view.active}
+    <a class="primary start-button" href="/workout/">Continue</a>
+  {:else}
+    <button class="primary start-button" type="button" disabled={starting} onclick={startNext}
+      >Start</button
+    >
+  {/if}
 </section>

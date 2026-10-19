@@ -1,60 +1,68 @@
 <script lang="ts">
-  import { appUpdate } from '../browser/app-update.svelte.ts';
+  import { appVersion } from '../app-state.svelte.ts';
+  import { getState } from '../state.ts';
+  import { activityLine, workoutDate } from './history-format.ts';
   import AppList from '../components/AppList.svelte';
+  import ListLabel from '../components/ListLabel.svelte';
   import ListRow from '../components/ListRow.svelte';
   import Title from '../components/Title.svelte';
-  import DataActions from './DataActions.svelte';
 
-  // The index is only about the past; `data` is the Settings view (sound, backup, updates).
-  let { data = false }: { data?: boolean } = $props();
-  let importError = $state('');
+  // One list of everything done, newest first: lifting workouts open their sets, activities
+  // (walks and the like) just show their duration.
+  const entries = $derived.by(() => {
+    void appVersion.value;
+    const { history, health } = getState();
+    const workouts = history.map((workout, index) => ({
+      time: workout.startedAt || 0,
+      date: workoutDate(workout),
+      label: workout.name || 'Workout',
+      metric: '',
+      href: `/history/?view=workout&id=${index}`,
+    }));
+    const activities = health.activities.map((activity) => {
+      const line = activityLine(activity);
+      const when = activity.completedAt || activity.startedAt || activity.date;
+      return {
+        time: when ? new Date(when).getTime() || 0 : 0,
+        ...line,
+        href: '',
+      };
+    });
+    return [...workouts, ...activities].sort((a, b) => b.time - a.time);
+  });
 </script>
 
-<section aria-labelledby={data ? 'data-title' : 'history-title'}>
-  <Title text={data ? 'Settings' : 'History'} id={data ? 'data-title' : 'history-title'} />
-  <AppList label={data ? 'Settings' : 'History'} rows={data}>
-    {#if !data}
+<section aria-labelledby="history-title">
+  <Title text="History" id="history-title" />
+  <AppList label="History" rows={entries.length}>
+    <ListRow
+      label="This week"
+      href="/history/?view=analytics"
+      icon="chevron"
+      iconLabel="Open this week"
+    />
+    <ListLabel text="Done" />
+    {#each entries as entry, index (index)}
       <ListRow
-        label="Workouts"
-        href="/history/?view=workouts"
-        icon="chevron"
-        iconLabel="Open workouts"
-      />
-      <ListRow
-        label="Activities"
-        href="/history/?view=activities"
-        icon="chevron"
-        iconLabel="Open activities"
-      />
-      <ListRow
-        label="This Week"
-        href="/history/?view=analytics"
-        icon="chevron"
-        iconLabel="Open this week"
-      />
-      <ListRow
-        label="Settings"
-        href="/history/?view=data"
-        icon="chevron"
-        iconLabel="Open settings"
-      />
+        href={entry.href || undefined}
+        icon={entry.href ? 'chevron' : undefined}
+        iconLabel="Open workout"
+        skip={!entry.href}
+      >
+        {#snippet content()}
+          <span class="history-workout-label"
+            ><time>{entry.date}</time><span aria-hidden="true">·</span><strong>{entry.label}</strong
+            ></span
+          >
+        {/snippet}
+        {#snippet trailing()}{#if entry.metric}<small>{entry.metric}</small>{/if}{/snippet}
+      </ListRow>
     {:else}
-      <DataActions onerror={(message) => (importError = message)} />
-    {/if}
+      <ListRow
+        label="Nothing yet. Finish a workout and it shows here."
+        linkClass="empty-state"
+        skip
+      />
+    {/each}
   </AppList>
-  <output id="data-status" class="notice error" aria-live="polite" hidden={!importError}
-    >{importError}</output
-  >
-  <p
-    id="app-update-status"
-    class="app-update-status sr-only"
-    role="status"
-    aria-live="polite"
-    aria-atomic="true"
-  >
-    {appUpdate.message}
-  </p>
-  {#if data}
-    <p class="build-label">Version {__BUILD_ID__}</p>
-  {/if}
 </section>
