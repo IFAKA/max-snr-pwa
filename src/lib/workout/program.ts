@@ -116,7 +116,7 @@ export const CANONICAL_ROUTINE_3_DAY: Record<'Monday' | 'Wednesday' | 'Friday', 
 };
 
 // Restart workouts: no input, no setup. Finishing one sends the rotation back to A.
-// FLOOR_ROUTINE is about 30 minutes (10 sets); HOME_FLOOR_ROUTINE about 15, with no gym.
+// FLOOR_ROUTINE is about 30 minutes (10 sets); HOME_FLOOR_ROUTINE about 15, with no equipment.
 export const FLOOR_ROUTINE: RoutineDay = [
   fixed('lateralRaise', 2),
   fixed('inclinePress', 2),
@@ -126,10 +126,10 @@ export const FLOOR_ROUTINE: RoutineDay = [
 ];
 
 export const HOME_FLOOR_ROUTINE: RoutineDay = [
-  fixed('dumbbellLateralRaise', 2),
+  fixed('pikePushUp', 2),
   fixed('pushUp', 2),
-  fixed('oneArmRow', 2),
-  fixed('dumbbellCurl', 2),
+  fixed('proneRaise', 2),
+  fixed('chairDip', 2),
   fixed('floorCrunch', 2),
 ];
 

@@ -1,6 +1,6 @@
 import type { CatalogExercise } from './exercises.ts';
 
-// Equipment-free (or dumbbell/band) exercises for the home restart workout. They join EXERCISES
+// Equipment-free exercises (a floor and a chair) for the home restart workout. They join EXERCISES
 // so ids resolve everywhere, but the optimizer's allocation never selects them.
 const home = (
   definition: Omit<CatalogExercise, 'type' | 'station' | 'restMs' | 'setupSeconds' | 'fatigue'>,
@@ -14,15 +14,15 @@ const home = (
 });
 
 export const HOME_EXERCISES = {
-  dumbbellLateralRaise: home({
-    id: 'dumbbell-lateral-raise',
-    name: 'Dumbbell Lateral Raise',
+  pikePushUp: home({
+    id: 'pike-push-up',
+    name: 'Pike Push-Up',
     sets: 2,
-    reps: '10–20',
+    reps: '6–15',
     rir: '1–2',
-    primary: { sideDelts: 1 },
-    secondary: {},
-    executionSeconds: 30,
+    primary: { sideDelts: 0.5, triceps: 0.5 },
+    secondary: { upperChest: 0.3 },
+    executionSeconds: 35,
     supersetSafe: true,
     health: ['shoulder'],
   }),
@@ -38,29 +38,29 @@ export const HOME_EXERCISES = {
     supersetSafe: true,
     health: ['push'],
   }),
-  oneArmRow: home({
-    id: 'one-arm-dumbbell-row',
-    name: 'One-Arm Row',
+  proneRaise: home({
+    id: 'prone-y-t-raise',
+    name: 'Prone Y-T Raise',
     sets: 2,
-    reps: '8–15',
+    reps: '10–20',
     rir: '1–2',
-    primary: { lats: 1 },
-    secondary: { upperBack: 0.5, biceps: 0.3 },
-    executionSeconds: 40,
+    primary: { upperBack: 1, rearDelts: 1 },
+    secondary: { sideDelts: 0.3 },
+    executionSeconds: 35,
     supersetSafe: true,
     health: ['pull'],
   }),
-  dumbbellCurl: home({
-    id: 'dumbbell-curl',
-    name: 'Dumbbell Curl',
+  chairDip: home({
+    id: 'chair-dip',
+    name: 'Chair Dip',
     sets: 2,
     reps: '8–15',
     rir: '1–2',
-    primary: { biceps: 1 },
-    secondary: { forearms: 0.3 },
+    primary: { triceps: 1 },
+    secondary: { chest: 0.3 },
     executionSeconds: 30,
     supersetSafe: true,
-    health: ['pull'],
+    health: ['push'],
   }),
   floorCrunch: home({
     id: 'floor-crunch',

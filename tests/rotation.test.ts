@@ -63,6 +63,7 @@ describe('restart workouts', () => {
     const home = flatten(HOME_FLOOR_ROUTINE);
     expect(home).toHaveLength(10);
     expect(home.every((task) => task.station === 'home')).toBe(true);
+    expect(home.some((task) => /dumbbell|band|door/i.test(task.name ?? ''))).toBe(false);
   });
 
   test.each(['floor', 'home'] as const)(
