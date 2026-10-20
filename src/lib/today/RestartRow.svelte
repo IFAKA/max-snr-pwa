@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { cue } from '../browser/feedback.ts';
   import { act } from '../app-state.svelte.ts';
   import { getState } from '../state.ts';
   import { RESTART_PLANS, start, type RestartKind } from '../workout/index.ts';
@@ -16,8 +17,10 @@
   async function begin() {
     busy = true;
     const started = await act(() => start(RESTART_PLANS[kind].day));
-    if (started) await goto('/workout/');
-    else busy = false;
+    if (started) {
+      cue('started');
+      await goto('/workout/');
+    } else busy = false;
   }
 
   function request() {

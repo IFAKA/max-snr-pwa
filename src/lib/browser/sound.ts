@@ -2,7 +2,8 @@
 // and they play offline. They are one family, struck rather than beeped: each is a set of decaying
 // partials tuned like a real material (a wooden bar, a glass bar, a steel plate, felt), all in D
 // major and sharing one small room, so every sound says what happened by what it sounds like:
-// - the wheel: a tiny wooden ratchet per value, and felt seating when it rests;
+// - the wheel: a tiny wooden ratchet per value, and a magnet clacking home when it rests;
+// - starting a workout: a wooden run up the chord; skipping rest: air and a light rising note;
 // - a swipe crossing its threshold: a latch catching (up) or letting go (down);
 // - a timer's last seconds: a glass A that the end resolves;
 // - rest over: a rising call (D to A), time to lift; a hold over: a falling one, let go;
@@ -16,6 +17,8 @@ const SOUND_KEY = 'maxsnr-sound';
 export type Sound =
   | 'detent'
   | 'seat'
+  | 'begin'
+  | 'skip'
   | 'tick'
   | 'arm'
   | 'disarm'
@@ -155,6 +158,22 @@ function burst(voice: Voice, freq: number, dur: number, gain: number, at = 0) {
   source.start(t, Math.random() * 0.8, dur + 0.02);
 }
 
+// Noise swept through a filter: air moving past, for things that move on.
+function sweep(voice: Voice, from: number, to: number, dur: number, gain: number) {
+  if (!noise) return;
+  const source = voice.audio.createBufferSource();
+  const filter = voice.audio.createBiquadFilter();
+  const level = voice.audio.createGain();
+  source.buffer = noise;
+  filter.type = 'bandpass';
+  filter.Q.value = 2;
+  filter.frequency.setValueAtTime(from, voice.t);
+  filter.frequency.exponentialRampToValueAtTime(to, voice.t + dur);
+  envelope(level, voice.t, gain, dur * 0.6, dur);
+  source.connect(filter).connect(level).connect(voice.out);
+  source.start(voice.t, Math.random() * 0.7, dur + 0.02);
+}
+
 // Partials of struck materials: [frequency ratio, loudness, decay], from modal analysis of each.
 type Material = [number, number, number][];
 const WOOD: Material = [
@@ -216,9 +235,23 @@ const SOUNDS: Record<Sound, (voice: Voice) => void> = {
     burst(voice, 4200, 0.007, 0.09);
     strike(voice, WOOD, D7, 0.045, 0.02);
   },
+  // A magnet hitting home: a hard little clack over a felt thock and a short low thump.
   seat: (voice) => {
-    burst(voice, 1100, 0.014, 0.07);
-    strike(voice, FELT, D5, 0.11, 0.1);
+    burst(voice, 2600, 0.006, 0.16);
+    burst(voice, 900, 0.02, 0.09);
+    strike(voice, FELT, D5, 0.14, 0.11);
+    tone(voice, { freq: 170, to: 95, dur: 0.06, gain: 0.22, attack: 0.001 });
+  },
+  // Starting a workout: the wooden bar runs up the chord, a step forward.
+  begin: (voice) => {
+    [D5, FS5, A5, D6].forEach((freq, index) => strike(voice, WOOD, freq, 0.1, 0.45, index * 0.06));
+    strike(voice, GLASS, D7, 0.035, 0.8, 0.18);
+  },
+  // Rest cut short: air moving on and a light rising grace note, lighter than rest running out.
+  skip: (voice) => {
+    sweep(voice, 500, 3200, 0.2, 0.09);
+    strike(voice, GLASS, A5, 0.06, 0.2, 0.08);
+    strike(voice, GLASS, D6, 0.08, 0.45, 0.14);
   },
   tick: (voice) => strike(voice, GLASS, A6, 0.06, 0.3),
   arm: (voice) => {
@@ -266,7 +299,9 @@ const SOUNDS: Record<Sound, (voice: Voice) => void> = {
 // moments that matter ring a little.
 const ROOM: Record<Sound, number> = {
   detent: 0.03,
-  seat: 0.08,
+  seat: 0.06,
+  begin: 0.25,
+  skip: 0.2,
   tick: 0.15,
   arm: 0.05,
   disarm: 0.05,

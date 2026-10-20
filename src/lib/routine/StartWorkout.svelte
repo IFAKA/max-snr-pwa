@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { cue } from '../browser/feedback.ts';
   import { act } from '../app-state.svelte.ts';
   import { getState } from '../state.ts';
   import { start } from '../workout/index.ts';
@@ -23,8 +24,10 @@
     if (value !== 'start') return;
     busy = true;
     const started = await act(() => start(day));
-    if (started) await goto('/workout/');
-    else busy = false;
+    if (started) {
+      cue('started');
+      await goto('/workout/');
+    } else busy = false;
   }
 </script>
 

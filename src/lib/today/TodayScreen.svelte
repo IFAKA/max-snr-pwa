@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { cue } from '../browser/feedback.ts';
   import { act, appVersion } from '../app-state.svelte.ts';
   import { getState } from '../state.ts';
   import { persist } from '../storage/persistence.ts';
@@ -40,8 +41,10 @@
   async function startNext() {
     starting = true;
     const started = await act(() => start(view.day));
-    if (started) await goto('/workout/');
-    else starting = false;
+    if (started) {
+      cue('started');
+      await goto('/workout/');
+    } else starting = false;
   }
 </script>
 

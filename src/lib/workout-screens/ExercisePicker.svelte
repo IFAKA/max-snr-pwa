@@ -1,6 +1,7 @@
 <script lang="ts">
   import { act } from '../app-state.svelte.ts';
   import type { ActiveWorkout, Task } from '../types.ts';
+  import { cue } from '../browser/feedback.ts';
   import { exerciseSelectionLocked, selectExercise, substituteCurrent } from '../workout/index.ts';
   import AppList from '../components/AppList.svelte';
   import ListRow from '../components/ListRow.svelte';
@@ -55,7 +56,9 @@
     busy = true;
     const result = await act(action);
     busy = false;
-    if (result !== false) onselected();
+    if (result === false) return;
+    cue('pick');
+    onselected();
   }
 </script>
 

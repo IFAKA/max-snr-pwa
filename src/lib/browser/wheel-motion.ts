@@ -50,6 +50,27 @@ export function settleAt(from: number, to: number, elapsed: number) {
 }
 
 /** A value's look at a distance from the band, in rows: full size in the band, then receding. */
+// The last stretch is pulled in like a magnet: the glide hands over once it is this close, then
+// accelerates onto the value, so the wheel lands with a hit (and the snap sound) instead of
+// creeping the final pixels.
+export const SNAP_PX = 14;
+export const SNAP_MS = 70;
+const RECOIL_PX = 2.5;
+export const RECOIL_MS = 150;
+
+/** The magnet's pull: from `from` onto `to`, speeding up until it hits. */
+export function snapAt(from: number, to: number, elapsed: number) {
+  const t = Math.min(1, elapsed / SNAP_MS);
+  return from + (to - from) * t * t;
+}
+
+/** After the hit the value rocks past by a hair and back, a damped wobble that ends exactly on it. */
+export function recoilAt(to: number, direction: number, elapsed: number) {
+  if (elapsed >= RECOIL_MS) return to;
+  const swing = Math.sin((elapsed / RECOIL_MS) * 2 * Math.PI);
+  return to + Math.sign(direction) * RECOIL_PX * swing * Math.exp(-elapsed / 40);
+}
+
 export function rollStyle(distance: number) {
   const d = Math.min(Math.abs(distance), 3);
   if (d <= 1) return { scale: 1 - 0.3 * d, opacity: 1 - 0.45 * d };

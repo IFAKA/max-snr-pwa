@@ -57,6 +57,11 @@
     void run(undoLastSet);
   }
 
+  function skip() {
+    if (!busy) cue('restSkipped');
+    void run(continueRest);
+  }
+
   async function run(action: () => Promise<unknown>) {
     if (busy) return;
     busy = true;
@@ -74,7 +79,7 @@
 {/snippet}
 
 <SwipeCard
-  onconfirm={() => run(continueRest)}
+  onconfirm={skip}
   confirmLabel="Skip Rest"
   behindConfirm={afterRest}
   behindUndo={afterUndo}
@@ -124,12 +129,8 @@
     {/snippet}
     {#snippet more()}
       <div class="countdown-actions">
-        <button
-          class="primary"
-          id="continue"
-          type="button"
-          disabled={busy}
-          onclick={() => run(continueRest)}>Skip Rest</button
+        <button class="primary" id="continue" type="button" disabled={busy} onclick={skip}
+          >Skip Rest</button
         >
         <button
           class="secondary"

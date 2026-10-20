@@ -4,11 +4,15 @@
   import { detent, seated } from '../browser/feedback.ts';
   import {
     clamp,
+    RECOIL_MS,
+    recoilAt,
     releaseVelocity,
     rollStyle,
     rubberBand,
     settleAt,
     settleTarget,
+    SNAP_PX,
+    snapAt,
     type Sample,
   } from '../browser/wheel-motion.ts';
 
@@ -91,13 +95,32 @@
       seated();
       return;
     }
+    // Glide, then the magnet takes the last pixels and the sound lands on the frame of the hit.
     const from = offset;
+    const direction = to - from;
     const start = performance.now();
+    let snapFrom = 0;
+    let snapStart = 0;
+    let hitAt = 0;
     const tick = (now: number) => {
-      const next = settleAt(from, to, now - start);
+      if (hitAt) {
+        draw(recoilAt(to, direction, now - hitAt));
+        if (now - hitAt < RECOIL_MS) frame = requestAnimationFrame(tick);
+        return;
+      }
+      if (!snapStart && Math.abs(to - offset) > SNAP_PX) {
+        draw(settleAt(from, to, now - start));
+        frame = requestAnimationFrame(tick);
+        return;
+      }
+      if (!snapStart) [snapFrom, snapStart] = [offset, now];
+      const next = snapAt(snapFrom, to, now - snapStart);
       draw(next);
-      if (next !== to) frame = requestAnimationFrame(tick);
-      else seated();
+      if (next === to) {
+        hitAt = now;
+        seated();
+      }
+      frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
   }

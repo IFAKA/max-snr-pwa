@@ -4,6 +4,8 @@ import { playSound, type Sound } from './sound.ts';
 // Each workout moment has one cue: a sound (when Sound is on) and a vibration, so the two agree.
 const CUES = {
   pick: { sound: 'tick', vibrate: [8] },
+  started: { sound: 'begin', vibrate: [20, 40, 30] },
+  restSkipped: { sound: 'skip', vibrate: [18] },
   hold: { sound: 'tick', vibrate: [22] },
   countdown: { sound: 'pip', vibrate: [20] },
   timerDone: { sound: 'done', vibrate: [35, 70] },
@@ -40,7 +42,7 @@ export function detent(position = 0.5) {
 /** The wheel coming to rest on a value: a firmer pulse and a low seat. */
 export function seated() {
   if (nativeApp && document.visibilityState === 'hidden') return;
-  globalThis.navigator?.vibrate?.(14);
+  globalThis.navigator?.vibrate?.(18);
   playSound('seat');
 }
 
