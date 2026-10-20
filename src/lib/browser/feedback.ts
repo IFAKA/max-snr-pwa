@@ -22,14 +22,26 @@ let lastDetent = 0;
 const DETENT_GAP_MS = 40;
 
 /**
- * The click of a turning wheel: a short pulse, without sound, and at most one per 40 ms, so a
- * fast flick through many values stays smooth instead of queueing a buzz and a sound per row.
+ * The click of a turning wheel: a short pulse and a ratchet tick, at most one per 40 ms, so a fast
+ * flick through many values stays smooth instead of queueing a buzz and a sound per row. Quick
+ * clicks are quieter, as a free-spinning wheel sounds lighter, and the pitch rises a little with
+ * `position` (0 to 1 along the values), so the ear hears which way the value moves.
  */
-export function detent() {
+export function detent(position = 0.5) {
+  if (nativeApp && document.visibilityState === 'hidden') return;
   const now = performance.now();
-  if (now - lastDetent < DETENT_GAP_MS) return;
+  const gap = now - lastDetent;
+  if (gap < DETENT_GAP_MS) return;
   lastDetent = now;
   globalThis.navigator?.vibrate?.(8);
+  playSound('detent', Math.min(1, Math.max(0.45, gap / 160)), 0.94 + position * 0.12);
+}
+
+/** The wheel coming to rest on a value: a firmer pulse and a low seat. */
+export function seated() {
+  if (nativeApp && document.visibilityState === 'hidden') return;
+  globalThis.navigator?.vibrate?.(14);
+  playSound('seat');
 }
 
 export function cue(name: Cue) {

@@ -1,12 +1,13 @@
 // Synthesized workout sounds: Web Audio builds each one on the fly, so there are no files to cache
-// and they play offline. The palette is calm: a soft struck bar for picks, a muted plate knock for a
+// and they play offline. The palette is calm: a soft struck bar for picks, a dry ratchet click for
+// each value a wheel turns past and a low seat when it comes to rest, a muted plate knock for a
 // logged set, clear pips for a timer's last seconds, a bright two-note call when it ends, and warm
 // chords for a better set and the finish. One limiter keeps stacked sounds from distorting, and each
 // play shifts pitch and loudness a little so repeats don't sound canned. Browsers block audio until
 // a gesture, so the first tap starts the context; a timer can then sound on its own later.
 const SOUND_KEY = 'maxsnr-sound';
 
-export type Sound = 'tick' | 'pip' | 'go' | 'log' | 'best' | 'finish' | 'undo';
+export type Sound = 'detent' | 'seat' | 'tick' | 'pip' | 'go' | 'log' | 'best' | 'finish' | 'undo';
 
 let ctx: AudioContext | null = null;
 let master: AudioNode | null = null;
@@ -115,6 +116,17 @@ const chord = (voice: Voice, freqs: number[], at: number, step: number, dur: num
   );
 
 const SOUNDS: Record<Sound, (voice: Voice) => void> = {
+  // A crown's ratchet: a dry tick of filtered noise on a tiny wooden body, short enough that a
+  // fast flick reads as a free-spinning wheel rather than a run of beeps.
+  detent: (voice) => {
+    burst(voice, 3400, 0.012, 0.16);
+    tone(voice, { freq: 2100, dur: 0.018, type: 'triangle', gain: 0.045, attack: 0.001 });
+  },
+  // The wheel seating on a value: a softer, lower thock, like a detent clicking home.
+  seat: (voice) => {
+    burst(voice, 1500, 0.022, 0.18);
+    tone(voice, { freq: 620, to: 500, dur: 0.07, gain: 0.13, attack: 0.002 });
+  },
   tick: (voice) => {
     tone(voice, { freq: 1500, dur: 0.04, type: 'triangle', gain: 0.07 });
     tone(voice, { freq: 2600, dur: 0.025, gain: 0.03 });
@@ -150,14 +162,15 @@ const SOUNDS: Record<Sound, (voice: Voice) => void> = {
 // Cues that mark time keep their exact pitch; the rest vary a little each play.
 const STEADY = new Set<Sound>(['pip', 'go']);
 
-export function playSound(name: Sound) {
+/** Plays a sound; `level` scales its loudness and `pitch` shifts it (1 is as designed). */
+export function playSound(name: Sound, level = 1, pitch = 1) {
   if (!enabled) return;
   const audio = context();
   if (!audio || !master) return;
   const out = audio.createGain();
-  out.gain.value = 0.9 + Math.random() * 0.1;
+  out.gain.value = level * (0.9 + Math.random() * 0.1);
   out.connect(master);
-  const k = STEADY.has(name) ? 1 : 1 + (Math.random() - 0.5) * 0.04;
+  const k = pitch * (STEADY.has(name) ? 1 : 1 + (Math.random() - 0.5) * 0.04);
   SOUNDS[name]({ audio, out, t: audio.currentTime + 0.005, k });
 }
 

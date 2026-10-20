@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { prefersReducedMotion } from '../browser/device.ts';
-  import { detent } from '../browser/feedback.ts';
+  import { detent, seated } from '../browser/feedback.ts';
   import {
     clamp,
     releaseVelocity,
@@ -80,7 +80,7 @@
     const near = clamp(Math.round(offset / ROW), 0, values.length - 1);
     if (near === index) return;
     index = near;
-    detent();
+    detent(values.length > 1 ? near / (values.length - 1) : 0.5);
   }
 
   let frame = 0;
@@ -88,6 +88,7 @@
     cancelAnimationFrame(frame);
     if (prefersReducedMotion()) {
       draw(to);
+      seated();
       return;
     }
     const from = offset;
@@ -96,6 +97,7 @@
       const next = settleAt(from, to, now - start);
       draw(next);
       if (next !== to) frame = requestAnimationFrame(tick);
+      else seated();
     };
     frame = requestAnimationFrame(tick);
   }
