@@ -1,5 +1,6 @@
 package com.maxsnr.workout;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.webkit.WebView;
 import androidx.activity.OnBackPressedCallback;
@@ -30,8 +31,19 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(WorkoutTimerPlugin.class);
         registerPlugin(BackupFilePlugin.class);
         super.onCreate(savedInstanceState);
+        // Keep the page's renderer as important as the app (a foreground service during a
+        // workout), so the system does not freeze it in the background and notification buttons
+        // run at once instead of when the app is next opened.
+        getBridge().getWebView().setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_IMPORTANT, false);
+        WorkoutTimerPlugin.fromIntent(getIntent());
         keepInsideSystemBars();
         getOnBackPressedDispatcher().addCallback(this, backThroughHistory);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        WorkoutTimerPlugin.fromIntent(intent);
     }
 
     /**

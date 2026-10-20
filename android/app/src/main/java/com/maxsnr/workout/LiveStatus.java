@@ -19,6 +19,8 @@ final class LiveStatus {
     final String[] actions;
     final String doneTitle;
     final String doneText;
+    /** Shown once the countdown ends (the next set), or null. */
+    final LiveStatus after;
     private final String json;
 
     LiveStatus(JSONObject data, long now) {
@@ -36,6 +38,13 @@ final class LiveStatus {
         JSONArray list = data.optJSONArray("actions");
         actions = new String[list == null ? 0 : list.length()];
         for (int i = 0; i < actions.length; i++) actions[i] = list.optString(i);
+        JSONObject next = data.optJSONObject("after");
+        after = next == null ? null : new LiveStatus(next, now);
+    }
+
+    /** What to show at the given time: the next step once the countdown is over. */
+    LiveStatus at(long now) {
+        return after != null && endsAt > 0 && endsAt <= now ? after : this;
     }
 
     Intent into(Intent intent) {

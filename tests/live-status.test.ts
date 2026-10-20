@@ -39,7 +39,7 @@ describe('lock-screen workout status', () => {
     expect(status?.progress).toMatch(/^(Exercise 1 of \d+|Last exercise) · ~\d+ min left$/);
   });
 
-  test('rest counts down to the next set with Skip and Undo, then offers Start set', async () => {
+  test('rest counts down to the next set with Skip and Undo, then shows that set with Log set', async () => {
     await start('Monday');
     await logSet();
     const next = active().tasks[active().nextPos as number];
@@ -55,8 +55,12 @@ describe('lock-screen workout status', () => {
     await adjustRest(15000);
     expect(liveStatus(getState())?.endsAt).toBe(active().restEndsAt);
 
+    expect(status?.after).toMatchObject({
+      title: `${next.performedName} · set ${next.set} of ${next.sets}`,
+      actions: ['log'],
+    });
     const over = liveStatus(getState(), (active().restEndsAt as number) + 1);
-    expect(over).toMatchObject({ endsAt: null, title: 'Rest over', chip: 'Go', actions: ['next'] });
+    expect(over).toMatchObject({ endsAt: null, title: status?.after?.title, actions: ['log'] });
   });
 
   test('stretch counts down with its own copy', async () => {
@@ -87,6 +91,15 @@ describe('notification buttons', () => {
     await logSet();
     expect(await runNativeAction('skip')).toBe(true);
     expect(active().phase).not.toBe('rest');
+  });
+
+  test('Log set after a rest the page slept through moves on and logs the next set', async () => {
+    await start('Monday');
+    await logSet();
+    active().restEndsAt = Date.now() - 1;
+    expect(await runNativeAction('log')).toBe(true);
+    expect(completed()).toBe(2);
+    expect(active().phase).toBe('rest');
   });
 
   test('a stale button does nothing', async () => {

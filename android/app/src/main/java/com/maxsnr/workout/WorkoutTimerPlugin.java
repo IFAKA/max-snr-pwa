@@ -14,6 +14,8 @@ import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 import com.getcapacitor.annotation.Permission;
 import com.getcapacitor.annotation.PermissionCallback;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The native half of src/lib/browser/native-app.ts: keeps the running workout as a lock-screen and
@@ -27,15 +29,44 @@ public class WorkoutTimerPlugin extends Plugin {
 
     private static WorkoutTimerPlugin instance;
 
+    // Taps made while no page was there to run them (the app was closed), run once it loads.
+    private static final List<String> pending = new ArrayList<>();
+    static final String EXTRA_ACTION = "notificationAction";
+
     @Override
     public void load() {
         instance = this;
         TimerNotifications.createChannels(getContext());
+        for (String action : pending) dispatch(action);
+        pending.clear();
+        TimerService.refresh(getContext());
+    }
+
+    @Override
+    protected void handleOnDestroy() {
+        if (instance == this) instance = null;
+        TimerService.refresh(getContext());
+    }
+
+    /** Whether a page is there to run a button; if not, buttons open the app with the action. */
+    static boolean isLive() {
+        return instance != null;
+    }
+
+    /** A button that opened the app (see isLive) runs once the page listens. */
+    static void fromIntent(Intent intent) {
+        String action = intent == null ? null : intent.getStringExtra(EXTRA_ACTION);
+        if (action == null) return;
+        intent.removeExtra(EXTRA_ACTION);
+        dispatch(action);
     }
 
     /** A notification button: the page runs it like the on-screen button (see onNativeAction). */
     static void dispatch(String action) {
-        if (instance == null) return;
+        if (instance == null) {
+            pending.add(action);
+            return;
+        }
         JSObject data = new JSObject();
         data.put("action", action);
         // Retained until a listener exists, so a tap while the page is still loading is not lost.

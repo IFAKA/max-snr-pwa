@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Rides the countdown bar: the app's barbell on its soft sage disc (WORKOUT-VISUAL-IDENTITY.md). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFDCEEE3"
+        android:pathData="M12,12m-11,0a11,11 0 1,0 22,0a11,11 0 1,0 -22,0" />
+    <group android:pivotX="12" android:pivotY="12" android:scaleX="0.72" android:scaleY="0.72">
+        <path
+            android:fillColor="#FF17633F"
+            android:pathData="M1,10.5h2v3H1z M4,7.5h3v9H4z M8,11h8v2H8z M17,7.5h3v9h-3z M21,10.5h2v3h-2z" />
+    </group>
+</vector>

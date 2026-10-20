@@ -23,6 +23,9 @@ public class TimerService extends Service {
 
     static final String ACTION_BUTTON = "com.maxsnr.workout.BUTTON";
     static final String EXTRA_BUTTON = "button";
+    private static final String ACTION_REFRESH = "com.maxsnr.workout.REFRESH";
+    // Four redraws a second keep the bar draining smoothly, under the system's five a second.
+    private static final long FRAME_MS = 250;
     private static final long CONFIRM_MS = 4000;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -41,6 +44,15 @@ public class TimerService extends Service {
         }
     }
 
+    /** Redraws the buttons, e.g. when the page goes away and they must open the app instead. */
+    static void refresh(Context context) {
+        try {
+            context.startService(new Intent(context, TimerService.class).setAction(ACTION_REFRESH));
+        } catch (RuntimeException notRunning) {
+            // Nothing is shown, so nothing to redraw.
+        }
+    }
+
     static void stop(Context context) {
         context.stopService(new Intent(context, TimerService.class));
         TimerNotifications.cancel(context, TimerNotifications.LIVE_ID);
@@ -50,6 +62,11 @@ public class TimerService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null && ACTION_BUTTON.equals(intent.getAction())) {
             press(intent.getStringExtra(EXTRA_BUTTON));
+            return START_NOT_STICKY;
+        }
+        if (intent != null && ACTION_REFRESH.equals(intent.getAction())) {
+            if (status == null) stopSelf();
+            else redraw();
             return START_NOT_STICKY;
         }
         LiveStatus next = intent == null ? null : LiveStatus.from(intent);
@@ -83,11 +100,11 @@ public class TimerService extends Service {
         }
         confirmSkipUntil = 0;
         // Once rest is over, skipping it is just starting the next set.
-        WorkoutTimerPlugin.dispatch("skip".equals(button) && !counting() ? "next" : button);
+        WorkoutTimerPlugin.dispatch(button);
     }
 
     private boolean counting() {
-        return status != null && status.endsAt > System.currentTimeMillis();
+        return status != null && status.at(System.currentTimeMillis()).endsAt > System.currentTimeMillis();
     }
 
     private boolean confirming() {
@@ -100,15 +117,12 @@ public class TimerService extends Service {
 
     private void tick() {
         redraw();
-        // The last redraw, at zero, turns the countdown into "Rest over" with what is next.
+        // The last redraw, at zero, shows what comes next (the next set with Log set).
         if (counting()) scheduleTick();
     }
 
-    // Redraw just after the shown second changes, so the time never lags the in-app countdown.
     private void scheduleTick() {
-        long left = status.endsAt - System.currentTimeMillis();
-        long untilNextSecond = left % 1000;
-        handler.postDelayed(tick, (untilNextSecond == 0 ? 1000 : untilNextSecond) + 5);
+        handler.postDelayed(tick, FRAME_MS);
     }
 
     @Override

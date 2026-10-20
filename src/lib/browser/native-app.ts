@@ -27,6 +27,8 @@ export interface NativeStatus {
   actions: NativeAction[];
   doneTitle: string;
   doneText: string;
+  /** What to show once the countdown ends (the next set), without waiting for the page. */
+  after?: NativeStatus | null;
 }
 
 interface WorkoutTimerPlugin {

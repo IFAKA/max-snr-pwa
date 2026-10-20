@@ -11,6 +11,7 @@ import android.media.RingtoneManager;
 import android.os.Build;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.graphics.drawable.IconCompat;
 import java.util.Locale;
 
 /**
@@ -28,6 +29,8 @@ final class TimerNotifications {
     static final String ALERT_SILENT_CHANNEL = "timer-alert-silent";
     static final int LIVE_ID = 1;
     static final int ALERT_ID = 2;
+    // The app's sage accent (dark theme, as lock screens are dark), from src/styles/app.css.
+    private static final int ACCENT = 0xFF8FD0A9;
     private static final long[] VIBRATION = { 0, 300, 150, 300 };
 
     private TimerNotifications() {}
@@ -81,20 +84,21 @@ final class TimerNotifications {
      * The text says what comes next and the expanded view adds the finish line (exercise k of n,
      * minutes left). Buttons do what the matching on-screen buttons do.
      */
-    static Notification live(Context context, LiveStatus status, boolean confirmingSkip) {
-        long left = status.endsAt - System.currentTimeMillis();
+    static Notification live(Context context, LiveStatus shown, boolean confirmingSkip) {
+        long now = System.currentTimeMillis();
+        LiveStatus status = shown.at(now);
+        long left = status.endsAt - now;
         boolean counting = left > 0;
         boolean ended = status.endsAt > 0 && !counting;
         String time = clock(Math.max(0, left));
         String title = counting ? time + " · " + status.title : ended ? status.doneTitle : status.title;
         String text = ended ? status.doneText : status.text;
         String chip = counting ? time : ended ? "Go" : status.chip;
-        String expanded = status.progress.isEmpty() ? text : text + "\n" + status.progress;
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, LIVE_CHANNEL)
             .setSmallIcon(R.drawable.ic_stat_timer)
+            .setColor(ACCENT)
             .setContentTitle(title)
             .setContentText(text)
-            .setStyle(new NotificationCompat.BigTextStyle().bigText(expanded))
             .setContentIntent(openApp(context))
             .setOngoing(true)
             .setOnlyAlertOnce(true)
@@ -108,25 +112,46 @@ final class TimerNotifications {
             .setRequestPromotedOngoing(true);
         if (!chip.isEmpty()) builder.setShortCriticalText(chip);
         if (counting) {
-            int max = (int) Math.max(1, status.total / 1000);
-            builder.setProgress(max, (int) Math.min(max, (left + 999) / 1000), false);
+            // The bar drains like the in-app countdown, in the app's sage, with the barbell riding
+            // its edge; the finish line moves to the header.
+            int max = (int) Math.max(1, status.total / 100);
+            builder
+                .setSubText(status.progress)
+                .setStyle(
+                    new NotificationCompat.ProgressStyle()
+                        .addProgressSegment(new NotificationCompat.ProgressStyle.Segment(max).setColor(ACCENT))
+                        .setStyledByProgress(true)
+                        .setProgressTrackerIcon(IconCompat.createWithResource(context, R.drawable.ic_progress_tracker))
+                        .setProgress((int) Math.min(max, left / 100))
+                );
+        } else {
+            String expanded = status.progress.isEmpty() ? text : text + "\n" + status.progress;
+            builder.setStyle(new NotificationCompat.BigTextStyle().bigText(expanded));
         }
+        boolean live = WorkoutTimerPlugin.isLive();
         for (int i = 0; i < status.actions.length; i++) {
             String action = status.actions[i];
             String label = label(action, counting, confirmingSkip);
             if (label == null) continue;
+            builder.addAction(new NotificationCompat.Action.Builder(R.drawable.ic_stat_timer, label, button(context, action, i, live)).build());
+        }
+        return builder.build();
+    }
+
+    // With the page running, a button acts in place (the service asks it to). With the app closed
+    // nothing can run it, so the button opens the app, which runs it as it loads.
+    private static PendingIntent button(Context context, String action, int index, boolean live) {
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE;
+        if (live) {
             Intent intent = new Intent(context, TimerService.class)
                 .setAction(TimerService.ACTION_BUTTON)
                 .putExtra(TimerService.EXTRA_BUTTON, action);
-            PendingIntent pending = PendingIntent.getService(
-                context,
-                10 + i,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-            );
-            builder.addAction(new NotificationCompat.Action.Builder(R.drawable.ic_stat_timer, label, pending).build());
+            return PendingIntent.getService(context, 10 + index, intent, flags);
         }
-        return builder.build();
+        Intent intent = new Intent(context, MainActivity.class)
+            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            .putExtra(WorkoutTimerPlugin.EXTRA_ACTION, action);
+        return PendingIntent.getActivity(context, 20 + index, intent, flags);
     }
 
     private static String label(String action, boolean counting, boolean confirmingSkip) {
@@ -137,7 +162,7 @@ final class TimerNotifications {
                 if (!counting) return "Start set";
                 return confirmingSkip ? "Tap again to skip" : "Skip rest";
             case "next":
-                return "Start set";
+                return "Stretch";
             case "undo":
                 return "Undo set";
             default:
@@ -165,6 +190,8 @@ final class TimerNotifications {
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setVibrate(VIBRATION);
         if (sound) builder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+        // The live card already shows the next set; the alert only needs to be heard, then goes.
+        builder.setTimeoutAfter(30000);
         post(context, ALERT_ID, builder.build());
     }
 

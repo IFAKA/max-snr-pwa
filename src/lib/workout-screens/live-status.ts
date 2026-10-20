@@ -32,24 +32,6 @@ function progress(active: ActiveWorkout, now: number) {
   return `${where} · ~${left.minutesLeft} min left`;
 }
 
-function restStatus(active: ActiveWorkout, unit: Unit, now: number): NativeStatus {
-  const next = Number.isInteger(active.nextPos) ? active.tasks[active.nextPos as number] : null;
-  // The next set starts from a clean draft, like the set screen after rest.
-  const set = next && setText(plannedSet({ ...active, draft: {} }, next, unit), unit);
-  const ended = !active.restEndsAt || active.restEndsAt <= now;
-  return {
-    endsAt: ended ? null : active.restEndsAt,
-    total: active.tasks[active.pos]?.restMs || REST_MS,
-    title: ended ? 'Rest over' : 'Rest',
-    text: next ? `Next: ${next.performedName} · ${set}` : 'Next: stretch',
-    progress: progress(active, now),
-    chip: ended ? 'Go' : '',
-    actions: ended ? ['next'] : ['skip', 'undo'],
-    doneTitle: 'Rest over',
-    doneText: next ? `${next.performedName}, ${ofSets(next)} · ${set}` : 'Time to stretch',
-  };
-}
-
 function liftingStatus(active: ActiveWorkout, unit: Unit, now: number): NativeStatus | null {
   const task = active.tasks[active.pos];
   if (!task) return null;
@@ -63,6 +45,50 @@ function liftingStatus(active: ActiveWorkout, unit: Unit, now: number): NativeSt
     actions: ['log'],
     doneTitle: '',
     doneText: '',
+  };
+}
+
+/** The set rest leads to, as the lifting screen will show it (from a clean draft). */
+const nextSetStatus = (active: ActiveWorkout, unit: Unit, now: number) =>
+  Number.isInteger(active.nextPos)
+    ? liftingStatus(
+        { ...active, phase: 'lifting', pos: active.nextPos as number, restEndsAt: null, draft: {} },
+        unit,
+        now,
+      )
+    : null;
+
+// When rest ends the next set is simply the thing to do: the notification shows it with Log set,
+// as the app moves on by itself. Undo is gone by then; it was there for the whole rest.
+function restStatus(active: ActiveWorkout, unit: Unit, now: number): NativeStatus | null {
+  const next = Number.isInteger(active.nextPos) ? active.tasks[active.nextPos as number] : null;
+  const after = nextSetStatus(active, unit, now);
+  const ended = !active.restEndsAt || active.restEndsAt <= now;
+  if (ended && after) return after;
+  const stretch: NativeStatus = {
+    endsAt: null,
+    total: 0,
+    title: 'Rest over',
+    text: 'Time to stretch',
+    progress: 'Last step',
+    chip: 'Go',
+    actions: ['next'],
+    doneTitle: '',
+    doneText: '',
+  };
+  if (ended) return stretch;
+  return {
+    endsAt: active.restEndsAt,
+    total: active.tasks[active.pos]?.restMs || REST_MS,
+    title: 'Rest',
+    text: next && after ? `Next: ${next.performedName} · ${after.text}` : 'Next: stretch',
+    progress: progress(active, now),
+    chip: '',
+    actions: ['skip', 'undo'],
+    doneTitle: 'Rest over',
+    doneText:
+      next && after ? `${next.performedName}, ${ofSets(next)} · ${after.text}` : 'Time to stretch',
+    after: after || stretch,
   };
 }
 
@@ -98,9 +124,14 @@ export function liveStatus(state: AppState, now = Date.now()): NativeStatus | nu
  * Runs a notification button like its on-screen twin. A stale button (the workout moved on
  * before it was tapped) does nothing.
  */
-export async function runNativeAction(action: NativeAction) {
+export async function runNativeAction(action: NativeAction): Promise<boolean> {
   const active = getState().active;
   if (!active) return false;
+  // The page may have slept through the end of rest: move on to the set first, as the app would.
+  if (action === 'log' && active.phase === 'rest' && (active.restEndsAt || 0) <= Date.now()) {
+    await act(continueRest);
+    return getState().active?.phase === 'lifting' && runNativeAction(action);
+  }
   if (action === 'log' && active.phase === 'lifting') {
     const task = active.tasks[active.pos];
     if (!task) return false;
