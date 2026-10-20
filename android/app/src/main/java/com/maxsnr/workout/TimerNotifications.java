@@ -17,7 +17,10 @@ import androidx.core.app.NotificationManagerCompat;
  */
 final class TimerNotifications {
 
-    static final String LIVE_CHANNEL = "timer-live";
+    // Default importance (with no sound) so the countdown is not hidden with silent notifications
+    // on the lock screen; importance cannot change after creation, hence the new id.
+    static final String LIVE_CHANNEL = "timer-live-2";
+    private static final String OLD_LIVE_CHANNEL = "timer-live";
     static final String ALERT_CHANNEL = "timer-alert";
     // Channel sounds cannot change after creation, so Sound off uses its own vibrate-only channel.
     static final String ALERT_SILENT_CHANNEL = "timer-alert-silent";
@@ -30,9 +33,12 @@ final class TimerNotifications {
     static void createChannels(Context context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
         NotificationManager manager = context.getSystemService(NotificationManager.class);
-        NotificationChannel live = new NotificationChannel(LIVE_CHANNEL, "Workout timer", NotificationManager.IMPORTANCE_LOW);
-        live.setDescription("The rest, plank or stretch countdown while the phone is locked");
+        manager.deleteNotificationChannel(OLD_LIVE_CHANNEL);
+        NotificationChannel live = new NotificationChannel(LIVE_CHANNEL, "Workout timer", NotificationManager.IMPORTANCE_DEFAULT);
+        live.setDescription("The rest, plank or stretch countdown on the lock screen and status bar");
         live.setShowBadge(false);
+        live.setSound(null, null);
+        live.enableVibration(false);
         live.setLockscreenVisibility(NotificationCompat.VISIBILITY_PUBLIC);
 
         NotificationChannel alert = new NotificationChannel(ALERT_CHANNEL, "Timer done", NotificationManager.IMPORTANCE_HIGH);
@@ -82,6 +88,9 @@ final class TimerNotifications {
             .setWhen(endsAt)
             .setUsesChronometer(true)
             .setChronometerCountDown(true)
+            // Android 16 Live Update: the countdown shows as a status bar chip (the island on
+            // HyperOS, the Now Bar on One UI) and at the top of the lock screen.
+            .setRequestPromotedOngoing(true)
             // The countdown would run past zero; the alarm also removes it when it fires.
             .setTimeoutAfter(Math.max(0, endsAt - System.currentTimeMillis()));
         notify(context, LIVE_ID, builder);

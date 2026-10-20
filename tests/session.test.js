@@ -23,6 +23,7 @@ const {
   findNext,
   continueRest,
   selectExercise,
+  exerciseChangeAvailable,
   exerciseSelectionLocked,
   supersetProgress,
   sessionBudgetState,
@@ -315,7 +316,7 @@ test('selecting an exercise during rest preserves the countdown and changes the 
   assert.equal(state.active.nextPos, null);
 });
 
-test('switching exercises is allowed during rest between sets', async () => {
+test('rest between sets of a started exercise cannot switch exercises', async () => {
   const state = emptyState();
   const completed = task('press');
   completed.completed = { reps: 8, completedAt: '2026-09-06T12:00:00.000Z' };
@@ -330,8 +331,31 @@ test('switching exercises is allowed during rest between sets', async () => {
   };
   setState(state);
 
-  assert.equal(await selectExercise('row'), true);
+  assert.equal(exerciseChangeAvailable(state.active), false);
+  assert.equal(await selectExercise('row'), false);
+  assert.equal(state.active.nextPos, 1);
+});
+
+test('rest before a new exercise can switch it, but not when it is the last one left', async () => {
+  const state = emptyState();
+  const completed = task('press');
+  completed.completed = { reps: 8, completedAt: '2026-09-06T12:00:00.000Z' };
+  state.active = {
+    tasks: [completed, task('row'), task('curl')],
+    pos: 0,
+    nextPos: 1,
+    phase: 'rest',
+    deferredGroups: [],
+    draft: {},
+    restEndsAt: Date.now() + 30000,
+  };
+  setState(state);
+
+  assert.equal(exerciseChangeAvailable(state.active), true);
+  assert.equal(await selectExercise('curl'), true);
   assert.equal(state.active.nextPos, 2);
+  state.active.tasks[1].skipped = true;
+  assert.equal(exerciseChangeAvailable(state.active), false);
 });
 
 test('selecting the second superset member makes it the lead for each round', async () => {

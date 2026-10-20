@@ -70,6 +70,7 @@ export { previewLog, previewSkipRest, previewUndo, type StepPreview } from './ne
 export {
   completeStretch,
   finishEarly,
+  stretchEarly,
   finishAtBudget,
   completeWorkout,
   finishWorkout,

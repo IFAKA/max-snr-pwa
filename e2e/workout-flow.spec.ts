@@ -111,17 +111,21 @@ test('a workout left on the old unsaved review step is saved on open', async ({ 
   expect(data.history[0].id).toBe(2000);
 });
 
-test('cancel discards the workout; finish early keeps the logged sets', async ({ page }) => {
+test('finish early goes to the stretch and keeps the logged sets', async ({ page }) => {
   await seed(page, appState({ active: activeWorkout({ phase: 'rest', open: 1 }) }));
   await page.goto('/workout/');
   await expect(page.getByRole('timer')).toBeVisible();
   await page.keyboard.press('Escape');
   await page.locator('dialog[open]').getByRole('button', { name: 'Finish Early' }).click();
-  await expect(page).toHaveURL(/view=summary/);
+  await expect(page.getByRole('timer', { name: 'Stretch remaining' })).toBeVisible();
   const data = await stored(page);
-  expect(
-    data.history[0].tasks.filter((task: { completed: unknown }) => task.completed),
-  ).toHaveLength(2);
+  expect(data.active.phase).toBe('stretch');
+  expect(data.active.tasks.filter((task: { completed: unknown }) => task.completed)).toHaveLength(
+    2,
+  );
+  await page.keyboard.press('Escape');
+  await page.locator('dialog[open]').getByRole('button', { name: 'Finish and Save' }).click();
+  await expect(page).toHaveURL(/view=summary/);
 });
 
 test('deep links unwind detail → parent → Today with back', async ({ page, context }) => {

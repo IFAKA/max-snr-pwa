@@ -2,7 +2,7 @@
   import { beforeNavigate, goto } from '$app/navigation';
   import { act } from '../app-state.svelte.ts';
   import { getState } from '../state.ts';
-  import { cancelWorkout, finishEarly } from '../workout/index.ts';
+  import { cancelWorkout, finishEarly, stretchEarly } from '../workout/index.ts';
   import { completionUrl } from '../browser/routes.ts';
   import ConfirmDialog from '../components/ConfirmDialog.svelte';
 
@@ -50,6 +50,8 @@
   async function handleClose(value: string) {
     if (value === 'discard') {
       if (await act(cancelWorkout)) await goto('/', { replace: true });
+    } else if (value === 'finish-early' && canFinishEarly) {
+      if (await act(stretchEarly)) await goto('/workout/', { replace: true });
     } else if (value === 'finish-early') {
       const saved = await act(finishEarly);
       if (saved) await goto(completionUrl(saved.id), { replace: true });
@@ -63,7 +65,7 @@
   bind:open
   title="Cancel workout?"
   body={hasCompletedSets
-    ? `Cancel discards this workout. ${canFinishEarly ? 'Finish early' : 'Finish'} saves the sets you have done.`
+    ? `Cancel discards this workout. ${canFinishEarly ? 'Finish early skips the sets left and goes to the stretch, which saves the sets you have done.' : 'Finish saves the sets you have done.'}`
     : 'Cancel discards this workout.'}
   actions={[
     { value: 'keep', label: 'Keep Working Out', primary: true },

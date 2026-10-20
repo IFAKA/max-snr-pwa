@@ -6,6 +6,7 @@ import {
   cancelWorkout,
   completeWorkout,
   finishEarly,
+  stretchEarly,
   finishWorkout,
   reopenWorkout,
 } from '../src/lib/workout/finish.ts';
@@ -109,4 +110,18 @@ test('improvement callouts compare against the previous session, not the saved o
   await logFirstSet('12', '20');
   const saved = await finishEarly();
   expect(improvementCallouts(saved!, 'kg')).toEqual(['Cable Lateral Raise: +2 reps']);
+});
+
+test('finish early during the lifts skips the sets left and goes to the stretch', async () => {
+  await start('Monday');
+  await logFirstSet('12', '20');
+  expect(await stretchEarly()).toBe(true);
+  expect(active().phase).toBe('stretch');
+  expect(getState().history).toHaveLength(0);
+  expect(active().tasks.filter((task) => task.completed)).toHaveLength(1);
+  expect(
+    active()
+      .tasks.filter((task) => !task.completed)
+      .every((task) => task.skipped),
+  ).toBe(true);
 });

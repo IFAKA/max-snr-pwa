@@ -57,15 +57,32 @@ export async function completeWorkout() {
   return finishWorkout();
 }
 
-export async function finishEarly() {
-  const active = getState().active;
-  if (!active) return null;
+const skipOpen = (active: ActiveWorkout) => {
   active.tasks.forEach((task) => {
     if (!task.completed && !task.skipped) {
       task.skipped = true;
       task.skipReason = 'user';
     }
   });
+};
+
+/**
+ * "Finish Early" during the lifts: the sets not done are skipped and the workout goes on to the
+ * cooldown stretch, as after the last set; finishing the stretch saves it.
+ */
+export async function stretchEarly() {
+  const active = getState().active;
+  if (!active) return false;
+  skipOpen(active);
+  clearTimers(active);
+  await finishLifts();
+  return true;
+}
+
+export async function finishEarly() {
+  const active = getState().active;
+  if (!active) return null;
+  skipOpen(active);
   clearTimers(active);
   active.completedAt = new Date().toISOString();
   return finishWorkout();

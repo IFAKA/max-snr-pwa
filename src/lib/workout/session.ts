@@ -106,28 +106,38 @@ export async function continueRest() {
   return { render: true };
 }
 
+// The exercise a change would replace: the one being lifted, or during rest the one coming next.
+const changeTarget = (active: ActiveWorkout) =>
+  active.phase === 'rest'
+    ? Number.isInteger(active.nextPos)
+      ? active.tasks[active.nextPos as number]
+      : undefined
+    : active.tasks[active.pos];
+
+// Once an exercise (or its superset round) has a logged set, it is under way and stays.
+const underWay = (active: ActiveWorkout, task: Task) =>
+  active.tasks.some(
+    (candidate) => candidate.exerciseId === task.exerciseId && candidate.completed,
+  ) ||
+  (task.groupType === 'superset' &&
+    active.tasks.some(
+      (candidate) =>
+        candidate.groupId === task.groupId && candidate.set === task.set && candidate.completed,
+    ));
+
 export const exerciseSelectionLocked = (active: ActiveWorkout | null | undefined) => {
   if (!active) return true;
   if (active.phase === 'warmup') return false;
   if (!['lifting', 'rest'].includes(active.phase)) return true;
-  if (active.phase !== 'lifting') return false;
-  const task = active.tasks[active.pos];
-  if (!task) return false;
-  const currentStarted = active.tasks.some(
-    (candidate) => candidate.exerciseId === task.exerciseId && candidate.completed,
-  );
-  const currentSupersetRoundStarted =
-    task.groupType === 'superset' &&
-    active.tasks.some(
-      (candidate) =>
-        candidate.groupId === task.groupId && candidate.set === task.set && candidate.completed,
-    );
-  return currentStarted || currentSupersetRoundStarted;
+  const task = changeTarget(active);
+  // Rest with nothing left to lift leads to the stretch, so there is nothing to change.
+  if (!task) return active.phase === 'rest';
+  return underWay(active, task);
 };
 
 export const exerciseChangeAvailable = (active: ActiveWorkout | null | undefined) => {
   if (!active || exerciseSelectionLocked(active)) return false;
-  const task = active.tasks[active.pos];
+  const task = changeTarget(active);
   return active.tasks.some(
     (candidate) => candidate.exerciseId !== task?.exerciseId && open(candidate),
   );

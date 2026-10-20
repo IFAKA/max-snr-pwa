@@ -997,6 +997,35 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   color: var(--text);
   scale: 1;
 }
+/* Where the browser can tie an animation to scroll position, every value scales and fades with
+   its distance from the band as the list moves, on the compositor, like a native picker wheel,
+   instead of jumping when the centred value changes. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .value-wheel-item {
+      color: var(--text);
+      transition: none;
+      animation: wheel-roll linear both;
+      animation-timeline: view();
+    }
+  }
+}
+@keyframes wheel-roll {
+  0%,
+  100% {
+    opacity: 0.25;
+    scale: 0.55;
+  }
+  35%,
+  65% {
+    opacity: 0.55;
+    scale: 0.7;
+  }
+  50% {
+    opacity: 1;
+    scale: 1;
+  }
+}
 @keyframes wheel-in {
   from {
     opacity: 0;

@@ -113,8 +113,8 @@ describe('screen helpers', () => {
     expect(loads[0]).toBe('0');
     expect(loads).toContain('41');
     expect(loads).toContain('42.5');
-    expect(loads.at(-1)).toBe('100');
-    expect(pickerValues('weight', '120').at(-1)).toBe('170');
+    expect(loads.at(-1)).toBe('300');
+    expect(pickerValues('weight', '250').at(-1)).toBe('350');
     expect(pickerValues('weight', '')).toContain('0');
   });
 

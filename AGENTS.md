@@ -60,7 +60,7 @@ Preserve state schema `version: 2` with `history` and `active`. Preserve Indexed
 
 These come from the product-psychology review (B=MAP, B.I.A.S., Peak-End, Regret and Black Mirror tests) and are covered by tests. A change that breaks one is not ready.
 
-- Finishing never loses work: finishing the cooldown or "Finish Early" saves to history immediately, and the completion screen offers "Reopen Workout" as the undo. There is no unsaved review step.
+- Finishing never loses work: "Finish Early" during the lifts skips the sets left and goes to the cooldown stretch, as after the last set; finishing the cooldown (or "Finish and Save" from it) saves to history immediately, and the completion screen offers "Reopen Workout" as the undo. There is no unsaved review step.
 - Safe defaults: every confirmation focuses the nondestructive choice ("Keep Working Out", "Keep Current Workout", "Keep Current Data", or "Start" when nothing is replaced). Destructive choices use the `destructive` style and say what they discard.
 - Honest copy: dialogs state what each choice does (cancel discards; finish early saves the logged sets).
 - Native dialogs only: no bottom sheets, drag handles, or custom dismiss gestures.

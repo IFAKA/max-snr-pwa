@@ -71,7 +71,8 @@ export function pickerValues(field: SetField, current: string) {
     const top = Math.max(30, Math.round(value) + 10);
     return Array.from({ length: top }, (_, index) => String(index + 1));
   }
-  const top = Math.max(100, Math.ceil((value + 50) / LOAD_STEP) * LOAD_STEP);
+  // Heavy lifts (squat, deadlift, leg press) go well past 100 kg.
+  const top = Math.max(300, Math.ceil((value + 100) / LOAD_STEP) * LOAD_STEP);
   const loads = Array.from({ length: top / LOAD_STEP + 1 }, (_, index) => index * LOAD_STEP);
   if (!loads.includes(value)) loads.push(value);
   return loads.sort((a, b) => a - b).map(formatLoad);
