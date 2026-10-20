@@ -10,6 +10,7 @@
   import { setActivityStatus } from '../browser/native-app.ts';
   import SwipeCard from '../components/SwipeCard.svelte';
   import WorkoutStage from '../components/WorkoutStage.svelte';
+  import WorkoutGuard from './WorkoutGuard.svelte';
 
   let { type }: { type: string } = $props();
 
@@ -56,7 +57,20 @@
     });
     await goto('/', { replace: true });
   }
+
+  // Leaving a timed activity asks, like a workout does: otherwise it keeps running and opening
+  // it again resumes it, with no way to end it short of finishing it.
+  async function discard() {
+    if (finished) return;
+    finished = true;
+    globalThis.sessionStorage?.removeItem(storageKey);
+    await goto('/', { replace: true });
+  }
 </script>
+
+{#if definition.durationMs > 0}
+  <WorkoutGuard main activity={{ title: definition.title, save: finish, discard }} />
+{/if}
 
 <SwipeCard onconfirm={finish} confirmLabel="Finish" disabled={type === 'measurement'}>
   <WorkoutStage
