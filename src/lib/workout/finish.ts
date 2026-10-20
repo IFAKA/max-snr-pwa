@@ -89,6 +89,20 @@ export async function finishEarly() {
 }
 
 /**
+ * Removes one saved workout (a test run, a mistake). Ids are never reused, so everything else in
+ * History keeps its id; plans and progression are re-evaluated from what is left.
+ */
+export async function deleteWorkout(id: number) {
+  const state = getState();
+  const at = state.history.findIndex((workout) => workout.id === id);
+  if (at < 0) return false;
+  state.history.splice(at, 1);
+  await persist();
+  await evaluateAndPersist(state);
+  return true;
+}
+
+/**
  * Undo for the completion screen: moves the latest saved workout back to active. Sets that
  * "Finish early" skipped become open again, so the workout resumes where it stopped.
  */

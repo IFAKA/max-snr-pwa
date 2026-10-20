@@ -9,6 +9,7 @@ import {
   stretchEarly,
   finishWorkout,
   reopenWorkout,
+  deleteWorkout,
 } from '../src/lib/workout/finish.ts';
 import { improvementCallouts } from '../src/lib/workout/summary.ts';
 import { createDefaultPrescription } from '../src/lib/workout/program.ts';
@@ -124,4 +125,18 @@ test('finish early during the lifts skips the sets left and goes to the stretch'
       .tasks.filter((task) => !task.completed)
       .every((task) => task.skipped),
   ).toBe(true);
+});
+
+describe('deleting a saved workout', () => {
+  test('removes only that workout and keeps the others', async () => {
+    await start('Monday');
+    await logFirstSet();
+    const first = await completeWorkout();
+    await start('Wednesday');
+    await logFirstSet();
+    const second = await completeWorkout();
+    expect(await deleteWorkout(second!.id)).toBe(true);
+    expect(getState().history.map((workout) => workout.id)).toEqual([first!.id]);
+    expect(await deleteWorkout(second!.id)).toBe(false);
+  });
 });

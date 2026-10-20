@@ -75,6 +75,7 @@ export {
   completeWorkout,
   finishWorkout,
   reopenWorkout,
+  deleteWorkout,
   cancelWorkout,
 } from './finish.ts';
 export { startPlank, setTimer, adjustRest, remaining, formatDuration } from './timers.ts';
