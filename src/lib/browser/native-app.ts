@@ -83,11 +83,20 @@ export function nativeTimerFor(state: AppState, now = Date.now()): NativeTimer |
 
 let synced = '';
 let asked = false;
+// A timed activity (walk, …) counts outside workout state, so its screen hands its timer over.
+let activityTimer: NativeTimer | null = null;
+
+/** Shows (or, with null, clears) a timed activity's countdown in the native timer. */
+export function setActivityTimer(timer: NativeTimer | null, state: AppState) {
+  activityTimer = timer;
+  syncNativeTimer(state);
+}
 
 /** Starts, moves or stops the native timer to match state; repeated calls with no change are free. */
 export function syncNativeTimer(state: AppState) {
   if (!nativeApp) return;
-  const timer = nativeTimerFor(state);
+  const timer =
+    activityTimer && activityTimer.endsAt > Date.now() ? activityTimer : nativeTimerFor(state);
   const options = timer && { ...timer, sound: soundEnabled() };
   const key = JSON.stringify(options);
   if (key === synced) return;

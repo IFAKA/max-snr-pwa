@@ -7,6 +7,7 @@
   import { recordActivity } from '../health/health-data.ts';
   import { cue } from '../browser/feedback.ts';
   import Countdown from '../components/Countdown.svelte';
+  import { setActivityTimer } from '../browser/native-app.ts';
   import SwipeCard from '../components/SwipeCard.svelte';
   import WorkoutStage from '../components/WorkoutStage.svelte';
 
@@ -25,6 +26,22 @@
     return now;
   }
   const startedAtMs = startedAt();
+  // The countdown also runs in the status bar and on the lock screen in the Android app.
+  $effect(() => {
+    if (!definition.durationMs) return;
+    const title = definition.title;
+    setActivityTimer(
+      {
+        endsAt: startedAtMs + definition.durationMs,
+        title,
+        text: 'Remaining',
+        doneTitle: `${title} done`,
+        doneText: 'Finish when ready',
+      },
+      getState(),
+    );
+    return () => setActivityTimer(null, getState());
+  });
   let finished = false;
   let waist = $state('');
 
