@@ -42,7 +42,8 @@ public class WorkoutTimerPlugin extends Plugin {
         TimerService.start(
             context,
             endsAt,
-            call.getLong("total", 0L),
+            // JS sends small numbers as ints, which getLong does not read.
+            call.getData().optLong("total", 0L),
             call.getString("title", "Workout"),
             call.getString("text", "")
         );

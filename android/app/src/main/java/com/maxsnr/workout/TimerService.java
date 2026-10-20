@@ -58,7 +58,9 @@ public class TimerService extends Service {
             return START_NOT_STICKY;
         }
         endsAt = intent.getLongExtra(EXTRA_ENDS_AT, 0);
+        // Without a known length the bar measures from now, fixed once so it still empties.
         total = intent.getLongExtra(EXTRA_TOTAL, 0);
+        if (total <= 0) total = Math.max(1000, endsAt - System.currentTimeMillis());
         title = intent.getStringExtra(EXTRA_TITLE);
         text = intent.getStringExtra(EXTRA_TEXT);
         Notification notification = TimerNotifications.live(this, endsAt, total, title, text);
