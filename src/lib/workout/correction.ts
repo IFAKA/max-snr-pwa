@@ -5,9 +5,11 @@ import { evaluateAndPersist } from './coordinator.ts';
 import { EXERCISES } from './exercises.ts';
 import { HOME_EXERCISES } from './home-exercises.ts';
 
+// The home exercises already join EXERCISES, so ids are deduplicated.
 const catalogue = (): ExerciseDefinition[] => [
-  ...Object.values(EXERCISES),
-  ...Object.values(HOME_EXERCISES),
+  ...new Map(
+    [...Object.values(EXERCISES), ...Object.values(HOME_EXERCISES)].map((item) => [item.id, item]),
+  ).values(),
 ];
 
 /** The exercises a saved workout's sets can be corrected to, by name. */

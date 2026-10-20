@@ -222,3 +222,15 @@ test('menus name things the way Today does: workouts in Routine, only the past i
   await page.getByRole('link', { name: 'Settings' }).click();
   await expect(page.getByRole('switch', { name: 'Sound' })).toBeVisible();
 });
+
+test('a saved workout can be corrected to the exercise really done', async ({ page }) => {
+  await seed(page, appState());
+  await page.goto('/history/?view=workout&id=0');
+  await page.getByRole('link', { name: 'Did a different exercise?' }).click();
+  await expect(page.locator('main h1')).toHaveText('Done instead');
+  await page.getByRole('button', { name: /Pike Push-Up/ }).click();
+  await page.locator('dialog[open]').getByRole('button', { name: 'Change Exercise' }).click();
+  await expect(page.locator('main h1')).toHaveText('Full body A');
+  await expect(page.getByText('Pike Push-Up')).toBeVisible();
+  expect((await stored(page)).history[0].tasks[0].exerciseId).toBe('pike-push-up');
+});
