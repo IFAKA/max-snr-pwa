@@ -908,8 +908,9 @@ main > section:has(> .app-list) > .app-list .list-link::before {
     background: var(--accent-soft);
   }
 }
-/* A set value's wheel: a native snapping list centred on a dimmed screen, the values rolling
-   through a band and fading out above and below, with no card around them. */
+/* A set value's wheel: a list turned by its own momentum (ValueWheel.svelte) centred on a dimmed
+   screen, the values rolling through a band and fading out above and below, with no card around
+   them. The whole screen takes the drag, so no touch on it is left to the browser. */
 .value-wheel {
   width: 100%;
   max-width: none;
@@ -922,6 +923,8 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   border: 0;
   background: transparent;
   color: var(--text);
+  touch-action: none;
+  user-select: none;
   animation: wheel-in 200ms var(--ease-out);
 }
 .value-wheel::backdrop {
@@ -934,10 +937,11 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   opacity: 0;
   transition: opacity 140ms ease-in;
 }
-/* No mask or blur here: either would take the list off the compositor's fast scrolling path and
-   make a quick flick feel heavy. The fade above and below is a still overlay instead. */
+/* No mask or blur here: either would make every frame of a flick repaint the list. The fade above
+   and below is a still overlay instead. */
 .value-wheel-face {
   position: relative;
+  overflow: hidden;
   width: min(100% - 16px, 220px);
 }
 .value-wheel-face::before,
@@ -966,16 +970,10 @@ main > section:has(> .app-list) > .app-list .list-link::before {
 }
 .value-wheel-list {
   position: relative;
-  height: 100%;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scroll-snap-type: y mandatory;
-  scrollbar-width: none;
+  will-change: transform;
 }
-.value-wheel-list::-webkit-scrollbar {
-  display: none;
-}
-/* The centred value is enlarged by scaling, which costs no layout as values roll through. */
+/* Each value is scaled and faded by its distance from the band as the wheel turns (set inline per
+   frame), on the compositor, with no layout. These are the far values' resting look. */
 .value-wheel-item {
   width: 100%;
   min-height: 44px;
@@ -983,48 +981,12 @@ main > section:has(> .app-list) > .app-list .list-link::before {
   border: 0;
   border-radius: 999px;
   background: transparent;
-  color: var(--muted);
+  color: var(--text);
   font-size: 34px;
   font-weight: 800;
   letter-spacing: -0.03em;
-  scale: 0.65;
-  scroll-snap-align: center;
-  transition:
-    scale 100ms var(--ease-out),
-    color 100ms var(--ease-out);
-}
-.value-wheel-item.is-current {
-  color: var(--text);
-  scale: 1;
-}
-/* Where the browser can tie an animation to scroll position, every value scales and fades with
-   its distance from the band as the list moves, on the compositor, like a native picker wheel,
-   instead of jumping when the centred value changes. */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .value-wheel-item {
-      color: var(--text);
-      transition: none;
-      animation: wheel-roll linear both;
-      animation-timeline: view();
-    }
-  }
-}
-@keyframes wheel-roll {
-  0%,
-  100% {
-    opacity: 0.25;
-    scale: 0.55;
-  }
-  35%,
-  65% {
-    opacity: 0.55;
-    scale: 0.7;
-  }
-  50% {
-    opacity: 1;
-    scale: 1;
-  }
+  opacity: 0.25;
+  scale: 0.55;
 }
 @keyframes wheel-in {
   from {
