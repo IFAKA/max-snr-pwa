@@ -25,7 +25,7 @@
       return {
         time: when ? new Date(when).getTime() || 0 : 0,
         ...line,
-        href: '',
+        href: `/history/?view=activity&id=${encodeURIComponent(activity.id)}`,
       };
     });
     return [...workouts, ...activities].sort((a, b) => b.time - a.time);
@@ -64,7 +64,7 @@
       <ListRow
         href={entry.href || undefined}
         icon={entry.href ? 'chevron' : undefined}
-        iconLabel="Open workout"
+        iconLabel="Open entry"
         skip={!entry.href}
       >
         {#snippet content()}

@@ -234,3 +234,25 @@ test('a saved workout can be corrected to the exercise really done', async ({ pa
   await expect(page.getByText('Pike Push-Up')).toBeVisible();
   expect((await stored(page)).history[0].tasks[0].exerciseId).toBe('pike-push-up');
 });
+
+test('a saved workout and a walk can each be deleted from their detail', async ({ page }) => {
+  const state = appState() as { health: { activities: unknown[] } };
+  state.health.activities.push({
+    id: 'walk-1',
+    type: 'walk',
+    completedAt: new Date(Date.now() - 86400000).toISOString(),
+    durationMinutes: 20,
+  });
+  await seed(page, state);
+  await page.goto('/history/');
+  await page.getByRole('link', { name: /Walk/i }).click();
+  await page.getByRole('button', { name: 'Delete Activity' }).click();
+  await page.locator('dialog[open]').getByRole('button', { name: 'Delete Activity' }).click();
+  await expect(page.locator('main h1')).toHaveText('History');
+  expect((await stored(page)).health.activities).toHaveLength(0);
+  await page.getByRole('link', { name: /Full body A/ }).click();
+  await page.getByRole('button', { name: 'Delete Workout' }).click();
+  await page.locator('dialog[open]').getByRole('button', { name: 'Delete Workout' }).click();
+  await expect(page.locator('main h1')).toHaveText('History');
+  expect((await stored(page)).history).toHaveLength(0);
+});

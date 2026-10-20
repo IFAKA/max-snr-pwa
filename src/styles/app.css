@@ -1815,3 +1815,7 @@ main > section:has(> .app-list) > .app-list .list-link::before {
 .set-values.single {
   grid-template-columns: minmax(0, 1fr);
 }
+/* The destructive row at the top of a History detail. */
+.list-link.is-danger {
+  color: var(--danger);
+}

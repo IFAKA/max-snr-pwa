@@ -102,6 +102,17 @@ export async function deleteWorkout(id: number) {
   return true;
 }
 
+/** Removes one saved activity (a walk and the like) from History. */
+export async function deleteActivity(id: string) {
+  const state = getState();
+  const at = state.health.activities.findIndex((activity) => activity.id === id);
+  if (at < 0) return false;
+  state.health.activities.splice(at, 1);
+  await persist();
+  await evaluateAndPersist(state);
+  return true;
+}
+
 /**
  * Undo for the completion screen: moves the latest saved workout back to active. Sets that
  * "Finish early" skipped become open again, so the workout resumes where it stopped.
