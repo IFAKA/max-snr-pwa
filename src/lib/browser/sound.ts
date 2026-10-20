@@ -1,17 +1,36 @@
 // Synthesized workout sounds: Web Audio builds each one on the fly, so there are no files to cache
-// and they play offline. The palette is calm: a soft struck bar for picks, a dry ratchet click for
-// each value a wheel turns past and a low seat when it comes to rest, a muted plate knock for a
-// logged set, clear pips for a timer's last seconds, a bright two-note call when it ends, and warm
-// chords for a better set and the finish. One limiter keeps stacked sounds from distorting, and each
-// play shifts pitch and loudness a little so repeats don't sound canned. Browsers block audio until
-// a gesture, so the first tap starts the context; a timer can then sound on its own later.
+// and they play offline. They are one family, struck rather than beeped: each is a set of decaying
+// partials tuned like a real material (a wooden bar, a glass bar, a steel plate, felt), all in D
+// major and sharing one small room, so every sound says what happened by what it sounds like:
+// - the wheel: a tiny wooden ratchet per value, and felt seating when it rests;
+// - a swipe crossing its threshold: a latch catching (up) or letting go (down);
+// - a timer's last seconds: a glass A that the end resolves;
+// - rest over: a rising call (D to A), time to lift; a hold over: a falling one, let go;
+// - a logged set: a plate set down on the rack; a better one adds a rising sparkle;
+// - undo: a reversed swell falling back; the finish: a warm opening chord with a long tail.
+// One limiter keeps stacked sounds clean, and each play shifts pitch and loudness a little so
+// repeats don't sound canned. Browsers block audio until a gesture, so the first tap starts the
+// context; a timer can then sound on its own later.
 const SOUND_KEY = 'maxsnr-sound';
 
-export type Sound = 'detent' | 'seat' | 'tick' | 'pip' | 'go' | 'log' | 'best' | 'finish' | 'undo';
+export type Sound =
+  | 'detent'
+  | 'seat'
+  | 'tick'
+  | 'arm'
+  | 'disarm'
+  | 'pip'
+  | 'go'
+  | 'done'
+  | 'log'
+  | 'best'
+  | 'finish'
+  | 'undo';
 
 let ctx: AudioContext | null = null;
 let master: AudioNode | null = null;
 let noise: AudioBuffer | null = null;
+let reverb: AudioNode | null = null;
 let enabled = (() => {
   try {
     return globalThis.localStorage?.getItem(SOUND_KEY) !== 'off';
@@ -31,6 +50,25 @@ export function setSoundEnabled(on: boolean) {
   }
 }
 
+function room(audio: AudioContext, out: AudioNode) {
+  // A small, dark room: a second of decaying noise, filtered so the tail is warm, not hissy.
+  const length = Math.floor(audio.sampleRate * 1.1);
+  const impulse = audio.createBuffer(2, length, audio.sampleRate);
+  for (let channel = 0; channel < 2; channel++) {
+    const data = impulse.getChannelData(channel);
+    for (let index = 0; index < length; index++) {
+      data[index] = (Math.random() * 2 - 1) * Math.exp(-index / (audio.sampleRate * 0.28));
+    }
+  }
+  const tone = audio.createBiquadFilter();
+  tone.type = 'lowpass';
+  tone.frequency.value = 3800;
+  const convolver = audio.createConvolver();
+  convolver.buffer = impulse;
+  tone.connect(convolver).connect(out);
+  return tone;
+}
+
 function context() {
   if (typeof AudioContext === 'undefined') return null;
   if (!ctx) {
@@ -42,9 +80,15 @@ function context() {
     limiter.attack.value = 0.002;
     limiter.release.value = 0.15;
     limiter.connect(audio.destination);
+    // Phone speakers turn the top octave into fizz; keep it smooth.
+    const smooth = audio.createBiquadFilter();
+    smooth.type = 'lowpass';
+    smooth.frequency.value = 9000;
+    smooth.connect(limiter);
     const gain = audio.createGain();
     gain.gain.value = 0.85;
-    gain.connect(limiter);
+    gain.connect(smooth);
+    reverb = room(audio, gain);
     noise = audio.createBuffer(1, audio.sampleRate, audio.sampleRate);
     const samples = noise.getChannelData(0);
     for (let index = 0; index < samples.length; index++) samples[index] = Math.random() * 2 - 1;
@@ -95,72 +139,148 @@ function tone(
   oscillator.stop(t + dur + 0.02);
 }
 
-// A filtered slice of noise: the knock of a plate or the scrape of a bar.
-function burst(voice: Voice, freq: number, dur: number, gain: number) {
+// A filtered slice of noise: the contact of a mallet, a latch or a plate.
+function burst(voice: Voice, freq: number, dur: number, gain: number, at = 0) {
   if (!noise) return;
+  const t = voice.t + at;
   const source = voice.audio.createBufferSource();
   const filter = voice.audio.createBiquadFilter();
   const level = voice.audio.createGain();
   source.buffer = noise;
   filter.type = 'bandpass';
   filter.frequency.value = freq * voice.k;
-  filter.Q.value = 1.4;
-  envelope(level, voice.t, gain, 0.002, dur);
+  filter.Q.value = 1.2;
+  envelope(level, t, gain, 0.001, dur);
   source.connect(filter).connect(level).connect(voice.out);
-  source.start(voice.t, Math.random() * 0.8, dur + 0.02);
+  source.start(t, Math.random() * 0.8, dur + 0.02);
 }
 
-const chord = (voice: Voice, freqs: number[], at: number, step: number, dur: number) =>
-  freqs.forEach((freq, index) =>
-    tone(voice, { freq, dur, type: 'triangle', gain: 0.11, at: at + index * step, attack: 0.012 }),
-  );
+// Partials of struck materials: [frequency ratio, loudness, decay], from modal analysis of each.
+type Material = [number, number, number][];
+const WOOD: Material = [
+  [1, 1, 1],
+  [3.93, 0.3, 0.25],
+  [9.2, 0.1, 0.08],
+];
+const GLASS: Material = [
+  [1, 1, 1],
+  [2.76, 0.4, 0.5],
+  [5.4, 0.16, 0.25],
+  [8.93, 0.06, 0.12],
+];
+const PLATE: Material = [
+  [1, 1, 1],
+  [1.59, 0.6, 0.8],
+  [2.14, 0.45, 0.6],
+  [2.65, 0.3, 0.5],
+  [3.91, 0.18, 0.3],
+];
+const FELT: Material = [
+  [1, 1, 1],
+  [2, 0.12, 0.4],
+];
+
+/** A struck bar: every partial starts together and dies away at its own rate. */
+function strike(
+  voice: Voice,
+  material: Material,
+  freq: number,
+  gain: number,
+  decay: number,
+  at = 0,
+) {
+  for (const [ratio, loudness, fade] of material) {
+    tone(voice, {
+      freq: freq * ratio,
+      dur: decay * fade,
+      gain: gain * loudness,
+      at,
+      attack: 0.001,
+    });
+  }
+}
+
+// D major, so any two sounds that meet still agree.
+const D4 = 293.66;
+const D5 = 587.33;
+const FS5 = 739.99;
+const A5 = 880;
+const D6 = 1174.66;
+const E6 = 1318.51;
+const FS6 = 1479.98;
+const A6 = 1760;
+const D7 = 2349.32;
 
 const SOUNDS: Record<Sound, (voice: Voice) => void> = {
-  // A crown's ratchet: a dry tick of filtered noise on a tiny wooden body, short enough that a
-  // fast flick reads as a free-spinning wheel rather than a run of beeps.
   detent: (voice) => {
-    burst(voice, 3400, 0.012, 0.16);
-    tone(voice, { freq: 2100, dur: 0.018, type: 'triangle', gain: 0.045, attack: 0.001 });
+    burst(voice, 4200, 0.007, 0.09);
+    strike(voice, WOOD, D7, 0.045, 0.02);
   },
-  // The wheel seating on a value: a softer, lower thock, like a detent clicking home.
   seat: (voice) => {
-    burst(voice, 1500, 0.022, 0.18);
-    tone(voice, { freq: 620, to: 500, dur: 0.07, gain: 0.13, attack: 0.002 });
+    burst(voice, 1100, 0.014, 0.07);
+    strike(voice, FELT, D5, 0.11, 0.1);
   },
-  tick: (voice) => {
-    tone(voice, { freq: 1500, dur: 0.04, type: 'triangle', gain: 0.07 });
-    tone(voice, { freq: 2600, dur: 0.025, gain: 0.03 });
+  tick: (voice) => strike(voice, GLASS, A6, 0.06, 0.3),
+  arm: (voice) => {
+    burst(voice, 3000, 0.009, 0.1);
+    strike(voice, WOOD, E6, 0.06, 0.05);
+    strike(voice, WOOD, A6, 0.05, 0.06, 0.028);
   },
-  pip: (voice) => {
-    tone(voice, { freq: 880, dur: 0.13, gain: 0.24 });
-    tone(voice, { freq: 1760, dur: 0.06, gain: 0.05 });
-  },
+  disarm: (voice) => strike(voice, WOOD, D6, 0.04, 0.045),
+  pip: (voice) => strike(voice, GLASS, A5, 0.17, 0.4),
   go: (voice) => {
-    tone(voice, { freq: 660, dur: 0.16, type: 'triangle', gain: 0.22 });
-    tone(voice, { freq: 990, dur: 0.5, type: 'triangle', gain: 0.24, at: 0.14 });
-    tone(voice, { freq: 1980, dur: 0.3, gain: 0.05, at: 0.14 });
+    strike(voice, WOOD, D5, 0.1, 0.3);
+    strike(voice, GLASS, D6, 0.15, 0.55);
+    strike(voice, GLASS, A6, 0.17, 1, 0.12);
   },
+  done: (voice) =>
+    [A6, FS6, D6].forEach((freq, index) => strike(voice, GLASS, freq, 0.12, 1, index * 0.12)),
   log: (voice) => {
-    burst(voice, 700, 0.07, 0.35);
-    tone(voice, { freq: 150, to: 70, dur: 0.16, gain: 0.45 });
-    tone(voice, { freq: 1180, dur: 0.35, gain: 0.035 });
-    tone(voice, { freq: 1730, dur: 0.25, gain: 0.025 });
+    burst(voice, 900, 0.05, 0.2);
+    tone(voice, { freq: 120, to: 58, dur: 0.15, gain: 0.42 });
+    strike(voice, PLATE, 310, 0.045, 0.6, 0.004);
   },
   undo: (voice) => {
-    tone(voice, { freq: 330, to: 262, dur: 0.18, type: 'triangle', gain: 0.18 });
+    // Swells that cut off: a sound played backwards, falling back a fourth.
+    tone(voice, { freq: A5, dur: 0.12, gain: 0.1, attack: 0.1 });
+    tone(voice, { freq: FS5, dur: 0.11, gain: 0.07, attack: 0.09, at: 0.13 });
   },
   best: (voice) => {
     SOUNDS.log(voice);
-    chord(voice, [1047, 1319, 1568], 0.12, 0.07, 0.55);
+    [D6, FS6, A6, D7].forEach((freq, index) =>
+      strike(voice, GLASS, freq, 0.07, 0.75, 0.1 + index * 0.06),
+    );
   },
   finish: (voice) => {
-    chord(voice, [523, 659, 784, 1047], 0, 0.09, 0.3);
-    chord(voice, [523, 659, 784, 1047], 0.38, 0, 1.3);
+    [D5, FS5, A5, D6, E6].forEach((freq, index) =>
+      strike(voice, WOOD, freq, 0.1, 0.8, index * 0.08),
+    );
+    for (const freq of [D4, A5 / 2, FS5]) {
+      tone(voice, { freq, dur: 1.7, type: 'triangle', gain: 0.045, attack: 0.3, at: 0.35 });
+    }
+    strike(voice, GLASS, D7, 0.04, 1.4, 0.45);
   },
 };
 
+// How much of each sound reaches the room: the wheel and latches stay dry and close, the
+// moments that matter ring a little.
+const ROOM: Record<Sound, number> = {
+  detent: 0.03,
+  seat: 0.08,
+  tick: 0.15,
+  arm: 0.05,
+  disarm: 0.05,
+  pip: 0.15,
+  go: 0.22,
+  done: 0.3,
+  log: 0.1,
+  undo: 0.2,
+  best: 0.3,
+  finish: 0.38,
+};
+
 // Cues that mark time keep their exact pitch; the rest vary a little each play.
-const STEADY = new Set<Sound>(['pip', 'go']);
+const STEADY = new Set<Sound>(['pip', 'go', 'done']);
 
 /** Plays a sound; `level` scales its loudness and `pitch` shifts it (1 is as designed). */
 export function playSound(name: Sound, level = 1, pitch = 1) {
@@ -170,7 +290,12 @@ export function playSound(name: Sound, level = 1, pitch = 1) {
   const out = audio.createGain();
   out.gain.value = level * (0.9 + Math.random() * 0.1);
   out.connect(master);
-  const k = pitch * (STEADY.has(name) ? 1 : 1 + (Math.random() - 0.5) * 0.04);
+  if (reverb) {
+    const send = audio.createGain();
+    send.gain.value = ROOM[name];
+    out.connect(send).connect(reverb);
+  }
+  const k = pitch * (STEADY.has(name) ? 1 : 1 + (Math.random() - 0.5) * 0.03);
   SOUNDS[name]({ audio, out, t: audio.currentTime + 0.005, k });
 }
 
