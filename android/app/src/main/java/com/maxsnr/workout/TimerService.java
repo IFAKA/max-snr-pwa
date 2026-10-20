@@ -24,8 +24,6 @@ public class TimerService extends Service {
     static final String ACTION_BUTTON = "com.maxsnr.workout.BUTTON";
     static final String EXTRA_BUTTON = "button";
     private static final String ACTION_REFRESH = "com.maxsnr.workout.REFRESH";
-    // Four redraws a second keep the bar draining smoothly, under the system's five a second.
-    private static final long FRAME_MS = 250;
     private static final long CONFIRM_MS = 4000;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -121,8 +119,14 @@ public class TimerService extends Service {
         if (counting()) scheduleTick();
     }
 
+    // One redraw a second, just after the shown second changes, so the time never lags the
+    // in-app countdown. Every redraw makes the system re-inflate the card, the island and the
+    // lock screen; more often than this (we tried four a second for a smoother bar) makes them
+    // lag badly when opened.
     private void scheduleTick() {
-        handler.postDelayed(tick, FRAME_MS);
+        long left = status.at(System.currentTimeMillis()).endsAt - System.currentTimeMillis();
+        long untilNextSecond = left % 1000;
+        handler.postDelayed(tick, (untilNextSecond <= 0 ? 1000 : untilNextSecond) + 5);
     }
 
     @Override
