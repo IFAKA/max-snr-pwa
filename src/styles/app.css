@@ -1819,3 +1819,11 @@ main > section:has(> .app-list) > .app-list .list-link::before {
 .list-link.is-danger {
   color: var(--danger);
 }
+/* A confirmation as a bottom drawer (phone widths): the same title, copy and buttons as the dialog. */
+.confirm-drawer h2 {
+  margin: 0;
+}
+.confirm-drawer p {
+  margin: 8px 0 0;
+  color: var(--muted);
+}

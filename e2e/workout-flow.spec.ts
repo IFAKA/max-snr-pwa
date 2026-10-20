@@ -5,7 +5,7 @@ test('start from a routine day, log a set, rest survives a refresh', async ({ pa
   await seed(page, appState({ history: [] }));
   await page.goto('/routine/?day=Monday');
   await page.getByRole('button', { name: /^Start/ }).click();
-  const dialog = page.locator('dialog[open]');
+  const dialog = page.locator('dialog[open], [data-confirm-drawer]');
   await expect(dialog.getByRole('button', { name: 'Start' })).toBeFocused();
   await dialog.getByRole('button', { name: 'Start' }).click();
 
@@ -56,15 +56,15 @@ test('a single back gesture is ignored; Escape asks with "Keep Working Out" focu
   await expect(page.getByRole('timer')).toBeVisible();
   await page.goBack();
   await expect(page).toHaveURL(/\/workout\/$/);
-  await expect(page.locator('dialog[open]')).toHaveCount(0);
+  await expect(page.locator('dialog[open], [data-confirm-drawer]')).toHaveCount(0);
 
   await page.keyboard.press('Escape');
-  const dialog = page.locator('dialog[open]');
+  const dialog = page.locator('dialog[open], [data-confirm-drawer]');
   await expect(dialog.getByRole('heading')).toHaveText('Cancel workout?');
   await expect(dialog.getByRole('button', { name: 'Keep Working Out' })).toBeFocused();
   await expect(dialog).toContainText('Cancel discards this workout.');
   await page.keyboard.press('Escape');
-  await expect(page.locator('dialog[open]')).toHaveCount(0);
+  await expect(page.locator('dialog[open], [data-confirm-drawer]')).toHaveCount(0);
   expect((await stored(page)).active).not.toBeNull();
 });
 
@@ -116,7 +116,10 @@ test('finish early goes to the stretch and keeps the logged sets', async ({ page
   await page.goto('/workout/');
   await expect(page.getByRole('timer')).toBeVisible();
   await page.keyboard.press('Escape');
-  await page.locator('dialog[open]').getByRole('button', { name: 'Finish Early' }).click();
+  await page
+    .locator('dialog[open], [data-confirm-drawer]')
+    .getByRole('button', { name: 'Finish Early' })
+    .click();
   await expect(page.getByRole('timer', { name: 'Stretch remaining' })).toBeVisible();
   const data = await stored(page);
   expect(data.active.phase).toBe('stretch');
@@ -124,7 +127,10 @@ test('finish early goes to the stretch and keeps the logged sets', async ({ page
     2,
   );
   await page.keyboard.press('Escape');
-  await page.locator('dialog[open]').getByRole('button', { name: 'Finish and Save' }).click();
+  await page
+    .locator('dialog[open], [data-confirm-drawer]')
+    .getByRole('button', { name: 'Finish and Save' })
+    .click();
   await expect(page).toHaveURL(/view=summary/);
 });
 
@@ -153,7 +159,10 @@ async function openWeightWheel(page: Page) {
   await seed(page, appState({ history: [] }));
   await page.goto('/routine/?day=Monday');
   await page.getByRole('button', { name: /^Start/ }).click();
-  await page.locator('dialog[open]').getByRole('button', { name: 'Start' }).click();
+  await page
+    .locator('dialog[open], [data-confirm-drawer]')
+    .getByRole('button', { name: 'Start' })
+    .click();
   await expect(page.locator('#weight-value')).toHaveText('0');
   await page.locator('#weight-pick').click();
   const wheel = page.getByRole('dialog', { name: 'Load in kg' });
@@ -189,7 +198,7 @@ test('back or Escape closes the wheel and keeps the value, without leaving the w
   await expect(wheel.locator('.is-current')).toHaveText('5 kg');
   await page.keyboard.press('Escape');
   await expect(wheel).toHaveCount(0);
-  await expect(page.locator('dialog[open]')).toHaveCount(0);
+  await expect(page.locator('dialog[open], [data-confirm-drawer]')).toHaveCount(0);
   await expect(page.locator('#weight-value')).toHaveText('5');
 });
 
@@ -200,7 +209,7 @@ test('Today offers the next workout and a restart that needs no setup', async ({
   await expect(page.getByRole('button', { name: 'Start', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Start At the gym · 30 min' }).click();
   await expect(page).toHaveURL(/\/workout\/$/);
-  await expect(page.locator('dialog[open]')).toHaveCount(0);
+  await expect(page.locator('dialog[open], [data-confirm-drawer]')).toHaveCount(0);
   await expect(page.locator('#reps-value')).toBeVisible();
 });
 
@@ -229,7 +238,10 @@ test('a saved workout can be corrected to the exercise really done', async ({ pa
   await page.getByRole('link', { name: 'Did a different exercise?' }).click();
   await expect(page.locator('main h1')).toHaveText('Done instead');
   await page.getByRole('button', { name: /Pike Push-Up/ }).click();
-  await page.locator('dialog[open]').getByRole('button', { name: 'Change Exercise' }).click();
+  await page
+    .locator('dialog[open], [data-confirm-drawer]')
+    .getByRole('button', { name: 'Change Exercise' })
+    .click();
   await expect(page.locator('main h1')).toHaveText('Full body A');
   await expect(page.getByText('Pike Push-Up')).toBeVisible();
   expect((await stored(page)).history[0].tasks[0].exerciseId).toBe('pike-push-up');
@@ -247,12 +259,18 @@ test('a saved workout and a walk can each be deleted from their detail', async (
   await page.goto('/history/');
   await page.getByRole('link', { name: /Walk/i }).click();
   await page.getByRole('button', { name: 'Delete Activity' }).click();
-  await page.locator('dialog[open]').getByRole('button', { name: 'Delete Activity' }).click();
+  await page
+    .locator('dialog[open], [data-confirm-drawer]')
+    .getByRole('button', { name: 'Delete Activity' })
+    .click();
   await expect(page.locator('main h1')).toHaveText('History');
   expect((await stored(page)).health.activities).toHaveLength(0);
   await page.getByRole('link', { name: /Full body A/ }).click();
   await page.getByRole('button', { name: 'Delete Workout' }).click();
-  await page.locator('dialog[open]').getByRole('button', { name: 'Delete Workout' }).click();
+  await page
+    .locator('dialog[open], [data-confirm-drawer]')
+    .getByRole('button', { name: 'Delete Workout' })
+    .click();
   await expect(page.locator('main h1')).toHaveText('History');
   expect((await stored(page)).history).toHaveLength(0);
 });

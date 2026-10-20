@@ -11,10 +11,13 @@ import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
 
-    // Closes the top open <dialog> as a cancel, like Chrome's back gesture does on the web.
+    // Closes the top open <dialog> (or a confirmation drawer, with Escape) as a cancel, like Chrome's back gesture does on the web.
     private static final String CLOSE_DIALOG_JS =
         "(() => { const dialog = [...document.querySelectorAll('dialog[open]')].pop();" +
-        " if (!dialog) return false;" +
+        " if (!dialog) {" +
+        "   if (!document.querySelector('[data-confirm-drawer]')) return false;" +
+        "   document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));" +
+        "   return true; }" +
         " if (dialog.requestClose) dialog.requestClose();" +
         " else if (dialog.dispatchEvent(new Event('cancel', { cancelable: true }))) dialog.close();" +
         " return true; })()";

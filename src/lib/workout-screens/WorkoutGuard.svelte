@@ -52,7 +52,12 @@
       target instanceof HTMLTextAreaElement ||
       target instanceof HTMLSelectElement ||
       target?.isContentEditable;
-    if (event.key !== 'Escape' || !main || editable || document.querySelector('dialog[open]'))
+    if (
+      event.key !== 'Escape' ||
+      !main ||
+      editable ||
+      document.querySelector('dialog[open], [data-state="open"] [data-confirm-drawer]')
+    )
       return;
     event.preventDefault();
     request();

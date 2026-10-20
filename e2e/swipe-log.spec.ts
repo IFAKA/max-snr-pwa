@@ -84,9 +84,12 @@ test('on the first set, swiping up opens the exercise list', async ({ page }) =>
   await seed(page, appState({ history: [] }));
   await page.goto('/routine/?day=Monday');
   await page.getByRole('button', { name: /^Start/ }).click();
-  await page.locator('dialog[open]').getByRole('button', { name: 'Start' }).click();
+  await page
+    .locator('dialog[open], [data-confirm-drawer]')
+    .getByRole('button', { name: 'Start' })
+    .click();
   await expect(page.locator('#reps-value')).toBeVisible();
-  await expect(page.locator('dialog[open]')).toHaveCount(0);
+  await expect(page.locator('dialog[open], [data-confirm-drawer]')).toHaveCount(0);
   // The route's view transition covers the page for a moment.
   await page.waitForTimeout(800);
   const box = (await page.locator('.swipe-card').boundingBox())!;
@@ -130,7 +133,10 @@ test('opening and closing the drawer does not play a page transition', async ({ 
   await seed(page, appState({ history: [] }));
   await page.goto('/routine/?day=Monday');
   await page.getByRole('button', { name: /^Start/ }).click();
-  await page.locator('dialog[open]').getByRole('button', { name: 'Start' }).click();
+  await page
+    .locator('dialog[open], [data-confirm-drawer]')
+    .getByRole('button', { name: 'Start' })
+    .click();
   await expect(page.locator('#reps-value')).toBeVisible();
   await page.waitForTimeout(800);
   await page.evaluate(() => {
@@ -155,7 +161,10 @@ test('closing the drawer with back slides it out instead of removing it', async 
   await seed(page, appState({ history: [] }));
   await page.goto('/routine/?day=Monday');
   await page.getByRole('button', { name: /^Start/ }).click();
-  await page.locator('dialog[open]').getByRole('button', { name: 'Start' }).click();
+  await page
+    .locator('dialog[open], [data-confirm-drawer]')
+    .getByRole('button', { name: 'Start' })
+    .click();
   await expect(page.locator('#reps-value')).toBeVisible();
   await page.waitForTimeout(800);
   await page.locator('.stage-title-link').click();
@@ -251,7 +260,10 @@ test('the exercise title opens the list only when the exercise can change', asyn
   await seed(page, appState({ history: [] }));
   await page.goto('/routine/?day=Monday');
   await page.getByRole('button', { name: /^Start/ }).click();
-  await page.locator('dialog[open]').getByRole('button', { name: 'Start' }).click();
+  await page
+    .locator('dialog[open], [data-confirm-drawer]')
+    .getByRole('button', { name: 'Start' })
+    .click();
   const edge = page.locator('a[href*="view=exercises"]');
   await expect(edge).toBeVisible();
   await page.waitForTimeout(800);

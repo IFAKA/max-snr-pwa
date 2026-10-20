@@ -46,7 +46,7 @@ test('import validates, asks with "Keep Current Data" as the default, then repla
     mimeType: 'application/json',
     buffer: Buffer.from(JSON.stringify(backup)),
   });
-  const dialog = page.locator('dialog[open]');
+  const dialog = page.locator('dialog[open], [data-confirm-drawer]');
   await expect(dialog.getByRole('button', { name: 'Keep Current Data' })).toBeFocused();
   await dialog.getByRole('button', { name: 'Replace with Backup' }).click();
   await expect.poll(async () => (await stored(page)).history.length).toBe(3);
