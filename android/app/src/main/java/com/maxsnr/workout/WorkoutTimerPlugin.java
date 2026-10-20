@@ -39,7 +39,13 @@ public class WorkoutTimerPlugin extends Plugin {
         }
         Context context = getContext();
         TimerNotifications.cancel(context, TimerNotifications.ALERT_ID);
-        TimerNotifications.showLive(context, endsAt, call.getString("title", "Workout"), call.getString("text", ""));
+        TimerService.start(
+            context,
+            endsAt,
+            call.getLong("total", 0L),
+            call.getString("title", "Workout"),
+            call.getString("text", "")
+        );
 
         Intent intent = new Intent(context, TimerAlarmReceiver.class)
             .putExtra(TimerAlarmReceiver.EXTRA_TITLE, call.getString("doneTitle", "Time's up"))
@@ -54,7 +60,7 @@ public class WorkoutTimerPlugin extends Plugin {
         Context context = getContext();
         AlarmManager alarms = context.getSystemService(AlarmManager.class);
         alarms.cancel(alarmIntent(context, new Intent(context, TimerAlarmReceiver.class)));
-        TimerNotifications.cancel(context, TimerNotifications.LIVE_ID);
+        TimerService.stop(context);
         // A "done" alert that already rang stays until the app is opened (MainActivity.onResume):
         // a backgrounded page may still run and move on to the next set by itself.
         call.resolve();

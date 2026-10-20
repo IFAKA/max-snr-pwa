@@ -30,8 +30,9 @@ describe('native lock-screen timer', () => {
     const next = active().tasks[active().nextPos as number];
     const timer = nativeTimerFor(getState());
     expect(timer?.endsAt).toBe(active().restEndsAt);
-    expect(timer?.title).toBe(`Rest · ${next.performedName}`);
-    expect(timer?.text).toBe(`Next: set ${next.set} of ${next.sets}`);
+    expect(timer?.title).toBe('Rest');
+    expect(timer?.text).toBe(`Next: ${next.performedName} · set ${next.set} of ${next.sets}`);
+    expect(timer?.total).toBeGreaterThan(0);
     expect(timer?.doneTitle).toBe('Rest over');
   });
 

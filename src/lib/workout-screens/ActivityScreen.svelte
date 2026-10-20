@@ -33,8 +33,9 @@
     setActivityTimer(
       {
         endsAt: startedAtMs + definition.durationMs,
+        total: definition.durationMs,
         title,
-        text: 'Remaining',
+        text: 'Finish when the time is up',
         doneTitle: `${title} done`,
         doneText: 'Finish when ready',
       },

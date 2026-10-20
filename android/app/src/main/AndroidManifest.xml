@@ -24,6 +24,16 @@
 
         </activity>
 
+        <!-- Keeps the countdown notification ticking each second while the app is in the background. -->
+        <service
+            android:name=".TimerService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Live workout rest countdown shown on the lock screen and status bar" />
+        </service>
+
         <receiver
             android:name=".TimerAlarmReceiver"
             android:exported="false" />
@@ -45,6 +55,8 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Android 16 Live Updates: the running countdown as a status bar chip and lock-screen card. -->
     <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <!-- Ring exactly when rest ends: granted to timer apps on Android 13+, by the user on 12. -->
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />

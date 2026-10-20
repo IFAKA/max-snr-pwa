@@ -1,5 +1,6 @@
 import { Capacitor, registerPlugin } from '@capacitor/core';
 import type { ActiveWorkout, AppState } from '../types.ts';
+import { PLANK_MS, REST_MS, STRETCH_MS } from '../constants.ts';
 import { soundEnabled } from './sound.ts';
 
 // The Android app's native edges (Capacitor plugins in android/app/src/main/java/…/workout/).
@@ -10,6 +11,8 @@ import { soundEnabled } from './sound.ts';
 
 export interface NativeTimer {
   endsAt: number;
+  /** The full length, so the notification's bar can show how much is left. */
+  total: number;
   title: string;
   text: string;
   doneTitle: string;
@@ -54,8 +57,9 @@ function restTimer(active: ActiveWorkout, endsAt: number): NativeTimer {
   const set = next ? `set ${next.set} of ${next.sets}` : '';
   return {
     endsAt,
-    title: name ? `Rest · ${name}` : 'Rest',
-    text: name ? `Next: ${set}` : 'Next set when the timer ends',
+    total: active.tasks[active.pos]?.restMs || REST_MS,
+    title: 'Rest',
+    text: name ? `Next: ${name} · ${set}` : 'Next set when the timer ends',
     doneTitle: 'Rest over',
     doneText: name ? `${name}, ${set}` : 'Time for your next set',
   };
@@ -69,10 +73,18 @@ export function nativeTimerFor(state: AppState, now = Date.now()): NativeTimer |
   const endsAt = active.timerEndsAt;
   if (!endsAt || endsAt <= now) return null;
   if (active.phase === 'plank')
-    return { endsAt, title: 'Plank', text: 'Hold', doneTitle: 'Plank done', doneText: 'Rest up' };
+    return {
+      endsAt,
+      total: PLANK_MS,
+      title: 'Plank',
+      text: 'Hold',
+      doneTitle: 'Plank done',
+      doneText: 'Rest up',
+    };
   if (active.phase === 'stretch')
     return {
       endsAt,
+      total: STRETCH_MS,
       title: 'Stretch',
       text: 'Breathe and hold',
       doneTitle: 'Stretch done',

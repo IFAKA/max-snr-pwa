@@ -1,5 +1,6 @@
 package com.maxsnr.workout;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -10,6 +11,7 @@ import android.media.RingtoneManager;
 import android.os.Build;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import java.util.Locale;
 
 /**
  * The two notifications a workout timer uses: a silent, ongoing countdown on the lock screen
@@ -73,10 +75,18 @@ final class TimerNotifications {
         return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
-    static void showLive(Context context, long endsAt, String title, String text) {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, LIVE_CHANNEL)
+    /**
+     * The countdown as a glance: the time left first in the title and alone in the status bar chip
+     * (the island), what comes next as the text, and a bar that empties as the time runs out.
+     */
+    static Notification live(Context context, long endsAt, long total, String title, String text) {
+        long left = Math.max(0, endsAt - System.currentTimeMillis());
+        String time = clock(left);
+        int max = (int) Math.max(1, (total > 0 ? total : left) / 1000);
+        int remaining = (int) Math.min(max, (left + 999) / 1000);
+        return new NotificationCompat.Builder(context, LIVE_CHANNEL)
             .setSmallIcon(R.drawable.ic_stat_timer)
-            .setContentTitle(title)
+            .setContentTitle(time + " · " + title)
             .setContentText(text)
             .setContentIntent(openApp(context))
             .setOngoing(true)
@@ -84,16 +94,22 @@ final class TimerNotifications {
             .setSilent(true)
             .setCategory(NotificationCompat.CATEGORY_STOPWATCH)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setShowWhen(true)
-            .setWhen(endsAt)
-            .setUsesChronometer(true)
-            .setChronometerCountDown(true)
-            // Android 16 Live Update: the countdown shows as a status bar chip (the island on
-            // HyperOS, the Now Bar on One UI) and at the top of the lock screen.
+            .setShowWhen(false)
+            .setProgress(max, remaining, false)
+            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+            // Android 16 Live Update: the time shows as a status bar chip (the island on HyperOS,
+            // the Now Bar on One UI) and the card sits at the top of the lock screen.
             .setRequestPromotedOngoing(true)
-            // The countdown would run past zero; the alarm also removes it when it fires.
-            .setTimeoutAfter(Math.max(0, endsAt - System.currentTimeMillis()));
-        notify(context, LIVE_ID, builder);
+            .setShortCriticalText(time)
+            .build();
+    }
+
+    static String clock(long ms) {
+        long seconds = (ms + 999) / 1000;
+        if (seconds >= 3600) {
+            return String.format(Locale.ROOT, "%d:%02d:%02d", seconds / 3600, (seconds / 60) % 60, seconds % 60);
+        }
+        return String.format(Locale.ROOT, "%d:%02d", seconds / 60, seconds % 60);
     }
 
     static void showAlert(Context context, String title, String text, boolean sound) {
@@ -108,19 +124,23 @@ final class TimerNotifications {
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setVibrate(VIBRATION);
         if (sound) builder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
-        notify(context, ALERT_ID, builder);
+        post(context, ALERT_ID, builder.build());
     }
 
     static void cancel(Context context, int id) {
         NotificationManagerCompat.from(context).cancel(id);
     }
 
-    private static void notify(Context context, int id, NotificationCompat.Builder builder) {
+    static void post(Context context, Notification notification) {
+        post(context, LIVE_ID, notification);
+    }
+
+    private static void post(Context context, int id, Notification notification) {
         NotificationManagerCompat manager = NotificationManagerCompat.from(context);
         // Without the notification permission (Android 13+) the timer still works in the app.
         if (!manager.areNotificationsEnabled()) return;
         try {
-            manager.notify(id, builder.build());
+            manager.notify(id, notification);
         } catch (SecurityException ignored) {}
     }
 }
