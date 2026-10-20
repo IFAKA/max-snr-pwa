@@ -73,10 +73,27 @@ public class WorkoutTimerPlugin extends Plugin {
         instance.notifyListeners("action", data, true);
     }
 
+    // The countdown the alarm was set for. The page keeps running in the background, so when a
+    // countdown ends it usually moves on (and replaces the alarm) before the alarm goes off; ring
+    // here then, or the end would pass in silence.
+    private static LiveStatus counted;
+    private static boolean countedSound = true;
+
+    private static void ringIfJustEnded(Context context, LiveStatus next) {
+        LiveStatus last = counted;
+        counted = next != null && next.endsAt > 0 ? next : null;
+        if (last == null || (next != null && next.endsAt == last.endsAt)) return;
+        if (last.endsAt <= System.currentTimeMillis() + 1000) {
+            TimerAlarmReceiver.ring(context, last.endsAt, last.doneTitle, last.doneText, countedSound);
+        }
+    }
+
     @PluginMethod
     public void start(PluginCall call) {
         Context context = getContext();
         LiveStatus status = new LiveStatus(call.getData(), System.currentTimeMillis());
+        ringIfJustEnded(context, status);
+        countedSound = call.getBoolean("sound", true);
         TimerNotifications.cancel(context, TimerNotifications.ALERT_ID);
         TimerService.start(context, status);
 
@@ -84,7 +101,8 @@ public class WorkoutTimerPlugin extends Plugin {
         Intent intent = new Intent(context, TimerAlarmReceiver.class)
             .putExtra(TimerAlarmReceiver.EXTRA_TITLE, status.doneTitle)
             .putExtra(TimerAlarmReceiver.EXTRA_TEXT, status.doneText)
-            .putExtra(TimerAlarmReceiver.EXTRA_SOUND, call.getBoolean("sound", true));
+            .putExtra(TimerAlarmReceiver.EXTRA_SOUND, countedSound)
+            .putExtra(TimerAlarmReceiver.EXTRA_ENDS_AT, status.endsAt);
         if (status.endsAt > System.currentTimeMillis()) schedule(context, status.endsAt, alarmIntent(context, intent));
         else alarms.cancel(alarmIntent(context, intent));
         call.resolve();
@@ -93,6 +111,7 @@ public class WorkoutTimerPlugin extends Plugin {
     @PluginMethod
     public void stop(PluginCall call) {
         Context context = getContext();
+        ringIfJustEnded(context, null);
         AlarmManager alarms = context.getSystemService(AlarmManager.class);
         alarms.cancel(alarmIntent(context, new Intent(context, TimerAlarmReceiver.class)));
         TimerService.stop(context);
