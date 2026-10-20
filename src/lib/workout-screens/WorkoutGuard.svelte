@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { beforeNavigate, goto } from '$app/navigation';
+  import { beforeNavigate } from '$app/navigation';
+  import { leaveToToday, leavingProgrammatically, replaceUrl } from '../browser/navigation.ts';
   import { act } from '../app-state.svelte.ts';
   import { getState } from '../state.ts';
   import { cancelWorkout, finishEarly, stretchEarly } from '../workout/index.ts';
@@ -36,7 +37,7 @@
   }
 
   beforeNavigate((navigation) => {
-    if (navigation.type !== 'popstate' || !main || open) return;
+    if (navigation.type !== 'popstate' || !main || open || leavingProgrammatically()) return;
     navigation.cancel();
     const now = performance.now();
     const isDoubleBack = now - lastBackAt <= DOUBLE_BACK_MS;
@@ -64,12 +65,12 @@
       return;
     }
     if (value === 'discard') {
-      if (await act(cancelWorkout)) await goto('/', { replace: true });
+      await leaveToToday(() => act(cancelWorkout));
     } else if (value === 'finish-early' && canFinishEarly) {
-      if (await act(stretchEarly)) await goto('/workout/', { replace: true });
+      if (await act(stretchEarly)) await replaceUrl('/workout/');
     } else if (value === 'finish-early') {
       const saved = await act(finishEarly);
-      if (saved) await goto(completionUrl(saved.id), { replace: true });
+      if (saved) await replaceUrl(completionUrl(saved.id));
     }
   }
 </script>

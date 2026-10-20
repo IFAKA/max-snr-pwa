@@ -6,6 +6,7 @@
   import { getState } from '#lib/state.ts';
   import { routeName } from '#lib/browser/routes.ts';
   import { deepLinkAncestors } from '#lib/browser/route-history.ts';
+  import { goUp, recordNavigation, replaceUrl, startHistory } from '#lib/browser/navigation.ts';
   import { keepAwake, releaseWakeLock } from '#lib/browser/device.ts';
   import { routeTransition } from '#lib/browser/route-transition.ts';
   import { registerServiceWorker } from '#lib/browser/app-update.svelte.ts';
@@ -39,8 +40,7 @@
   });
   onNativeAction(async (action) => {
     const done = await runNativeAction(action);
-    if (done && page.url.pathname === '/workout/' && page.url.search)
-      await goto('/workout/', { replace: true });
+    if (done && page.url.pathname === '/workout/' && page.url.search) await goUp('/workout/');
   });
 
   // Screens render only after the history fix-up for deep links, so their own redirects
@@ -51,6 +51,7 @@
     // The Android app ships its files in the APK; only the web app updates through /sw.js.
     if (!nativeApp) registerServiceWorker();
     const current = `${page.url.pathname}${page.url.search}`;
+    startHistory(current);
     const ancestors = deepLinkAncestors(
       new URL(page.url.href),
       Boolean(getState().active),
@@ -63,7 +64,7 @@
     const [root, ...rest] = ancestors;
     void rest
       .concat(current)
-      .reduce((chain, url) => chain.then(() => goto(url)), goto(root, { replace: true }))
+      .reduce((chain, url) => chain.then(() => goto(url)), replaceUrl(root))
       .finally(() => (ready = true));
   });
 
@@ -73,7 +74,10 @@
   });
 
   // Move focus to the new screen's heading so screen readers and keyboards land on the content.
-  afterNavigate(async ({ type }) => {
+  afterNavigate(async (navigation) => {
+    const { type, to } = navigation;
+    const delta = 'delta' in navigation ? navigation.delta : undefined;
+    if (to) recordNavigation(type, delta, `${to.url.pathname}${to.url.search}`);
     if (type === 'enter') return;
     await tick();
     const heading = document.querySelector<HTMLElement>('main h1, main h2');

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { goto } from '$app/navigation';
+  import { goUp, leavingProgrammatically, replaceUrl } from '../browser/navigation.ts';
   import { page } from '$app/state';
   import { act, appVersion } from '../app-state.svelte.ts';
   import { getState } from '../state.ts';
@@ -68,13 +68,14 @@
 
   $effect(() => {
     const current = view;
-    if (current.kind === 'home' && !savingLegacy) void goto('/', { replace: true });
-    else if (current.kind === 'redirect') void goto(current.to, { replace: true });
+    if (current.kind === 'home' && !savingLegacy) {
+      if (!leavingProgrammatically()) void replaceUrl('/');
+    } else if (current.kind === 'redirect') void replaceUrl(current.to);
     else if (current.kind === 'save-legacy' && !savingLegacy) {
       // A workout left on the old unsaved review step is saved, never silently lost.
       savingLegacy = true;
       void act(finishWorkout).then(async (saved) => {
-        if (saved) await goto(completionUrl(saved.id), { replace: true });
+        if (saved) await replaceUrl(completionUrl(saved.id));
         savingLegacy = false;
       });
     }
@@ -108,6 +109,6 @@
 {#if drawer}
   {@const current = drawer}
   <Drawer label="Exercises" open={drawerOpen} onrequestclose={() => history.back()}>
-    <ExercisePicker active={current.active} onselected={() => goto(current.returnTo)} />
+    <ExercisePicker active={current.active} onselected={() => goUp(current.returnTo)} />
   </Drawer>
 {/if}

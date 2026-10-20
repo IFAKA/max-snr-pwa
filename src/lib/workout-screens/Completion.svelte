@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { goto } from '$app/navigation';
+  import { leaveToToday, replaceUrl } from '../browser/navigation.ts';
   import confetti from 'canvas-confetti';
   import { act } from '../app-state.svelte.ts';
   import { getState } from '../state.ts';
@@ -41,7 +41,7 @@
   async function reopen() {
     busy = true;
     const reopened = await act(() => reopenWorkout(workout.id));
-    if (reopened) await goto('/workout/', { replace: true });
+    if (reopened) await replaceUrl('/workout/');
     else busy = false;
   }
 </script>
@@ -62,9 +62,7 @@
     {/if}
   {/snippet}
   {#snippet actions()}
-    <button class="primary" id="finish" type="button" onclick={() => goto('/', { replace: true })}
-      >Done</button
-    >
+    <button class="primary" id="finish" type="button" onclick={() => leaveToToday()}>Done</button>
     {#if canReopen}
       <button class="secondary" id="reopen-workout" type="button" disabled={busy} onclick={reopen}
         >Reopen Workout</button

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { untrack } from 'svelte';
-  import { goto } from '$app/navigation';
+  import { replaceUrl } from '../browser/navigation.ts';
   import { act } from '../app-state.svelte.ts';
   import { STRETCH_MS } from '../constants.ts';
   import type { ActiveWorkout } from '../types.ts';
@@ -25,7 +25,7 @@
   async function finish() {
     busy = true;
     const saved = await act(completeWorkout);
-    if (saved) await goto(completionUrl(saved.id), { replace: true });
+    if (saved) await replaceUrl(completionUrl(saved.id));
     else busy = false;
   }
 </script>

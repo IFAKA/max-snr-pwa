@@ -1,6 +1,7 @@
 <script lang="ts">
   import { untrack } from 'svelte';
   import { goto } from '$app/navigation';
+  import { replaceUrl } from '../browser/navigation.ts';
   import { act, showError } from '../app-state.svelte.ts';
   import { getState } from '../state.ts';
   import { persist } from '../storage/persistence.ts';
@@ -65,7 +66,7 @@
       return;
     }
     cue(better ? 'betterSet' : 'setLogged');
-    await goto('/workout/', { replace: true });
+    await replaceUrl('/workout/');
   }
 
   async function cutOptional() {

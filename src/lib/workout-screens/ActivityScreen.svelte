@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { goto } from '$app/navigation';
+  import { leaveToToday } from '../browser/navigation.ts';
   import { act } from '../app-state.svelte.ts';
   import { getState } from '../state.ts';
   import { persist } from '../storage/persistence.ts';
@@ -55,7 +55,7 @@
       globalThis.sessionStorage?.removeItem(storageKey);
       await persist();
     });
-    await goto('/', { replace: true });
+    await leaveToToday();
   }
 
   // Leaving a timed activity asks, like a workout does: otherwise it keeps running and opening
@@ -64,7 +64,7 @@
     if (finished) return;
     finished = true;
     globalThis.sessionStorage?.removeItem(storageKey);
-    await goto('/', { replace: true });
+    await leaveToToday();
   }
 </script>
 

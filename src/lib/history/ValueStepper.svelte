@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { goto } from '$app/navigation';
+  import { goUp } from '../browser/navigation.ts';
   import { act, showError } from '../app-state.svelte.ts';
   import SwipeCard from '../components/SwipeCard.svelte';
   import SwipeHint from '../components/SwipeHint.svelte';
@@ -72,7 +72,7 @@
       return;
     }
     const saved = await act(() => onsave(values));
-    if (saved) await goto(doneHref, { replace: true });
+    if (saved) await goUp(doneHref);
     else busy = false;
   }
 

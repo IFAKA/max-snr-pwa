@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { goto } from '$app/navigation';
+  import { replaceUrl } from '../browser/navigation.ts';
   import { act } from '../app-state.svelte.ts';
   import { PLANK_MS } from '../constants.ts';
   import type { ActiveWorkout } from '../types.ts';
@@ -17,7 +17,7 @@
     if (busy) return;
     busy = true;
     await act(action);
-    await goto('/workout/', { replace: true });
+    await replaceUrl('/workout/');
   }
 
   $effect(() => {
