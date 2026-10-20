@@ -1,5 +1,5 @@
 const DEFAULT_HOLD_MS = 400;
-const MOVE_TOLERANCE = 24;
+const MOVE_TOLERANCE = 10;
 const DETENT_DISTANCE = 24;
 const ACCELERATION_START_DETENTS = 2;
 const ACCELERATION_POWER = 1.35;
@@ -579,7 +579,9 @@ export function createMagneticPicker(list, suppliedOptions = {}) {
     if (event.pointerId !== pointerId) return;
     const deltaY = event.clientY - startY;
     if (!pickerActive) {
-      if (Math.abs(deltaY) > MOVE_TOLERANCE) {
+      // A drag in any direction is a drag, not a hold.
+      const deltaX = (event.clientX ?? startX) - startX;
+      if (Math.hypot(deltaX, deltaY) > MOVE_TOLERANCE) {
         clearTimer();
         setHolding(false);
         movedBeforePicker = true;

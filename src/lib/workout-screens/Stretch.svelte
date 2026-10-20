@@ -48,7 +48,7 @@
           if (wasRunning) cue('timerDone');
         }}
       />
-      <SwipeHint text="Swipe ← finish · → restart" />
+      <SwipeHint directions={['left', 'right']} />
     {/snippet}
     {#snippet more()}
       <div class="countdown-actions">

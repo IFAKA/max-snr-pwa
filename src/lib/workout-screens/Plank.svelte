@@ -38,7 +38,7 @@
           void toLifting(beginLifting);
         }}
       />
-      <SwipeHint text="Swipe ← finish" />
+      <SwipeHint directions={['left']} />
     {/snippet}
     {#snippet more()}
       <div class="countdown-actions">

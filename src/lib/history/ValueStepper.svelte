@@ -117,7 +117,7 @@
             ></button
           >
         </div>
-        <SwipeHint text="← swipe for next · → skip" />
+        <SwipeHint directions={['left', 'right']} />
       {/snippet}
       {#snippet more()}
         <button class="primary log-set" id="step-next" type="button" disabled={busy} onclick={next}

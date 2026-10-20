@@ -3,7 +3,7 @@
 // partials tuned like a real material (a wooden bar, a glass bar, a steel plate, felt), all in D
 // major and sharing one small room, so every sound says what happened by what it sounds like:
 // - the wheel: a tiny wooden ratchet per value, and a magnet clacking home when it rests;
-// - starting a workout: a wooden run up the chord; skipping rest: air and a light rising note;
+// - starting a workout: a short count-in that leaps up and stops, unresolved; skipping rest: air and a light rising note;
 // - a swipe crossing its threshold: a latch catching (up) or letting go (down);
 // - a timer's last seconds: a glass A that the end resolves;
 // - rest over: a rising call (D to A), time to lift; a hold over: a falling one, let go;
@@ -242,10 +242,14 @@ const SOUNDS: Record<Sound, (voice: Voice) => void> = {
     strike(voice, FELT, D5, 0.14, 0.11);
     tone(voice, { freq: 170, to: 95, dur: 0.06, gain: 0.22, attack: 0.001 });
   },
-  // Starting a workout: the wooden bar runs up the chord, a step forward.
+  // Starting a workout: a low thump and an air rush building up, then two quick wooden knocks
+  // that leap a fifth and stop dry on the high note: a count-in, short and open, with no tail.
   begin: (voice) => {
-    [D5, FS5, A5, D6].forEach((freq, index) => strike(voice, WOOD, freq, 0.1, 0.45, index * 0.06));
-    strike(voice, GLASS, D7, 0.035, 0.8, 0.18);
+    tone(voice, { freq: 80, to: 140, dur: 0.12, gain: 0.3, attack: 0.01 });
+    sweep(voice, 300, 2600, 0.16, 0.08);
+    strike(voice, WOOD, D5, 0.1, 0.14, 0.14);
+    strike(voice, WOOD, A5, 0.12, 0.16, 0.22);
+    strike(voice, GLASS, A6, 0.05, 0.2, 0.22);
   },
   // Rest cut short: air moving on and a light rising grace note, lighter than rest running out.
   skip: (voice) => {
@@ -300,7 +304,7 @@ const SOUNDS: Record<Sound, (voice: Voice) => void> = {
 const ROOM: Record<Sound, number> = {
   detent: 0.03,
   seat: 0.06,
-  begin: 0.25,
+  begin: 0.08,
   skip: 0.2,
   tick: 0.15,
   arm: 0.05,

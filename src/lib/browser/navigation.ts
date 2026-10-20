@@ -52,9 +52,11 @@ function goBack(steps: number) {
 /** Shows `url` in place of the current screen (no new history entry). */
 export function replaceUrl(url: string) {
   replacing = true;
-  // Navigation uses plain paths; the app is served from the domain root.
+  // Navigation uses plain paths; the app is served from the domain root. afterNavigate can run
+  // after goto settles, so the flag outlives it briefly; a replace that changed nothing (same URL)
+  // never reaches recordNavigation and would otherwise stay set.
   // eslint-disable-next-line svelte/no-navigation-without-resolve
-  return goto(url, { replace: true }).finally(() => (replacing = false));
+  return goto(url, { replace: true }).finally(() => setTimeout(() => (replacing = false), 300));
 }
 
 /** Returns to `url`: back when it is the previous screen, otherwise in place of this one. */

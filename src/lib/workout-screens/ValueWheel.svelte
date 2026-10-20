@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, tick } from 'svelte';
   import { prefersReducedMotion } from '../browser/device.ts';
   import { detent, seated } from '../browser/feedback.ts';
   import {
@@ -29,12 +29,15 @@
     label,
     format = (value: string) => value,
     onclose,
+    target,
   }: {
     values: string[];
     current: string;
     label: string;
     format?: (value: string) => string;
     onclose: (value: string) => void;
+    /** Where the value is shown once the wheel closes; the chosen value flies there. */
+    target?: () => HTMLElement | null;
   } = $props();
 
   const ROW = 52;
@@ -51,6 +54,8 @@
   let index = $state(0);
   let closing = $state(false);
   let closed = false;
+  // A value chosen by key or tap holds the selection while the wheel glides onto it.
+  let pinned = false;
   let offset = 0;
 
   onMount(() => {
@@ -80,7 +85,7 @@
       items[at].style.opacity = String(opacity);
       styled.push(items[at]);
     }
-    if (closing) return;
+    if (closing || pinned) return;
     const near = clamp(Math.round(offset / ROW), 0, values.length - 1);
     if (near === index) return;
     index = near;
@@ -135,6 +140,7 @@
   function down(event: PointerEvent) {
     if (pointer !== null || event.button > 0) return;
     cancelAnimationFrame(frame);
+    pinned = false;
     pointer = event.pointerId;
     startY = event.clientY;
     startOffset = offset;
@@ -175,6 +181,7 @@
   function wheel(event: WheelEvent) {
     event.preventDefault();
     cancelAnimationFrame(frame);
+    pinned = false;
     draw(clamp(offset + event.deltaY, 0, top()));
     clearTimeout(wheelTimer);
     wheelTimer = window.setTimeout(() => settle(settleTarget(offset, 0, ROW, values.length)), 120);
@@ -184,15 +191,54 @@
   function dismiss() {
     if (closing) return;
     closing = true;
-    setTimeout(() => dialog.close(), prefersReducedMotion() ? 0 : 140);
+    if (prefersReducedMotion()) return dialog.close();
+    void fly().then((flight) => {
+      if (!flight) {
+        setTimeout(() => dialog.close(), 140);
+        return;
+      }
+      return flight.finished.then(
+        () => dialog.close(),
+        () => dialog.close(),
+      );
+    });
   }
+
+  // The chosen value lifts out of the band and glides onto the spot where the screen shows it, as
+  // the rest of the wheel fades; that spot stays empty until the wheel is gone.
+  let flyer = $state<{ left: number; top: number; text: string } | null>(null);
+  let flyerEl = $state<HTMLElement>();
+  async function fly() {
+    const item = list.children[index] as HTMLElement | undefined;
+    const spot = target?.();
+    if (!item || !spot) return null;
+    const from = item.getBoundingClientRect();
+    const to = spot.getBoundingClientRect();
+    const size = parseFloat(getComputedStyle(spot).fontSize) / 34;
+    const left = from.left + from.width / 2;
+    const top = from.top + from.height / 2;
+    flyer = { left, top, text: values[index] };
+    item.style.visibility = 'hidden';
+    spot.style.visibility = 'hidden';
+    restore = () => (spot.style.visibility = '');
+    await tick();
+    const dx = to.left + to.width / 2 - left;
+    const dy = to.top + to.height / 2 - top;
+    return flyerEl!.animate(
+      [
+        { transform: 'translate(-50%, -50%)' },
+        { transform: `translate(${dx}px, ${dy}px) translate(-50%, -50%) scale(${size})` },
+      ],
+      { duration: 260, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' },
+    );
+  }
+  let restore = () => {};
 
   // A tapped value slides into the band as the wheel fades.
   function choose(at: number) {
     index = at;
-    closing = true;
+    pinned = true;
     settle(at * ROW);
-    closing = false;
     dismiss();
   }
 
@@ -201,6 +247,7 @@
     if (!move) return;
     event.preventDefault();
     const at = clamp(index + move, 0, values.length - 1);
+    pinned = true;
     settle(at * ROW);
     index = at;
     list.querySelectorAll('button')[at]?.focus({ preventScroll: true });
@@ -219,6 +266,7 @@
     if (closed) return;
     closed = true;
     onclose(values[index]);
+    restore();
   }}
   onclickcapture={swallowDragClick}
   onclick={(event) => {
@@ -250,4 +298,12 @@
       {/each}
     </div>
   </div>
+  {#if flyer}
+    <span
+      class="value-wheel-flyer"
+      bind:this={flyerEl}
+      style:left="{flyer.left}px"
+      style:top="{flyer.top}px">{flyer.text}</span
+    >
+  {/if}
 </dialog>

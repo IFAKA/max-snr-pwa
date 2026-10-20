@@ -122,7 +122,7 @@
           {/each}
         </div>
         <SwipeHint
-          text={`← swipe to log${task.set === 1 && model.canChangeExercise ? ' · ↑ exercise' : ''}`}
+          directions={task.set === 1 && model.canChangeExercise ? ['left', 'up'] : ['left']}
         />
         {#if model.canCutOptional}
           <button
@@ -163,6 +163,7 @@
     current={shown(field)}
     label={NAMES[field]}
     format={field === 'weight' ? (value) => `${value} ${unit}` : undefined}
+    target={() => document.getElementById(`${field}-value`)}
     onclose={(value) => picked(field, value)}
   />
 {/if}

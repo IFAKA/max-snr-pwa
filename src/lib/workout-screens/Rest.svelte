@@ -125,7 +125,7 @@
           void run(continueRest);
         }}
       />
-      <SwipeHint text={`Swipe ← skip · → undo${canChange ? ' · ↑ exercise' : ''}`} />
+      <SwipeHint directions={canChange ? ['left', 'right', 'up'] : ['left', 'right']} />
     {/snippet}
     {#snippet more()}
       <div class="countdown-actions">
