@@ -16,8 +16,8 @@ import com.getcapacitor.annotation.Permission;
 import com.getcapacitor.annotation.PermissionCallback;
 
 /**
- * The native half of src/lib/browser/native-timer.ts: mirrors the running rest, plank or stretch
- * timer as a lock-screen countdown and an exact alarm at its end time.
+ * The native half of src/lib/browser/native-app.ts: keeps the running workout as a lock-screen and
+ * status bar notification with buttons, and rings an exact alarm when a countdown ends.
  */
 @CapacitorPlugin(
     name = "WorkoutTimer",
@@ -25,34 +25,37 @@ import com.getcapacitor.annotation.PermissionCallback;
 )
 public class WorkoutTimerPlugin extends Plugin {
 
+    private static WorkoutTimerPlugin instance;
+
     @Override
     public void load() {
+        instance = this;
         TimerNotifications.createChannels(getContext());
+    }
+
+    /** A notification button: the page runs it like the on-screen button (see onNativeAction). */
+    static void dispatch(String action) {
+        if (instance == null) return;
+        JSObject data = new JSObject();
+        data.put("action", action);
+        // Retained until a listener exists, so a tap while the page is still loading is not lost.
+        instance.notifyListeners("action", data, true);
     }
 
     @PluginMethod
     public void start(PluginCall call) {
-        Long endsAt = call.getLong("endsAt");
-        if (endsAt == null) {
-            call.reject("endsAt is required");
-            return;
-        }
         Context context = getContext();
+        LiveStatus status = new LiveStatus(call.getData(), System.currentTimeMillis());
         TimerNotifications.cancel(context, TimerNotifications.ALERT_ID);
-        TimerService.start(
-            context,
-            endsAt,
-            // JS sends small numbers as ints, which getLong does not read.
-            call.getData().optLong("total", 0L),
-            call.getString("title", "Workout"),
-            call.getString("text", "")
-        );
+        TimerService.start(context, status);
 
+        AlarmManager alarms = context.getSystemService(AlarmManager.class);
         Intent intent = new Intent(context, TimerAlarmReceiver.class)
-            .putExtra(TimerAlarmReceiver.EXTRA_TITLE, call.getString("doneTitle", "Time's up"))
-            .putExtra(TimerAlarmReceiver.EXTRA_TEXT, call.getString("doneText", ""))
+            .putExtra(TimerAlarmReceiver.EXTRA_TITLE, status.doneTitle)
+            .putExtra(TimerAlarmReceiver.EXTRA_TEXT, status.doneText)
             .putExtra(TimerAlarmReceiver.EXTRA_SOUND, call.getBoolean("sound", true));
-        schedule(context, endsAt, alarmIntent(context, intent));
+        if (status.endsAt > System.currentTimeMillis()) schedule(context, status.endsAt, alarmIntent(context, intent));
+        else alarms.cancel(alarmIntent(context, intent));
         call.resolve();
     }
 

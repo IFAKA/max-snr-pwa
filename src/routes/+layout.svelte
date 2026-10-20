@@ -9,7 +9,8 @@
   import { keepAwake, releaseWakeLock } from '#lib/browser/device.ts';
   import { routeTransition } from '#lib/browser/route-transition.ts';
   import { registerServiceWorker } from '#lib/browser/app-update.svelte.ts';
-  import { nativeApp, syncNativeTimer } from '#lib/browser/native-app.ts';
+  import { nativeApp, onNativeAction, syncNativeStatus } from '#lib/browser/native-app.ts';
+  import { liveStatus, runNativeAction } from '#lib/workout-screens/live-status.ts';
   import { appError, appVersion } from '#lib/app-state.svelte.ts';
   import ErrorNotice from '#lib/components/ErrorNotice.svelte';
 
@@ -30,10 +31,16 @@
     else void releaseWakeLock();
   });
 
-  // In the Android app, keep the lock-screen countdown and end alarm in step with the workout.
+  // In the Android app, keep the lock-screen status, countdown and end alarm in step with the
+  // workout, and run its buttons; a set logged there leaves any detail view for the main step.
   $effect(() => {
     void appVersion.value;
-    syncNativeTimer(getState());
+    syncNativeStatus(liveStatus(getState()));
+  });
+  onNativeAction(async (action) => {
+    const done = await runNativeAction(action);
+    if (done && page.url.pathname === '/workout/' && page.url.search)
+      await goto('/workout/', { replace: true });
   });
 
   // Screens render only after the history fix-up for deep links, so their own redirects

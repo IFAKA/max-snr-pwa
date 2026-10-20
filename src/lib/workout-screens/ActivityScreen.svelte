@@ -7,7 +7,7 @@
   import { recordActivity } from '../health/health-data.ts';
   import { cue } from '../browser/feedback.ts';
   import Countdown from '../components/Countdown.svelte';
-  import { setActivityTimer } from '../browser/native-app.ts';
+  import { setActivityStatus } from '../browser/native-app.ts';
   import SwipeCard from '../components/SwipeCard.svelte';
   import WorkoutStage from '../components/WorkoutStage.svelte';
 
@@ -30,18 +30,18 @@
   $effect(() => {
     if (!definition.durationMs) return;
     const title = definition.title;
-    setActivityTimer(
-      {
-        endsAt: startedAtMs + definition.durationMs,
-        total: definition.durationMs,
-        title,
-        text: 'Finish when the time is up',
-        doneTitle: `${title} done`,
-        doneText: 'Finish when ready',
-      },
-      getState(),
-    );
-    return () => setActivityTimer(null, getState());
+    setActivityStatus({
+      endsAt: startedAtMs + definition.durationMs,
+      total: definition.durationMs,
+      title,
+      text: 'It finishes by itself when the time is up',
+      progress: '',
+      chip: '',
+      actions: [],
+      doneTitle: `${title} done`,
+      doneText: 'Saved',
+    });
+    return () => setActivityStatus(null);
   });
   let finished = false;
   let waist = $state('');

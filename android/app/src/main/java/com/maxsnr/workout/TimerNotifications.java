@@ -19,7 +19,7 @@ import java.util.Locale;
  */
 final class TimerNotifications {
 
-    // Default importance (with no sound) so the countdown is not hidden with silent notifications
+    // Default importance (with no sound) so the workout is not hidden with silent notifications
     // on the lock screen; importance cannot change after creation, hence the new id.
     static final String LIVE_CHANNEL = "timer-live-2";
     private static final String OLD_LIVE_CHANNEL = "timer-live";
@@ -76,32 +76,73 @@ final class TimerNotifications {
     }
 
     /**
-     * The countdown as a glance: the time left first in the title and alone in the status bar chip
-     * (the island), what comes next as the text, and a bar that empties as the time runs out.
+     * The workout as a glance: during a countdown the time left leads the title and stands alone
+     * in the status bar chip (the island), with a bar that empties; while lifting, the set to do.
+     * The text says what comes next and the expanded view adds the finish line (exercise k of n,
+     * minutes left). Buttons do what the matching on-screen buttons do.
      */
-    static Notification live(Context context, long endsAt, long total, String title, String text) {
-        long left = Math.max(0, endsAt - System.currentTimeMillis());
-        String time = clock(left);
-        int max = (int) Math.max(1, (total > 0 ? total : left) / 1000);
-        int remaining = (int) Math.min(max, (left + 999) / 1000);
-        return new NotificationCompat.Builder(context, LIVE_CHANNEL)
+    static Notification live(Context context, LiveStatus status, boolean confirmingSkip) {
+        long left = status.endsAt - System.currentTimeMillis();
+        boolean counting = left > 0;
+        boolean ended = status.endsAt > 0 && !counting;
+        String time = clock(Math.max(0, left));
+        String title = counting ? time + " · " + status.title : ended ? status.doneTitle : status.title;
+        String text = ended ? status.doneText : status.text;
+        String chip = counting ? time : ended ? "Go" : status.chip;
+        String expanded = status.progress.isEmpty() ? text : text + "\n" + status.progress;
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, LIVE_CHANNEL)
             .setSmallIcon(R.drawable.ic_stat_timer)
-            .setContentTitle(time + " · " + title)
+            .setContentTitle(title)
             .setContentText(text)
+            .setStyle(new NotificationCompat.BigTextStyle().bigText(expanded))
             .setContentIntent(openApp(context))
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setSilent(true)
-            .setCategory(NotificationCompat.CATEGORY_STOPWATCH)
+            .setCategory(counting ? NotificationCompat.CATEGORY_STOPWATCH : NotificationCompat.CATEGORY_WORKOUT)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setShowWhen(false)
-            .setProgress(max, remaining, false)
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
-            // Android 16 Live Update: the time shows as a status bar chip (the island on HyperOS,
-            // the Now Bar on One UI) and the card sits at the top of the lock screen.
-            .setRequestPromotedOngoing(true)
-            .setShortCriticalText(time)
-            .build();
+            // Android 16 Live Update: the chip shows in the status bar (the island on HyperOS, the
+            // Now Bar on One UI) and the card sits at the top of the lock screen.
+            .setRequestPromotedOngoing(true);
+        if (!chip.isEmpty()) builder.setShortCriticalText(chip);
+        if (counting) {
+            int max = (int) Math.max(1, status.total / 1000);
+            builder.setProgress(max, (int) Math.min(max, (left + 999) / 1000), false);
+        }
+        for (int i = 0; i < status.actions.length; i++) {
+            String action = status.actions[i];
+            String label = label(action, counting, confirmingSkip);
+            if (label == null) continue;
+            Intent intent = new Intent(context, TimerService.class)
+                .setAction(TimerService.ACTION_BUTTON)
+                .putExtra(TimerService.EXTRA_BUTTON, action);
+            PendingIntent pending = PendingIntent.getService(
+                context,
+                10 + i,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            );
+            builder.addAction(new NotificationCompat.Action.Builder(R.drawable.ic_stat_timer, label, pending).build());
+        }
+        return builder.build();
+    }
+
+    private static String label(String action, boolean counting, boolean confirmingSkip) {
+        switch (action) {
+            case "log":
+                return "Log set";
+            case "skip":
+                if (!counting) return "Start set";
+                return confirmingSkip ? "Tap again to skip" : "Skip rest";
+            case "next":
+                return "Start set";
+            case "undo":
+                return "Undo set";
+            default:
+                return null;
+        }
     }
 
     static String clock(long ms) {
