@@ -112,7 +112,7 @@ final class TimerNotifications {
             .setRequestPromotedOngoing(true);
         if (!chip.isEmpty()) builder.setShortCriticalText(chip);
         if (counting) {
-            // The bar drains like the in-app countdown, in the app's sage, with the barbell riding
+            // The bar drains like the in-app countdown, in the app's sage, with a dot riding
             // its edge; the finish line moves to the header.
             int max = (int) Math.max(1, status.total / 100);
             builder
