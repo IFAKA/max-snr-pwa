@@ -11,6 +11,7 @@ import {
   reopenWorkout,
   deleteWorkout,
 } from '../src/lib/workout/finish.ts';
+import { correctExercise, correctionChoices } from '../src/lib/workout/correction.ts';
 import { improvementCallouts } from '../src/lib/workout/summary.ts';
 import { createDefaultPrescription } from '../src/lib/workout/program.ts';
 import type { ActiveWorkout } from '../src/lib/types.ts';
@@ -138,5 +139,21 @@ describe('deleting a saved workout', () => {
     expect(await deleteWorkout(second!.id)).toBe(true);
     expect(getState().history.map((workout) => workout.id)).toEqual([first!.id]);
     expect(await deleteWorkout(second!.id)).toBe(false);
+  });
+});
+
+describe('correcting the exercise of a saved workout', () => {
+  test('relabels the logged sets and keeps what was logged', async () => {
+    await start('Monday');
+    await logFirstSet('9', '30');
+    const saved = (await finishEarly())!;
+    const from = saved.tasks[0].exerciseId;
+    const to = correctionChoices().find((choice) => choice.id !== from)!;
+    expect(await correctExercise(saved.id, from, to.id)).toBe(true);
+    const task = getState().history[0].tasks[0];
+    expect(task.exerciseId).toBe(to.id);
+    expect(task.performedName).toBe(to.name);
+    expect(task.completed).toMatchObject({ reps: 9, weight: 30 });
+    expect(await correctExercise(saved.id, 'missing', to.id)).toBe(false);
   });
 });

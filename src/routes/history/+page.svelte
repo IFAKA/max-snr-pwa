@@ -6,10 +6,13 @@
   import DailyLog from '#lib/history/DailyLog.svelte';
   import Analytics from '#lib/history/Analytics.svelte';
   import HistoryIndex from '#lib/history/HistoryIndex.svelte';
+  import WorkoutFix from '#lib/history/WorkoutFix.svelte';
   import WorkoutDetail from '#lib/history/WorkoutDetail.svelte';
   import Settings from '#lib/history/Settings.svelte';
 
   const view = $derived(page.url.searchParams.get('view'));
+  const fix = $derived(page.url.searchParams.get('fix'));
+  const workoutIndex = $derived(Number(page.url.searchParams.get('id')));
   const workout = $derived.by(() => {
     void appVersion.value;
     return view === 'workout'
@@ -18,8 +21,10 @@
   });
 </script>
 
-{#if view === 'workout' && workout}
-  <WorkoutDetail {workout} />
+{#if view === 'workout' && workout && fix}
+  <WorkoutFix {workout} index={workoutIndex} from={fix} />
+{:else if view === 'workout' && workout}
+  <WorkoutDetail {workout} index={workoutIndex} />
 {:else if view === 'analytics'}
   <Analytics />
 {:else if view === 'muscles' || view === 'insights'}

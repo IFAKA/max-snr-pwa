@@ -23,12 +23,14 @@ export function setLine(task: Task, index: number) {
 /** Sets grouped by the exercise name actually performed, in workout order. */
 export function exerciseGroups(workout: Workout) {
   const groups = new Map<string, string[]>();
+  const ids = new Map<string, string>();
   (workout.tasks || workout.queue || []).forEach((task, index) => {
     const name = task.performedName || task.name || 'Exercise';
     if (!groups.has(name)) groups.set(name, []);
+    if (!ids.has(name)) ids.set(name, task.exerciseId);
     groups.get(name)?.push(setLine(task, index));
   });
-  return [...groups].map(([name, lines]) => ({ name, lines }));
+  return [...groups].map(([name, lines]) => ({ name, lines, exerciseId: ids.get(name) || '' }));
 }
 
 /** A short list date ("Oct 18"), with the year only when it is not this year, so the name fits. */

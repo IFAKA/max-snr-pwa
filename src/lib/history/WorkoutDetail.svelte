@@ -10,7 +10,7 @@
   import ListHeading from '../components/ListHeading.svelte';
   import Title from '../components/Title.svelte';
 
-  let { workout }: { workout: Workout } = $props();
+  let { workout, index }: { workout: Workout; index: number } = $props();
   const groups = $derived(exerciseGroups(workout));
   let confirmOpen = $state(false);
 
@@ -25,11 +25,16 @@
   <Title text={workout.name || 'Workout'} id="workout-title" />
   <div class="history-detail">
     <AppList label="Workout sets" rows={workout.id}>
-      {#each groups as group, index (group.name)}
-        <ListHeading text={group.name} id={`history-exercise-title-${index}`} />
+      {#each groups as group, groupIndex (group.name)}
+        <ListHeading text={group.name} id={`history-exercise-title-${groupIndex}`} />
         {#each group.lines as line, lineIndex (lineIndex)}
           <li><div class="list-link"><span class="history-set-label">{line}</span></div></li>
         {/each}
+        <ListRow
+          label="Did a different exercise?"
+          href={`/history/?view=workout&id=${index}&fix=${encodeURIComponent(group.exerciseId)}`}
+          icon="chevron"
+        />
       {/each}
     </AppList>
     <AppList label="Workout actions">

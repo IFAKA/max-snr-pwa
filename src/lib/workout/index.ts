@@ -79,6 +79,7 @@ export {
   cancelWorkout,
 } from './finish.ts';
 export { startPlank, setTimer, adjustRest, remaining, formatDuration } from './timers.ts';
+export { correctExercise, correctionChoices } from './correction.ts';
 export {
   remainingWork,
   sessionBudgetState,
