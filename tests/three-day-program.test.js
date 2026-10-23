@@ -13,7 +13,7 @@ const sessionSets = prescription.routine.map((day) =>
 );
 
 test('default program is the fixed Monday/Wednesday/Friday routine', () => {
-  assert.equal(prescription.programId, 'fixed-hypertrophy-3-day-v3');
+  assert.equal(prescription.programId, 'fixed-hypertrophy-3-day-v4');
   assert.equal(prescription.daysPerWeek, 3);
   assert.deepEqual(prescription.days, ['Monday', 'Wednesday', 'Friday']);
   assert.deepEqual(prescription.names, ['Full body A', 'Upper body B', 'Full body C']);
@@ -131,5 +131,21 @@ test('routine-data resolves the Monday/Wednesday/Friday schedule', () => {
     assert.equal(isWorkoutDay('Thursday'), false);
   } finally {
     setState(previous);
+  }
+});
+
+test('crowded gym: no day runs four cable exercises in a row and every machine lift has a swap', async () => {
+  const { CANONICAL_ROUTINE_3_DAY } = await import('../src/lib/workout/program.ts');
+  for (const day of Object.values(CANONICAL_ROUTINE_3_DAY)) {
+    let run = 0;
+    for (const item of day) {
+      const members = item.type === 'superset' ? item.members : [item];
+      const cable = members.every((m) => m.station === 'cable');
+      run = cable ? run + members.length : 0;
+      assert.ok(run <= 3, `four cable lifts in a row on ${item.id}`);
+      members
+        .filter((m) => m.station !== 'neck' && m.station !== 'dumbbells')
+        .forEach((m) => assert.ok(m.alternatives?.length, `${m.id} has no swap`));
+    }
   }
 });

@@ -112,18 +112,18 @@ describe('old data', () => {
     const loaded = migrate(JSON.parse(JSON.stringify(old)));
     expect(loaded.version).toBe(2);
     expect(loaded.history).toEqual([workout]);
-    expect(loaded.prescription?.programId).toBe('fixed-hypertrophy-3-day-v3');
+    expect(loaded.prescription?.programId).toBe('fixed-hypertrophy-3-day-v4');
     expect(nextRotationDay(loaded.history, loaded.prescription?.days)).toBe('Friday');
   });
 
-  test('a stored v2 program is rebuilt as v3 and keeps history', () => {
+  test('a stored v2 program is rebuilt as v4 and keeps history', () => {
     const old = emptyState();
     old.prescription = createPrescription(3, { programId: 'fixed-hypertrophy-3-day-v2' });
     const workout = { id: 3, day: 'Monday', name: 'Full body A', tasks: [] } as unknown as Workout;
     old.history = [workout];
     const loaded = migrate(JSON.parse(JSON.stringify(old)));
     expect(loaded.history).toEqual([workout]);
-    expect(loaded.prescription?.programId).toBe('fixed-hypertrophy-3-day-v3');
+    expect(loaded.prescription?.programId).toBe('fixed-hypertrophy-3-day-v4');
     expect(loaded.prescription?.weeklySetAllocation['cable-rope-hammer-curl']).toBe(5);
   });
 

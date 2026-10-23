@@ -79,6 +79,11 @@ const armsPair = (day: string, triceps: number, curl: number) =>
 const neckPair = (day: string) =>
   fixedSuperset(`neck-${day}`, 'Neck', [fixed('neckFlexion', 1, 4), fixed('neckExtension', 1, 4)]);
 
+// Crowded-gym order: cable work is 8 of the 14 lifts, and a busy gym has one cable stack free at a
+// time, so no day runs more than three cable exercises back to back; neck (a quiet corner) and calves
+// sit between cable blocks. Order barely changes hypertrophy (Nunes et al.), so the freshness cost
+// is small. Every lift also lists free-weight swaps in `alternatives` (the exercise list offers them
+// while the machine is taken).
 // Built for visible upper-body size (shoulders, lats, arms, forearms, obliques) with legs at a
 // balance dose. BASE program: 66 sets (22 a day). For the default profile personalization adds
 // six sets (lateral +1, incline +1, triceps +2, curl +1, hammer +1), which land so that the days
@@ -94,8 +99,8 @@ export const CANONICAL_ROUTINE_3_DAY: Record<'Monday' | 'Wednesday' | 'Friday', 
     fixed('legPress', 2),
     fixed('legCurl', 2, null, { rir: '1' }),
     armsPair('monday', 2, 1),
-    fixed('hammerCurl', 1),
     fixed('calfRaise', 1, 1),
+    fixed('hammerCurl', 1),
   ],
   Wednesday: [
     fixed('lateralRaise', 4),
@@ -103,24 +108,24 @@ export const CANONICAL_ROUTINE_3_DAY: Record<'Monday' | 'Wednesday' | 'Friday', 
     fixed('pulldown', 3),
     fixed('reverseFly', 2),
     armsPair('wednesday', 3, 2),
-    fixed('hammerCurl', 2),
-    fixed('crunch', 2, 2),
-    fixed('woodchop', 2, 2),
     neckPair('wednesday'),
+    fixed('hammerCurl', 2),
+    fixed('woodchop', 2, 2),
+    fixed('crunch', 2, 2),
   ],
   Friday: [
     fixed('lateralRaise', 4),
     fixed('inclinePress', 2, null, { rir: '1–2' }),
     fixed('pulldown', 2),
-    fixed('reverseFly', 1),
     fixed('legPress', 2),
+    fixed('reverseFly', 1),
     fixed('legCurl', 1, null, { rir: '1' }),
     armsPair('friday', 3, 2),
-    fixed('hammerCurl', 1),
     fixed('calfRaise', 1, 1),
+    fixed('hammerCurl', 1),
+    neckPair('friday'),
     fixed('crunch', 2, 2),
     fixed('woodchop', 1, 2),
-    neckPair('friday'),
   ],
 };
 
@@ -197,12 +202,13 @@ export const OPTIMIZER_OUTPUT = canonicalOutput();
 
 export const FIXED_PROGRAM_IDS: Record<number, string> = {
   2: 'fixed-hypertrophy-2-day-v1',
-  3: 'fixed-hypertrophy-3-day-v3',
+  3: 'fixed-hypertrophy-3-day-v4',
 };
 // Programs stored before the upper-body-size change; migrate() rebuilds them as the current program.
 export const LEGACY_FIXED_PROGRAM_IDS = [
   'fixed-hypertrophy-3-day-v1',
   'fixed-hypertrophy-3-day-v2',
+  'fixed-hypertrophy-3-day-v3',
 ];
 export const isFixedProgram = (programId?: string) =>
   Object.values(FIXED_PROGRAM_IDS).includes(programId || '') ||

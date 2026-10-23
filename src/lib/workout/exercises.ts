@@ -53,6 +53,7 @@ export const EXERCISES = {
   inclinePress: exercise({
     id: 'incline-machine-press',
     name: 'Incline Machine Press',
+    alternatives: ['Incline Dumbbell Press', 'Smith Machine Incline Press'],
     sets: 3,
     reps: '6–10',
     rir: '2 → 1',
@@ -69,6 +70,7 @@ export const EXERCISES = {
   pulldown: exercise({
     id: 'neutral-grip-pulldown',
     name: 'Neutral-Grip Pulldown',
+    alternatives: ['Assisted Pull-Up', 'Single-Arm Cable Pulldown'],
     sets: 3,
     reps: '6–10',
     rir: '1–2',
@@ -85,6 +87,7 @@ export const EXERCISES = {
   row: exercise({
     id: 'chest-supported-row',
     name: 'Chest-Supported Row',
+    alternatives: ['Chest-Supported Dumbbell Row', 'Seated Cable Row'],
     sets: 3,
     reps: '8–12',
     rir: '1–2',
@@ -101,6 +104,7 @@ export const EXERCISES = {
   legPress: exercise({
     id: 'leg-press',
     name: 'Leg Press',
+    alternatives: ['Hack Squat', 'Goblet Squat'],
     sets: 2,
     reps: '8–12',
     rir: '1–2',
@@ -117,6 +121,7 @@ export const EXERCISES = {
   legCurl: exercise({
     id: 'seated-leg-curl',
     name: 'Seated Leg Curl',
+    alternatives: ['Lying Leg Curl', 'Dumbbell Leg Curl'],
     sets: 2,
     reps: '8–12',
     rir: '1–2',
@@ -133,6 +138,7 @@ export const EXERCISES = {
   lateralRaise: exercise({
     id: 'cable-lateral-raise',
     name: 'Cable Lateral Raise',
+    alternatives: ['Dumbbell Lateral Raise', 'Machine Lateral Raise'],
     sets: 3,
     reps: '10–20',
     rir: '1 → 0',
@@ -149,6 +155,7 @@ export const EXERCISES = {
   curl: exercise({
     id: 'cable-curl',
     name: 'Cable Curl',
+    alternatives: ['Dumbbell Curl', 'EZ-Bar Curl'],
     sets: 2,
     reps: '8–15',
     rir: '1 → 0',
@@ -165,6 +172,7 @@ export const EXERCISES = {
   pushdown: exercise({
     id: 'overhead-cable-triceps-extension',
     name: 'Overhead Cable Triceps Extension',
+    alternatives: ['Overhead Dumbbell Triceps Extension', 'Skull Crusher'],
     sets: 2,
     reps: '8–15',
     rir: '1 → 0',
@@ -181,6 +189,7 @@ export const EXERCISES = {
   hammerCurl: exercise({
     id: 'cable-rope-hammer-curl',
     name: 'Cable Rope Hammer Curl',
+    alternatives: ['Dumbbell Hammer Curl'],
     sets: 2,
     reps: '8–15',
     rir: '1 → 0',
@@ -197,6 +206,7 @@ export const EXERCISES = {
   woodchop: exercise({
     id: 'cable-woodchop',
     name: 'Cable Woodchop',
+    alternatives: ['Dumbbell Side Bend'],
     sets: 2,
     reps: '12–20',
     rir: '1–2',
@@ -213,6 +223,7 @@ export const EXERCISES = {
   calfRaise: exercise({
     id: 'standing-calf-raise',
     name: 'Standing Calf Raise',
+    alternatives: ['Dumbbell Calf Raise', 'Leg Press Calf Raise'],
     sets: 1,
     reps: '8–15',
     rir: '0–1',
@@ -229,6 +240,7 @@ export const EXERCISES = {
   crunch: exercise({
     id: 'cable-crunch',
     name: 'Cable Crunch',
+    alternatives: ['Machine Crunch', 'Hanging Knee Raise'],
     sets: 1,
     reps: '8–15',
     rir: '0–1',
@@ -261,6 +273,7 @@ export const EXERCISES = {
   reverseFly: exercise({
     id: 'reverse-cable-fly',
     name: 'Reverse Cable Fly',
+    alternatives: ['Reverse Pec Deck', 'Dumbbell Rear Delt Raise'],
     sets: 2,
     reps: '12–20',
     rir: '1 → 0',
@@ -277,6 +290,7 @@ export const EXERCISES = {
   shrug: exercise({
     id: 'chest-supported-shrug',
     name: 'Chest-Supported Shrug',
+    alternatives: ['Dumbbell Shrug'],
     sets: 1,
     reps: '10–15',
     rir: '0–1',

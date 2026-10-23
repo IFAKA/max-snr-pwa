@@ -19,7 +19,7 @@ test('migration adds the current three-day prescription without changing history
   assert.equal(state.prescription.daysPerWeek, 3);
   assert.deepEqual(state.prescription.days, ['Monday', 'Wednesday', 'Friday']);
   assert.equal(state.history[0], history[0]);
-  assert.equal(state.prescription.programId, 'fixed-hypertrophy-3-day-v3');
+  assert.equal(state.prescription.programId, 'fixed-hypertrophy-3-day-v4');
   assert.equal(state.prescription.weeklySetAllocation['cable-crunch'], 4);
 });
 
@@ -30,7 +30,7 @@ test('migration replaces an old prescription but leaves historical records untou
     history,
     prescription: { version: 1, daysPerWeek: 2, routine: [], names: [] },
   });
-  assert.equal(state.prescription.programId, 'fixed-hypertrophy-3-day-v3');
+  assert.equal(state.prescription.programId, 'fixed-hypertrophy-3-day-v4');
   assert.deepEqual(state.history, history);
 });
 
@@ -43,7 +43,7 @@ test('migration upgrades the legacy two-day program and keeps every completed se
     },
   ];
   const state = migrate({ version: 2, history, prescription: createPrescription(2) });
-  assert.equal(state.prescription.programId, 'fixed-hypertrophy-3-day-v3');
+  assert.equal(state.prescription.programId, 'fixed-hypertrophy-3-day-v4');
   assert.deepEqual(state.prescription.days, ['Monday', 'Wednesday', 'Friday']);
   assert.deepEqual(state.history, history);
 });
@@ -58,7 +58,7 @@ test('migration leaves the current three-day program untouched', () => {
 
 test('a fresh install starts on the three-day program', async () => {
   const state = await loadState();
-  assert.equal(state.prescription.programId, 'fixed-hypertrophy-3-day-v3');
+  assert.equal(state.prescription.programId, 'fixed-hypertrophy-3-day-v4');
   assert.equal(state.history.length, 0);
 });
 
