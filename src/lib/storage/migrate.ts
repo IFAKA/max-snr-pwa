@@ -68,7 +68,7 @@ function currentPrescription(state: AppState): Prescription {
     lastChangeReason: isCurrent
       ? 'Re-personalized from updated body measurements'
       : prescription && LEGACY_FIXED_PROGRAM_IDS.includes(prescription.programId)
-        ? 'Updated the program: more curl and crunch volume'
+        ? 'Updated the program: more shoulder, arm, forearm and oblique volume'
         : prescription
           ? 'Migrated to the fixed Monday/Wednesday/Friday program'
           : 'Created the fixed Monday/Wednesday/Friday program',

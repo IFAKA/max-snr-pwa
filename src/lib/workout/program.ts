@@ -69,48 +69,57 @@ export const CANONICAL_ROUTINE: Record<'Monday' | 'Thursday', RoutineDay> = {
   ],
 };
 
-const armsPair = (day: string) =>
-  fixedSuperset(`arms-${day}`, 'Antagonist arms', [fixed('curl', 3), fixed('pushdown', 2)]);
+// Overhead triceps first, then curl: the antagonist pair on every day.
+const armsPair = (day: string, triceps: number, curl: number) =>
+  fixedSuperset(`arms-${day}`, 'Antagonist arms', [
+    fixed('pushdown', triceps),
+    fixed('curl', curl),
+  ]);
 
 const neckPair = (day: string) =>
   fixedSuperset(`neck-${day}`, 'Neck', [fixed('neckFlexion', 1, 4), fixed('neckExtension', 1, 4)]);
 
-// Weekly sets: laterals 11, incline 7, pulldown 6, row 4, curl 9, triceps 6, reverse fly 3,
-// leg press 4, leg curl 4, calves 2, crunch 6, neck 2 + 2, shrug 1. Legs sit on days 1 and 3,
-// which keeps day 2 shorter; every priority muscle is trained at least twice a week.
+// Built for visible upper-body size (shoulders, lats, arms, forearms, obliques) with legs at a
+// balance dose. BASE program: 66 sets (22 a day). For the default profile personalization adds
+// six sets (lateral +1, incline +1, triceps +2, curl +1, hammer +1), which land so that the days
+// end at 24/24/24 = 72 weekly sets: laterals 12, incline 7, pulldown 7, row 2, overhead triceps 10,
+// curl 6, hammer curl 5, reverse fly 3, crunch 4, woodchop 3, leg press 4, leg curl 3, calves 2,
+// neck 2 + 2. Every priority muscle is trained on at least two days.
 export const CANONICAL_ROUTINE_3_DAY: Record<'Monday' | 'Wednesday' | 'Friday', RoutineDay> = {
   Monday: [
-    fixed('lateralRaise', 4),
-    fixed('inclinePress', 3),
+    fixed('lateralRaise', 3),
+    fixed('inclinePress', 2),
     fixed('pulldown', 2),
     fixed('row', 2),
     fixed('legPress', 2),
     fixed('legCurl', 2, null, { rir: '1' }),
-    armsPair('monday'),
-    fixed('reverseFly', 1),
-    fixed('shrug', 1),
+    armsPair('monday', 2, 1),
+    fixed('hammerCurl', 1),
     fixed('calfRaise', 1, 1),
   ],
   Wednesday: [
     fixed('lateralRaise', 4),
     fixed('inclinePress', 2, null, { rir: '1–2' }),
-    fixed('pulldown', 2),
-    fixed('row', 2),
-    armsPair('wednesday'),
-    fixed('reverseFly', 1),
-    fixed('crunch', 3),
+    fixed('pulldown', 3),
+    fixed('reverseFly', 2),
+    armsPair('wednesday', 3, 2),
+    fixed('hammerCurl', 2),
+    fixed('crunch', 2, 2),
+    fixed('woodchop', 2, 2),
     neckPair('wednesday'),
   ],
   Friday: [
-    fixed('lateralRaise', 3),
+    fixed('lateralRaise', 4),
     fixed('inclinePress', 2, null, { rir: '1–2' }),
     fixed('pulldown', 2),
-    fixed('legPress', 2),
-    fixed('legCurl', 2, null, { rir: '1' }),
-    armsPair('friday'),
     fixed('reverseFly', 1),
+    fixed('legPress', 2),
+    fixed('legCurl', 1, null, { rir: '1' }),
+    armsPair('friday', 3, 2),
+    fixed('hammerCurl', 1),
     fixed('calfRaise', 1, 1),
-    fixed('crunch', 3),
+    fixed('crunch', 2, 2),
+    fixed('woodchop', 1, 2),
     neckPair('friday'),
   ],
 };
@@ -188,10 +197,13 @@ export const OPTIMIZER_OUTPUT = canonicalOutput();
 
 export const FIXED_PROGRAM_IDS: Record<number, string> = {
   2: 'fixed-hypertrophy-2-day-v1',
-  3: 'fixed-hypertrophy-3-day-v2',
+  3: 'fixed-hypertrophy-3-day-v3',
 };
-// Programs stored before the curl/crunch change; migrate() rebuilds them as the current program.
-export const LEGACY_FIXED_PROGRAM_IDS = ['fixed-hypertrophy-3-day-v1'];
+// Programs stored before the upper-body-size change; migrate() rebuilds them as the current program.
+export const LEGACY_FIXED_PROGRAM_IDS = [
+  'fixed-hypertrophy-3-day-v1',
+  'fixed-hypertrophy-3-day-v2',
+];
 export const isFixedProgram = (programId?: string) =>
   Object.values(FIXED_PROGRAM_IDS).includes(programId || '') ||
   LEGACY_FIXED_PROGRAM_IDS.includes(programId || '');

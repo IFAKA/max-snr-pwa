@@ -83,7 +83,7 @@ describe('restart workouts', () => {
 });
 
 describe('routine volume', () => {
-  test('curl has 3 sets and crunch 3 sets without a cut priority on both days it appears', () => {
+  test('curl sits in the arm superset every day and crunch carries a cut priority', () => {
     const days = Object.values(CANONICAL_ROUTINE_3_DAY);
     const items = days.flatMap((day) =>
       day.flatMap((item) =>
@@ -91,11 +91,10 @@ describe('routine volume', () => {
       ),
     );
     expect(items.filter((item) => item.id === 'cable-curl').map((item) => item.sets)).toEqual([
-      3, 3, 3,
+      1, 2, 2,
     ]);
     const crunches = items.filter((item) => item.id === 'cable-crunch');
-    expect(crunches.map((item) => item.sets)).toEqual([3, 3]);
-    expect(crunches.some((item) => item.cutPriority)).toBe(false);
+    expect(crunches.map((item) => item.sets)).toEqual([2, 2]);
   });
 });
 
@@ -113,8 +112,19 @@ describe('old data', () => {
     const loaded = migrate(JSON.parse(JSON.stringify(old)));
     expect(loaded.version).toBe(2);
     expect(loaded.history).toEqual([workout]);
-    expect(loaded.prescription?.programId).toBe('fixed-hypertrophy-3-day-v2');
+    expect(loaded.prescription?.programId).toBe('fixed-hypertrophy-3-day-v3');
     expect(nextRotationDay(loaded.history, loaded.prescription?.days)).toBe('Friday');
+  });
+
+  test('a stored v2 program is rebuilt as v3 and keeps history', () => {
+    const old = emptyState();
+    old.prescription = createPrescription(3, { programId: 'fixed-hypertrophy-3-day-v2' });
+    const workout = { id: 3, day: 'Monday', name: 'Full body A', tasks: [] } as unknown as Workout;
+    old.history = [workout];
+    const loaded = migrate(JSON.parse(JSON.stringify(old)));
+    expect(loaded.history).toEqual([workout]);
+    expect(loaded.prescription?.programId).toBe('fixed-hypertrophy-3-day-v3');
+    expect(loaded.prescription?.weeklySetAllocation['cable-rope-hammer-curl']).toBe(5);
   });
 
   test('saved history with weekday names and no restart days still rotates', () => {

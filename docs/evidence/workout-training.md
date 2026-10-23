@@ -34,19 +34,33 @@ The current starting frontier is two full-body gym days. Two days satisfy the tw
 
 ## Active program: fixed 3-day Monday/Wednesday/Friday
 
-The optimizer's cost-only comparison above still favors two visits. The active program is nevertheless a user-chosen fixed three-day routine (`fixed-hypertrophy-3-day-v1`): Full body A, Upper body B, Full body C. This is a goal-priority ASSUMPTION, not an optimizer result: the user has a deadline and prioritizes visible shoulder, upper-chest, back and arm size, and three days gives volume headroom for those muscles while keeping each session at roughly 18–22 sets (22/18/20). The weekly allocation is 60 sets: lateral raise 11, incline press 7, pulldown 6, row 4, curl 6, triceps 6, reverse fly 3, leg press 4, leg curl 4, calves 2, crunch 2, neck 2 + 2, shrug 1. Every major muscle is directly trained on at least two days. No new citations are claimed for the three-day split; the rationale is session-size and volume distribution.
+The optimizer's cost-only comparison above still favors two visits. The active program is nevertheless a user-chosen fixed three-day routine (`fixed-hypertrophy-3-day-v3`): Full body A, Upper body B, Full body C. This is a goal-priority ASSUMPTION, not an optimizer result: the user wants visible-when-clothed size (shoulders, lats, arms, forearms, obliques), with legs at a balance dose. The program is 66 base sets (22 a day) plus the personalization below; for the default profile it is 72 sets, 24/24/24. Weekly allocation: lateral raise 12, incline press 7, pulldown 7, row 2, overhead triceps 10, curl 6, hammer curl 5, reverse fly 3, crunch 4, woodchop 3, leg press 4, leg curl 3, calves 2, neck 2 + 2. There is no shrug. Overhead triceps and curl are an antagonist superset every day. Every priority muscle is directly trained on at least two days.
 
-Reverse cable fly replaces wrist extension. In the model, rear delts receive only about 0.45 fractional sets a week from other lifts, and their priority weight (1.15) exceeds forearms (1.05). Reverse fly is the lowest-cost fix and is never a time-cap cut candidate.
+Why upper-body-heavy (what the evidence does and does not say):
 
-The coordinator never auto-switches a fixed program (`KEEP`, "The fixed program is canonical."). Existing installs on the old two-day program are upgraded once on load; history is kept and the new exercise starts without history. Falsifiers: flat rolling performance on priority lifts, session time above the time cap, or poor adherence. Any of these should lead to revising the program, not to silent adaptation.
+- FACT: Sell, Lukaszewski & Townsley 2017 (Proc R Soc B, DOI [10.1098/rspb.2017.1819](https://doi.org/10.1098/rspb.2017.1819)) found upper-body strength cues explain over 70% of male bodily attractiveness ratings, with no ceiling in the range studied.
+- FACT: Durkee et al. 2019 (Evolutionary Psychology, DOI [10.1177/1474704919852918](https://doi.org/10.1177/1474704919852918)): women ranked obliques first, glutes second and abdominals third among male muscles; lower-body muscles other than glutes were mostly not rated important; men overestimated the size women prefer. Hence the added woodchop (obliques) and crunch volume, and legs kept at maintenance-to-balance dose rather than cut to zero (leg work still serves health, see above).
+- FACT: Maeo et al. 2023 (Eur J Sport Sci, DOI [10.1080/17461391.2022.2100279](https://doi.org/10.1080/17461391.2022.2100279)): overhead triceps extension produced about 1.4 times the triceps growth of pushdowns, so the triceps slot is the overhead extension and it carries the most arm volume.
+- ASSUMPTION: a shoulder-to-waist ratio plateau near 1.6 comes from secondary sources and is used only as a direction for the shoulder target.
+- HEURISTIC: hammer curl is modelled as forearms primary (1) with partial biceps (0.5) for brachialis and brachioradialis; woodchop as obliques primary with a quarter set of abs. Obliques get a priority weight of 1.15, equal to abs.
+
+Waist reduction (fat loss) is likely the largest lever on how the shoulders look, but it is an outcome, not a set rule, so the program only reads the waist measurement as an input.
+
+Reverse cable fly covers rear delts (about 0.45 fractional sets a week from other lifts otherwise). The coordinator never auto-switches a fixed program (`KEEP`, "The fixed program is canonical."). Existing installs on v1 or v2 are rebuilt once on load; history is kept and new exercises start without history. Falsifiers: flat rolling performance on priority lifts, session time above the time cap, or poor adherence. Any of these should lead to revising the program, not to silent adaptation.
 
 ## Personalization from body measurements
 
-The fixed program is adjusted from the user's stored tape measurements (`js/workout/personalization.js`). Rule: `deficit = (target − measured) / target`; every 0.1 of deficit adds one weekly set (max +3) to the exercises that drive that measurement (shoulders → lateral raise, chest → incline press, biceps → curl and triceps extension, calves → calf raise). A measurement within 2% of its target trims 2 sets from that exercise when at least 6 sets remain. Added sets go to the shortest session containing the exercise (cap 24 sets); removed sets come from the session with the most.
+The fixed program is adjusted from the user's stored tape measurements (`src/lib/workout/personalization.ts`). Rule: `deficit = (target − measured) / target`; every 0.1 of deficit adds one weekly set (max +3) to the exercises that drive that measurement. Priority exercises (lateral raise, incline press, curl, overhead triceps, hammer curl) only ever gain sets: being at or above a target never cuts them. Only non-priority work (calves) is trimmed by 2 sets when within 2% of target and at least 6 sets remain. Added sets go to the shortest session containing the exercise (cap 24 sets).
 
-Targets are ASSUMPTIONS expressed as fractions of height (waist 0.43, shoulders 1.5 × waist, chest 0.58, arm 0.215, calves 0.215). They set the direction of the adjustment, not a proven optimum. Tape error is about ±1–2 cm and arm measurement conditions are not recorded. The program is recomputed whenever the profile measurements change; history is untouched. Waist is not trained directly: it is a fat-loss outcome, so it is not part of the set rule.
+- Shoulders → lateral raise. Target is 1.6 × the measured waist; with no waist reading, height × 0.43 × 1.6.
+- Chest (0.58 × height) → incline press.
+- Arms (biceps, 0.215 × height): overhead triceps gets the full set delta and curl half of it rounded down (2:1 toward triceps).
+- Forearms (optional, 0.17 × height) → hammer curl. Skipped when forearms are not measured.
+- Calves (0.215 × height) → calf raise.
 
-For the 172 cm / 111 shoulders / 92 chest / 28.5 arm / 36 calves profile this gives lateral raise 9 (−2), incline press 8 (+1), curl 8 (+2), triceps 8 (+2), calves unchanged; 63 sets, sessions 21/21/21. Falsifier: if re-measurement after 4–6 weeks shows the arms or chest not moving while other measures do, revise the volume rather than trusting the target.
+Targets are ASSUMPTIONS that set the direction of the adjustment, not a proven optimum. Tape error is about ±1–2 cm and arm measurement conditions are not recorded. The program is recomputed whenever the profile measurements (including waist and forearms) change; history is untouched.
+
+For the 172 cm / 79 waist / 111 shoulders / 92 chest / 28.5 arm / 26 forearm / 36 calves profile the deficits are shoulders 0.122, chest 0.078, arm 0.229, forearm 0.111, calves 0.027, giving lateral raise +1, incline press +1, triceps +2, curl +1, hammer curl +1, calves 0; sessions 24/24/24. Falsifier: if re-measurement after 4–6 weeks shows the arms or chest not moving while other measures do, revise the volume rather than trusting the target.
 
 ## What would change it
 

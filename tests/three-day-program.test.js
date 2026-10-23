@@ -6,34 +6,35 @@ import { flatten } from '../src/lib/workout/task-factory.ts';
 import { emptyState, getState, setState } from '../src/lib/state.ts';
 import { configuredDays, isWorkoutDay, workoutName } from '../src/lib/routine/routine-data.ts';
 
-const prescription = createDefaultPrescription();
+const prescription = createDefaultPrescription({ profile: emptyState().settings.profile });
 const members = (day) => day.flatMap((item) => (item.type === 'superset' ? item.members : [item]));
 const sessionSets = prescription.routine.map((day) =>
   members(day).reduce((sum, item) => sum + item.sets, 0),
 );
 
 test('default program is the fixed Monday/Wednesday/Friday routine', () => {
-  assert.equal(prescription.programId, 'fixed-hypertrophy-3-day-v2');
+  assert.equal(prescription.programId, 'fixed-hypertrophy-3-day-v3');
   assert.equal(prescription.daysPerWeek, 3);
   assert.deepEqual(prescription.days, ['Monday', 'Wednesday', 'Friday']);
   assert.deepEqual(prescription.names, ['Full body A', 'Upper body B', 'Full body C']);
-  assert.deepEqual(sessionSets, [23, 21, 23]);
+  assert.deepEqual(sessionSets, [24, 24, 24]);
 });
 
 test('weekly set allocation is exact', () => {
   assert.deepEqual(prescription.weeklySetAllocation, {
-    'cable-lateral-raise': 11,
+    'cable-lateral-raise': 12,
     'incline-machine-press': 7,
-    'neutral-grip-pulldown': 6,
-    'chest-supported-row': 4,
+    'neutral-grip-pulldown': 7,
+    'chest-supported-row': 2,
     'leg-press': 4,
-    'seated-leg-curl': 4,
-    'cable-curl': 9,
-    'overhead-cable-triceps-extension': 6,
-    'reverse-cable-fly': 3,
-    'chest-supported-shrug': 1,
+    'seated-leg-curl': 3,
+    'overhead-cable-triceps-extension': 10,
+    'cable-curl': 6,
+    'cable-rope-hammer-curl': 5,
     'standing-calf-raise': 2,
-    'cable-crunch': 6,
+    'reverse-cable-fly': 3,
+    'cable-crunch': 4,
+    'cable-woodchop': 3,
     'neck-flexion': 2,
     'neck-extension': 2,
   });
@@ -43,7 +44,6 @@ test('every major muscle is directly trained on at least two days', () => {
   const major = [
     'upperChest',
     'lats',
-    'upperBack',
     'sideDelts',
     'rearDelts',
     'biceps',
@@ -52,6 +52,8 @@ test('every major muscle is directly trained on at least two days', () => {
     'hamstrings',
     'calves',
     'abs',
+    'obliques',
+    'forearms',
   ];
   for (const muscle of major) {
     const days = prescription.routine.filter((day) =>
@@ -61,15 +63,22 @@ test('every major muscle is directly trained on at least two days', () => {
   }
 });
 
-test('reverse fly replaces wrist extension on every day', () => {
+test('reverse fly is on both upper days and wrist extension is gone', () => {
   assert.ok(prescription.exerciseIds.includes('reverse-cable-fly'));
-  assert.ok(
-    prescription.routine.every((day) => members(day).some((i) => i.id === 'reverse-cable-fly')),
+  const withFly = prescription.routine.filter((day) =>
+    members(day).some((i) => i.id === 'reverse-cable-fly'),
   );
+  assert.equal(withFly.length, 2);
   assert.ok(
     prescription.routine.every((day) => members(day).every((i) => i.id !== 'wrist-extension')),
   );
   assert.equal(EXERCISES.reverseFly.reps, '12–20');
+});
+
+test('no shrug, and the new exercises have their catalogue entries', () => {
+  assert.equal(prescription.weeklySetAllocation['chest-supported-shrug'], undefined);
+  assert.deepEqual(EXERCISES.hammerCurl.primary, { forearms: 1, biceps: 0.5 });
+  assert.deepEqual(EXERCISES.woodchop.primary, { obliques: 1 });
 });
 
 test('superset ids are unique and members are superset-safe', () => {
@@ -84,19 +93,19 @@ test('superset ids are unique and members are superset-safe', () => {
 });
 
 test('flattened tasks carry reverse fly metadata and alternate arm supersets', () => {
-  const tasks = flatten(prescription.routine[0]);
-  assert.equal(tasks.length, sessionSets[0]);
+  const tasks = flatten(prescription.routine[1]);
+  assert.equal(tasks.length, sessionSets[1]);
   const fly = tasks.find((t) => t.exerciseId === 'reverse-cable-fly');
   assert.equal(fly.reps, '12–20');
   assert.equal(fly.rir, '1 → 0');
   assert.equal(fly.restMs, 60000);
-  const arms = tasks.filter((t) => t.groupId === 'arms-monday').map((t) => t.exerciseId);
+  const arms = tasks.filter((t) => t.groupId === 'arms-wednesday').map((t) => t.exerciseId);
   assert.deepEqual(arms, [
-    'cable-curl',
     'overhead-cable-triceps-extension',
     'cable-curl',
     'overhead-cable-triceps-extension',
     'cable-curl',
+    'overhead-cable-triceps-extension',
   ]);
 });
 
@@ -104,7 +113,9 @@ test('time-cap cut order trims calves, then neck; crunch, delts and fly are neve
   const byId = (id) =>
     prescription.routine.flatMap(members).find((item) => item.id === id)?.cutPriority;
   assert.equal(byId('standing-calf-raise'), 1);
-  assert.equal(byId('cable-crunch'), undefined);
+  assert.equal(byId('cable-crunch'), 2);
+  assert.equal(byId('cable-woodchop'), 2);
+  assert.equal(byId('cable-rope-hammer-curl'), undefined);
   assert.equal(byId('neck-flexion'), 4);
   assert.equal(byId('reverse-cable-fly'), undefined);
   assert.equal(byId('cable-lateral-raise'), undefined);

@@ -8,6 +8,7 @@ const PRIORITY_MUSCLES = new Set([
   'upperChest',
   'lats',
   'abs',
+  'obliques',
   'forearms',
 ]);
 
